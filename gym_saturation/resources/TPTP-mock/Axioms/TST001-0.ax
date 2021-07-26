@@ -1,0 +1,5 @@
+%this is a test TPTP axioms file
+cnf(test_axiom,axiom,
+    ( test_constant = X )).
+cnf(test_axiom_2,axiom,
+    ( test_constant != 0 )).

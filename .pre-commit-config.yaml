@@ -1,0 +1,23 @@
+repos:
+-   repo: local
+    hooks:
+    -   id: black
+        name: black
+        entry: black
+        language: system
+        types: [python]
+    -   id: pycodestyle
+        name: pycodestyle
+        entry: pycodestyle --max-doc-length 1000 --ignore E203,E501,W503
+        language: system
+        types: [python]
+    -   id: mypy
+        name: mypy
+        entry: mypy --config-file mypy.ini
+        language: system
+        types: [python]
+    -   id: pylint
+        name:  pylint
+        entry: pylint --rcfile=.pylintrc
+        language: system
+        types: [python]
