@@ -1,5 +1,6 @@
 venv/
 *.*~
+*~
 .ipynb_checkpoints/
 *.pyc
 test-results/
@@ -8,3 +9,5 @@ test-results/
 *.pt
 runs/
 \#*.*#
+*.gz
+*.whl

@@ -1,0 +1,60 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@0.2.1
+
+jobs:
+  build-and-test:
+    docker:
+      - image: circleci/python:3.6.14
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "poetry.lock" }}
+            - v1-dependencies-
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -U pip
+            pip install -U wheel setuptools poetry
+            poetry install
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "poetry.lock" }}
+      - run:
+          name: run tests
+          command: |
+            . venv/bin/activate
+            pytest --cov gym_saturation --cov-report xml --cov-fail-under=99\
+                   --junit-xml test-results/gym-saturation.xml\
+                   --doctest-modules gym_saturation
+      - run:
+          name: run linters
+          command: |
+            . venv/bin/activate
+            pycodestyle --max-doc-length 1000 --ignore E203,E501,W503\
+                        gym_saturation
+            pylint --rcfile=.pylintrc gym_saturation
+      - run:
+          name: run type checks
+          command: |
+            . venv/bin/activate
+            mypy --config-file mypy.ini gym_saturation
+      - run:
+          name: upload data to codecov
+          command: |
+            bash <(curl -s https://codecov.io/bash) -X gcov -X coveragepy
+      - store_artifacts:
+          path: build
+      - store_test_results:
+          path: test-results
+
+workflows:
+  main:
+    jobs:
+      - build-and-test
