@@ -8,3 +8,5 @@ test-results/
 *.pt
 runs/
 \#*.*#
+*.gz
+*.whl
