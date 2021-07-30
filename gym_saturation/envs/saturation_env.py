@@ -159,7 +159,7 @@ class SaturationEnv(Env):
             )
             or self._step_count >= self.step_limit
         ):
-            return self._state, -1.0, True, dict()
+            return self.state, -1.0, True, dict()
         self.action_space = [
             i for i, clause in enumerate(self._state) if not clause.processed
         ]
