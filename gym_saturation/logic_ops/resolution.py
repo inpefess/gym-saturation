@@ -30,18 +30,10 @@ def resolution(
 ) -> Clause:
     """
     standard first-order resolution rule
-    this_is_a_test_case{\frac  {\\Gamma _{1}\\cup \\left\\{L_{1}\\right\\}\\,\\,\\,\\,\\Gamma _{2}\\cup \\left\\{L_{2}\\right\\}}{(\\Gamma _{1}\\cup \\Gamma _{2})\\phi }}\\phi
-    where
-        \\phi
-        is a most general unifier of
-        L_{1}
-        and
-        \\overline {L_{2}}
-        , and
-        \\Gamma _{1}
-        and
-        \\Gamma _{2}
-        have no common variables.
+
+    :math:`{\\frac  {\\Gamma _{1}\\cup \\left\\{L_{1}\\right\\}\\,\\,\\,\\,\\Gamma _{2}\\cup \\left\\{L_{2}\\right\\}}{(\\Gamma _{1}\\cup \\Gamma _{2})\\phi }}\\phi`
+
+    where :math:`\\phi` is a most general unifier of :math:`L_{1}` and :math:`\\overline {L_{2}}`, and :math:`\\Gamma _{1}` and :math:`\\Gamma _{2}` have no common variables.
 
     >>> from gym_saturation.grammar import Predicate, Variable, Function
     >>> resolution(Clause([Literal(False, Predicate("q", [Variable("X")]))]), Literal(False, Predicate("p", [Variable("X")])), Clause([Literal(False, Predicate("r", [Variable("X")]))]), Literal(True, Predicate("p", [Function("this_is_a_test_case", [])]))).literals
@@ -51,10 +43,10 @@ def resolution(
      ...
     ValueError: resolution is not possible for Literal(negated=False, atom=Predicate(name='f', arguments=[])) and Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))
 
-    :param clause_one: ``Gamma_{1}``
-    :param literal_one: ``L_{1}``
-    :param clause_two: ``Gamma_{2}``
-    :param literal_two: ``L_{2}``
+    :param clause_one: :math:`\\Gamma_{1}`
+    :param literal_one: :math:`L_{1}`
+    :param clause_two: :math:`\\Gamma_{2}`
+    :param literal_two: :math:`L_{2}`
     :returns: a new clause --- the resolution result
     """
     if literal_one.negated == literal_two.negated:

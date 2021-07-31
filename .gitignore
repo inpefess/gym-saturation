@@ -11,3 +11,4 @@ runs/
 \#*.*#
 *.gz
 *.whl
+doc/build/

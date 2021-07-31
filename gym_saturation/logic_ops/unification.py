@@ -24,7 +24,7 @@ class NonUnifiableError(Exception):
     """ exception raised when terms are not unifiable """
 
 
-def get_disagreement(one: Proposition, two: Proposition) -> List[Proposition]:
+def _get_disagreement(one: Proposition, two: Proposition) -> List[Proposition]:
     """
     find a disagreement set of two first order propositions
 
@@ -46,7 +46,7 @@ def get_disagreement(one: Proposition, two: Proposition) -> List[Proposition]:
         if one.name != two.name:
             return [one, two]
         for argument_one, argument_two in zip(one.arguments, two.arguments):
-            disagreement = get_disagreement(argument_one, argument_two)
+            disagreement = _get_disagreement(argument_one, argument_two)
             if disagreement != []:
                 return disagreement
         return []
@@ -95,7 +95,7 @@ def most_general_unifier(
     not_none_substitutions = [] if substitutions is None else substitutions
     if len(propositions) == 1:
         return not_none_substitutions
-    disagreement = get_disagreement(propositions[0], propositions[1])
+    disagreement = _get_disagreement(propositions[0], propositions[1])
     if disagreement == []:
         return []
     substitution = _propose_substitution(disagreement, propositions)
