@@ -75,9 +75,9 @@ class SaturationEnv(Env):
     ...     tptp_folder=files("gym_saturation.resources").joinpath("TPTP-mock")
     ... )
     >>> result = env.reset("TST001-1.p")
-    >>> # the reward is ``-1``
+    >>> # the reward is ``0``
     >>> env.step(0)[1:3]
-    (-1.0, True)
+    (0.0, True)
     """
 
     def __init__(
@@ -159,7 +159,7 @@ class SaturationEnv(Env):
             )
             or self._step_count >= self.step_limit
         ):
-            return self.state, -1.0, True, dict()
+            return self.state, 0.0, True, dict()
         self.action_space = [
             i for i, clause in enumerate(self._state) if not clause.processed
         ]
