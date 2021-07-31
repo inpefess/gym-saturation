@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from lark import Transformer
-
 from gym_saturation.grammar import (
     Clause,
     Function,
@@ -26,7 +25,7 @@ from gym_saturation.grammar import (
 
 class CNFParser(Transformer):
     """
-    a parser for <cnf_formula> from Lark parse tree
+    a parser for ``<cnf_formula>`` from Lark parse tree
     methods are not typed since nobody calls them directly
 
     >>> from lark import Lark
@@ -62,8 +61,7 @@ class CNFParser(Transformer):
 
     def fof_defined_plain_formula(self, children):
         """
-        <fof_defined_plain_formula> :== <defined_proposition> |
-                           <defined_predicate>(<fof_arguments>)
+        <fof_defined_plain_formula> :== <defined_proposition> | <defined_predicate>(<fof_arguments>)
         """
         return self._predicate(children)
 
@@ -83,6 +81,7 @@ class CNFParser(Transformer):
     def variable(children):
         """
         <variable>             ::= <upper_word>
+
         a variable (supposed to be universally quantified)
         """
         return Variable(children[0])
@@ -91,6 +90,7 @@ class CNFParser(Transformer):
     def fof_arguments(children):
         """
         <fof_arguments>        ::= <fof_term> | <fof_term>,<fof_arguments>
+
         a list of arguments, organised in pairs
         """
         result = list()
@@ -104,8 +104,8 @@ class CNFParser(Transformer):
     @staticmethod
     def literal(children):
         """
-        <literal>              ::= <fof_atomic_formula> | ~ <fof_atomic_formula> |
-                           <fof_infix_unary>
+        <literal>              ::= <fof_atomic_formula> | ~ <fof_atomic_formula> | <fof_infix_unary>
+
         a literal is a possible negated predicate
         """
         if children[0] == "~":
@@ -129,6 +129,7 @@ class CNFParser(Transformer):
     def fof_defined_infix_formula(children):
         """
         <fof_defined_infix_formula> ::= <fof_term> <defined_infix_pred> <fof_term>
+
         some predicates are in the infix form, so we translate to them prefix
         """
         return Predicate(children[1], [children[0], children[2]])
@@ -137,6 +138,7 @@ class CNFParser(Transformer):
     def fof_infix_unary(children):
         """
         <fof_infix_unary>      ::= <fof_term> <infix_inequality> <fof_term>
+
         some predicates are in the infix form, so we translate to them prefix
         """
         return Predicate(children[1], [children[0], children[2]])
@@ -145,6 +147,7 @@ class CNFParser(Transformer):
     def disjunction(children):
         """
         <disjunction>          ::= <literal> | <disjunction> <vline> <literal>
+
         basic clause structure
         """
         if len(children) == 1:
@@ -160,8 +163,8 @@ class CNFParser(Transformer):
     @staticmethod
     def cnf_annotated(children):
         """
-        <cnf_annotated>        ::= cnf(<name>,<formula_role>,<cnf_formula>
-                           <annotations>).
+        <cnf_annotated>        ::= cnf(<name>,<formula_role>,<cnf_formula> <annotations>).
+
         annotated CNF formula (clause)
         """
         clause = children[2]

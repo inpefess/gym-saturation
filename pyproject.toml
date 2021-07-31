@@ -38,6 +38,9 @@ pre-commit = "*"
 tomlkit = "*"
 types-dataclasses = "*"
 vulture = "*"
+Sphinx = "*"
+sphinx-rtd-theme = "*"
+sphinx-autodoc-typehints = "*"
 
 [tool.black]
 line-length=79
