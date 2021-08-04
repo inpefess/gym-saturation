@@ -20,6 +20,7 @@ from glob import glob
 from typing import List, Optional, Tuple
 
 from gym import Env
+
 from gym_saturation.grammar import Clause
 from gym_saturation.logic_ops.resolution import all_possible_resolutions
 from gym_saturation.logic_ops.utils import (
@@ -37,10 +38,14 @@ class SaturationEnv(Env):
     """
     saturation algorithm defined in a Reiforcement Learning friendly way
 
-    >>> from importlib_resources import files
+    >>> import sys
+    >>> if sys.version_info.major == 3 and sys.version_info.minor == 9:
+    ...     from importlib.resources import files
+    ... else:
+    ...     from importlib_resources import files
     >>> env = SaturationEnv(
     ...     step_limit=3,
-    ...     tptp_folder=files("gym_saturation.resources").joinpath("TPTP-mock")
+    ...     tptp_folder=files("gym_saturation").joinpath("resources/TPTP-mock")
     ... )
     >>> # there is nothing non-deterministic here, but the seed can be set
     >>> env.seed(0)
@@ -72,7 +77,7 @@ class SaturationEnv(Env):
     >>> # if the proof is not found after a fixed number of steps
     >>> env = SaturationEnv(
     ...     step_limit=1,
-    ...     tptp_folder=files("gym_saturation.resources").joinpath("TPTP-mock")
+    ...     tptp_folder=files("gym_saturation").joinpath("resources/TPTP-mock")
     ... )
     >>> result = env.reset("TST001-1.p")
     >>> # the reward is ``0``
