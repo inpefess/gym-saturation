@@ -16,7 +16,6 @@ limitations under the License.
 import json
 import os
 import random
-from glob import glob
 from typing import List, Optional, Tuple
 
 from gym import Env
@@ -44,10 +43,9 @@ class SaturationEnv(Env):
     ... else:
     ...     from importlib_resources import files
     >>> tptp_folder = files("gym_saturation").joinpath("resources/TPTP-mock")
-    >>> env = SaturationEnv(
-    ...     step_limit=3,
-    ...     tptp_folder=tptp_folder
-    ... )
+    >>> from glob import glob
+    >>> problem_list = glob(os.path.join(tptp_folder, "Problems", "*", "*.p"))
+    >>> env = SaturationEnv(3, problem_list)
     >>> # there is nothing non-deterministic here, but the seed can be set
     >>> env.seed(0)
     0
@@ -83,10 +81,7 @@ class SaturationEnv(Env):
     >>> # if a proof is found, then reward is ``+1``
     >>> env.step(4)[1:3]
     (1.0, True)
-    >>> env = SaturationEnv(
-    ...     step_limit=1,
-    ...     tptp_folder=tptp_folder
-    ... )
+    >>> env = SaturationEnv(1, problem_list)
     >>> # one can also choose a particular problem file during reset
     >>> problem = os.path.join(tptp_folder, "Problems", "TST", "TST001-1.p")
     >>> result = env.reset(problem)
@@ -99,20 +94,21 @@ class SaturationEnv(Env):
     def __init__(
         self,
         step_limit: int,
-        tptp_folder: str,
+        problem_list: List[str],
     ):
         super().__init__()
         self.step_limit = step_limit
-        self.tptp_folder = tptp_folder
+        self.problem_list = problem_list
         self._step_count = 0
         self._starting_label_index = 0
         self._state: List[Clause] = []
         self._problem: Optional[str] = None
 
-    def _init_clauses(self, filename: str):
+    def _init_clauses(self):
+        tptp_folder = os.path.join(os.path.dirname(self._problem), "..", "..")
         clauses = TPTPParser().parse(
-            filename,
-            self.tptp_folder,
+            self._problem,
+            tptp_folder,
         )
         for clause in clauses:
             clause.birth_step = 0
@@ -123,13 +119,11 @@ class SaturationEnv(Env):
     # pylint: disable=arguments-differ
     def reset(self, problem: Optional[str] = None) -> list:
         if problem is None:
-            self._problem = random.choice(
-                glob(os.path.join(self.tptp_folder, "Problems", "*", "*-*.p"))
-            )
+            self._problem = random.choice(self.problem_list)
         else:
             self._problem = problem
         self._step_count = 0
-        self._state = reindex_variables(self._init_clauses(self._problem), "X")
+        self._state = reindex_variables(self._init_clauses(), "X")
         self._starting_label_index = 0
         self.action_space = list(range(len(self._state)))
         return self.state
