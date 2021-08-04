@@ -14,13 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import os
+import sys
 from typing import List
 
-from importlib_resources import files
 from lark import Lark, Token
 
 from gym_saturation.grammar import Clause
 from gym_saturation.parsing.cnf_parser import CNFParser
+
+if sys.version_info.major == 3 and sys.version_info.minor == 9:
+    # pylint: disable=no-name-in-module, import-error
+    from importlib.resources import files  # type: ignore
+else:
+    from importlib_resources import files  # pylint: disable=import-error
 
 
 # pylint: disable=too-few-public-methods
@@ -28,17 +34,17 @@ class TPTPParser:
     """
     >>> tptp_parser = TPTPParser()
     >>> tptp_parser.parse(
-    ...     files("gym_saturation.resources.TPTP-mock.Problems.TST")
-    ...     .joinpath("TST001-1.p"),
-    ...     files("gym_saturation.resources").joinpath("TPTP-mock")
+    ...     files("gym_saturation")
+    ...     .joinpath("resources/TPTP-mock/Problems/TST/TST001-1.p"),
+    ...     files("gym_saturation").joinpath("resources/TPTP-mock")
     ... )
     [Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[Function(name='test_constant', arguments=[])]))], label='test_formula', inference_parents=None, processed=None, birth_step=None), Clause(literals=[Literal(negated=True, atom=Predicate(name='this_is_a_test_case', arguments=[Function(name='test_constant', arguments=[])]))], label='test_formula', inference_parents=None, processed=None, birth_step=None), Clause(literals=[Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='test_constant', arguments=[]), Variable(name='X')]))], label='test_axiom', inference_parents=None, processed=None, birth_step=None), Clause(literals=[Literal(negated=False, atom=Predicate(name='!=', arguments=[Function(name='test_constant', arguments=[]), Function(name='0', arguments=[])]))], label='test_axiom_2', inference_parents=None, processed=None, birth_step=None)]
     """
 
     def __init__(self):
         self.parser = Lark(
-            files("gym_saturation.resources")
-            .joinpath("TPTP.lark")
+            files("gym_saturation")
+            .joinpath("resources/TPTP.lark")
             .read_text(),
             start="tptp_file",
         )

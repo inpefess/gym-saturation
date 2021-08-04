@@ -20,6 +20,7 @@ from glob import glob
 from typing import List, Optional, Tuple
 
 from gym import Env
+
 from gym_saturation.grammar import Clause
 from gym_saturation.logic_ops.resolution import all_possible_resolutions
 from gym_saturation.logic_ops.utils import (
@@ -37,17 +38,30 @@ class SaturationEnv(Env):
     """
     saturation algorithm defined in a Reiforcement Learning friendly way
 
-    >>> from importlib_resources import files
+    >>> import sys
+    >>> if sys.version_info.major == 3 and sys.version_info.minor == 9:
+    ...     from importlib.resources import files
+    ... else:
+    ...     from importlib_resources import files
+    >>> tptp_folder = files("gym_saturation").joinpath("resources/TPTP-mock")
     >>> env = SaturationEnv(
     ...     step_limit=3,
-    ...     tptp_folder=files("gym_saturation.resources").joinpath("TPTP-mock")
+    ...     tptp_folder=tptp_folder
     ... )
     >>> # there is nothing non-deterministic here, but the seed can be set
     >>> env.seed(0)
     0
     >>> # initially, there are only 4 unprocessed clauses
+    >>> # problem is not chosen yet
+    >>> env.problem
+    Traceback (most recent call last):
+     ...
+    ValueError: Problem no defined. Run env.reset() first
     >>> len(env.reset())
     4
+    >>> # now the problem is defined
+    >>> print(os.path.basename(env.problem))
+    TST001-1.p
     >>> # the test theorem can be proved in three steps
     >>> env.step(0)[1:3]
     (0.0, False)
@@ -69,12 +83,14 @@ class SaturationEnv(Env):
     >>> # if a proof is found, then reward is ``+1``
     >>> env.step(4)[1:3]
     (1.0, True)
-    >>> # if the proof is not found after a fixed number of steps
     >>> env = SaturationEnv(
     ...     step_limit=1,
-    ...     tptp_folder=files("gym_saturation.resources").joinpath("TPTP-mock")
+    ...     tptp_folder=tptp_folder
     ... )
-    >>> result = env.reset("TST001-1.p")
+    >>> # one can also choose a particular problem file during reset
+    >>> problem = os.path.join(tptp_folder, "Problems", "TST", "TST001-1.p")
+    >>> result = env.reset(problem)
+    >>> # if the proof is not found after a fixed number of steps
     >>> # the reward is ``0``
     >>> env.step(0)[1:3]
     (0.0, True)
@@ -91,6 +107,7 @@ class SaturationEnv(Env):
         self._step_count = 0
         self._starting_label_index = 0
         self._state: List[Clause] = []
+        self._problem: Optional[str] = None
 
     def _init_clauses(self, filename: str):
         clauses = TPTPParser().parse(
@@ -106,16 +123,13 @@ class SaturationEnv(Env):
     # pylint: disable=arguments-differ
     def reset(self, problem: Optional[str] = None) -> list:
         if problem is None:
-            filename = random.choice(
+            self._problem = random.choice(
                 glob(os.path.join(self.tptp_folder, "Problems", "*", "*-*.p"))
             )
         else:
-            filename = os.path.join(
-                self.tptp_folder, "Problems", problem[:3], problem
-            )
+            self._problem = problem
         self._step_count = 0
-        clauses = self._init_clauses(filename)
-        self._state = reindex_variables(clauses, "X")
+        self._state = reindex_variables(self._init_clauses(self._problem), "X")
         self._starting_label_index = 0
         self.action_space = list(range(len(self._state)))
         return self.state
@@ -182,6 +196,15 @@ class SaturationEnv(Env):
         :returns: environment state in Python ``dict`` format
         """
         return json.loads(json.dumps(self._state, cls=ClauseJSONEncoder))
+
+    @property
+    def problem(self) -> str:
+        """
+        :returns: full filename of a problem
+        """
+        if self._problem is not None:
+            return self._problem
+        raise ValueError("Problem no defined. Run env.reset() first")
 
     def seed(self, seed=None):
         random.seed(seed)
