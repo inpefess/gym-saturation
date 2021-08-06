@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from copy import deepcopy
 from typing import Any, List, Union
 
 from gym_saturation.grammar import (
@@ -200,7 +201,7 @@ def subterm_by_index(atom: Proposition, index: int) -> Term:
     >>> subterm_by_index(atom, 0)
     Traceback (most recent call last):
      ...
-    ValueError: subterm with index 0 exists only for term, but got: Predicate(name='this_is_a_test_case', arguments=[Function(name='f', arguments=[Variable(name='X')]), Function(name='g', arguments=[Variable(name='Y')])])
+    ValueError: subterm with index 0 exists only for terms, but got: Predicate(name='this_is_a_test_case', arguments=[Function(name='f', arguments=[Variable(name='X')]), Function(name='g', arguments=[Variable(name='Y')])])
     >>> subterm_by_index(atom, 1) == atom.arguments[0]
     True
     >>> subterm_by_index(atom, 2) == atom.arguments[0].arguments[0]
@@ -216,13 +217,56 @@ def subterm_by_index(atom: Proposition, index: int) -> Term:
         if isinstance(atom, (Function, Variable)):
             return atom
         raise ValueError(
-            f"subterm with index 0 exists only for term, but got: {atom}"
+            f"subterm with index 0 exists only for terms, but got: {atom}"
         )
     subterm_length = 1
     if not isinstance(atom, Variable):
         for argument in atom.arguments:
             try:
-                return subterm_by_index(argument, index - subterm_length)
+                return deepcopy(
+                    subterm_by_index(argument, index - subterm_length)
+                )
+            except NoSubtermFound as error:
+                subterm_length += error.args[0]
+    raise NoSubtermFound(subterm_length)
+
+
+class CantReplaceTheWholeTerm(Exception):
+    """ an exception raised when trying to replace a subterm with index 0 """
+
+
+def replace_subterm_by_index(
+    atom: Proposition, index: int, term: Term
+) -> None:
+    """
+    replace a subterm with a given index (depth-first search) by a new term
+    replacement always happens inplace!
+
+    >>> atom = Predicate("this_is_a_test_case", [Function("f", [Variable("X")]), Function("g", [Variable("Y")])])
+    >>> replace_subterm_by_index(atom, 0, Variable("Z"))
+    Traceback (most recent call last):
+     ...
+    gym_saturation.logic_ops.utils.NoSubtermFound: 5
+    >>> replace_subterm_by_index(atom, 3, Function("h", [Variable("Z")]))
+    >>> atom
+    Predicate(name='this_is_a_test_case', arguments=[Function(name='f', arguments=[Variable(name='X')]), Function(name='h', arguments=[Variable(name='Z')])])
+
+    :param atom: a predicate or a term
+    :param index: an index of a subterm to replace, must be greater than 0
+    :param term: replacement term for a given index
+    :returns:
+    """
+    subterm_length = 1
+    if not isinstance(atom, Variable):
+        for i, argument in enumerate(atom.arguments):
+            if index == subterm_length:
+                atom.arguments[i] = term
+                return
+            try:
+                replace_subterm_by_index(
+                    argument, index - subterm_length, term
+                )
+                return
             except NoSubtermFound as error:
                 subterm_length += error.args[0]
     raise NoSubtermFound(subterm_length)
