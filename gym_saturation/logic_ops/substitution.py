@@ -23,7 +23,7 @@ from gym_saturation import grammar
 @dataclass
 class Substitution:
     """
-    a mapping from ``Variable`` to ` `Term``
+    a mapping from ``Variable`` to ``Term``
 
     >>> substitution = Substitution(grammar.Variable("X"), grammar.Function("this_is_a_test_case", []))
     >>> substitution(grammar.Clause([grammar.Literal(False, grammar.Predicate("p", [grammar.Function("this_is_a_test_case", [grammar.Variable("X")])]))]))
