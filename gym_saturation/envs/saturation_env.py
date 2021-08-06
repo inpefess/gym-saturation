@@ -21,7 +21,7 @@ from typing import List, Optional, Tuple
 from gym import Env
 
 from gym_saturation.grammar import Clause
-from gym_saturation.logic_ops.resolution import all_possible_resolutions
+from gym_saturation.logic_ops.resolution import all_possible_resolvents
 from gym_saturation.logic_ops.utils import (
     clause_in_a_list,
     is_tautology,
@@ -130,19 +130,19 @@ class SaturationEnv(Env):
 
     def _do_resolutions(self, given_clause: Clause) -> None:
         if not given_clause.processed:
-            new_resolutions = all_possible_resolutions(
+            new_resolvents = all_possible_resolvents(
                 [clause for clause in self._state if clause.processed],
                 given_clause,
                 INFERRED_CLAUSES_PREFIX,
                 self._starting_label_index,
             )
-            for new_resolution in new_resolutions:
-                if not is_tautology(new_resolution):
-                    if not clause_in_a_list(new_resolution, self._state):
-                        new_resolution.birth_step = self._step_count
-                        new_resolution.processed = False
-                        self._state.append(new_resolution)
-            self._starting_label_index += len(new_resolutions)
+            for new_resolvent in new_resolvents:
+                if not is_tautology(new_resolvent):
+                    if not clause_in_a_list(new_resolvent, self._state):
+                        new_resolvent.birth_step = self._step_count
+                        new_resolvent.processed = False
+                        self._state.append(new_resolvent)
+            self._starting_label_index += len(new_resolvents)
 
     def step(self, action: int) -> Tuple[list, float, bool, dict]:
         if action not in self.action_space:
