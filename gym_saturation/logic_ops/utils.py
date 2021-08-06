@@ -185,3 +185,44 @@ def clause_in_a_list(clause: Clause, clauses: List[Clause]) -> bool:
         if a_clause.literals == clause.literals:
             return True
     return False
+
+
+class NoSubtermFound(Exception):
+    """ sometimes a subterm index is larger than term length """
+
+
+def subterm_by_index(atom: Proposition, index: int) -> Term:
+    """
+    extract a subterm using depth-first search through the tree of logical
+    operations
+
+    >>> atom = Predicate("this_is_a_test_case", [Function("f", [Variable("X")]), Function("g", [Variable("Y")])])
+    >>> subterm_by_index(atom, 0)
+    Traceback (most recent call last):
+     ...
+    ValueError: subterm with index 0 exists only for term, but got: Predicate(name='this_is_a_test_case', arguments=[Function(name='f', arguments=[Variable(name='X')]), Function(name='g', arguments=[Variable(name='Y')])])
+    >>> subterm_by_index(atom, 1) == atom.arguments[0]
+    True
+    >>> subterm_by_index(atom, 2) == atom.arguments[0].arguments[0]
+    True
+    >>> subterm_by_index(atom, 4) == atom.arguments[1].arguments[0]
+    True
+
+    :param atom: a predicate or a term
+    :param index: an index of a desired subterm
+    :returns: a subterm
+    """
+    if index == 0:
+        if isinstance(atom, (Function, Variable)):
+            return atom
+        raise ValueError(
+            f"subterm with index 0 exists only for term, but got: {atom}"
+        )
+    subterm_length = 1
+    if not isinstance(atom, Variable):
+        for argument in atom.arguments:
+            try:
+                return subterm_by_index(argument, index - subterm_length)
+            except NoSubtermFound as error:
+                subterm_length += error.args[0]
+    raise NoSubtermFound(subterm_length)
