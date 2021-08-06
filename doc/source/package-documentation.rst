@@ -68,6 +68,10 @@ Resolution
 .. autofunction:: gym_saturation.logic_ops.resolution.resolution
 .. autofunction:: gym_saturation.logic_ops.resolution.all_possible_resolutions
 
+Paramodulation
+===============
+.. autofunction:: gym_saturation.logic_ops.paramodulation.paramodulation
+.. autofunction:: gym_saturation.logic_ops.paramodulation.all_possible_paramodulations
 
 utils
 ======
