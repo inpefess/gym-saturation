@@ -41,7 +41,7 @@ def deduplicate(a_list: List[Any]) -> List[Any]:
     return new_list
 
 
-def is_subterm(one: Proposition, two: Proposition) -> bool:
+def is_subproposition(one: Proposition, two: Proposition) -> bool:
     """
     check whether proposition ``one`` is part of a proposition ``two``
 
@@ -53,7 +53,7 @@ def is_subterm(one: Proposition, two: Proposition) -> bool:
         return one == two
     if isinstance(two, (Function, Predicate)):
         for argument in two.arguments:
-            if is_subterm(one, argument):
+            if is_subproposition(one, argument):
                 return True
     return False
 
@@ -148,26 +148,26 @@ def clause_length(clause: Clause) -> int:
         if literal.negated:
             length += 1
         for term in literal.atom.arguments:
-            length += term_length(term)
+            length += proposition_length(term)
         length += 1
     return length
 
 
-def term_length(term: Term) -> int:
+def proposition_length(proposition: Proposition) -> int:
     """
-    total length of subterms plus ones for a function or one for a variable
+    total number of functional, predicate and variable symbols
 
-    :param term: a function or a variable
-    :return: sctructural length of a term
+    :param proposition: a function, a predicate or a variable
+    :return: sctructural length of a proposition
 
-    >>> term_length(Function("f", [Variable("X")]))
-    2
+    >>> proposition_length(Predicate("p", [Function("f", [Variable("X")])]))
+    3
     """
     length = 0
-    if isinstance(term, Variable):
+    if isinstance(proposition, Variable):
         return 1
-    for subterm in term.arguments:
-        length += term_length(subterm)
+    for subterm in proposition.arguments:
+        length += proposition_length(subterm)
     return 1 + length
 
 
