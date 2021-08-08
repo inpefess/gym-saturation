@@ -138,9 +138,9 @@ def all_possible_resolvents(
                 except NonUnifiableError:
                     continue
                 new_clause = Clause(
-                    new_literals,
-                    f"{label_prefix}{new_clause_index}",
-                    [
+                    literals=new_literals,
+                    label=f"{label_prefix}{new_clause_index}",
+                    inference_parents=[
                         # check for non empty labels is done in
                         # ``_multi_resolution_init``
                         clause.label,  # type: ignore
