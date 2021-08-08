@@ -43,7 +43,7 @@ def _get_disagreement(one: Proposition, two: Proposition) -> List[Proposition]:
         or isinstance(one, Function)
         and isinstance(two, Function)
     ):
-        if one.name != two.name:
+        if one.name != two.name or len(one.arguments) != len(two.arguments):
             return [one, two]
         for argument_one, argument_two in zip(one.arguments, two.arguments):
             disagreement = _get_disagreement(argument_one, argument_two)
