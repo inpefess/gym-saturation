@@ -66,22 +66,23 @@ Unification
 Resolution
 ===========
 .. autofunction:: gym_saturation.logic_ops.resolution.resolution
-.. autofunction:: gym_saturation.logic_ops.resolution.all_possible_resolutions
+.. autofunction:: gym_saturation.logic_ops.resolution.all_possible_resolvents
 
 Paramodulation
 ===============
 .. autofunction:: gym_saturation.logic_ops.paramodulation.paramodulation
-.. autofunction:: gym_saturation.logic_ops.paramodulation.all_possible_paramodulations
-
+.. autofunction:: gym_saturation.logic_ops.paramodulation.all_paramodulants_from_clause
+.. autofunction:: gym_saturation.logic_ops.paramodulation.all_paramodulants_from_list
+		  
 utils
 ======
 .. autofunction:: gym_saturation.logic_ops.utils.deduplicate
-.. autofunction:: gym_saturation.logic_ops.utils.is_subterm
+.. autofunction:: gym_saturation.logic_ops.utils.is_subproposition
 .. autofunction:: gym_saturation.logic_ops.utils.get_variable_list
 .. autofunction:: gym_saturation.logic_ops.utils.reindex_variables
 .. autofunction:: gym_saturation.logic_ops.utils.is_tautology
 .. autofunction:: gym_saturation.logic_ops.utils.clause_length
-.. autofunction:: gym_saturation.logic_ops.utils.term_length
+.. autofunction:: gym_saturation.logic_ops.utils.proposition_length
 .. autofunction:: gym_saturation.logic_ops.utils.clause_in_a_list
 
 Parsing
