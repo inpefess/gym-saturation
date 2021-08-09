@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from typing import List, Tuple
+from typing import List
 
 from gym_saturation.grammar import Clause, Literal
 from gym_saturation.logic_ops.unification import (
@@ -68,21 +68,24 @@ def resolution(
     return result
 
 
-def _multi_resolution_init(
-    given_clause: Clause, clauses: List[Clause], starting_label_index: int
-) -> Tuple[List[Literal], List[Literal], List[Clause], int]:
-    for clause in clauses + [given_clause]:
-        if clause.label is None:
-            raise ValueError(f"clauses should be labeled: {clause}")
-    negative_literals = [
-        literal for literal in given_clause.literals if literal.negated
-    ]
-    positive_literals = [
-        literal for literal in given_clause.literals if not literal.negated
-    ]
+def _get_new_resolvents(
+    clause_one: Clause, literal_one: Literal, given_clause: Clause
+) -> List[Clause]:
     resolvents: List[Clause] = list()
-    new_clause_index = starting_label_index
-    return negative_literals, positive_literals, resolvents, new_clause_index
+    for j, literal_two in enumerate(given_clause.literals):
+        if literal_one.negated != literal_two.negated:
+            clause_two = Clause(
+                given_clause.literals[:j] + given_clause.literals[j + 1 :]
+            )
+            try:
+                resolvents.append(
+                    resolution(
+                        clause_one, literal_one, clause_two, literal_two
+                    )
+                )
+            except NonUnifiableError:
+                pass
+    return resolvents
 
 
 def all_possible_resolvents(
@@ -95,10 +98,14 @@ def all_possible_resolvents(
     one of the four basic building blocks of the Given Clause algorithm
 
     >>> from gym_saturation.grammar import Predicate, Variable, Function
-    >>> all_possible_resolvents([Clause([Literal(False, Predicate("this_is_a_test_case", []))])], Clause([]), "inferred_", 0)
+    >>> all_possible_resolvents([Clause([])], Clause([Literal(False, Predicate("this_is_a_test_case", []))]), "inferred_", 0)
     Traceback (most recent call last):
      ...
-    ValueError: clauses should be labeled: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, processed=None, birth_step=None)
+    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, processed=None, birth_step=None)
+    >>> all_possible_resolvents([Clause([Literal(False, Predicate("this_is_a_test_case", []))])], Clause([], "one"), "inferred_", 0)
+    Traceback (most recent call last):
+     ...
+    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, processed=None, birth_step=None)
     >>> all_possible_resolvents([Clause([Literal(False, Predicate("q", [Variable("X")])), Literal(False, Predicate("p", [Variable("X")]))], label="input1")], Clause([Literal(True, Predicate("p", [Function("this_is_a_test_case", [])]))], label="input2"), "inferred_", 0)
     [Clause(literals=[Literal(negated=False, atom=Predicate(name='q', arguments=[Function(name='this_is_a_test_case', arguments=[])]))], label='inferred_0', inference_parents=['input1', 'input2'], processed=None, birth_step=None)]
 
@@ -111,42 +118,28 @@ def all_possible_resolvents(
     :returns: results of all possible resolvents with each one from
         ``clauses`` and the ``given_clause``
     """
-    (
-        negative_literals,
-        positive_literals,
-        resolvents,
-        new_clause_index,
-    ) = _multi_resolution_init(given_clause, clauses, starting_label_index)
+    if given_clause.label is None:
+        raise ValueError(f"no label: {given_clause}")
+    resolvents: List[Clause] = list()
     for clause in clauses:
-        for i, _ in enumerate(clause.literals):
-            other_literals = (
-                positive_literals
-                if clause.literals[i].negated
-                else negative_literals
+        for i, literal_one in enumerate(clause.literals):
+            clause_one = Clause(clause.literals[:i] + clause.literals[i + 1 :])
+            if clause.label is None:
+                raise ValueError(f"no label: {clause}")
+            new_resolvents = _get_new_resolvents(
+                clause_one, literal_one, given_clause
             )
-            for j, _ in enumerate(other_literals):
-                try:
-                    new_literals = resolution(
-                        Clause(clause.literals[:i] + clause.literals[i + 1 :]),
-                        clause.literals[i],
-                        Clause(
-                            given_clause.literals[:j]
-                            + given_clause.literals[j + 1 :]
+            resolvents.extend(
+                [
+                    Clause(
+                        literals=resolvent.literals,
+                        inference_parents=[clause.label, given_clause.label],
+                        label=label_prefix
+                        + str(
+                            starting_label_index + len(resolvents) + ord_num
                         ),
-                        other_literals[j],
-                    ).literals
-                except NonUnifiableError:
-                    continue
-                new_clause = Clause(
-                    literals=new_literals,
-                    label=f"{label_prefix}{new_clause_index}",
-                    inference_parents=[
-                        # check for non empty labels is done in
-                        # ``_multi_resolution_init``
-                        clause.label,  # type: ignore
-                        given_clause.label,  # type: ignore
-                    ],
-                )
-                new_clause_index += 1
-                resolvents.append(new_clause)
+                    )
+                    for ord_num, resolvent in enumerate(new_resolvents)
+                ]
+            )
     return resolvents

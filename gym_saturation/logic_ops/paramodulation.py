@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from copy import deepcopy
-from typing import List
+from typing import List, Tuple
 
-from gym_saturation.grammar import Clause, Literal
+from gym_saturation.grammar import Clause, Literal, Term
 from gym_saturation.logic_ops.unification import (
     NonUnifiableError,
     most_general_unifier,
@@ -31,7 +31,7 @@ from gym_saturation.logic_ops.utils import (
 
 def paramodulation(
     clause_one: Clause,
-    literal_one: Literal,
+    literal_one: Tuple[Term, Term],
     clause_two: Clause,
     literal_two: Literal,
     r_position: int,
@@ -50,12 +50,8 @@ def paramodulation(
     * :math:`\phi` is a most general unifier of :math:`s` and :math:`r`
 
     >>> from gym_saturation.grammar import Predicate, Variable, Function
-    >>> paramodulation(Clause([Literal(False, Predicate("q", [Variable("X")]))]), Literal(False, Predicate("=", [Variable("X"), Function("this_is_a_test_case", [])])), Clause([Literal(False, Predicate("r", [Variable("X")]))]), Literal(True, Predicate("p", [Function("f", [])])), 1).literals
+    >>> paramodulation(Clause([Literal(False, Predicate("q", [Variable("X")]))]), [Variable("X"), Function("this_is_a_test_case", [])], Clause([Literal(False, Predicate("r", [Variable("X")]))]), Literal(True, Predicate("p", [Function("f", [])])), 1).literals
     [Literal(negated=True, atom=Predicate(name='p', arguments=[Function(name='this_is_a_test_case', arguments=[])])), Literal(negated=False, atom=Predicate(name='q', arguments=[Function(name='f', arguments=[])])), Literal(negated=False, atom=Predicate(name='r', arguments=[Function(name='f', arguments=[])]))]
-    >>> paramodulation(Clause([]), Literal(False, Predicate("this_is_a_test_case", [])), Clause([]), Literal(False, Predicate("p", [])), 0)
-    Traceback (most recent call last):
-     ...
-    ValueError: expected equality, but got Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))
 
     :param clause_one: :math:`\Gamma_1`
     :param literal_one: :math:`s\approx t`
@@ -64,11 +60,9 @@ def paramodulation(
     :param r_position: index of :math:`r` in the tree of subterms of :math:`L\left[r\right]`
     :returns: a new clause --- the paramodulation result
     """
-    if literal_one.atom.name != "=" or literal_one.negated:
-        raise ValueError(f"expected equality, but got {literal_one}")
     substitutions = most_general_unifier(
         [
-            literal_one.atom.arguments[0],
+            literal_one[0],
             subterm_by_index(literal_two.atom, r_position),
         ]
     )
@@ -76,7 +70,7 @@ def paramodulation(
     replace_subterm_by_index(
         new_atom,
         r_position,
-        literal_one.atom.arguments[1],
+        literal_one[1],
     )
     new_literals = deduplicate(
         [Literal(literal_two.negated, new_atom)]
@@ -89,6 +83,43 @@ def paramodulation(
     return result
 
 
+def _equality_symmetry_paramodulation(
+    clause_one, literal_one, clause_two, literal_two, k
+):
+    paramodulants = list()
+    try:
+        paramodulants.append(
+            paramodulation(
+                clause_one,
+                (
+                    literal_one.atom.arguments[0],
+                    literal_one.atom.arguments[1],
+                ),
+                clause_two,
+                literal_two,
+                k,
+            )
+        )
+    except NonUnifiableError:
+        pass
+    try:
+        paramodulants.append(
+            paramodulation(
+                clause_one,
+                (
+                    literal_one.atom.arguments[1],
+                    literal_one.atom.arguments[0],
+                ),
+                clause_two,
+                literal_two,
+                k,
+            )
+        )
+    except NonUnifiableError:
+        pass
+    return paramodulants
+
+
 def all_paramodulants_from_clause(
     clause_one: Clause,
     literal_one: Literal,
@@ -97,6 +128,7 @@ def all_paramodulants_from_clause(
 ) -> List[Clause]:
     r"""
     applies ``paramodulation`` with varying ``r_position`` argument
+    also varies for equality symmetry
 
     :param clause_one: :math:`\Gamma_1`
     :param literal_one: :math:`s\approx t`
@@ -104,37 +136,45 @@ def all_paramodulants_from_clause(
     :param literal_two: :math:`L\left[r\right]`
     :returns: a list of paramodulants for all possible values of ``r_position``
     """
+    if (
+        literal_one.atom.name != "="
+        or literal_one.negated
+        or len(literal_one.atom.arguments) != 2
+    ):
+        raise ValueError(f"expected equality, but got {literal_one}")
     literal_two_len = proposition_length(literal_two.atom)
     paramodulants = list()
     for k in range(1, literal_two_len):
-        try:
-            paramodulant = paramodulation(
+        paramodulants.extend(
+            _equality_symmetry_paramodulation(
                 clause_one, literal_one, clause_two, literal_two, k
             )
-            paramodulants.append(paramodulant)
-        except NonUnifiableError:
-            pass
+        )
     return paramodulants
 
 
 def _get_new_paramodulants(
     clause_one: Clause, literal_one: Literal, given_clause: Clause
 ) -> List[Clause]:
-    new_paramodulants = list()
+    paramodulants = list()
     for j, literal_two in enumerate(given_clause.literals):
         clause_two = Clause(
             given_clause.literals[:j] + given_clause.literals[j + 1 :]
         )
         if not literal_one.negated and literal_one.atom.name == "=":
-            new_paramodulants = all_paramodulants_from_clause(
-                clause_one, literal_one, clause_two, literal_two
+            paramodulants.extend(
+                all_paramodulants_from_clause(
+                    clause_one, literal_one, clause_two, literal_two
+                )
             )
         if not literal_two.negated and literal_two.atom.name == "=":
             # pylint: disable=arguments-out-of-order
-            new_paramodulants = all_paramodulants_from_clause(
-                clause_two, literal_two, clause_one, literal_one
+            paramodulants.extend(
+                all_paramodulants_from_clause(
+                    clause_two, literal_two, clause_one, literal_one
+                )
             )
-    return new_paramodulants
+    return paramodulants
 
 
 def all_paramodulants_from_list(
@@ -155,8 +195,12 @@ def all_paramodulants_from_list(
     Traceback (most recent call last):
      ...
     ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case_2', arguments=[]))], label=None, inference_parents=None, processed=None, birth_step=None)
-    >>> all_paramodulants_from_list([Clause([Literal(False, Predicate("=", [Function("f", []), Variable("A")]))], "this_is_a_test_case")], Clause([Literal(False, Predicate("=", [Function("f", [Variable("Y")]), Variable("X")]))], "this_is_a_test_case_2"), "inferred_", 0)
-    [Clause(literals=[Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='f', arguments=[]), Variable(name='X')]))], label='inferred_0', inference_parents=['this_is_a_test_case', 'this_is_a_test_case_2'], processed=None, birth_step=None)]
+    >>> all_paramodulants_from_list([Clause([Literal(False, Predicate("=", [Function("this_is_a_test_case", [])]))], "one")], Clause([Literal(True, Predicate("p", []))], "two"), "inferred_", 0)
+    Traceback (most recent call last):
+     ...
+    ValueError: expected equality, but got Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='this_is_a_test_case', arguments=[])]))
+    >>> all_paramodulants_from_list([Clause([Literal(False, Predicate("=", [Function("f", []), Function("g", [])]))], "this_is_a_test_case")], Clause([Literal(False, Predicate("=", [Function("g", []), Function("h", [])]))], "this_is_a_test_case_2"), "inferred_", 0)
+    [Clause(literals=[Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='f', arguments=[]), Function(name='h', arguments=[])]))], label='inferred_0', inference_parents=['this_is_a_test_case', 'this_is_a_test_case_2'], processed=None, birth_step=None), Clause(literals=[Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='f', arguments=[]), Function(name='h', arguments=[])]))], label='inferred_1', inference_parents=['this_is_a_test_case', 'this_is_a_test_case_2'], processed=None, birth_step=None)]
 
     :param clauses: a list of (processed) clauses
     :param given_clause: a new clause which should be combined with all the
@@ -170,11 +214,13 @@ def all_paramodulants_from_list(
     if given_clause.label is None:
         raise ValueError(f"no label: {given_clause}")
     paramodulants: List[Clause] = list()
-    for clause in clauses:
-        for i, literal_one in enumerate(clause.literals):
-            clause_one = Clause(clause.literals[:i] + clause.literals[i + 1 :])
-            if clause.label is None:
-                raise ValueError(f"no label: {clause}")
+    for other_clause in clauses:
+        for i, literal_one in enumerate(other_clause.literals):
+            clause_one = Clause(
+                other_clause.literals[:i] + other_clause.literals[i + 1 :]
+            )
+            if other_clause.label is None:
+                raise ValueError(f"no label: {other_clause}")
             new_paramodulants = _get_new_paramodulants(
                 clause_one, literal_one, given_clause
             )
@@ -182,7 +228,10 @@ def all_paramodulants_from_list(
                 [
                     Clause(
                         literals=paramodulant.literals,
-                        inference_parents=[clause.label, given_clause.label],
+                        inference_parents=[
+                            other_clause.label,
+                            given_clause.label,
+                        ],
                         label=label_prefix
                         + str(label_index_base + len(paramodulants) + ord_num),
                     )

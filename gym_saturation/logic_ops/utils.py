@@ -247,9 +247,9 @@ def replace_subterm_by_index(
     Traceback (most recent call last):
      ...
     gym_saturation.logic_ops.utils.NoSubtermFound: 5
-    >>> replace_subterm_by_index(atom, 3, Function("h", [Variable("Z")]))
+    >>> replace_subterm_by_index(atom, 4, Function("h", [Variable("Z")]))
     >>> atom
-    Predicate(name='this_is_a_test_case', arguments=[Function(name='f', arguments=[Variable(name='X')]), Function(name='h', arguments=[Variable(name='Z')])])
+    Predicate(name='this_is_a_test_case', arguments=[Function(name='f', arguments=[Variable(name='X')]), Function(name='g', arguments=[Function(name='h', arguments=[Variable(name='Z')])])])
 
     :param atom: a predicate or a term
     :param index: an index of a subterm to replace, must be greater than 0

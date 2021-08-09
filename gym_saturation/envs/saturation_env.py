@@ -21,6 +21,7 @@ from typing import List, Optional, Tuple
 from gym import Env
 
 from gym_saturation.grammar import Clause
+from gym_saturation.logic_ops.paramodulation import all_paramodulants_from_list
 from gym_saturation.logic_ops.resolution import all_possible_resolvents
 from gym_saturation.logic_ops.utils import (
     clause_in_a_list,
@@ -100,7 +101,7 @@ class SaturationEnv(Env):
         self.step_limit = step_limit
         self.problem_list = problem_list
         self._step_count = 0
-        self._starting_label_index = 0
+        self._inference_count = 0
         self._state: List[Clause] = []
         self._problem: Optional[str] = None
 
@@ -124,25 +125,39 @@ class SaturationEnv(Env):
             self._problem = problem
         self._step_count = 0
         self._state = reindex_variables(self._init_clauses(), "X")
-        self._starting_label_index = 0
         self.action_space = list(range(len(self._state)))
         return self.state
 
-    def _do_resolutions(self, given_clause: Clause) -> None:
+    def _add_to_state(self, new_clauses: List[Clause]) -> None:
+        self._inference_count += len(new_clauses)
+        for clause in new_clauses:
+            if not is_tautology(clause):
+                if not clause_in_a_list(clause, self._state):
+                    clause.birth_step = self._step_count
+                    clause.processed = False
+                    self._state.append(clause)
+
+    def _do_deductions(self, given_clause: Clause) -> None:
         if not given_clause.processed:
-            new_resolvents = all_possible_resolvents(
-                [clause for clause in self._state if clause.processed],
-                given_clause,
-                INFERRED_CLAUSES_PREFIX,
-                self._starting_label_index,
+            unprocessed_clauses = [
+                clause for clause in self._state if clause.processed
+            ]
+            self._add_to_state(
+                all_possible_resolvents(
+                    unprocessed_clauses,
+                    given_clause,
+                    INFERRED_CLAUSES_PREFIX,
+                    self._inference_count,
+                )
             )
-            for new_resolvent in new_resolvents:
-                if not is_tautology(new_resolvent):
-                    if not clause_in_a_list(new_resolvent, self._state):
-                        new_resolvent.birth_step = self._step_count
-                        new_resolvent.processed = False
-                        self._state.append(new_resolvent)
-            self._starting_label_index += len(new_resolvents)
+            self._add_to_state(
+                all_paramodulants_from_list(
+                    unprocessed_clauses,
+                    given_clause,
+                    INFERRED_CLAUSES_PREFIX,
+                    self._inference_count,
+                )
+            )
 
     def step(self, action: int) -> Tuple[list, float, bool, dict]:
         if action not in self.action_space:
@@ -156,7 +171,7 @@ class SaturationEnv(Env):
                 True,
                 dict(),
             )
-        self._do_resolutions(self._state[action])
+        self._do_deductions(self._state[action])
         self._state[action].processed = True
         if (
             min(
