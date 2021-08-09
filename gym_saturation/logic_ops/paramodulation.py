@@ -22,6 +22,7 @@ from gym_saturation.logic_ops.unification import (
     most_general_unifier,
 )
 from gym_saturation.logic_ops.utils import (
+    TermSelfReplace,
     deduplicate,
     proposition_length,
     replace_subterm_by_index,
@@ -100,7 +101,7 @@ def _equality_symmetry_paramodulation(
                 k,
             )
         )
-    except NonUnifiableError:
+    except (NonUnifiableError, TermSelfReplace):
         pass
     try:
         paramodulants.append(
@@ -115,7 +116,7 @@ def _equality_symmetry_paramodulation(
                 k,
             )
         )
-    except NonUnifiableError:
+    except (NonUnifiableError, TermSelfReplace):
         pass
     return paramodulants
 
