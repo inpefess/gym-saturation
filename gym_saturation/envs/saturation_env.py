@@ -16,13 +16,14 @@ limitations under the License.
 import json
 import os
 import random
-from glob import glob
 from typing import List, Optional, Tuple
 
 from gym import Env
 
 from gym_saturation.grammar import Clause
-from gym_saturation.logic_ops.resolution import all_possible_resolutions
+from gym_saturation.logic_ops.factoring import all_possible_factors
+from gym_saturation.logic_ops.paramodulation import all_paramodulants_from_list
+from gym_saturation.logic_ops.resolution import all_possible_resolvents
 from gym_saturation.logic_ops.utils import (
     clause_in_a_list,
     is_tautology,
@@ -44,10 +45,11 @@ class SaturationEnv(Env):
     ... else:
     ...     from importlib_resources import files
     >>> tptp_folder = files("gym_saturation").joinpath("resources/TPTP-mock")
-    >>> env = SaturationEnv(
-    ...     step_limit=3,
-    ...     tptp_folder=tptp_folder
+    >>> from glob import glob
+    >>> problem_list = glob(
+    ...     os.path.join(tptp_folder, "Problems", "*", "*1-1.p")
     ... )
+    >>> env = SaturationEnv(3, problem_list)
     >>> # there is nothing non-deterministic here, but the seed can be set
     >>> env.seed(0)
     0
@@ -83,10 +85,7 @@ class SaturationEnv(Env):
     >>> # if a proof is found, then reward is ``+1``
     >>> env.step(4)[1:3]
     (1.0, True)
-    >>> env = SaturationEnv(
-    ...     step_limit=1,
-    ...     tptp_folder=tptp_folder
-    ... )
+    >>> env = SaturationEnv(1, problem_list)
     >>> # one can also choose a particular problem file during reset
     >>> problem = os.path.join(tptp_folder, "Problems", "TST", "TST001-1.p")
     >>> result = env.reset(problem)
@@ -99,20 +98,21 @@ class SaturationEnv(Env):
     def __init__(
         self,
         step_limit: int,
-        tptp_folder: str,
+        problem_list: List[str],
     ):
         super().__init__()
         self.step_limit = step_limit
-        self.tptp_folder = tptp_folder
+        self.problem_list = problem_list
         self._step_count = 0
-        self._starting_label_index = 0
+        self._inference_count = 0
         self._state: List[Clause] = []
         self._problem: Optional[str] = None
 
-    def _init_clauses(self, filename: str):
+    def _init_clauses(self):
+        tptp_folder = os.path.join(os.path.dirname(self._problem), "..", "..")
         clauses = TPTPParser().parse(
-            filename,
-            self.tptp_folder,
+            self._problem,
+            tptp_folder,
         )
         for clause in clauses:
             clause.birth_step = 0
@@ -123,32 +123,51 @@ class SaturationEnv(Env):
     # pylint: disable=arguments-differ
     def reset(self, problem: Optional[str] = None) -> list:
         if problem is None:
-            self._problem = random.choice(
-                glob(os.path.join(self.tptp_folder, "Problems", "*", "*-*.p"))
-            )
+            self._problem = random.choice(self.problem_list)
         else:
             self._problem = problem
         self._step_count = 0
-        self._state = reindex_variables(self._init_clauses(self._problem), "X")
-        self._starting_label_index = 0
+        self._state = reindex_variables(self._init_clauses(), "X")
         self.action_space = list(range(len(self._state)))
         return self.state
 
-    def _do_resolutions(self, given_clause: Clause) -> None:
+    def _add_to_state(self, new_clauses: List[Clause]) -> None:
+        self._inference_count += len(new_clauses)
+        for clause in new_clauses:
+            if not is_tautology(clause):
+                if not clause_in_a_list(clause, self._state):
+                    clause.birth_step = self._step_count
+                    clause.processed = False
+                    self._state.append(clause)
+
+    def _do_deductions(self, given_clause: Clause) -> None:
         if not given_clause.processed:
-            new_resolutions = all_possible_resolutions(
-                [clause for clause in self._state if clause.processed],
-                given_clause,
-                INFERRED_CLAUSES_PREFIX,
-                self._starting_label_index,
+            unprocessed_clauses = [
+                clause for clause in self._state if clause.processed
+            ]
+            self._add_to_state(
+                all_possible_resolvents(
+                    unprocessed_clauses,
+                    given_clause,
+                    INFERRED_CLAUSES_PREFIX,
+                    self._inference_count,
+                )
             )
-            for new_resolution in new_resolutions:
-                if not is_tautology(new_resolution):
-                    if not clause_in_a_list(new_resolution, self._state):
-                        new_resolution.birth_step = self._step_count
-                        new_resolution.processed = False
-                        self._state.append(new_resolution)
-            self._starting_label_index += len(new_resolutions)
+            self._add_to_state(
+                all_paramodulants_from_list(
+                    unprocessed_clauses,
+                    given_clause,
+                    INFERRED_CLAUSES_PREFIX,
+                    self._inference_count,
+                )
+            )
+            self._add_to_state(
+                all_possible_factors(
+                    given_clause,
+                    INFERRED_CLAUSES_PREFIX,
+                    self._inference_count,
+                )
+            )
 
     def step(self, action: int) -> Tuple[list, float, bool, dict]:
         if action not in self.action_space:
@@ -162,7 +181,7 @@ class SaturationEnv(Env):
                 True,
                 dict(),
             )
-        self._do_resolutions(self._state[action])
+        self._do_deductions(self._state[action])
         self._state[action].processed = True
         if (
             min(

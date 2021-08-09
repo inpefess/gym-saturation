@@ -17,7 +17,7 @@ from typing import List, Optional
 
 from gym_saturation.grammar import Function, Predicate, Proposition, Variable
 from gym_saturation.logic_ops.substitution import Substitution
-from gym_saturation.logic_ops.utils import deduplicate, is_subterm
+from gym_saturation.logic_ops.utils import deduplicate, is_subproposition
 
 
 class NonUnifiableError(Exception):
@@ -43,7 +43,7 @@ def _get_disagreement(one: Proposition, two: Proposition) -> List[Proposition]:
         or isinstance(one, Function)
         and isinstance(two, Function)
     ):
-        if one.name != two.name:
+        if one.name != two.name or len(one.arguments) != len(two.arguments):
             return [one, two]
         for argument_one, argument_two in zip(one.arguments, two.arguments):
             disagreement = _get_disagreement(argument_one, argument_two)
@@ -65,7 +65,7 @@ def _propose_substitution(
         disagreement[0], (Variable, Function)
     ):
         substitution = Substitution(disagreement[1], disagreement[0])
-    if substitution is None or is_subterm(
+    if substitution is None or is_subproposition(
         substitution.variable, substitution.term
     ):
         raise NonUnifiableError((propositions[0], propositions[1]))

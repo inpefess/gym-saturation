@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from copy import deepcopy
 from typing import Any, List, Union
 
 from gym_saturation.grammar import (
@@ -40,7 +41,7 @@ def deduplicate(a_list: List[Any]) -> List[Any]:
     return new_list
 
 
-def is_subterm(one: Proposition, two: Proposition) -> bool:
+def is_subproposition(one: Proposition, two: Proposition) -> bool:
     """
     check whether proposition ``one`` is part of a proposition ``two``
 
@@ -52,7 +53,7 @@ def is_subterm(one: Proposition, two: Proposition) -> bool:
         return one == two
     if isinstance(two, (Function, Predicate)):
         for argument in two.arguments:
-            if is_subterm(one, argument):
+            if is_subproposition(one, argument):
                 return True
     return False
 
@@ -147,26 +148,26 @@ def clause_length(clause: Clause) -> int:
         if literal.negated:
             length += 1
         for term in literal.atom.arguments:
-            length += term_length(term)
+            length += proposition_length(term)
         length += 1
     return length
 
 
-def term_length(term: Term) -> int:
+def proposition_length(proposition: Proposition) -> int:
     """
-    total length of subterms plus ones for a function or one for a variable
+    total number of functional, predicate and variable symbols
 
-    :param term: a function or a variable
-    :return: sctructural length of a term
+    :param proposition: a function, a predicate or a variable
+    :return: sctructural length of a proposition
 
-    >>> term_length(Function("f", [Variable("X")]))
-    2
+    >>> proposition_length(Predicate("p", [Function("f", [Variable("X")])]))
+    3
     """
     length = 0
-    if isinstance(term, Variable):
+    if isinstance(proposition, Variable):
         return 1
-    for subterm in term.arguments:
-        length += term_length(subterm)
+    for subterm in proposition.arguments:
+        length += proposition_length(subterm)
     return 1 + length
 
 
@@ -185,3 +186,104 @@ def clause_in_a_list(clause: Clause, clauses: List[Clause]) -> bool:
         if a_clause.literals == clause.literals:
             return True
     return False
+
+
+class NoSubtermFound(Exception):
+    """ sometimes a subterm index is larger than term length """
+
+
+def subterm_by_index(atom: Proposition, index: int) -> Term:
+    """
+    extract a subterm using depth-first search through the tree of logical
+    operations
+
+    >>> atom = Predicate("this_is_a_test_case", [Function("f", [Variable("X")]), Function("g", [Variable("Y")])])
+    >>> subterm_by_index(atom, 0)
+    Traceback (most recent call last):
+     ...
+    ValueError: subterm with index 0 exists only for terms, but got: Predicate(name='this_is_a_test_case', arguments=[Function(name='f', arguments=[Variable(name='X')]), Function(name='g', arguments=[Variable(name='Y')])])
+    >>> subterm_by_index(atom, 1) == atom.arguments[0]
+    True
+    >>> subterm_by_index(atom, 2) == atom.arguments[0].arguments[0]
+    True
+    >>> subterm_by_index(atom, 4) == atom.arguments[1].arguments[0]
+    True
+
+    :param atom: a predicate or a term
+    :param index: an index of a desired subterm
+    :returns: a subterm
+    """
+    if index == 0:
+        if isinstance(atom, (Function, Variable)):
+            return atom
+        raise ValueError(
+            f"subterm with index 0 exists only for terms, but got: {atom}"
+        )
+    subterm_length = 1
+    if not isinstance(atom, Variable):
+        for argument in atom.arguments:
+            try:
+                return deepcopy(
+                    subterm_by_index(argument, index - subterm_length)
+                )
+            except NoSubtermFound as error:
+                subterm_length += error.args[0]
+    raise NoSubtermFound(subterm_length)
+
+
+class CantReplaceTheWholeTerm(Exception):
+    """ an exception raised when trying to replace a subterm with index 0 """
+
+
+class TermSelfReplace(Exception):
+    """ an exception raised when trying to replace a subterm with itself """
+
+
+def _replace_if_not_the_same(
+    atom: Proposition, index: int, term: Term
+) -> None:
+    if not isinstance(atom, Variable):
+        if atom.arguments[index] == term:
+            raise TermSelfReplace
+        atom.arguments[index] = term
+
+
+def replace_subterm_by_index(
+    atom: Proposition, index: int, term: Term
+) -> None:
+    """
+    replace a subterm with a given index (depth-first search) by a new term
+    replacement always happens inplace!
+
+    >>> atom = Predicate("this_is_a_test_case", [Function("f", [Variable("X")]), Function("g", [Variable("Y")])])
+    >>> replace_subterm_by_index(atom, 0, Variable("Z"))
+    Traceback (most recent call last):
+     ...
+    gym_saturation.logic_ops.utils.NoSubtermFound: 5
+    >>> replace_subterm_by_index(atom, 4, Function("h", [Variable("Z")]))
+    >>> atom
+    Predicate(name='this_is_a_test_case', arguments=[Function(name='f', arguments=[Variable(name='X')]), Function(name='g', arguments=[Function(name='h', arguments=[Variable(name='Z')])])])
+    >>> replace_subterm_by_index(Predicate("this_is_a_test_case", [Variable("X")]), 1, Variable("X"))
+    Traceback (most recent call last):
+     ...
+    gym_saturation.logic_ops.utils.TermSelfReplace
+
+    :param atom: a predicate or a term
+    :param index: an index of a subterm to replace, must be greater than 0
+    :param term: replacement term for a given index
+    :returns:
+    """
+    subterm_length = 1
+    if not isinstance(atom, Variable):
+        for i, argument in enumerate(atom.arguments):
+            if index == subterm_length:
+                _replace_if_not_the_same(atom, i, term)
+                return
+            try:
+                replace_subterm_by_index(
+                    argument, index - subterm_length, term
+                )
+                return
+            except NoSubtermFound as error:
+                subterm_length += error.args[0]
+    raise NoSubtermFound(subterm_length)

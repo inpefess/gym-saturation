@@ -13,7 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from typing import List, Tuple
+from copy import deepcopy
+from typing import List
 
 from gym_saturation.grammar import Clause, Literal
 from gym_saturation.logic_ops.unification import (
@@ -28,12 +29,16 @@ def resolution(
     clause_two: Clause,
     literal_two: Literal,
 ) -> Clause:
-    """
+    r"""
     standard first-order resolution rule
 
-    :math:`{\\frac  {\\Gamma _{1}\\cup \\left\\{L_{1}\\right\\}\\,\\,\\,\\,\\Gamma _{2}\\cup \\left\\{L_{2}\\right\\}}{(\\Gamma _{1}\\cup \\Gamma _{2})\\phi }}\\phi`
+    .. math:: {\frac{\Gamma_1\cup\left\{L_1\right\},\Gamma_2\cup\left\{L_2\right\}}{\left(\Gamma_1\cup\Gamma_2\right)\phi}}\phi
 
-    where :math:`\\phi` is a most general unifier of :math:`L_{1}` and :math:`\\overline {L_{2}}`, and :math:`\\Gamma _{1}` and :math:`\\Gamma _{2}` have no common variables.
+    where
+
+    * :math:`\Gamma_1` and :math:`\Gamma_2` are clauses with no common variables
+    * :math:`L_1` and :math:`L_2` are literals, one negated and one not
+    * :math:`\phi` is a most general unifier of :math:`L_1` and :math:`L_2`
 
     >>> from gym_saturation.grammar import Predicate, Variable, Function
     >>> resolution(Clause([Literal(False, Predicate("q", [Variable("X")]))]), Literal(False, Predicate("p", [Variable("X")])), Clause([Literal(False, Predicate("r", [Variable("X")]))]), Literal(True, Predicate("p", [Function("this_is_a_test_case", [])]))).literals
@@ -43,10 +48,10 @@ def resolution(
      ...
     ValueError: resolution is not possible for Literal(negated=False, atom=Predicate(name='f', arguments=[])) and Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))
 
-    :param clause_one: :math:`\\Gamma_{1}`
-    :param literal_one: :math:`L_{1}`
-    :param clause_two: :math:`\\Gamma_{2}`
-    :param literal_two: :math:`L_{2}`
+    :param clause_one: :math:`\Gamma_1`
+    :param literal_one: :math:`L_1`
+    :param clause_two: :math:`\Gamma_2`
+    :param literal_two: :math:`L_2`
     :returns: a new clause --- the resolution result
     """
     if literal_one.negated == literal_two.negated:
@@ -54,48 +59,55 @@ def resolution(
             f"resolution is not possible for {literal_one} and {literal_two}"
         )
     substitutions = most_general_unifier([literal_one.atom, literal_two.atom])
-    new_literals = clause_one.literals
+    new_literals = deepcopy(clause_one.literals)
     for literal in clause_two.literals:
         if literal not in new_literals:
-            new_literals.append(literal)
+            new_literals.append(deepcopy(literal))
     result = Clause(new_literals)
     for substitution in substitutions:
         result = substitution.substitute_in_clause(result)
     return result
 
 
-def _multi_resolution_init(
-    given_clause: Clause, clauses: List[Clause], starting_label_index: int
-) -> Tuple[List[Literal], List[Literal], List[Clause], int]:
-    for clause in clauses + [given_clause]:
-        if clause.label is None:
-            raise ValueError(f"clauses should be labeled: {clause}")
-    negative_literals = [
-        literal for literal in given_clause.literals if literal.negated
-    ]
-    positive_literals = [
-        literal for literal in given_clause.literals if not literal.negated
-    ]
-    resolutions: List[Clause] = list()
-    new_clause_index = starting_label_index
-    return negative_literals, positive_literals, resolutions, new_clause_index
+def _get_new_resolvents(
+    clause_one: Clause, literal_one: Literal, given_clause: Clause
+) -> List[Clause]:
+    resolvents: List[Clause] = list()
+    for j, literal_two in enumerate(given_clause.literals):
+        if literal_one.negated != literal_two.negated:
+            clause_two = Clause(
+                given_clause.literals[:j] + given_clause.literals[j + 1 :]
+            )
+            try:
+                resolvents.append(
+                    resolution(
+                        clause_one, literal_one, clause_two, literal_two
+                    )
+                )
+            except NonUnifiableError:
+                pass
+    return resolvents
 
 
-def all_possible_resolutions(
+def all_possible_resolvents(
     clauses: List[Clause],
     given_clause: Clause,
     label_prefix: str,
     starting_label_index: int,
 ) -> List[Clause]:
     """
-    basic building block of the Given Clause algorithm
+    one of the four basic building blocks of the Given Clause algorithm
 
     >>> from gym_saturation.grammar import Predicate, Variable, Function
-    >>> all_possible_resolutions([Clause([Literal(False, Predicate("this_is_a_test_case", []))])], Clause([]), "inferred_", 0)
+    >>> all_possible_resolvents([Clause([])], Clause([Literal(False, Predicate("this_is_a_test_case", []))]), "inferred_", 0)
     Traceback (most recent call last):
      ...
-    ValueError: clauses should be labeled: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, processed=None, birth_step=None)
-    >>> all_possible_resolutions([Clause([Literal(False, Predicate("q", [Variable("X")])), Literal(False, Predicate("p", [Variable("X")]))], label="input1")], Clause([Literal(True, Predicate("p", [Function("this_is_a_test_case", [])]))], label="input2"), "inferred_", 0)
+    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, processed=None, birth_step=None)
+    >>> all_possible_resolvents([Clause([Literal(False, Predicate("this_is_a_test_case", []))])], Clause([], "one"), "inferred_", 0)
+    Traceback (most recent call last):
+     ...
+    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, processed=None, birth_step=None)
+    >>> all_possible_resolvents([Clause([Literal(False, Predicate("q", [Variable("X")])), Literal(False, Predicate("p", [Variable("X")]))], label="input1")], Clause([Literal(True, Predicate("p", [Function("this_is_a_test_case", [])]))], label="input2"), "inferred_", 0)
     [Clause(literals=[Literal(negated=False, atom=Predicate(name='q', arguments=[Function(name='this_is_a_test_case', arguments=[])]))], label='inferred_0', inference_parents=['input1', 'input2'], processed=None, birth_step=None)]
 
     :param clauses: a list of (processed) clauses
@@ -104,45 +116,31 @@ def all_possible_resolutions(
     :param label_prefix: generated clauses will be labeled with this prefix
     :param starting_label_index: generated clauses will be indexed starting
         with this number
-    :returns: results of all possible resolutions with each one from
+    :returns: results of all possible resolvents with each one from
         ``clauses`` and the ``given_clause``
     """
-    (
-        negative_literals,
-        positive_literals,
-        resolutions,
-        new_clause_index,
-    ) = _multi_resolution_init(given_clause, clauses, starting_label_index)
+    if given_clause.label is None:
+        raise ValueError(f"no label: {given_clause}")
+    resolvents: List[Clause] = list()
     for clause in clauses:
-        for i, _ in enumerate(clause.literals):
-            other_literals = (
-                positive_literals
-                if clause.literals[i].negated
-                else negative_literals
+        for i, literal_one in enumerate(clause.literals):
+            clause_one = Clause(clause.literals[:i] + clause.literals[i + 1 :])
+            if clause.label is None:
+                raise ValueError(f"no label: {clause}")
+            new_resolvents = _get_new_resolvents(
+                clause_one, literal_one, given_clause
             )
-            for j, _ in enumerate(other_literals):
-                try:
-                    new_literals = resolution(
-                        Clause(clause.literals[:i] + clause.literals[i + 1 :]),
-                        clause.literals[i],
-                        Clause(
-                            given_clause.literals[:j]
-                            + given_clause.literals[j + 1 :]
+            resolvents.extend(
+                [
+                    Clause(
+                        literals=resolvent.literals,
+                        inference_parents=[clause.label, given_clause.label],
+                        label=label_prefix
+                        + str(
+                            starting_label_index + len(resolvents) + ord_num
                         ),
-                        other_literals[j],
-                    ).literals
-                except NonUnifiableError:
-                    continue
-                new_clause = Clause(
-                    new_literals,
-                    f"{label_prefix}{new_clause_index}",
-                    [
-                        # check for non empty labels is done in
-                        # ``_multi_resolution_init``
-                        clause.label,  # type: ignore
-                        given_clause.label,  # type: ignore
-                    ],
-                )
-                new_clause_index += 1
-                resolutions.append(new_clause)
-    return resolutions
+                    )
+                    for ord_num, resolvent in enumerate(new_resolvents)
+                ]
+            )
+    return resolvents
