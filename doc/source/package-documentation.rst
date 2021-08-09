@@ -38,7 +38,12 @@ Predicate
 Term
 =====
 .. autoclass:: gym_saturation.grammar.Term
-   :members:		   
+   :members:
+
+Proposition
+============
+.. autoclass:: gym_saturation.grammar.Proposition
+   :members:
 
 Literal
 ========
@@ -73,6 +78,11 @@ Paramodulation
 .. autofunction:: gym_saturation.logic_ops.paramodulation.paramodulation
 .. autofunction:: gym_saturation.logic_ops.paramodulation.all_paramodulants_from_clause
 .. autofunction:: gym_saturation.logic_ops.paramodulation.all_paramodulants_from_list
+
+Factoring
+==========
+.. autofunction:: gym_saturation.logic_ops.factoring.factoring
+.. autofunction:: gym_saturation.logic_ops.factoring.all_possible_factors
 		  
 utils
 ======
@@ -84,6 +94,8 @@ utils
 .. autofunction:: gym_saturation.logic_ops.utils.clause_length
 .. autofunction:: gym_saturation.logic_ops.utils.proposition_length
 .. autofunction:: gym_saturation.logic_ops.utils.clause_in_a_list
+.. autofunction:: gym_saturation.logic_ops.utils.subterm_by_index
+.. autofunction:: gym_saturation.logic_ops.utils.replace_subterm_by_index
 
 Parsing
 ********

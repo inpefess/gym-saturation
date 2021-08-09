@@ -142,6 +142,8 @@ def all_paramodulants_from_clause(
         or len(literal_one.atom.arguments) != 2
     ):
         raise ValueError(f"expected equality, but got {literal_one}")
+    if literal_one.atom.arguments[0] == literal_one.atom.arguments[1]:
+        return []
     literal_two_len = proposition_length(literal_two.atom)
     paramodulants = list()
     for k in range(1, literal_two_len):
@@ -199,8 +201,9 @@ def all_paramodulants_from_list(
     Traceback (most recent call last):
      ...
     ValueError: expected equality, but got Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='this_is_a_test_case', arguments=[])]))
-    >>> all_paramodulants_from_list([Clause([Literal(False, Predicate("=", [Function("f", []), Function("g", [])]))], "this_is_a_test_case")], Clause([Literal(False, Predicate("=", [Function("g", []), Function("h", [])]))], "this_is_a_test_case_2"), "inferred_", 0)
-    [Clause(literals=[Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='f', arguments=[]), Function(name='h', arguments=[])]))], label='inferred_0', inference_parents=['this_is_a_test_case', 'this_is_a_test_case_2'], processed=None, birth_step=None), Clause(literals=[Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='f', arguments=[]), Function(name='h', arguments=[])]))], label='inferred_1', inference_parents=['this_is_a_test_case', 'this_is_a_test_case_2'], processed=None, birth_step=None)]
+    >>> paramodulants = all_paramodulants_from_list([Clause([Literal(False, Predicate("=", [Function("f", []), Function("g", [])])), Literal(False, Predicate("=", [Variable("X"), Variable("X")]))], "this_is_a_test_case")], Clause([Literal(False, Predicate("=", [Function("g", []), Function("h", [])]))], "this_is_a_test_case_2"), "inferred_", 0)
+    >>> print("this_is_a_test_case:", deduplicate([clause.literals for clause in paramodulants]))
+    this_is_a_test_case: [[Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='f', arguments=[]), Function(name='h', arguments=[])])), Literal(negated=False, atom=Predicate(name='=', arguments=[Variable(name='X'), Variable(name='X')]))], [Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='h', arguments=[]), Function(name='g', arguments=[])])), Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='f', arguments=[]), Function(name='g', arguments=[])]))], [Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='g', arguments=[]), Function(name='h', arguments=[])])), Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='f', arguments=[]), Function(name='g', arguments=[])]))]]
 
     :param clauses: a list of (processed) clauses
     :param given_clause: a new clause which should be combined with all the

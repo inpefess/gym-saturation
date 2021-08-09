@@ -54,8 +54,8 @@ class Substitution:
                 ],
             )
         if term.name == self.variable.name:
-            return self.term
-        return term
+            return deepcopy(self.term)
+        return deepcopy(term)
 
     def _substitute_in_predicate(
         self, predicate: grammar.Predicate

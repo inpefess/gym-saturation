@@ -235,6 +235,19 @@ class CantReplaceTheWholeTerm(Exception):
     """ an exception raised when trying to replace a subterm with index 0 """
 
 
+class TermSelfReplace(Exception):
+    """ an exception raised when trying to replace a subterm with itself """
+
+
+def _replace_if_not_the_same(
+    atom: Proposition, index: int, term: Term
+) -> None:
+    if not isinstance(atom, Variable):
+        if atom.arguments[index] == term:
+            raise TermSelfReplace
+        atom.arguments[index] = term
+
+
 def replace_subterm_by_index(
     atom: Proposition, index: int, term: Term
 ) -> None:
@@ -250,6 +263,10 @@ def replace_subterm_by_index(
     >>> replace_subterm_by_index(atom, 4, Function("h", [Variable("Z")]))
     >>> atom
     Predicate(name='this_is_a_test_case', arguments=[Function(name='f', arguments=[Variable(name='X')]), Function(name='g', arguments=[Function(name='h', arguments=[Variable(name='Z')])])])
+    >>> replace_subterm_by_index(Predicate("this_is_a_test_case", [Variable("X")]), 1, Variable("X"))
+    Traceback (most recent call last):
+     ...
+    gym_saturation.logic_ops.utils.TermSelfReplace
 
     :param atom: a predicate or a term
     :param index: an index of a subterm to replace, must be greater than 0
@@ -260,7 +277,7 @@ def replace_subterm_by_index(
     if not isinstance(atom, Variable):
         for i, argument in enumerate(atom.arguments):
             if index == subterm_length:
-                atom.arguments[i] = term
+                _replace_if_not_the_same(atom, i, term)
                 return
             try:
                 replace_subterm_by_index(

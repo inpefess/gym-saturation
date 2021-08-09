@@ -17,16 +17,23 @@
 What is going on
 #################
 
-One can write theorems in a machine-readable form. This package uses the CNF sublanguage of TPTP. Before using the environment, you will need to download a recent TPTP archive (ca 600MB).
+One can write theorems in a machine-readable form. This package uses the `CNF`_ sublanguage of `TPTP`_. Before using the environment, you will need to download a recent TPTP archive (ca 600MB).
 
-A statement of a theorem becomes a list of clauses. In a given clause algorithm, one divides the clauses in processed and not processed yet. Then at each step, one selects a not processed yet clause as a given clause. If it's empty (we arrived at a contradiction, i.e. found a refutation proof), the algorithm stops with success. If not, one computes all possible resolvents (the results of applying a simple but powerful resolution deduction rule to the given clause and all processed clauses). Then we add resolvents to the unprocessed set, and the given clause goes into the processed. The algorithm iterates if we didn't run out of time and unprocessed clauses.
+A statement of a theorem becomes a list of clauses. In a given clause algorithm, one divides the clauses in processed and not processed yet. Then at each step, one selects a not processed yet clause as a given clause. If it's empty (we arrived at a contradiction, i.e. found a refutation proof), the algorithm stops with success. If not, one applies all possible deduction rules to the given clause and all processed clauses. Then we add deduction results to the unprocessed set, and the given clause goes into the processed. The algorithm iterates if we didn't run out of time and unprocessed clauses.
+
+The deduction rules are the following (this deductive system is known to be refutation complete):
+
+* `resolution`_
+* `factoring`_
+* `paramodulation`_
+* reflexivity resolution (in fact, a paramodulation variant)
 
 For the choice of a given clause, one usually employs a clever combination of heuristics. Of course, we can reformulate the same process as a reinforcement learning task.
 
 What is a State
 ****************
 
-(More or less resembles [``ProofState`` class of PyRes](https://github.com/eprover/PyRes/blob/master/saturation.py))
+(More or less resembles `ProofState class of PyRes`_)
 
 The environment's state is a list of logical clauses. Each clause is a list of literals and also has several properties:
 
@@ -55,3 +62,10 @@ Important notice
 *****************
 
 Usually, saturation provers use a timeout in seconds since they work in real-time mode. Here, we live in a discrete time, so we limit a prover by the number of saturation algorithm steps taken, not wall-clock time.
+
+.. _CNF: https://en.wikipedia.org/wiki/Clausal_normal_form
+.. _TPTP: http://www.tptp.org/
+.. _ProofState class of PyRes: https://github.com/eprover/PyRes/blob/master/saturation.py
+.. _resolution: https://en.wikipedia.org/wiki/Resolution_(logic)#Resolution_in_first_order_logic
+.. _factoring: https://en.wikipedia.org/wiki/Resolution_(logic)#Factoring
+.. _paramodulation: https://en.wikipedia.org/wiki/Resolution_(logic)#Paramodulation

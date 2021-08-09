@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from copy import deepcopy
 from typing import List
 
 from gym_saturation.grammar import Clause, Literal
@@ -58,10 +59,10 @@ def resolution(
             f"resolution is not possible for {literal_one} and {literal_two}"
         )
     substitutions = most_general_unifier([literal_one.atom, literal_two.atom])
-    new_literals = clause_one.literals
+    new_literals = deepcopy(clause_one.literals)
     for literal in clause_two.literals:
         if literal not in new_literals:
-            new_literals.append(literal)
+            new_literals.append(deepcopy(literal))
     result = Clause(new_literals)
     for substitution in substitutions:
         result = substitution.substitute_in_clause(result)
