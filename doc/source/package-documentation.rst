@@ -114,7 +114,6 @@ CNF Parser
 JSON Encoder
 =============
 .. autoclass:: gym_saturation.parsing.json_grammar.ClauseJSONEncoder
-
 .. autofunction:: gym_saturation.parsing.json_grammar.dict_to_clause
 
 TPTP Parser
@@ -130,3 +129,12 @@ Saturation Environment
 .. autoclass:: gym_saturation.envs.saturation_env.SaturationEnv
    :special-members: __init__
    :members:
+
+Policy Testing
+***************
+
+This module is an example of testing your own trained policy.
+
+.. autofunction:: gym_saturation.policy_testing.episode
+.. autofunction:: gym_saturation.policy_testing.save_final_state
+.. autofunction:: gym_saturation.policy_testing.size_policy

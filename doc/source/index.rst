@@ -39,6 +39,7 @@ See `the notebook`_ for more information.
 	     
    how-to-contribute
    what-is-going-on
+   testing-a-policy
    package-documentation
 
 Indices and tables
