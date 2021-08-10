@@ -115,6 +115,10 @@ class CNFParser(Transformer):
         """
         if children[0] == "~":
             return Literal(True, children[1])
+        if isinstance(children[0], Predicate):
+            if children[0].name == "!=":
+                children[0].name = "="
+                return Literal(True, children[0])
         return Literal(False, children[0])
 
     @staticmethod
