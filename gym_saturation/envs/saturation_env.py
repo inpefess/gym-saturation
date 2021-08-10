@@ -23,6 +23,9 @@ from gym import Env
 from gym_saturation.grammar import Clause
 from gym_saturation.logic_ops.factoring import all_possible_factors
 from gym_saturation.logic_ops.paramodulation import all_paramodulants_from_list
+from gym_saturation.logic_ops.reflexivity_resolution import (
+    all_possible_reflexivity_resolvents,
+)
 from gym_saturation.logic_ops.resolution import all_possible_resolvents
 from gym_saturation.logic_ops.utils import (
     clause_in_a_list,
@@ -163,6 +166,13 @@ class SaturationEnv(Env):
             )
             self._add_to_state(
                 all_possible_factors(
+                    given_clause,
+                    INFERRED_CLAUSES_PREFIX,
+                    self._inference_count,
+                )
+            )
+            self._add_to_state(
+                all_possible_reflexivity_resolvents(
                     given_clause,
                     INFERRED_CLAUSES_PREFIX,
                     self._inference_count,

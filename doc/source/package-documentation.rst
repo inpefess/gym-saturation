@@ -73,17 +73,22 @@ Resolution
 .. autofunction:: gym_saturation.logic_ops.resolution.resolution
 .. autofunction:: gym_saturation.logic_ops.resolution.all_possible_resolvents
 
+Factoring
+==========
+.. autofunction:: gym_saturation.logic_ops.factoring.factoring
+.. autofunction:: gym_saturation.logic_ops.factoring.all_possible_factors
+
 Paramodulation
 ===============
 .. autofunction:: gym_saturation.logic_ops.paramodulation.paramodulation
 .. autofunction:: gym_saturation.logic_ops.paramodulation.all_paramodulants_from_clause
 .. autofunction:: gym_saturation.logic_ops.paramodulation.all_paramodulants_from_list
 
-Factoring
-==========
-.. autofunction:: gym_saturation.logic_ops.factoring.factoring
-.. autofunction:: gym_saturation.logic_ops.factoring.all_possible_factors
-		  
+Reflexivity Resolution
+=======================
+.. autofunction:: gym_saturation.logic_ops.reflexivity_resolution.reflexivity_resolution
+.. autofunction:: gym_saturation.logic_ops.reflexivity_resolution.all_possible_reflexivity_resolvents
+
 utils
 ======
 .. autofunction:: gym_saturation.logic_ops.utils.deduplicate
