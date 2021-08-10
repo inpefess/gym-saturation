@@ -18,9 +18,10 @@ import os
 import sys
 from argparse import ArgumentParser, Namespace
 from operator import itemgetter
-from typing import Callable, List, Optional
+from typing import Callable, Dict, List, Optional, Tuple
 
 from gym_saturation.envs import SaturationEnv
+from gym_saturation.grammar import Clause
 from gym_saturation.logic_ops.utils import clause_length
 from gym_saturation.parsing.json_grammar import dict_to_clause
 
@@ -79,20 +80,23 @@ def episode(
     >>> import shutil
     >>> test_policy_output = "test_policy_output"
     >>> shutil.rmtree(test_policy_output, ignore_errors=True)
+    >>> os.mkdir(test_policy_output)
     >>> import sys
     >>> if sys.version_info.major == 3 and sys.version_info.minor == 9:
     ...     from importlib.resources import files
     ... else:
     ...     from importlib_resources import files
-    >>> problem_filename = (
+    >>> from glob import glob
+    >>> problem_list = glob(os.path.join(
     ...     files("gym_saturation")
-    ...     .joinpath("resources/TPTP-mock/Problems/TST/TST001-1.p")
-    ... )
-    >>> episode(problem_filename, test_policy_output, 5, size_policy)
-    >>> with open(os.path.join(test_policy_output, "TST/TST001-1.json")) as f:
-    ...     text = f.read()
-    >>> len(text)
-    1419
+    ...     .joinpath("resources/TPTP-mock/Problems/TST")
+    ... , "*-*.p"))
+    >>> episode(problem_list[0], test_policy_output, 5, size_policy)
+    >>> episode(problem_list[1], test_policy_output, 5, size_policy)
+    >>> print(sorted(policy_testing_report(
+    ...     problem_list + ["this_is_a_test_case"], test_policy_output
+    ... ).items()))
+    [('TST001-1', ('PROOF_FOUND', 1, 1)), ('TST002-1', ('STEP_LIMIT', 4, -1)), ('this_is_a_test_case', ('ERROR', -1, -1))]
 
     :param problem_filename: the name of a problem file
     :param output_folder: where to log given clause
@@ -127,6 +131,89 @@ def parse_args(args: Optional[List[str]] = None) -> Namespace:
     argument_parser.add_argument("--step_limit", type=int, required=True)
     parsed_args = argument_parser.parse_args(args)
     return parsed_args
+
+
+def _analyse_proof(state: List[Clause]) -> Tuple[str, int, int]:
+    empty_clauses = [
+        clause
+        for clause in state
+        if clause.literals == [] and clause.processed
+    ]
+    step_count = (
+        max(
+            [
+                -1 if clause.birth_step is None else clause.birth_step
+                for clause in state
+            ]
+        )
+        - 1
+    )
+    if len(empty_clauses) > 1:
+        return ("ERROR", -1, -1)
+    if len(empty_clauses) == 0:
+        return ("STEP_LIMIT", step_count, -1)
+    return (
+        "PROOF_FOUND",
+        step_count,
+        proof_length(empty_clauses[0], state),
+    )
+
+
+def proof_length(empty_clause: Clause, state: List[Clause]) -> int:
+    """
+
+    :param empty_clause: a clause with no literals (final step of a proof)
+    :param state: a list of clauses
+    :returns: the number of steps in a refutational proof
+    """
+    proof_parts = (
+        []
+        if empty_clause.inference_parents is None
+        else empty_clause.inference_parents
+    )
+    proof = [empty_clause]
+    while proof_parts != []:
+        label = proof_parts.pop()
+        proof += [clause for clause in state if clause.label == label]
+        proof_parts += (
+            []
+            if proof[-1].inference_parents is None
+            else proof[-1].inference_parents
+        )
+    return len({clause.birth_step for clause in proof}) - 1
+
+
+def policy_testing_report(
+    problem_list: List[str], testing_result_folder: str
+) -> Dict[str, Tuple[str, int, int]]:
+    """
+
+    :param problem_list: a list of full paths to problem files
+    :param testing_result_folder: a folder filled by runs of ``episode``
+        function over ``problem_list``
+    :returns: a dictionary with problems as kets, and the following values:
+        * status (PROOF_FOUND, STEP_LIMIT, ERROR)
+        * step count (``-1`` for errors)
+        * proof length (``-1`` for no proof)
+    """
+    res = dict()
+    for problem in problem_list:
+        problem_name = os.path.splitext(os.path.basename(problem))[0]
+        result_filename = os.path.join(
+            testing_result_folder,
+            os.path.basename(os.path.dirname(problem)),
+            f"{problem_name}.json",
+        )
+        if os.path.exists(result_filename):
+            with open(result_filename, "r") as json_file:
+                state = [
+                    dict_to_clause(clause)
+                    for clause in json.loads(json_file.read())
+                ]
+            res[problem_name] = _analyse_proof(state)
+        else:
+            res[problem_name] = ("ERROR", -1, -1)
+    return res
 
 
 if __name__ == "__main__":
