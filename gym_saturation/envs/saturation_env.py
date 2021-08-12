@@ -183,7 +183,10 @@ class SaturationEnv(Env):
             )
         return dict(
             [
-                (i + state_len_before, clause)
+                (
+                    i + state_len_before,
+                    json.loads(json.dumps(clause, cls=ClauseJSONEncoder)),
+                )
                 for i, clause in enumerate(self._state[state_len_before:])
             ]
             + [(action, self._state[action])]
