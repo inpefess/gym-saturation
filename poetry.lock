@@ -603,7 +603,7 @@ test = ["pytest", "pytest-check-links", "requests", "wheel", "virtualenv"]
 
 [[package]]
 name = "jupyterlab"
-version = "3.1.4"
+version = "3.1.6"
 description = "JupyterLab computational environment"
 category = "dev"
 optional = false
@@ -654,7 +654,7 @@ test = ["pytest", "requests"]
 
 [[package]]
 name = "jupyterlab-server"
-version = "2.6.2"
+version = "2.7.0"
 description = "A set of server components for JupyterLab and JupyterLab like applications ."
 category = "dev"
 optional = false
@@ -662,6 +662,7 @@ python-versions = ">=3.6"
 
 [package.dependencies]
 babel = "*"
+entrypoints = ">=0.2.2"
 jinja2 = ">=2.10"
 json5 = "*"
 jsonschema = ">=3.0.1"
@@ -844,7 +845,7 @@ python-versions = "*"
 
 [[package]]
 name = "notebook"
-version = "6.4.2"
+version = "6.4.3"
 description = "A web-based notebook environment for interactive computing"
 category = "dev"
 optional = false
@@ -1423,7 +1424,7 @@ test = ["pytest"]
 
 [[package]]
 name = "terminado"
-version = "0.10.1"
+version = "0.11.0"
 description = "Tornado websocket backend for the Xterm.js Javascript terminal emulator library."
 category = "dev"
 optional = false
@@ -1527,7 +1528,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "virtualenv"
-version = "20.7.1"
+version = "20.7.2"
 description = "Virtual Python Environment builder"
 category = "dev"
 optional = false
@@ -1575,7 +1576,7 @@ python-versions = "*"
 
 [[package]]
 name = "websocket-client"
-version = "1.1.1"
+version = "1.2.0"
 description = "WebSocket client for Python with low level API options"
 category = "dev"
 optional = false
@@ -1900,8 +1901,8 @@ jupyter-server = [
 jupyterlab = [
     {file = "jupyterlab-2.3.2-py3-none-any.whl", hash = "sha256:2dbb5d1e5e3e0fc8c8cc1e5bec277b8892c7f98e62ee58d43bd4434fe318ab8f"},
     {file = "jupyterlab-2.3.2.tar.gz", hash = "sha256:45c0d7820b15c87addcb7d8a7584c1573a23c02e331521907bc1775342df2a6d"},
-    {file = "jupyterlab-3.1.4-py3-none-any.whl", hash = "sha256:b8ab11e2d6c467674f6e7c779c08cd6d33759bccda50dcf1f0b96ac3e4e6ed6d"},
-    {file = "jupyterlab-3.1.4.tar.gz", hash = "sha256:82b5ea0f4bd500ff2a6aa27304a206007d7bbe8bc2bc5c685014d72462c985da"},
+    {file = "jupyterlab-3.1.6-py3-none-any.whl", hash = "sha256:0d224d56fbf2bae1fdd0f1958d617fabc9f81fa8875d46da19c89d747c89527a"},
+    {file = "jupyterlab-3.1.6.tar.gz", hash = "sha256:6d2ada6a333861f33a1b555d3cb7b07aa9d1ab80f07997b3d0c43878a98c1174"},
 ]
 jupyterlab-pygments = [
     {file = "jupyterlab_pygments-0.1.2-py2.py3-none-any.whl", hash = "sha256:abfb880fd1561987efaefcb2d2ac75145d2a5d0139b1876d5be806e32f630008"},
@@ -1910,8 +1911,8 @@ jupyterlab-pygments = [
 jupyterlab-server = [
     {file = "jupyterlab_server-1.2.0-py3-none-any.whl", hash = "sha256:55d256077bf13e5bc9e8fbd5aac51bef82f6315111cec6b712b9a5ededbba924"},
     {file = "jupyterlab_server-1.2.0.tar.gz", hash = "sha256:5431d9dde96659364b7cc877693d5d21e7b80cea7ae3959ecc2b87518e5f5d8c"},
-    {file = "jupyterlab_server-2.6.2-py3-none-any.whl", hash = "sha256:ab568da1dcef2ffdfc9161128dc00b931aae94d6a94978b16f55330dcd1cb043"},
-    {file = "jupyterlab_server-2.6.2.tar.gz", hash = "sha256:6dc6e7d26600d110b862acbfaa4d1a2c5e86781008d139213896d96178c3accd"},
+    {file = "jupyterlab_server-2.7.0-py3-none-any.whl", hash = "sha256:244c815578c2fdcd341f01635e77d9f112efcbc92ba299e8c6243f870c84c609"},
+    {file = "jupyterlab_server-2.7.0.tar.gz", hash = "sha256:31457ef564febc42043bc539356c804f6f9144f602e2852150bf0820ed6d7e18"},
 ]
 lark-parser = [
     {file = "lark-parser-0.11.3.tar.gz", hash = "sha256:e29ca814a98bb0f81674617d878e5f611cb993c19ea47f22c80da3569425f9bd"},
@@ -2038,8 +2039,8 @@ nodeenv = [
     {file = "nodeenv-1.6.0.tar.gz", hash = "sha256:3ef13ff90291ba2a4a7a4ff9a979b63ffdd00a464dbe04acf0ea6471517a4c2b"},
 ]
 notebook = [
-    {file = "notebook-6.4.2-py3-none-any.whl", hash = "sha256:5ae23d7f831a5788e8bd51a0ba65c486db3bfd43e9db97a62330b6273e3175e3"},
-    {file = "notebook-6.4.2.tar.gz", hash = "sha256:ba9db5e5a9bd2d272b67e3de9143cca2be5125578f1c4f2902d7178ce2f0b4ff"},
+    {file = "notebook-6.4.3-py3-none-any.whl", hash = "sha256:b50eafa8208d5db966efd1caa4076b4dfc51815e02a805b32ecd717e9e6cc071"},
+    {file = "notebook-6.4.3.tar.gz", hash = "sha256:e6b6dfed36b00cf950f63c0d42e947c101d4258aec21624de62b9e0c11ed5c0d"},
 ]
 numpy = [
     {file = "numpy-1.19.5-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:cc6bd4fd593cb261332568485e20a0712883cf631f6f5e8e86a52caa8b2b50ff"},
@@ -2434,8 +2435,8 @@ sphinxcontrib-serializinghtml = [
     {file = "sphinxcontrib_serializinghtml-1.1.5-py2.py3-none-any.whl", hash = "sha256:352a9a00ae864471d3a7ead8d7d79f5fc0b57e8b3f95e9867eb9eb28999b92fd"},
 ]
 terminado = [
-    {file = "terminado-0.10.1-py3-none-any.whl", hash = "sha256:c89ace5bffd0e7268bdcf22526830eb787fd146ff9d78691a0528386f92b9ae3"},
-    {file = "terminado-0.10.1.tar.gz", hash = "sha256:89d5dac2f4e2b39758a0ff9a3b643707c95a020a6df36e70583b88297cd59cbe"},
+    {file = "terminado-0.11.0-py3-none-any.whl", hash = "sha256:221eef83e6a504894842f7dccfa971ca2e98ec22a8a9118577e5257527674b42"},
+    {file = "terminado-0.11.0.tar.gz", hash = "sha256:1e01183885f64c1bba3cf89a5a995ad4acfed4e5f00aebcce1bf7f089b0825a1"},
 ]
 testpath = [
     {file = "testpath-0.5.0-py3-none-any.whl", hash = "sha256:8044f9a0bab6567fc644a3593164e872543bb44225b0e24846e2c89237937589"},
@@ -2542,8 +2543,8 @@ urllib3 = [
     {file = "urllib3-1.26.6.tar.gz", hash = "sha256:f57b4c16c62fa2760b7e3d97c35b255512fb6b59a259730f36ba32ce9f8e342f"},
 ]
 virtualenv = [
-    {file = "virtualenv-20.7.1-py2.py3-none-any.whl", hash = "sha256:73863dc3be1efe6ee638e77495c0c195a6384ae7b15c561f3ceb2698ae7267c1"},
-    {file = "virtualenv-20.7.1.tar.gz", hash = "sha256:57bcb59c5898818bd555b1e0cfcf668bd6204bc2b53ad0e70a52413bd790f9e4"},
+    {file = "virtualenv-20.7.2-py2.py3-none-any.whl", hash = "sha256:e4670891b3a03eb071748c569a87cceaefbf643c5bac46d996c5a45c34aa0f06"},
+    {file = "virtualenv-20.7.2.tar.gz", hash = "sha256:9ef4e8ee4710826e98ff3075c9a4739e2cb1040de6a2a8d35db0055840dc96a0"},
 ]
 vulture = [
     {file = "vulture-2.3-py2.py3-none-any.whl", hash = "sha256:f39de5e6f1df1f70c3b50da54f1c8d494159e9ca3d01a9b89eac929600591703"},
@@ -2558,8 +2559,8 @@ webencodings = [
     {file = "webencodings-0.5.1.tar.gz", hash = "sha256:b36a1c245f2d304965eb4e0a82848379241dc04b865afcc4aab16748587e1923"},
 ]
 websocket-client = [
-    {file = "websocket-client-1.1.1.tar.gz", hash = "sha256:4cf754af7e3b3ba76589d49f9e09fd9a6c0aae9b799a89124d656009c01a261d"},
-    {file = "websocket_client-1.1.1-py2.py3-none-any.whl", hash = "sha256:8d07f155f8ed14ae3ced97bd7582b08f280bb1bfd27945f023ba2aceff05ab52"},
+    {file = "websocket-client-1.2.0.tar.gz", hash = "sha256:7665ba6c645989b28b61670874ab753e6929179e9fc90565ace6ac090f59c559"},
+    {file = "websocket_client-1.2.0-py2.py3-none-any.whl", hash = "sha256:d82a975bdd02216f7884cd18106a0d9896a9a9e8cc90f23fe8c81dc48da2f142"},
 ]
 wrapt = [
     {file = "wrapt-1.12.1.tar.gz", hash = "sha256:b62ffa81fb85f4332a4f609cab4ac40709470da05643a082ec1eb88e6d9b97d7"},
