@@ -19,8 +19,6 @@ Welcome to Saturation Gym documentation!
 
 Saturation Gym is an `OpenAI Gym`_ environment for saturation provers (like `PyRes`_).
 
-See :ref:dd
-
 How to install
 ***************
 
