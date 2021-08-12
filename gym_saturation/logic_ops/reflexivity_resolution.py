@@ -29,7 +29,7 @@ def reflexivity_resolution(
     r"""
     reflexivity resolution rule
 
-    .. math:: {\frac{\Gamma\cup\left\{s\ne t\right\}}{\left(\Gamma}\phi}}
+    .. math:: {\frac{\Gamma\cup\left\{s\ne t\right\}}{\left(\Gamma\right)\phi}}
 
     where
 

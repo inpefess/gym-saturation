@@ -31,7 +31,7 @@ def factoring(
     r"""
     positive factoring rule
 
-    .. math:: {\frac{\Gamma\cup\left\{L_1,L_2\right\}}{\left(\Gamma\cup\left\{L_1\right\}\phi}}\phi
+    .. math:: {\frac{\Gamma\cup\left\{L_1,L_2\right\}}{\left(\Gamma\cup\left\{L_1\right\}\right)\phi}}
 
     where
 

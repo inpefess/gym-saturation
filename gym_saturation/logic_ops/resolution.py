@@ -32,7 +32,7 @@ def resolution(
     r"""
     standard first-order resolution rule
 
-    .. math:: {\frac{\Gamma_1\cup\left\{L_1\right\},\Gamma_2\cup\left\{L_2\right\}}{\left(\Gamma_1\cup\Gamma_2\right)\phi}}\phi
+    .. math:: {\frac{\Gamma_1\cup\left\{L_1\right\},\Gamma_2\cup\left\{L_2\right\}}{\left(\Gamma_1\cup\Gamma_2\right)\phi}}
 
     where
 

@@ -16,7 +16,7 @@ limitations under the License.
 import json
 import os
 import random
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from gym import Env
 
@@ -36,6 +36,7 @@ from gym_saturation.parsing.json_grammar import ClauseJSONEncoder
 from gym_saturation.parsing.tptp_parser import TPTPParser
 
 INFERRED_CLAUSES_PREFIX = "inferred_"
+STATE_DIFF_UPDATED = "state_diff_updated"
 
 
 class SaturationEnv(Env):
@@ -143,7 +144,9 @@ class SaturationEnv(Env):
                     clause.processed = False
                     self._state.append(clause)
 
-    def _do_deductions(self, given_clause: Clause) -> None:
+    def _do_deductions(self, action: int) -> Dict[int, Clause]:
+        state_len_before = len(self._state)
+        given_clause = self._state[action]
         if not given_clause.processed:
             unprocessed_clauses = [
                 clause for clause in self._state if clause.processed
@@ -178,6 +181,13 @@ class SaturationEnv(Env):
                     self._inference_count,
                 )
             )
+        return dict(
+            [
+                (i + state_len_before, clause)
+                for i, clause in enumerate(self._state[state_len_before:])
+            ]
+            + [(action, self._state[action])]
+        )
 
     def step(self, action: int) -> Tuple[list, float, bool, dict]:
         if action not in self.action_space:
@@ -189,9 +199,9 @@ class SaturationEnv(Env):
                 self.state,
                 1.0,
                 True,
-                dict(),
+                {STATE_DIFF_UPDATED: {action: self._state[action]}},
             )
-        self._do_deductions(self._state[action])
+        updated = self._do_deductions(action)
         self._state[action].processed = True
         if (
             min(
@@ -202,16 +212,11 @@ class SaturationEnv(Env):
             )
             or self._step_count >= self.step_limit
         ):
-            return self.state, 0.0, True, dict()
+            return self.state, 0.0, True, {STATE_DIFF_UPDATED: updated}
         self.action_space = [
             i for i, clause in enumerate(self._state) if not clause.processed
         ]
-        return (
-            self.state,
-            0.0,
-            False,
-            dict(),
-        )
+        return (self.state, 0.0, False, {STATE_DIFF_UPDATED: updated})
 
     # pylint: disable=inconsistent-return-statements
     def render(self, mode="human"):

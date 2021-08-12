@@ -40,7 +40,7 @@ def paramodulation(
     r"""
     binary paramodulation rule
 
-    .. math:: {\frac{\Gamma_1\cup\left\{s\approx t\right\},\Gamma_2\cup \left\{L\left[r\right]\right\}}{\left(\left\{L\left[t\right]\right\}\cup\Gamma_1\cup\Gamma_2\right)\phi}}\phi
+    .. math:: {\frac{\Gamma_1\cup\left\{s\approx t\right\},\Gamma_2\cup \left\{L\left[r\right]\right\}}{\left(\left\{L\left[t\right]\right\}\cup\Gamma_1\cup\Gamma_2\right)\phi}}
 
     where
 
