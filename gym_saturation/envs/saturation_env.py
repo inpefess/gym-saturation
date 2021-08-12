@@ -189,7 +189,14 @@ class SaturationEnv(Env):
                 )
                 for i, clause in enumerate(self._state[state_len_before:])
             ]
-            + [(action, self._state[action])]
+            + [
+                (
+                    action,
+                    json.loads(
+                        json.dumps(self._state[action], cls=ClauseJSONEncoder)
+                    ),
+                )
+            ]
         )
 
     def step(self, action: int) -> Tuple[list, float, bool, dict]:
