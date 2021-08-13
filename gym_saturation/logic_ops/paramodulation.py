@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from copy import deepcopy
 from typing import List, Tuple
 
 from gym_saturation.grammar import Clause, Literal, Term
@@ -23,11 +22,11 @@ from gym_saturation.logic_ops.unification import (
 )
 from gym_saturation.logic_ops.utils import (
     TermSelfReplace,
-    deduplicate,
     proposition_length,
     replace_subterm_by_index,
     subterm_by_index,
 )
+from gym_saturation.utils import deduplicate, pickle_copy
 
 
 def paramodulation(
@@ -67,7 +66,7 @@ def paramodulation(
             subterm_by_index(literal_two.atom, r_position),
         ]
     )
-    new_atom = deepcopy(literal_two.atom)
+    new_atom = pickle_copy(literal_two.atom)
     replace_subterm_by_index(
         new_atom,
         r_position,
@@ -75,8 +74,8 @@ def paramodulation(
     )
     new_literals = deduplicate(
         [Literal(literal_two.negated, new_atom)]
-        + deepcopy(clause_one.literals)
-        + deepcopy(clause_two.literals)
+        + pickle_copy(clause_one.literals)
+        + pickle_copy(clause_two.literals)
     )
     result = Clause(new_literals)
     for substitution in substitutions:

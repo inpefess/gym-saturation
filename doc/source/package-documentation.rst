@@ -55,6 +55,15 @@ Clause
 .. autoclass:: gym_saturation.grammar.Clause
    :members:
 
+Utils
+******
+
+Some general utils useful for different submodules.
+
+.. autofunction:: gym_saturation.utils.deduplicate
+.. autofunction:: gym_saturation.utils.pickle_copy
+
+   
 Logic Operations
 *****************
 
@@ -91,7 +100,6 @@ Reflexivity Resolution
 
 utils
 ======
-.. autofunction:: gym_saturation.logic_ops.utils.deduplicate
 .. autofunction:: gym_saturation.logic_ops.utils.is_subproposition
 .. autofunction:: gym_saturation.logic_ops.utils.get_variable_list
 .. autofunction:: gym_saturation.logic_ops.utils.reindex_variables

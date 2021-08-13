@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from copy import deepcopy
 from typing import List
 
 from gym_saturation import grammar
@@ -21,6 +20,7 @@ from gym_saturation.logic_ops.unification import (
     NonUnifiableError,
     most_general_unifier,
 )
+from gym_saturation.utils import pickle_copy
 
 
 def factoring(
@@ -57,7 +57,7 @@ def factoring(
             f"factoring is not possible for {literal_one} and {literal_two}"
         )
     substitutions = most_general_unifier([literal_one.atom, literal_two.atom])
-    new_literals = deepcopy(given_clause.literals + [literal_one])
+    new_literals = pickle_copy(given_clause.literals + [literal_one])
     result = grammar.Clause(new_literals)
     for substitution in substitutions:
         result = substitution.substitute_in_clause(result)

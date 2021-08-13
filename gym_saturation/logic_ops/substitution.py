@@ -13,11 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from copy import deepcopy
 from dataclasses import dataclass
 from typing import Union
 
 from gym_saturation import grammar
+from gym_saturation.utils import pickle_copy
 
 
 @dataclass
@@ -54,8 +54,8 @@ class Substitution:
                 ],
             )
         if term.name == self.variable.name:
-            return deepcopy(self.term)
-        return deepcopy(term)
+            return pickle_copy(self.term)
+        return pickle_copy(term)
 
     def _substitute_in_predicate(
         self, predicate: grammar.Predicate
@@ -83,6 +83,6 @@ class Substitution:
                     self._substitute_in_predicate(literal.atom),
                 )
             )
-        new_clause = deepcopy(clause)
+        new_clause: grammar.Clause = pickle_copy(clause)
         new_clause.literals = literals
         return new_clause

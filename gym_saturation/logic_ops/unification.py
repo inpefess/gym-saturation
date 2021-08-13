@@ -17,7 +17,8 @@ from typing import List, Optional
 
 from gym_saturation.grammar import Function, Predicate, Proposition, Variable
 from gym_saturation.logic_ops.substitution import Substitution
-from gym_saturation.logic_ops.utils import deduplicate, is_subproposition
+from gym_saturation.logic_ops.utils import is_subproposition
+from gym_saturation.utils import deduplicate
 
 
 class NonUnifiableError(Exception):

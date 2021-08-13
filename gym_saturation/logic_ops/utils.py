@@ -13,8 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from copy import deepcopy
-from typing import Any, List, Union
+from typing import List, Union
 
 from gym_saturation.grammar import (
     Clause,
@@ -25,20 +24,7 @@ from gym_saturation.grammar import (
     Variable,
 )
 from gym_saturation.logic_ops.substitution import Substitution
-
-
-def deduplicate(a_list: List[Any]) -> List[Any]:
-    """
-    deduplicate a list
-
-    :param a_list: a list of possibly repeating items
-    :returns: a list of unique items
-    """
-    new_list = list()
-    for item in a_list:
-        if item not in new_list:
-            new_list.append(item)
-    return new_list
+from gym_saturation.utils import deduplicate, pickle_copy
 
 
 def is_subproposition(one: Proposition, two: Proposition) -> bool:
@@ -223,7 +209,7 @@ def subterm_by_index(atom: Proposition, index: int) -> Term:
     if not isinstance(atom, Variable):
         for argument in atom.arguments:
             try:
-                return deepcopy(
+                return pickle_copy(
                     subterm_by_index(argument, index - subterm_length)
                 )
             except NoSubtermFound as error:

@@ -13,10 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from copy import deepcopy
 from typing import List, Tuple
 
-from gym_saturation import grammar
+from gym_saturation import grammar, utils
 from gym_saturation.logic_ops.unification import (
     NonUnifiableError,
     most_general_unifier,
@@ -46,7 +45,7 @@ def reflexivity_resolution(
     :returns: a new clause --- the reflexivity resolution result
     """
     substitutions = most_general_unifier([a_literal[0], a_literal[1]])
-    new_literals = deepcopy(given_clause.literals)
+    new_literals = utils.pickle_copy(given_clause.literals)
     result = grammar.Clause(new_literals)
     for substitution in substitutions:
         result = substitution.substitute_in_clause(result)
