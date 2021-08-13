@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import json
 import os
 import random
 from typing import Dict, List, Optional, Tuple
@@ -32,7 +31,7 @@ from gym_saturation.logic_ops.utils import (
     is_tautology,
     reindex_variables,
 )
-from gym_saturation.parsing.json_grammar import ClauseJSONEncoder
+from gym_saturation.parsing.json_grammar import clause_to_dict
 from gym_saturation.parsing.tptp_parser import TPTPParser
 
 INFERRED_CLAUSES_PREFIX = "inferred_"
@@ -183,20 +182,10 @@ class SaturationEnv(Env):
             )
         return dict(
             [
-                (
-                    i + state_len_before,
-                    json.loads(json.dumps(clause, cls=ClauseJSONEncoder)),
-                )
+                (i + state_len_before, clause_to_dict(clause))
                 for i, clause in enumerate(self._state[state_len_before:])
             ]
-            + [
-                (
-                    action,
-                    json.loads(
-                        json.dumps(self._state[action], cls=ClauseJSONEncoder)
-                    ),
-                )
-            ]
+            + [(action, clause_to_dict(self._state[action]))]
         )
 
     def step(self, action: int) -> Tuple[list, float, bool, dict]:
@@ -209,7 +198,11 @@ class SaturationEnv(Env):
                 self.state,
                 1.0,
                 True,
-                {STATE_DIFF_UPDATED: {action: self._state[action]}},
+                {
+                    STATE_DIFF_UPDATED: {
+                        action: clause_to_dict(self._state[action])
+                    }
+                },
             )
         updated = self._do_deductions(action)
         self._state[action].processed = True
@@ -239,7 +232,7 @@ class SaturationEnv(Env):
         """
         :returns: environment state in Python ``dict`` format
         """
-        return json.loads(json.dumps(self._state, cls=ClauseJSONEncoder))
+        return clause_to_dict(self._state)
 
     @property
     def problem(self) -> str:

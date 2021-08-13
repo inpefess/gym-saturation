@@ -123,6 +123,7 @@ JSON Encoder
 =============
 .. autoclass:: gym_saturation.parsing.json_grammar.ClauseJSONEncoder
 .. autofunction:: gym_saturation.parsing.json_grammar.dict_to_clause
+.. autofunction:: gym_saturation.parsing.json_grammar.clause_to_dict
 
 TPTP Parser
 ============

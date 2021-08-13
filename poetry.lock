@@ -1576,11 +1576,15 @@ python-versions = "*"
 
 [[package]]
 name = "websocket-client"
-version = "1.2.0"
+version = "1.2.1"
 description = "WebSocket client for Python with low level API options"
 category = "dev"
 optional = false
 python-versions = ">=3.6"
+
+[package.extras]
+optional = ["python-socks", "wsaccel"]
+test = ["websockets"]
 
 [[package]]
 name = "wrapt"
@@ -2559,8 +2563,8 @@ webencodings = [
     {file = "webencodings-0.5.1.tar.gz", hash = "sha256:b36a1c245f2d304965eb4e0a82848379241dc04b865afcc4aab16748587e1923"},
 ]
 websocket-client = [
-    {file = "websocket-client-1.2.0.tar.gz", hash = "sha256:7665ba6c645989b28b61670874ab753e6929179e9fc90565ace6ac090f59c559"},
-    {file = "websocket_client-1.2.0-py2.py3-none-any.whl", hash = "sha256:d82a975bdd02216f7884cd18106a0d9896a9a9e8cc90f23fe8c81dc48da2f142"},
+    {file = "websocket-client-1.2.1.tar.gz", hash = "sha256:8dfb715d8a992f5712fff8c843adae94e22b22a99b2c5e6b0ec4a1a981cc4e0d"},
+    {file = "websocket_client-1.2.1-py2.py3-none-any.whl", hash = "sha256:0133d2f784858e59959ce82ddac316634229da55b498aac311f1620567a710ec"},
 ]
 wrapt = [
     {file = "wrapt-1.12.1.tar.gz", hash = "sha256:b62ffa81fb85f4332a4f609cab4ac40709470da05643a082ec1eb88e6d9b97d7"},
