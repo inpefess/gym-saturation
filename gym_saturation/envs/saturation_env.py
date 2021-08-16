@@ -53,47 +53,69 @@ class SaturationEnv(Env):
     ...     os.path.join(tptp_folder, "Problems", "*", "*1-1.p")
     ... )
     >>> env = SaturationEnv(3, problem_list)
-    >>> # there is nothing non-deterministic here, but the seed can be set
+
+    there is nothing non-deterministic here, but the seed can be set
+
     >>> env.seed(0)
     0
-    >>> # initially, there are only 4 unprocessed clauses
-    >>> # problem is not chosen yet
+
+    initially, there are only 4 unprocessed clauses problem is not chosen yet
+
     >>> env.problem
     Traceback (most recent call last):
      ...
     ValueError: Problem no defined. Run env.reset() first
     >>> len(env.reset())
     4
-    >>> # now the problem is defined
+
+    now the problem is defined
+
     >>> print(os.path.basename(env.problem))
     TST001-1.p
-    >>> # the test theorem can be proved in three steps
-    >>> env.step(0)[1:3]
-    (0.0, False)
-    >>> # repeating actions is not allowed
+
+    the test theorem can be proved in three steps
+
+    >>> next_state, reward, done, info = env.step(0)
+
+    ``info`` dict contains the state diff, for example
+
+    >>> info["state_diff_updated"][0]["processed"]
+    True
+
+    repeating actions is not allowed
+
     >>> env.step(0)
     Traceback (most recent call last):
      ...
     ValueError: action 0 is not valid
-    >>> # there is no reward until the end of an episode
+
+    there is no reward until the end of an episode
+
     >>> env.step(1)[1:3]
     (0.0, False)
-    >>> # only ``ansi`` rendering method is implemented
+
+    only ``ansi`` rendering method is implemented
+
     >>> len(env.render("ansi"))
     1420
     >>> env.render()
     Traceback (most recent call last):
      ...
     NotImplementedError
-    >>> # if a proof is found, then reward is ``+1``
+
+    if a proof is found, then reward is ``+1``
+
     >>> env.step(4)[1:3]
     (1.0, True)
     >>> env = SaturationEnv(1, problem_list)
-    >>> # one can also choose a particular problem file during reset
+
+    one can also choose a particular problem file during reset
+
     >>> problem = os.path.join(tptp_folder, "Problems", "TST", "TST001-1.p")
     >>> result = env.reset(problem)
-    >>> # if the proof is not found after a fixed number of steps
-    >>> # the reward is ``0``
+
+    if the proof is not found after a fixed number of steps the reward is ``0``
+
     >>> env.step(0)[1:3]
     (0.0, True)
     """
@@ -180,6 +202,7 @@ class SaturationEnv(Env):
                     self._inference_count,
                 )
             )
+        self._state[action].processed = True
         return dict(
             [
                 (i + state_len_before, clause_to_dict(clause))
@@ -205,7 +228,6 @@ class SaturationEnv(Env):
                 },
             )
         updated = self._do_deductions(action)
-        self._state[action].processed = True
         if (
             min(
                 [
