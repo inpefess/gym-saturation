@@ -64,7 +64,7 @@ class SaturationEnv(Env):
     >>> env.problem
     Traceback (most recent call last):
      ...
-    ValueError: Problem no defined. Run env.reset() first
+    ValueError: Problem not defined. Run env.reset() first
     >>> len(env.reset())
     4
 
@@ -135,10 +135,9 @@ class SaturationEnv(Env):
 
     def _init_clauses(self):
         tptp_folder = os.path.join(os.path.dirname(self._problem), "..", "..")
-        clauses = TPTPParser().parse(
-            self._problem,
-            tptp_folder,
-        )
+        with open(self._problem, "r") as problem_file:
+            problem_text = problem_file.read()
+        clauses = TPTPParser().parse(problem_text, tptp_folder)
         for clause in clauses:
             clause.birth_step = 0
             clause.inference_parents = []
@@ -263,7 +262,7 @@ class SaturationEnv(Env):
         """
         if self._problem is not None:
             return self._problem
-        raise ValueError("Problem no defined. Run env.reset() first")
+        raise ValueError("Problem not defined. Run env.reset() first")
 
     def seed(self, seed=None):
         random.seed(seed)

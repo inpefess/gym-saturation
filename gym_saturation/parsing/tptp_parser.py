@@ -33,9 +33,13 @@ else:
 class TPTPParser:
     """
     >>> tptp_parser = TPTPParser()
-    >>> tptp_parser.parse(
+    >>> tptp_text = (
     ...     files("gym_saturation")
-    ...     .joinpath("resources/TPTP-mock/Problems/TST/TST001-1.p"),
+    ...     .joinpath("resources/TPTP-mock/Problems/TST/TST001-1.p")
+    ...     .read_text()
+    ... )
+    >>> tptp_parser.parse(
+    ...     tptp_text,
     ...     files("gym_saturation").joinpath("resources/TPTP-mock")
     ... )
     [Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[Function(name='test_constant', arguments=[])]))], label='test_formula', inference_parents=['one', 'two'], inference_rule='resolution', processed=None, birth_step=None), Clause(literals=[Literal(negated=True, atom=Predicate(name='this_is_a_test_case', arguments=[Function(name='test_constant', arguments=[])]))], label='test_formula', inference_parents=None, inference_rule=None, processed=None, birth_step=None), Clause(literals=[Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='test_constant', arguments=[]), Variable(name='X')]))], label='test_axiom', inference_parents=None, inference_rule=None, processed=None, birth_step=None), Clause(literals=[Literal(negated=True, atom=Predicate(name='=', arguments=[Function(name='test_constant', arguments=[]), Function(name='0', arguments=[])]))], label='test_axiom_2', inference_parents=None, inference_rule=None, processed=None, birth_step=None)]
@@ -49,17 +53,16 @@ class TPTPParser:
             start="tptp_file",
         )
 
-    def parse(self, filename: str, tptp_folder: str) -> List[Clause]:
+    def parse(self, tptp_text: str, tptp_folder: str) -> List[Clause]:
         """
-        recursively parse a TPTP problem (or axioms) file
+        recursively parse a string containing a TPTP problem
 
-        :param filename: a name of a problem (or axioms) file
+        :param tptp_text: a name of a problem (or axioms) file
         :param parser: a ``Lark`` parser
         :param tptp_folder: a folder containing TPTP database
         :returns: a list of clauses (including those of the axioms)
         """
-        with open(filename, "r") as problem_file:
-            problem_tree = self.parser.parse(problem_file.read())
+        problem_tree = self.parser.parse(tptp_text)
         clauses = [
             CNFParser().transform(cnf_formula)
             for cnf_formula in problem_tree.find_data("cnf_annotated")
@@ -67,12 +70,11 @@ class TPTPParser:
         for include in problem_tree.find_data("include"):
             token = include.children[0]
             if isinstance(token, Token):
-                clauses.extend(
-                    self.parse(
-                        os.path.join(
-                            tptp_folder, token.value.replace("'", "")
-                        ),
-                        tptp_folder,
+                with open(
+                    os.path.join(tptp_folder, token.value.replace("'", "")),
+                    "r",
+                ) as included_file:
+                    clauses.extend(
+                        self.parse(included_file.read(), tptp_folder)
                     )
-                )
         return clauses
