@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from itertools import chain
 from typing import List, Union
 
 from gym_saturation.grammar import (
@@ -273,3 +274,47 @@ def replace_subterm_by_index(
             except NoSubtermFound as error:
                 subterm_length += error.args[0]
     raise NoSubtermFound(subterm_length)
+
+
+def reduce_to_proof(clauses: List[Clause]) -> List[Clause]:
+    """
+    leave only clauses belonging to the refutational proof
+
+    >>> reduce_to_proof([Clause([])])
+    Traceback (most recent call last):
+     ...
+    ValueError: wrong refutational proof
+    >>> state = [Clause([], label="one", processed=True)]
+    >>> reduce_to_proof(state) == state
+    True
+
+    :param clauses: a list of clauses with labels and inference records
+    :returns: the reduced list of clauses
+    """
+    state_dict = {clause.label: clause for clause in clauses}
+    empty_clauses = [
+        clause
+        for label, clause in state_dict.items()
+        if clause.literals == [] and clause.processed
+    ]
+    if len(empty_clauses) == 1:
+        if empty_clauses[0].label is not None:
+            reduced = []
+            new_reduced = [empty_clauses[0]]
+            while len(new_reduced) > 0:
+                reduced += new_reduced
+                new_reduced = [
+                    state_dict[label]
+                    for label in chain(
+                        *[
+                            (
+                                []
+                                if clause.inference_parents is None
+                                else clause.inference_parents
+                            )
+                            for clause in new_reduced
+                        ]
+                    )
+                ]
+            return reduced
+    raise ValueError("wrong refutational proof")
