@@ -1,3 +1,4 @@
 gym
 lark
 sphinx-autodoc-typehints
+importlib_resources
