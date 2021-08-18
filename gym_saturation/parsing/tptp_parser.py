@@ -19,7 +19,7 @@ from typing import List
 
 from lark import Lark, Token
 
-from gym_saturation.grammar import Clause
+from gym_saturation.grammar import Clause, Function, Term
 from gym_saturation.parsing.cnf_parser import CNFParser
 
 if sys.version_info.major == 3 and sys.version_info.minor == 9:
@@ -78,3 +78,52 @@ class TPTPParser:
                         self.parse(included_file.read(), tptp_folder)
                     )
         return clauses
+
+
+def _term_to_tptp(term: Term) -> str:
+    if isinstance(term, Function):
+        arguments = [_term_to_tptp(argument) for argument in term.arguments]
+        if arguments != []:
+            return f"{term.name}({','.join(arguments)})"
+    return term.name
+
+
+def clause_to_tptp(clause: Clause) -> str:
+    """
+    >>> from gym_saturation.grammar import Literal, Predicate, Variable
+    >>> clause = Clause([Literal(True, Predicate("this_is_a_test_case", [Function("f", [Variable("X")])]))], inference_rule="resolution", inference_parents=["one", "two"])
+    >>> clause_to_tptp(clause)
+    Traceback (most recent call last):
+     ...
+    ValueError: label is empty!
+    >>> clause.label = "clause"
+    >>> TPTPParser().parse(clause_to_tptp(clause), "") == [clause]
+    True
+
+    :param clause: a logic clause object
+    :returns: a TPTP representation of ``clause``
+    """
+    if clause.label is None:
+        raise ValueError("label is empty!")
+    res = f"cnf({clause.label}, hypothesis, "
+    for literal in clause.literals:
+        res += ("~" if literal.negated else "") + (
+            literal.atom.name
+            + "("
+            + ",".join(
+                [_term_to_tptp(term) for term in literal.atom.arguments]
+            )
+            + ") |"
+        )
+    if res[-1] == "|":
+        res = res[:-1]
+    if (
+        clause.inference_parents is not None
+        and clause.inference_rule is not None
+    ):
+        res += (
+            f", inference({clause.inference_rule}, [], ["
+            + ",".join(clause.inference_parents)
+            + "])"
+        )
+    return res + ")."
