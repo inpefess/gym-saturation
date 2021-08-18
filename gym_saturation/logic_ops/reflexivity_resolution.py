@@ -64,9 +64,9 @@ def all_possible_reflexivity_resolvents(
     >>> all_possible_reflexivity_resolvents(grammar.Clause([grammar.Literal(False, Predicate("this_is_a_test_case", []))]), "inferred_", 1)
     Traceback (most recent call last):
      ...
-    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, processed=None, birth_step=None)
+    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, inference_rule=None, processed=None, birth_step=None)
     >>> all_possible_reflexivity_resolvents(grammar.Clause([grammar.Literal(False, Predicate("p", [Variable("X")])), grammar.Literal(False, Predicate("=", [Variable("X"), Function("g", [])])), grammar.Literal(True, Predicate("!=", [Function("f", []), Function("g", [])]))], label="this_is_a_test_case"), "inferred_", 0)
-    [Clause(literals=[Literal(negated=False, atom=Predicate(name='p', arguments=[Function(name='g', arguments=[])])), Literal(negated=True, atom=Predicate(name='!=', arguments=[Function(name='f', arguments=[]), Function(name='g', arguments=[])]))], label='inferred_0', inference_parents=['this_is_a_test_case'], processed=None, birth_step=None)]
+    [Clause(literals=[Literal(negated=False, atom=Predicate(name='p', arguments=[Function(name='g', arguments=[])])), Literal(negated=True, atom=Predicate(name='!=', arguments=[Function(name='f', arguments=[]), Function(name='g', arguments=[])]))], label='inferred_0', inference_parents=['this_is_a_test_case'], inference_rule='reflexivity_resolution', processed=None, birth_step=None)]
 
     :param given_clause: a new clause which should be combined with all the
         processed ones
@@ -105,6 +105,7 @@ def all_possible_reflexivity_resolvents(
         grammar.Clause(
             literals=reflexivity_resolvent.literals,
             inference_parents=[given_clause.label],
+            inference_rule="reflexivity_resolution",
             label=label_prefix + str(label_index_base + ord_num),
         )
         for ord_num, reflexivity_resolvent in enumerate(reflexivity_resolvents)

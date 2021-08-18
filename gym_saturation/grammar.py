@@ -61,5 +61,6 @@ class Clause:
     literals: List[Literal]
     label: Optional[str] = None
     inference_parents: Optional[List[str]] = None
+    inference_rule: Optional[str] = None
     processed: Optional[bool] = None
     birth_step: Optional[int] = None

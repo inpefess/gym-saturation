@@ -76,9 +76,9 @@ def all_possible_factors(
     >>> all_possible_factors(grammar.Clause([grammar.Literal(False, Predicate("this_is_a_test_case", []))]), "inferred_", 0)
     Traceback (most recent call last):
      ...
-    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, processed=None, birth_step=None)
+    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, inference_rule=None, processed=None, birth_step=None)
     >>> all_possible_factors(grammar.Clause([grammar.Literal(False, Predicate("p", [Function("f", [])])), grammar.Literal(False, Predicate("p", [Variable("X")])), grammar.Literal(False, Predicate("q", []))], label="this_is_a_test_case"), "inferred_", 0)
-    [Clause(literals=[Literal(negated=False, atom=Predicate(name='q', arguments=[])), Literal(negated=False, atom=Predicate(name='p', arguments=[Function(name='f', arguments=[])]))], label='inferred_0', inference_parents=['this_is_a_test_case'], processed=None, birth_step=None)]
+    [Clause(literals=[Literal(negated=False, atom=Predicate(name='q', arguments=[])), Literal(negated=False, atom=Predicate(name='p', arguments=[Function(name='f', arguments=[])]))], label='inferred_0', inference_parents=['this_is_a_test_case'], inference_rule='factoring', processed=None, birth_step=None)]
 
     :param clauses: a list of (processed) clauses
     :param given_clause: a new clause which should be combined with all the
@@ -115,6 +115,7 @@ def all_possible_factors(
         grammar.Clause(
             literals=factor.literals,
             inference_parents=[given_clause.label],
+            inference_rule="factoring",
             label=label_prefix + str(starting_label_index + ord_num),
         )
         for ord_num, factor in enumerate(factors)

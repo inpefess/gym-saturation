@@ -497,7 +497,7 @@
 <sources>              :== <source> | <source>,<sources>
 %----Only a <dag_source> can be a <name>, i.e., derived formulae can be
 %----identified by a <name> or an <inference_record>
-<dag_source>           :== <name> | <inference_record>
+<dag_source>           :==  <inference_record> | <name>
 <inference_record>     :== inference(<inference_rule>,<useful_info>,
                            <inference_parents>)
 <inference_rule>       :== <atomic_word>

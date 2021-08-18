@@ -32,7 +32,7 @@ from gym_saturation.logic_ops.utils import (
     reindex_variables,
 )
 from gym_saturation.parsing.json_grammar import clause_to_dict
-from gym_saturation.parsing.tptp_parser import TPTPParser
+from gym_saturation.parsing.tptp_parser import TPTPParser, clause_to_tptp
 
 INFERRED_CLAUSES_PREFIX = "inferred_"
 STATE_DIFF_UPDATED = "state_diff_updated"
@@ -59,12 +59,12 @@ class SaturationEnv(Env):
     >>> env.seed(0)
     0
 
-    initially, there are only 4 unprocessed clauses problem is not chosen yet
+    problem is not chosen yet
 
     >>> env.problem
     Traceback (most recent call last):
      ...
-    ValueError: Problem no defined. Run env.reset() first
+    ValueError: Problem not defined. Run env.reset() first
     >>> len(env.reset())
     4
 
@@ -72,6 +72,27 @@ class SaturationEnv(Env):
 
     >>> print(os.path.basename(env.problem))
     TST001-1.p
+
+    one can look at the current state in TPTP format
+
+    >>> print(env.render())
+    cnf(test_formula, hypothesis, this_is_a_test_case(test_constant) , inference(resolution, [], [])).
+    cnf(test_formula, hypothesis, ~this_is_a_test_case(test_constant) ).
+    cnf(test_axiom, hypothesis, =(test_constant,X0) ).
+    cnf(test_axiom_2, hypothesis, ~=(test_constant,0) ).
+
+    ``ansi`` mode returns a JSON representation of the state
+    it should be more easily parsable than TPTP, although less human-friendly
+
+    >>> env.render("ansi")[:73]
+    "[{'class': 'Clause', 'literals': [{'class': 'Literal', 'negated': False, "
+
+    other modes are not implemented yet
+
+    >>> env.render(mode="rgb_array")
+    Traceback (most recent call last):
+     ...
+    NotImplementedError
 
     the test theorem can be proved in three steps
 
@@ -93,15 +114,6 @@ class SaturationEnv(Env):
 
     >>> env.step(1)[1:3]
     (0.0, False)
-
-    only ``ansi`` rendering method is implemented
-
-    >>> len(env.render("ansi"))
-    1420
-    >>> env.render()
-    Traceback (most recent call last):
-     ...
-    NotImplementedError
 
     if a proof is found, then reward is ``+1``
 
@@ -135,10 +147,9 @@ class SaturationEnv(Env):
 
     def _init_clauses(self):
         tptp_folder = os.path.join(os.path.dirname(self._problem), "..", "..")
-        clauses = TPTPParser().parse(
-            self._problem,
-            tptp_folder,
-        )
+        with open(self._problem, "r") as problem_file:
+            problem_text = problem_file.read()
+        clauses = TPTPParser().parse(problem_text, tptp_folder)
         for clause in clauses:
             clause.birth_step = 0
             clause.inference_parents = []
@@ -247,6 +258,10 @@ class SaturationEnv(Env):
     def render(self, mode="human"):
         if mode == "ansi":
             return str(self.state)
+        if mode == "human":
+            return "\n".join(
+                [clause_to_tptp(clause) for clause in self._state]
+            )
         super().render(mode=mode)
 
     @property
@@ -263,7 +278,7 @@ class SaturationEnv(Env):
         """
         if self._problem is not None:
             return self._problem
-        raise ValueError("Problem no defined. Run env.reset() first")
+        raise ValueError("Problem not defined. Run env.reset() first")
 
     def seed(self, seed=None):
         random.seed(seed)
