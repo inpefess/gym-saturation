@@ -42,7 +42,7 @@ class TPTPParser:
     ...     tptp_text,
     ...     files("gym_saturation").joinpath("resources/TPTP-mock")
     ... )
-    [Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[Function(name='test_constant', arguments=[])]))], label='test_formula', inference_parents=['one', 'two'], inference_rule='resolution', processed=None, birth_step=None), Clause(literals=[Literal(negated=True, atom=Predicate(name='this_is_a_test_case', arguments=[Function(name='test_constant', arguments=[])]))], label='test_formula', inference_parents=None, inference_rule=None, processed=None, birth_step=None), Clause(literals=[Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='test_constant', arguments=[]), Variable(name='X')]))], label='test_axiom', inference_parents=None, inference_rule=None, processed=None, birth_step=None), Clause(literals=[Literal(negated=True, atom=Predicate(name='=', arguments=[Function(name='test_constant', arguments=[]), Function(name='0', arguments=[])]))], label='test_axiom_2', inference_parents=None, inference_rule=None, processed=None, birth_step=None)]
+    [Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[Function(name='test_constant', arguments=[])]))], label='this_is_a_test_case_1', inference_parents=['one', 'two'], inference_rule='resolution', processed=None, birth_step=None), Clause(literals=[Literal(negated=True, atom=Predicate(name='this_is_a_test_case', arguments=[Function(name='test_constant', arguments=[])]))], label='this_is_a_test_case_2', inference_parents=None, inference_rule=None, processed=None, birth_step=None), Clause(literals=[Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='test_constant', arguments=[]), Variable(name='X')]))], label='test_axiom', inference_parents=None, inference_rule=None, processed=None, birth_step=None), Clause(literals=[Literal(negated=True, atom=Predicate(name='=', arguments=[Function(name='test_constant', arguments=[]), Function(name='0', arguments=[])]))], label='test_axiom_2', inference_parents=None, inference_rule=None, processed=None, birth_step=None)]
     """
 
     def __init__(self):
@@ -91,20 +91,13 @@ def _term_to_tptp(term: Term) -> str:
 def clause_to_tptp(clause: Clause) -> str:
     """
     >>> from gym_saturation.grammar import Literal, Predicate, Variable
-    >>> clause = Clause([Literal(True, Predicate("this_is_a_test_case", [Function("f", [Variable("X")])]))], inference_rule="resolution", inference_parents=["one", "two"])
-    >>> clause_to_tptp(clause)
-    Traceback (most recent call last):
-     ...
-    ValueError: label is empty!
-    >>> clause.label = "clause"
+    >>> clause = Clause([Literal(True, Predicate("this_is_a_test_case", [Function("f", [Variable("X")])]))], inference_rule="resolution", inference_parents=["one", "two"], label="clause")
     >>> TPTPParser().parse(clause_to_tptp(clause), "") == [clause]
     True
 
     :param clause: a logic clause object
     :returns: a TPTP representation of ``clause``
     """
-    if clause.label is None:
-        raise ValueError("label is empty!")
     res = f"cnf({clause.label}, hypothesis, "
     for literal in clause.literals:
         res += ("~" if literal.negated else "") + (
@@ -117,6 +110,8 @@ def clause_to_tptp(clause: Clause) -> str:
         )
     if res[-1] == "|":
         res = res[:-1]
+    if clause.literals == []:
+        res += "$false"
     if (
         clause.inference_parents is not None
         and clause.inference_rule is not None

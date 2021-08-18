@@ -29,6 +29,7 @@ from gym_saturation.logic_ops.resolution import all_possible_resolvents
 from gym_saturation.logic_ops.utils import (
     clause_in_a_list,
     is_tautology,
+    reduce_to_proof,
     reindex_variables,
 )
 from gym_saturation.parsing.json_grammar import clause_to_dict
@@ -76,8 +77,8 @@ class SaturationEnv(Env):
     one can look at the current state in TPTP format
 
     >>> print(env.render())
-    cnf(test_formula, hypothesis, this_is_a_test_case(test_constant) , inference(resolution, [], [])).
-    cnf(test_formula, hypothesis, ~this_is_a_test_case(test_constant) ).
+    cnf(this_is_a_test_case_1, hypothesis, this_is_a_test_case(test_constant) ).
+    cnf(this_is_a_test_case_2, hypothesis, ~this_is_a_test_case(test_constant) ).
     cnf(test_axiom, hypothesis, =(test_constant,X0) ).
     cnf(test_axiom_2, hypothesis, ~=(test_constant,0) ).
 
@@ -119,6 +120,13 @@ class SaturationEnv(Env):
 
     >>> env.step(4)[1:3]
     (1.0, True)
+
+    TSTP proof is now available (one can add ``include`` directive before it
+    for validation purposes)
+
+    >>> print(env.tstp_proof)
+    cnf(inferred_0, hypothesis, $false, inference(resolution, [], [this_is_a_test_case_1,this_is_a_test_case_2])).
+
     >>> env = SaturationEnv(1, problem_list)
 
     one can also choose a particular problem file during reset
@@ -153,6 +161,7 @@ class SaturationEnv(Env):
         for clause in clauses:
             clause.birth_step = 0
             clause.inference_parents = []
+            clause.inference_rule = None
             clause.processed = False
         return clauses
 
@@ -283,3 +292,16 @@ class SaturationEnv(Env):
     def seed(self, seed=None):
         random.seed(seed)
         return seed
+
+    @property
+    def tstp_proof(self) -> str:
+        """
+        :returns: TSTP proof (if found; raises error otherwise)
+        """
+        return "\n".join(
+            [
+                clause_to_tptp(clause)
+                for clause in reduce_to_proof(self._state)
+                if clause.inference_rule is not None
+            ]
+        )
