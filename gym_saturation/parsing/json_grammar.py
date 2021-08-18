@@ -26,7 +26,7 @@ class ClauseJSONEncoder(json.JSONEncoder):
     restore serialised objects back. Potentially that can be done in any
     language, not only Python.
 
-    >>> this_is_a_test_case = grammar.Clause([grammar.Literal(False, grammar.Predicate("=", [grammar.Function("f", [grammar.Variable("X"), grammar.Function("g", [grammar.Variable("Y")]), grammar.Function("h", [grammar.Variable("Z"), grammar.Function("c1", [])])]), grammar.Function("f", [grammar.Variable("X"), grammar.Variable("Y"), grammar.Function("c2", [])])])), grammar.Literal(True, grammar.Predicate("better", [grammar.Variable("X"), grammar.Function("g", [grammar.Variable("Y")])]))])
+    >>> this_is_a_test_case = grammar.Clause([grammar.Literal(False, grammar.Predicate("=", [grammar.Function("f", [grammar.Variable("X"), grammar.Function("g", [grammar.Variable("Y")]), grammar.Function("h", [grammar.Variable("Z"), grammar.Function("c1", [])])]), grammar.Function("f", [grammar.Variable("X"), grammar.Variable("Y"), grammar.Function("c2", [])])])), grammar.Literal(True, grammar.Predicate("better", [grammar.Variable("X"), grammar.Function("g", [grammar.Variable("Y")])]))], label="some", birth_step=0, inference_rule="resolution", inference_parents=["one", "two"], processed=False)
     >>> # this is a standard way to serialise a ``Clause``
     >>> serialised_clause = clause_to_dict(this_is_a_test_case)
     >>> # and this is how to deserialise
@@ -86,6 +86,7 @@ class ClauseJSONEncoder(json.JSONEncoder):
             "birth_step": o.birth_step,
             "processed": o.processed,
             "inference_parents": o.inference_parents,
+            "inference_rule": o.inference_rule,
         }
 
 
@@ -98,6 +99,7 @@ def dict_to_clause(json_dict):
             birth_step=json_dict["birth_step"],
             processed=json_dict["processed"],
             inference_parents=json_dict["inference_parents"],
+            inference_rule=json_dict["inference_rule"],
         )
     if json_dict["class"] == "Literal":
         return grammar.Literal(

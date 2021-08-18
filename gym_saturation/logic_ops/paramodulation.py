@@ -192,11 +192,11 @@ def all_paramodulants_from_list(
     >>> all_paramodulants_from_list([], Clause([Literal(False, Predicate("this_is_a_test_case", []))]), "inferred_", 0)
     Traceback (most recent call last):
      ...
-    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, processed=None, birth_step=None)
+    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, inference_rule=None, processed=None, birth_step=None)
     >>> all_paramodulants_from_list([Clause([Literal(False, Predicate("this_is_a_test_case_2", []))])], Clause([], "empty"), "inferred_", 0)
     Traceback (most recent call last):
      ...
-    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case_2', arguments=[]))], label=None, inference_parents=None, processed=None, birth_step=None)
+    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case_2', arguments=[]))], label=None, inference_parents=None, inference_rule=None, processed=None, birth_step=None)
     >>> all_paramodulants_from_list([Clause([Literal(False, Predicate("=", [Function("this_is_a_test_case", [])]))], "one")], Clause([Literal(True, Predicate("p", []))], "two"), "inferred_", 0)
     Traceback (most recent call last):
      ...
@@ -235,6 +235,7 @@ def all_paramodulants_from_list(
                             other_clause.label,
                             given_clause.label,
                         ],
+                        inference_rule="paramodulation",
                         label=label_prefix
                         + str(label_index_base + len(paramodulants) + ord_num),
                     )

@@ -30,14 +30,14 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            pytest --cov gym_saturation --cov-report xml --cov-fail-under=99\
+            pytest --cov gym_saturation --cov-report xml --cov-fail-under=98\
                    --junit-xml test-results/gym-saturation.xml\
                    --doctest-modules gym_saturation
       - run:
           name: run linters
           command: |
             . venv/bin/activate
-            pycodestyle --max-doc-length 1000 --ignore E203,E501,W503\
+            pycodestyle --max-doc-length 10000 --ignore E203,E501,W503\
                         gym_saturation
             pylint --rcfile=.pylintrc gym_saturation
       - run:

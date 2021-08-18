@@ -183,7 +183,7 @@ DEFINED_FUNCTOR      : ATOMIC_DEFINED_WORD | "$uminus" | "$sum" | "$difference" 
 TH1_DEFINED_TERM     : "!!" | "??" | "@@+" | "@@-" | "@="
 DEFINED_TERM         : NUMBER | DISTINCT_OBJECT
 variable             : UPPER_WORD
-source               : general_term | dag_source | internal_source | external_source | "unknown" | "[" sources "]"
+source               : dag_source | internal_source | external_source | "unknown" | "[" sources "]" | general_term
 sources              : source | source "," sources
 dag_source           : NAME | inference_record
 inference_record     : "inference" "(" inference_rule "," useful_info "," inference_parents ")" 

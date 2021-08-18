@@ -13,6 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from operator import itemgetter
+
 from lark import Transformer
 
 from gym_saturation.grammar import (
@@ -44,7 +46,7 @@ class CNFParser(Transformer):
     ...    cnf(test, axiom, f(X, g(Y), h(Z, c1)) = f(X, Y, c2)
     ...    | ~ better(f(X), g(Y)) | $false | this_is_a_test_case).
     ... '''))
-    Clause(literals=[Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='f', arguments=[Variable(name='X'), Function(name='g', arguments=[Variable(name='Y')]), Function(name='h', arguments=[Variable(name='Z'), Function(name='c1', arguments=[])])]), Function(name='f', arguments=[Variable(name='X'), Variable(name='Y'), Function(name='c2', arguments=[])])])), Literal(negated=True, atom=Predicate(name='better', arguments=[Function(name='f', arguments=[Variable(name='X')]), Function(name='g', arguments=[Variable(name='Y')])])), Literal(negated=False, atom=Predicate(name='$false', arguments=[])), Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label='test', inference_parents=None, processed=None, birth_step=None)
+    Clause(literals=[Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='f', arguments=[Variable(name='X'), Function(name='g', arguments=[Variable(name='Y')]), Function(name='h', arguments=[Variable(name='Z'), Function(name='c1', arguments=[])])]), Function(name='f', arguments=[Variable(name='X'), Variable(name='Y'), Function(name='c2', arguments=[])])])), Literal(negated=True, atom=Predicate(name='better', arguments=[Function(name='f', arguments=[Variable(name='X')]), Function(name='g', arguments=[Variable(name='Y')])])), Literal(negated=False, atom=Predicate(name='$false', arguments=[])), Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label='test', inference_parents=None, inference_rule=None, processed=None, birth_step=None)
     """
 
     def __default_token__(self, token):
@@ -178,4 +180,57 @@ class CNFParser(Transformer):
         """
         clause = children[2]
         clause.label = children[0]
+        if isinstance(children[3], list):
+            for annotation in children[3]:
+                if isinstance(annotation, dict):
+                    if "inference_record" in annotation:
+                        clause.inference_rule = annotation["inference_record"][
+                            0
+                        ]
+                        clause.inference_parents = list(
+                            map(
+                                itemgetter(0),
+                                annotation["inference_record"][1],
+                            )
+                        )
         return clause
+
+    @staticmethod
+    def inference_record(children):
+        """
+        <inference_record>     :== inference(<inference_rule>,<useful_info>,
+        <inference_parents>)
+        """
+        return {"inference_record": (children[0], children[2])}
+
+    @staticmethod
+    def annotations(children):
+        """
+        <annotations>          ::= ,<source><optional_info> | <null>
+        """
+        if isinstance(children, list):
+            if len(children) == 1:
+                return children[0]
+        return children
+
+    @staticmethod
+    def source(children):
+        """
+        <source>               ::= <general_term>
+        <source>               :== <dag_source> | <internal_source> |
+        <external_source> | unknown | [<sources>]
+        """
+        if isinstance(children, list):
+            if len(children) == 1:
+                return children[0]
+        return children
+
+    @staticmethod
+    def dag_source(children):
+        """
+        <dag_source>           :==  <inference_record> | <name>
+        """
+        if isinstance(children, list):
+            if len(children) == 1:
+                return children[0]
+        return children

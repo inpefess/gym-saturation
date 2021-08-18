@@ -97,7 +97,7 @@ class SaturationEnv(Env):
     only ``ansi`` rendering method is implemented
 
     >>> len(env.render("ansi"))
-    1420
+    1556
     >>> env.render()
     Traceback (most recent call last):
      ...
