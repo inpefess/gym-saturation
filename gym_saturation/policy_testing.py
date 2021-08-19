@@ -96,7 +96,7 @@ def episode(
     >>> print(sorted(policy_testing_report(
     ...     problem_list + ["this_is_a_test_case"], test_policy_output
     ... ).items()))
-    [('TST001-1', ('PROOF_FOUND', 1, 1)), ('TST002-1', ('STEP_LIMIT', 4, -1)), ('this_is_a_test_case', ('ERROR', -1, -1))]
+    [('TST001-1', ('PROOF_FOUND', 2, 2)), ('TST002-1', ('STEP_LIMIT', 5, -1)), ('this_is_a_test_case', ('ERROR', -1, -1))]
 
     :param problem_filename: the name of a problem file
     :param output_folder: where to log given clause
@@ -139,14 +139,11 @@ def _analyse_proof(state: List[Clause]) -> Tuple[str, int, int]:
         for clause in state
         if clause.literals == [] and clause.processed
     ]
-    step_count = (
-        max(
-            [
-                -1 if clause.birth_step is None else clause.birth_step
-                for clause in state
-            ]
-        )
-        - 1
+    step_count = max(
+        [
+            -1 if clause.birth_step is None else clause.birth_step
+            for clause in state
+        ]
     )
     if len(empty_clauses) > 1:
         return ("ERROR", -1, -1)
@@ -180,7 +177,7 @@ def proof_length(empty_clause: Clause, state: List[Clause]) -> int:
             if proof[-1].inference_parents is None
             else proof[-1].inference_parents
         )
-    return len({clause.birth_step for clause in proof}) - 1
+    return len({clause.birth_step for clause in proof})
 
 
 def policy_testing_report(

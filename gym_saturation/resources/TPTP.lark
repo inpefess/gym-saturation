@@ -236,8 +236,8 @@ FILE_NAME            : SINGLE_QUOTED
 null                 :
 COMMENT              : COMMENT_LINE | COMMENT_BLOCK
 COMMENT_LINE         : "%" (PRINTABLE_CHAR)*
-COMMENT_BLOCK        : "/*" NOT_STAR_SLASH "***/"
-NOT_STAR_SLASH       : /([^\*]*[\*][\*]*[^\/\*])+[^\*]*/
+COMMENT_BLOCK        : "/*" NOT_STAR_SLASH "*" "*"* "/"
+NOT_STAR_SLASH       : /([^\*]*[\*][\*]*[^\/*])*[^\*]*/
 SINGLE_QUOTED        : SINGLE_QUOTE SQ_CHAR SQ_CHAR* SINGLE_QUOTE
 SQ_CHAR              : /([\40-\46\50-\133\135-\176]|[\\]['\\])/
 DO_CHAR              : /([\40-\41\43-\133\135-\176]|[\\]["\\])/
