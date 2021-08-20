@@ -126,8 +126,8 @@ def parse_args(args: Optional[List[str]] = None) -> Namespace:
     :returns: arguments namespace for the script
     """
     argument_parser = ArgumentParser()
-    argument_parser.add_argument("--problem_filename", type=str, required=True)
     argument_parser.add_argument("--output_folder", type=str, required=True)
+    argument_parser.add_argument("--problem_filename", type=str, required=True)
     argument_parser.add_argument("--step_limit", type=int, required=True)
     parsed_args = argument_parser.parse_args(args)
     return parsed_args
