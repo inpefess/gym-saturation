@@ -17,8 +17,9 @@ import json
 import os
 import sys
 from argparse import ArgumentParser, Namespace
+from dataclasses import dataclass
 from operator import itemgetter
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from gym_saturation.envs import SaturationEnv
 from gym_saturation.grammar import Clause
@@ -26,15 +27,31 @@ from gym_saturation.logic_ops.utils import clause_length
 from gym_saturation.parsing.json_grammar import dict_to_clause
 
 
+@dataclass
+class Transition:
+    """
+    an object describing environment's state before the agent's action, the
+    action itself and its results
+    """
+
+    state: List[Dict[str, Any]]
+    action: int
+    policy_info: Dict[str, Any]
+    next_state: List[Dict[str, Any]]
+    reward: float
+    done: bool
+    env_info: Dict[str, Any]
+
+
 def save_final_state(
-    problem_filename: str, output_folder: str, state: list
+    problem_filename: str, output_folder: str, episode_memory: List[Transition]
 ) -> None:
     """
     save the final state of solving a TPTP problem
 
     :param problem_filename: a full path to the problem file
     :param output_folder: where to write subfolders and JSON files
-    :param state: a JSON-formatted representation of the state
+    :param episode_memory: a list of transitions during the episode
     :returns:
     """
     problem_name = os.path.splitext(os.path.basename(problem_filename))[0]
@@ -48,34 +65,44 @@ def save_final_state(
     with open(
         os.path.join(output_subfolder, f"{problem_name}.json"), "w"
     ) as data_file:
-        data_file.write(json.dumps(state))
+        data_file.write(json.dumps(episode_memory[-1].next_state))
 
 
-def size_policy(state: list) -> int:
+# pylint: disable=unused-argument
+def size_policy(
+    state: list, policy_info: Dict[str, Any], env_info: Dict[str, Any]
+) -> Tuple[int, Dict[str, Any]]:
     """
     an example of an implemented policy
 
     :param state: a list of clauses
-    :returns: the index of the clause with minimal length
+    :param policy_info: added for compatibility purpose
+    :param env_info: added for compatibility purpose
+    :returns: the index of the clause with minimal length, empty info dict
     """
-    return min(
-        [
-            (i, clause_length(dict_to_clause(clause)))
-            for i, clause in enumerate(state)
-            if not clause["processed"]
-        ],
-        key=itemgetter(1),
-    )[0]
+    return (
+        min(
+            [
+                (i, clause_length(dict_to_clause(clause)))
+                for i, clause in enumerate(state)
+                if not clause["processed"]
+            ],
+            key=itemgetter(1),
+        )[0],
+        dict(),
+    )
 
 
 def episode(
     problem_filename: str,
-    output_folder: str,
     step_limit: int,
-    policy: Callable,
-) -> None:
+    policy: Callable[
+        [List[Dict[str, Any]], Dict[str, Any], Dict[str, Any]],
+        Tuple[int, Dict[str, Any]],
+    ],
+) -> List[Transition]:
     """
-    tries to solve the problem and log the clauses
+    tries to solve the problem and logs the clauses
 
     >>> import shutil
     >>> test_policy_output = "test_policy_output"
@@ -91,25 +118,38 @@ def episode(
     ...     files("gym_saturation")
     ...     .joinpath("resources/TPTP-mock/Problems/TST")
     ... , "*-*.p"))
-    >>> episode(problem_list[0], test_policy_output, 5, size_policy)
-    >>> episode(problem_list[1], test_policy_output, 5, size_policy)
+    >>> for i in range(2):
+    ...     save_final_state(
+    ...         problem_list[i],
+    ...         test_policy_output,
+    ...         episode(problem_list[i], 5, size_policy)
+    ...     )
     >>> print(sorted(policy_testing_report(
     ...     problem_list + ["this_is_a_test_case"], test_policy_output
     ... ).items()))
     [('TST001-1', ('PROOF_FOUND', 2, 2)), ('TST002-1', ('STEP_LIMIT', 5, -1)), ('this_is_a_test_case', ('ERROR', -1, -1))]
 
     :param problem_filename: the name of a problem file
-    :param output_folder: where to log given clause
     :param step_limit: a maximal number of steps in an episode
-    :returns:
+    :param policy: a function, getting state as an argument and returning
+        action and info dict
+    :returns: the episode memory
     """
     env = SaturationEnv(step_limit, [problem_filename])
-    state = env.reset(problem=problem_filename)
-    done = False
+    state, done = env.reset(), False
+    episode_memory = list()
+    policy_info: Dict[str, Any] = dict()
+    env_info: Dict[str, Any] = dict()
     while not done:
-        action = policy(state)
-        state, _, done, _ = env.step(action)
-    save_final_state(problem_filename, output_folder, env.state)
+        action, policy_info = policy(state, policy_info, env_info)
+        next_state, reward, done, env_info = env.step(action)
+        episode_memory.append(
+            Transition(
+                state, action, policy_info, next_state, reward, done, env_info
+            )
+        )
+        state = next_state
+    return episode_memory
 
 
 def parse_args(args: Optional[List[str]] = None) -> Namespace:
@@ -218,7 +258,6 @@ if __name__ == "__main__":
     arguments = parse_args()
     episode(
         arguments.problem_filename,
-        arguments.output_folder,
         arguments.step_limit,
         size_policy,
     )
