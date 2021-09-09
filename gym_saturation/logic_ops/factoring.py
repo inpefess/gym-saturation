@@ -91,7 +91,7 @@ def all_possible_factors(
     """
     if given_clause.label is None:
         raise ValueError(f"no label: {given_clause}")
-    factors: List[grammar.Clause] = list()
+    factors: List[grammar.Clause] = []
     for i, literal_one in enumerate(given_clause.literals):
         for j in range(i + 1, len(given_clause.literals)):
             if (

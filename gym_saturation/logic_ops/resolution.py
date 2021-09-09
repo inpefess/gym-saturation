@@ -72,7 +72,7 @@ def resolution(
 def _get_new_resolvents(
     clause_one: Clause, literal_one: Literal, given_clause: Clause
 ) -> List[Clause]:
-    resolvents: List[Clause] = list()
+    resolvents: List[Clause] = []
     for j, literal_two in enumerate(given_clause.literals):
         if literal_one.negated != literal_two.negated:
             clause_two = Clause(
@@ -121,7 +121,7 @@ def all_possible_resolvents(
     """
     if given_clause.label is None:
         raise ValueError(f"no label: {given_clause}")
-    resolvents: List[Clause] = list()
+    resolvents: List[Clause] = []
     for clause in clauses:
         for i, literal_one in enumerate(clause.literals):
             clause_one = Clause(clause.literals[:i] + clause.literals[i + 1 :])

@@ -155,7 +155,7 @@ class SaturationEnv(Env):
 
     def _init_clauses(self):
         tptp_folder = os.path.join(os.path.dirname(self._problem), "..", "..")
-        with open(self._problem, "r") as problem_file:
+        with open(self._problem, "r", encoding="utf-8") as problem_file:
             problem_text = problem_file.read()
         clauses = TPTPParser().parse(problem_text, tptp_folder)
         for clause in clauses:

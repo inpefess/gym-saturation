@@ -63,7 +63,9 @@ def save_final_state(
     except FileExistsError:
         pass
     with open(
-        os.path.join(output_subfolder, f"{problem_name}.json"), "w"
+        os.path.join(output_subfolder, f"{problem_name}.json"),
+        "w",
+        encoding="utf-8",
     ) as data_file:
         data_file.write(json.dumps(episode_memory[-1].next_state))
 
@@ -89,7 +91,7 @@ def size_policy(
             ],
             key=itemgetter(1),
         )[0],
-        dict(),
+        {},
     )
 
 
@@ -137,9 +139,9 @@ def episode(
     """
     env = SaturationEnv(step_limit, [problem_filename])
     state, done = env.reset(), False
-    episode_memory = list()
-    policy_info: Dict[str, Any] = dict()
-    env_info: Dict[str, Any] = dict()
+    episode_memory = []
+    policy_info: Dict[str, Any] = {}
+    env_info: Dict[str, Any] = {}
     while not done:
         action, policy_info = policy(state, policy_info, env_info)
         next_state, reward, done, env_info = env.step(action)
@@ -233,7 +235,7 @@ def policy_testing_report(
         * step count (``-1`` for errors)
         * proof length (``-1`` for no proof)
     """
-    res = dict()
+    res = {}
     for problem in problem_list:
         problem_name = os.path.splitext(os.path.basename(problem))[0]
         result_filename = os.path.join(
@@ -242,7 +244,7 @@ def policy_testing_report(
             f"{problem_name}.json",
         )
         if os.path.exists(result_filename):
-            with open(result_filename, "r") as json_file:
+            with open(result_filename, "r", encoding="utf-8") as json_file:
                 state = [
                     dict_to_clause(clause)
                     for clause in json.loads(json_file.read())

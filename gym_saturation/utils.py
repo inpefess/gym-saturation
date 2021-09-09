@@ -24,7 +24,7 @@ def deduplicate(a_list: List[Any]) -> List[Any]:
     :param a_list: a list of possibly repeating items
     :returns: a list of unique items
     """
-    new_list = list()
+    new_list = []
     for item in a_list:
         if item not in new_list:
             new_list.append(item)

@@ -100,7 +100,7 @@ class CNFParser(Transformer):
 
         a list of arguments, organised in pairs
         """
-        result = list()
+        result = []
         for item in children:
             if isinstance(item, list):
                 result.extend(item)
@@ -163,7 +163,7 @@ class CNFParser(Transformer):
         """
         if len(children) == 1:
             return Clause(children)
-        literals = list()
+        literals = []
         for item in [children[0], children[2]]:
             if isinstance(item, Clause):
                 literals.extend(item.literals)

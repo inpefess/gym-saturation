@@ -73,6 +73,7 @@ class TPTPParser:
                 with open(
                     os.path.join(tptp_folder, token.value.replace("'", "")),
                     "r",
+                    encoding="utf-8",
                 ) as included_file:
                     clauses.extend(
                         self.parse(included_file.read(), tptp_folder)

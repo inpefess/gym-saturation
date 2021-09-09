@@ -86,7 +86,7 @@ def paramodulation(
 def _equality_symmetry_paramodulation(
     clause_one, literal_one, clause_two, literal_two, k
 ):
-    paramodulants = list()
+    paramodulants = []
     try:
         paramodulants.append(
             paramodulation(
@@ -145,7 +145,7 @@ def all_paramodulants_from_clause(
     if literal_one.atom.arguments[0] == literal_one.atom.arguments[1]:
         return []
     literal_two_len = proposition_length(literal_two.atom)
-    paramodulants = list()
+    paramodulants = []
     for k in range(1, literal_two_len):
         paramodulants.extend(
             _equality_symmetry_paramodulation(
@@ -158,7 +158,7 @@ def all_paramodulants_from_clause(
 def _get_new_paramodulants(
     clause_one: Clause, literal_one: Literal, given_clause: Clause
 ) -> List[Clause]:
-    paramodulants = list()
+    paramodulants = []
     for j, literal_two in enumerate(given_clause.literals):
         clause_two = Clause(
             given_clause.literals[:j] + given_clause.literals[j + 1 :]
@@ -216,7 +216,7 @@ def all_paramodulants_from_list(
     """
     if given_clause.label is None:
         raise ValueError(f"no label: {given_clause}")
-    paramodulants: List[Clause] = list()
+    paramodulants: List[Clause] = []
     for other_clause in clauses:
         for i, literal_one in enumerate(other_clause.literals):
             clause_one = Clause(

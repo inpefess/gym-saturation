@@ -78,7 +78,7 @@ def all_possible_reflexivity_resolvents(
     """
     if given_clause.label is None:
         raise ValueError(f"no label: {given_clause}")
-    reflexivity_resolvents: List[grammar.Clause] = list()
+    reflexivity_resolvents: List[grammar.Clause] = []
     for i, a_literal in enumerate(given_clause.literals):
         if (
             not a_literal.negated
