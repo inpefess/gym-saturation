@@ -102,7 +102,7 @@ def episode(
         [List[Dict[str, Any]], Dict[str, Any], Dict[str, Any]],
         Tuple[int, Dict[str, Any]],
     ],
-) -> List[Transition]:
+) -> Tuple[SaturationEnv, List[Transition]]:
     """
     tries to solve the problem and logs the clauses
 
@@ -124,7 +124,7 @@ def episode(
     ...     save_final_state(
     ...         problem_list[i],
     ...         test_policy_output,
-    ...         episode(problem_list[i], 5, size_policy)
+    ...         episode(problem_list[i], 5, size_policy)[1]
     ...     )
     >>> print(sorted(policy_testing_report(
     ...     problem_list + ["this_is_a_test_case"], test_policy_output
@@ -151,7 +151,7 @@ def episode(
             )
         )
         state = next_state
-    return episode_memory
+    return env, episode_memory
 
 
 def parse_args(args: Optional[List[str]] = None) -> Namespace:
