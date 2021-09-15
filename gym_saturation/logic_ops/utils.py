@@ -56,7 +56,7 @@ def get_variable_list(clause: Union[Clause, Proposition]) -> List[Variable]:
     :param clause: a clause
     :returns: a list (with repetitions) of variables from there clause
     """
-    variable_list = list()
+    variable_list = []
     if isinstance(clause, Clause):
         for literal in clause.literals:
             for term in literal.atom.arguments:
@@ -79,7 +79,7 @@ def reindex_variables(clauses: List[Clause], prefix: str) -> List[Clause]:
     :returns: the list of clauses with renamed variables
     """
     variable_count = 0
-    new_clauses = list()
+    new_clauses = []
     for clause in clauses:
         new_clause = clause
         variable_list = deduplicate(get_variable_list(clause))

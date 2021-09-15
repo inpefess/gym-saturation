@@ -109,6 +109,7 @@ utils
 .. autofunction:: gym_saturation.logic_ops.utils.clause_in_a_list
 .. autofunction:: gym_saturation.logic_ops.utils.subterm_by_index
 .. autofunction:: gym_saturation.logic_ops.utils.replace_subterm_by_index
+.. autofunction:: gym_saturation.logic_ops.utils.reduce_to_proof
 
 Parsing
 ********
@@ -145,6 +146,10 @@ Policy Testing
 
 This module is an example of testing your own trained policy.
 
-.. autofunction:: gym_saturation.policy_testing.episode
+.. autoclass:: gym_saturation.policy_testing.Transition
+   :members:
 .. autofunction:: gym_saturation.policy_testing.save_final_state
 .. autofunction:: gym_saturation.policy_testing.size_policy
+.. autofunction:: gym_saturation.policy_testing.episode
+.. autofunction:: gym_saturation.policy_testing.proof_length
+.. autofunction:: gym_saturation.policy_testing.policy_testing_report

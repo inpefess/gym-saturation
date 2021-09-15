@@ -75,7 +75,7 @@ class Substitution:
         :param clause: a clause to apply substitution to
         :returns: the result of the substitution
         """
-        literals = list()
+        literals = []
         for literal in clause.literals:
             literals.append(
                 grammar.Literal(

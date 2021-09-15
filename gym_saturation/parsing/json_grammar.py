@@ -47,7 +47,7 @@ class ClauseJSONEncoder(json.JSONEncoder):
     def _function_to_dict(
         self, function: grammar.Function
     ) -> Dict[str, Union[str, list]]:
-        arguments: List[Union[str, dict]] = list()
+        arguments: List[Union[str, dict]] = []
         for argument in function.arguments:
             if isinstance(argument, grammar.Variable):
                 arguments.append(self._variable_to_dict(argument))
@@ -60,9 +60,9 @@ class ClauseJSONEncoder(json.JSONEncoder):
         }
 
     def default(self, o):
-        literals = list()
+        literals = []
         for literal in o.literals:
-            arguments = list()
+            arguments = []
             for argument in literal.atom.arguments:
                 if isinstance(argument, grammar.Variable):
                     arguments.append(self._variable_to_dict(argument))

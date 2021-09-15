@@ -22,7 +22,7 @@ Saturation Gym is an `OpenAI Gym`_ environment for saturation provers (like `PyR
 How to install
 ***************
 
-The best way to install this client is to use ``pip``::
+The best way to install this package is to use ``pip``::
 
     pip install gym-saturation
     
