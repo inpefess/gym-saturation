@@ -258,8 +258,11 @@ def policy_testing_report(
 if __name__ == "__main__":
     sys.setrecursionlimit(10000)
     arguments = parse_args()
-    episode(
+    _, an_episode_memory = episode(
         arguments.problem_filename,
         arguments.step_limit,
         size_policy,
+    )
+    save_final_state(
+        arguments.problem_filename, arguments.output_folder, an_episode_memory
     )
