@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "0.0.17"
+version = "0.1.0"
 description = "An OpenAI Gym environment for saturation provers"
 authors = ["Boris Shminke <boris@shminke.ml>"]
 license = "Apache-2.0"
@@ -14,7 +14,7 @@ classifiers=[
 	"License :: OSI Approved :: Apache Software License",
 	"Operating System :: OS Independent",
 	"Intended Audience :: Science/Research",
-	"Development Status :: 1 - Planning",
+	"Development Status :: 3 - Alpha",
 	"Environment :: Console",
 	"Natural Language :: English",
 	"Topic :: Scientific/Engineering :: Artificial Intelligence",
