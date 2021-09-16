@@ -150,6 +150,8 @@ This module is an example of testing your own trained policy.
    :members:
 .. autofunction:: gym_saturation.policy_testing.save_final_state
 .. autofunction:: gym_saturation.policy_testing.size_policy
+.. autofunction:: gym_saturation.policy_testing.age_policy
+.. autofunction:: gym_saturation.policy_testing.random_policy
 .. autofunction:: gym_saturation.policy_testing.episode
 .. autofunction:: gym_saturation.policy_testing.proof_length
 .. autofunction:: gym_saturation.policy_testing.policy_testing_report
