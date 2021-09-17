@@ -298,6 +298,7 @@ def policy_testing_report(
 if __name__ == "__main__":
     sys.setrecursionlimit(10000)
     arguments = parse_args()
+    random.seed(hash(arguments.problem_filename))
     _, an_episode_memory = episode(
         arguments.problem_filename,
         arguments.step_limit,
