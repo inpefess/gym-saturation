@@ -39,23 +39,23 @@ def paramodulation(
     r"""
     binary paramodulation rule
 
-    .. math:: {\frac{\Gamma_1\cup\left\{s\approx t\right\},\Gamma_2\cup \left\{L\left[r\right]\right\}}{\left(\left\{L\left[t\right]\right\}\cup\Gamma_1\cup\Gamma_2\right)\phi}}
+    .. math:: {\frac{C_1\vee s\approx t,C_2\vee L\left[r\right]}{\sigma\left(L\left[t\right]\vee C_1\vee C_2\right)}}
 
     where
 
-    * :math:`\Gamma_1` and :math:`\Gamma_2` are clauses with no common variables
-    * :math:`L\left[r\right]` is a literal with subterm :math:`r`
+    * :math:`C_1` and :math:`C_2` are clauses with no common variables
+    * :math:`L\left[r\right]` is a literal with a subterm :math:`r`
     * only one instance of :math:`r` in :math:`L\left[r\right]` is considered, even if there are many of them
     * :math:`s` and :math:`t` are terms, :math:`\approx` is a syntactic equality symbol
-    * :math:`\phi` is a most general unifier of :math:`s` and :math:`r`
+    * :math:`\sigma` is a most general unifier of :math:`s` and :math:`r`
 
     >>> from gym_saturation.grammar import Predicate, Variable, Function
     >>> paramodulation(Clause([Literal(False, Predicate("q", [Variable("X")]))]), [Variable("X"), Function("this_is_a_test_case", [])], Clause([Literal(False, Predicate("r", [Variable("X")]))]), Literal(True, Predicate("p", [Function("f", [])])), 1).literals
     [Literal(negated=True, atom=Predicate(name='p', arguments=[Function(name='this_is_a_test_case', arguments=[])])), Literal(negated=False, atom=Predicate(name='q', arguments=[Function(name='f', arguments=[])])), Literal(negated=False, atom=Predicate(name='r', arguments=[Function(name='f', arguments=[])]))]
 
-    :param clause_one: :math:`\Gamma_1`
+    :param clause_one: :math:`C_1`
     :param literal_one: :math:`s\approx t`
-    :param clause_two: :math:`\Gamma_2`
+    :param clause_two: :math:`C_2`
     :param literal_two: :math:`L\left[r\right]`
     :param r_position: index of :math:`r` in the tree of subterms of :math:`L\left[r\right]`
     :returns: a new clause --- the paramodulation result
@@ -130,9 +130,9 @@ def all_paramodulants_from_clause(
     applies ``paramodulation`` with varying ``r_position`` argument
     also varies for equality symmetry
 
-    :param clause_one: :math:`\Gamma_1`
+    :param clause_one: :math:`C_1`
     :param literal_one: :math:`s\approx t`
-    :param clause_two: :math:`\Gamma_2`
+    :param clause_two: :math:`C_2`
     :param literal_two: :math:`L\left[r\right]`
     :returns: a list of paramodulants for all possible values of ``r_position``
     """

@@ -31,13 +31,13 @@ def factoring(
     r"""
     positive factoring rule
 
-    .. math:: {\frac{\Gamma\cup\left\{L_1,L_2\right\}}{\left(\Gamma\cup\left\{L_1\right\}\right)\phi}}
+    .. math:: {\frac{C\vee A_1\vee A_2}{\sigma\left(C\vee L_1\right)}}
 
     where
 
-    * :math:`\Gamma` and is a clause
-    * :math:`L_1` and :math:`L_2` are literals, both without negation
-    * :math:`\phi` is a most general unifier of :math:`L_1` and :math:`L_2`
+    * :math:`C` and is a clause
+    * :math:`A_1` and :math:`A_2` are atomic formulae (positive literals)
+    * :math:`\sigma` is a most general unifier of :math:`A_1` and :math:`A_2`
 
     >>> from gym_saturation.grammar import Predicate, Variable, Function
     >>> factoring(grammar.Clause([grammar.Literal(True, Predicate("q", [Variable("X")]))]), grammar.Literal(False, Predicate("p", [Variable("X")])), grammar.Literal(False, Predicate("p", [Function("this_is_a_test_case", [])]))).literals
@@ -47,9 +47,9 @@ def factoring(
      ...
     ValueError: factoring is not possible for Literal(negated=False, atom=Predicate(name='f', arguments=[])) and Literal(negated=True, atom=Predicate(name='this_is_a_test_case', arguments=[]))
 
-    :param given_clause: :math:`\Gamma`
-    :param literal_one: :math:`L_1`
-    :param literal_two: :math:`L_2`
+    :param given_clause: :math:`C`
+    :param literal_one: :math:`A_1`
+    :param literal_two: :math:`A_2`
     :returns: a new clause --- the factoring result
     """
     if literal_one.negated or literal_two.negated:
