@@ -15,6 +15,7 @@ limitations under the License.
 """
 import json
 import os
+import random
 import sys
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
@@ -91,6 +92,45 @@ def size_policy(
             ],
             key=itemgetter(1),
         )[0],
+        {},
+    )
+
+
+# pylint: disable=unused-argument
+def age_policy(
+    state: list, policy_info: Dict[str, Any], env_info: Dict[str, Any]
+) -> Tuple[int, Dict[str, Any]]:
+    """
+    another example of an implemented policy
+
+    :param state: a list of clauses
+    :param policy_info: added for compatibility purpose
+    :param env_info: added for compatibility purpose
+    :returns: the index of the first not yet processed clause, empty info dict
+    """
+    return (
+        min([i for i, clause in enumerate(state) if not clause["processed"]]),
+        {},
+    )
+
+
+# pylint: disable=unused-argument
+def random_policy(
+    state: list, policy_info: Dict[str, Any], env_info: Dict[str, Any]
+) -> Tuple[int, Dict[str, Any]]:
+    """
+    the most basic RL policy --- only exploration
+
+    :param state: a list of clauses
+    :param policy_info: added for compatibility purpose
+    :param env_info: added for compatibility purpose
+    :returns: (an index of a randomly selected not yet processed clause,
+        empty info dict)
+    """
+    return (
+        random.choice(
+            [i for i, clause in enumerate(state) if not clause["processed"]]
+        ),
         {},
     )
 
@@ -258,8 +298,12 @@ def policy_testing_report(
 if __name__ == "__main__":
     sys.setrecursionlimit(10000)
     arguments = parse_args()
-    episode(
+    random.seed(hash(arguments.problem_filename))
+    _, an_episode_memory = episode(
         arguments.problem_filename,
         arguments.step_limit,
         size_policy,
+    )
+    save_final_state(
+        arguments.problem_filename, arguments.output_folder, an_episode_memory
     )
