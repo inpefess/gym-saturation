@@ -28,20 +28,20 @@ def reflexivity_resolution(
     r"""
     reflexivity resolution rule
 
-    .. math:: {\frac{\Gamma\cup\left\{s\ne t\right\}}{\left(\Gamma\right)\phi}}
+    .. math:: \frac{C\vee s\not\approx t}{\sigma\left(C\right)}
 
     where
 
-    * :math:`\Gamma` and is a clause
-    * :math:`s` and :math:`t` are terms, :math:`\ne` is a negation of equality
-    * :math:`\phi` is a most general unifier of :math:`s` and :math:`t`
+    * :math:`C` and is a clause
+    * :math:`s` and :math:`t` are terms, :math:`\not\approx` is a negation of equality
+    * :math:`\sigma` is a most general unifier of :math:`s` and :math:`t`
 
     >>> from gym_saturation.grammar import Predicate, Variable, Function
     >>> reflexivity_resolution(grammar.Clause([grammar.Literal(True, Predicate("this_is_a_test_case", [Variable("X")]))]), [Variable("X"), Function("f", [])]).literals
     [Literal(negated=True, atom=Predicate(name='this_is_a_test_case', arguments=[Function(name='f', arguments=[])]))]
 
-    :param given_clause: :math:`\Gamma`
-    :param a_literal: :math:`s\ne t`
+    :param given_clause: :math:`C`
+    :param a_literal: :math:`s\not\approx t`
     :returns: a new clause --- the reflexivity resolution result
     """
     substitutions = most_general_unifier([a_literal[0], a_literal[1]])
