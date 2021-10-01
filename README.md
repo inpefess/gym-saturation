@@ -20,7 +20,7 @@ See [the notebook](https://github.com/inpefess/gym-saturation/blob/master/exampl
 
 # How to Contribute
 
-[Pull requests](https://github.com/inpefess/gym-saturation/pull-requests) are welcome. To start:
+[Pull requests](https://github.com/inpefess/gym-saturation/pulls) are welcome. To start:
 
 ```sh
 git clone https://github.com/inpefess/gym-saturation

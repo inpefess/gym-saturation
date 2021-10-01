@@ -13,28 +13,28 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-#########################################
-Welcome to Saturation Gym documentation!
-#########################################
+==========================================
+ Welcome to Saturation Gym documentation!
+==========================================
 
 ``gym-saturation`` is an `OpenAI Gym`_ environment for reinforcement learning (RL) agents capable of proving theorems. Currently, only theorems in `CNF`_ sublanguage of `TPTP`_ are supported. ``gym-saturation`` implements the 'given clause' algorithm (similar to one used in `Vampire`_ and `E Prover`_). Although, being written in Python, ``gym-saturation`` is closer to `PyRes`_. In contrast to monolithic architecture of a typical ATP, ``gym-saturation`` gives different agents opportunities to select clauses themselves and train from their experience. Combined with a particular agent, ``gym-saturation`` can work as an Automated Theorem Prover (ATP).
 
 ``gym-saturation`` can be interesting for RL practicioners willing to apply their experience to theorem proving without coding all the logic-related stuff themselves. It also can be useful for automated deduction researchers who want to create an RL-empowered ATP.
 
 How to install
-***************
+==============
 
 The best way to install this package is to use ``pip``::
 
     pip install gym-saturation
     
 How to use
-***********
+==========
 
 See `the notebook`_ for more information.
 
 How to contribute
-******************
+=================
 
 `Pull requests`_ are welcome. To start::
 
@@ -50,7 +50,7 @@ How to contribute
 To check the code quality before creating a pull request, one might run the script ``show_report.sh``. It locally does nearly the same as the CI pipeline after the PR is created.
 
 Reporting issues or problems with the software
-***********************************************
+==============================================
 
 Questions and bug reports are welcome on `the tracker`_. 
 
@@ -64,7 +64,7 @@ Questions and bug reports are welcome on `the tracker`_.
    package-documentation
 
 Indices and tables
-*******************
+==================
 
 * :ref:`genindex`
 * :ref:`modindex`
@@ -78,4 +78,4 @@ Indices and tables
 .. _TPTP: http://www.tptp.org/
 .. _Vampire: https://github.com/vprover/vampire
 .. _E Prover: https://github.com/eprover/eprover
-.. _Pull requests: https://github.com/inpefess/gym-saturation/pull-requests
+.. _Pull requests: https://github.com/inpefess/gym-saturation/pulls
