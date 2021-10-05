@@ -40,7 +40,7 @@ class Predicate:
     """ a predicate symbol might be applied to a list of arguments """
 
     name: str
-    arguments: List[Union[Function, Variable]]
+    arguments: List[Term]
 
 
 Proposition = Union[Predicate, Term]
