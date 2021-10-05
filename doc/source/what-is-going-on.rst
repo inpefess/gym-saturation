@@ -23,10 +23,10 @@ A statement of a theorem becomes a list of clauses. In a given clause algorithm,
 
 The deduction rules are the following (this deductive system is known to be refutation complete):
 
-* `resolution`_
-* `factoring`_
-* `paramodulation`_
-* reflexivity resolution (in fact, a paramodulation variant)
+* :ref:`resolution <resolution>`
+* :ref:`factoring <factoring>`
+* :ref:`paramodulation <paramodulation>`
+* :ref:`reflexivity resolution <reflexivity_resolution>`
 
 For the choice of a given clause, one usually employs a clever combination of heuristics. Of course, we can reformulate the same process as a reinforcement learning task.
 
@@ -35,16 +35,11 @@ What is a State
 
 (More or less resembles `ProofState class of PyRes`_)
 
-The environment's state is a list of logical clauses. Each clause is a list of literals and also has several properties:
-
-* ``label`` --- comes from the problem file or starts with ``inferred_`` if inferred during the episode
-* ``processed`` --- boolean value splitting clauses into unprocessed and processed ones; in the beginning, everything is not processed
-* ``birth_step`` --- a number of the step when the clause appeared in the unprocessed set; clauses from the problem have ``birth_step`` zero
-* ``inference_parents`` --- a list of labels from which the clause was inferred. For clauses from the problem statement, this list is empty.
+The environment's state is a list of logical clauses. Each clause is a list of literals and also has several :ref:`properties <Clause>`.
 
 Literal is a predicate, negated or not. A predicate can have arguments, which can be functions or variables. Functions can have arguments, which in turn can be functions or variables.
 
-Grammar is encoded in Python objects in a self-explanatory way. Each grammar object is a dictionary with an obligatory key ``class`` (``Clause``, ``Literal``, ``Predicate``, ``Function``, ``Variable``), and other keys representing this object's properties (such as being negated or having a list of arguments). To parse these JSON representation into package's inner representation, use ``gym_saturation.parsing.json_grammar.dict_to_clause``.
+Grammar is encoded in Python objects in a self-explanatory way. Each grammar object is a dictionary with an obligatory key ``class`` (:ref:`Clause`, :ref:`Literal`, :ref:`Predicate`, :ref:`Function`, :ref:`Variable`), and other keys representing this object's properties (such as being negated or having a list of arguments). To parse these JSON representation into package's inner representation, use :ref:`dict_to_clause <dict_to_clause>`.
 
 What is an Action
 ******************
