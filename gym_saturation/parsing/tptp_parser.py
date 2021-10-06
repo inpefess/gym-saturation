@@ -58,7 +58,6 @@ class TPTPParser:
         recursively parse a string containing a TPTP problem
 
         :param tptp_text: a name of a problem (or axioms) file
-        :param parser: a ``Lark`` parser
         :param tptp_folder: a folder containing TPTP database
         :returns: a list of clauses (including those of the axioms)
         """

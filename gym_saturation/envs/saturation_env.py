@@ -261,7 +261,7 @@ class SaturationEnv(Env):
         self.action_space = [
             i for i, clause in enumerate(self._state) if not clause.processed
         ]
-        return (self.state, 0.0, False, {STATE_DIFF_UPDATED: updated})
+        return self.state, 0.0, False, {STATE_DIFF_UPDATED: updated}
 
     # pylint: disable=inconsistent-return-statements
     def render(self, mode="human"):

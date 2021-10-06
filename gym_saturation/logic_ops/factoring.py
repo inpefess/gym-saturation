@@ -80,7 +80,6 @@ def all_possible_factors(
     >>> all_possible_factors(grammar.Clause([grammar.Literal(False, Predicate("p", [Function("f", [])])), grammar.Literal(False, Predicate("p", [Variable("X")])), grammar.Literal(False, Predicate("q", []))], label="this_is_a_test_case"), "inferred_", 0)
     [Clause(literals=[Literal(negated=False, atom=Predicate(name='q', arguments=[])), Literal(negated=False, atom=Predicate(name='p', arguments=[Function(name='f', arguments=[])]))], label='inferred_0', inference_parents=['this_is_a_test_case'], inference_rule='factoring', processed=None, birth_step=None)]
 
-    :param clauses: a list of (processed) clauses
     :param given_clause: a new clause which should be combined with all the
         processed ones
     :param label_prefix: generated clauses will be labeled with this prefix

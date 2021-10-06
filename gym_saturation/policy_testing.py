@@ -228,9 +228,9 @@ def _analyse_proof(state: List[Clause]) -> Tuple[str, int, int]:
         ]
     )
     if len(empty_clauses) > 1:
-        return ("ERROR", -1, -1)
+        return "ERROR", -1, -1
     if len(empty_clauses) == 0:
-        return ("STEP_LIMIT", step_count, -1)
+        return "STEP_LIMIT", step_count, -1
     return (
         "PROOF_FOUND",
         step_count,
