@@ -283,7 +283,7 @@ def reduce_to_proof(clauses: List[Clause]) -> List[Clause]:
     >>> reduce_to_proof([Clause([])])
     Traceback (most recent call last):
      ...
-    ValueError: wrong refutational proof
+    ValueError: wrong refutation proof
     >>> state = [Clause([], label="one", processed=True)]
     >>> reduce_to_proof(state) == state
     True
@@ -317,4 +317,4 @@ def reduce_to_proof(clauses: List[Clause]) -> List[Clause]:
                     )
                 ]
             return reduced
-    raise ValueError("wrong refutational proof")
+    raise ValueError("wrong refutation proof")

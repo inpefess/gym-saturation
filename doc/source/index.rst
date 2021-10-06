@@ -30,7 +30,7 @@ opportunities to select clauses themselves and train from their
 experience. Combined with a particular agent, ``gym-saturation`` can
 work as an Automated Theorem Prover (ATP).
 
-``gym-saturation`` can be interesting for RL practicioners willing to
+``gym-saturation`` can be interesting for RL practitioners willing to
 apply their experience to theorem proving without coding all the
 logic-related stuff themselves. It also can be useful for automated
 deduction researchers who want to create an RL-empowered ATP.

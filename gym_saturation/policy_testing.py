@@ -243,7 +243,7 @@ def proof_length(empty_clause: Clause, state: List[Clause]) -> int:
 
     :param empty_clause: a clause with no literals (final step of a proof)
     :param state: a list of clauses
-    :returns: the number of steps in a refutational proof
+    :returns: the number of steps in a refutation proof
     """
     proof_parts = (
         []
@@ -270,7 +270,7 @@ def policy_testing_report(
     :param problem_list: a list of full paths to problem files
     :param testing_result_folder: a folder filled by runs of ``episode``
         function over ``problem_list``
-    :returns: a dictionary with problems as kets, and the following values:
+    :returns: a dictionary with problems as keys, and the following values:
         * status (PROOF_FOUND, STEP_LIMIT, ERROR)
         * step count (``-1`` for errors)
         * proof length (``-1`` for no proof)
