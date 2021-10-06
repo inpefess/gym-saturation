@@ -46,6 +46,7 @@ class TPTPParser:
     """
 
     def __init__(self):
+        # pylint: disable=unspecified-encoding
         self.parser = Lark(
             files("gym_saturation")
             .joinpath("resources/TPTP.lark")
