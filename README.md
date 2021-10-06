@@ -4,7 +4,7 @@
 
 `gym-saturation` is an [OpenAI Gym](https://gym.openai.com/) environment for reinforcement learning (RL) agents capable of proving theorems. Currently, only theorems in CNF sublanguage of [TPTP](http://tptp.org) are supported. `gym-saturation` implements the 'given clause' algorithm (similar to one used in [Vampire](https://github.com/vprover/vampire) and [E Prover](https://github.com/eprover/eprover)). Although, being written in Python, `gym-saturation` is closer to [PyRes](https://github.com/eprover/PyRes). In contrast to monolithic architecture of a typical ATP, `gym-saturation` gives different agents opportunities to select clauses themselves and train from their experience. Combined with a particular agent, `gym-saturation` can work as an Automated Theorem Prover (ATP).
 
-`gym-saturation` can be interesting for RL practicioners willing to apply their experience to theorem proving without coding all the logic-related stuff themselves. It also can be useful for automated deduction researchers who want to create an RL-empowered ATP.
+`gym-saturation` can be interesting for RL practitioners willing to apply their experience to theorem proving without coding all the logic-related stuff themselves. It also can be useful for automated deduction researchers who want to create an RL-empowered ATP.
 
 # How to Install
 

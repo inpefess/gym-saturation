@@ -20,35 +20,49 @@ Package Documentation
 Grammar
 ********
 
+.. _Variable:
+
 Variable
 =========
 .. autoclass:: gym_saturation.grammar.Variable
    :members:
+
+.. _Function:
 
 Function
 =========
 .. autoclass:: gym_saturation.grammar.Function
    :members:		   
 
+.. _Predicate:
+
 Predicate
 ==========
 .. autoclass:: gym_saturation.grammar.Predicate
    :members:
+
+.. _Term:
 
 Term
 =====
 .. autoclass:: gym_saturation.grammar.Term
    :members:
 
+.. _Proposition:
+
 Proposition
 ============
 .. autoclass:: gym_saturation.grammar.Proposition
    :members:
 
+.. _Literal:
+
 Literal
 ========
 .. autoclass:: gym_saturation.grammar.Literal
    :members:		   
+
+.. _Clause:
 
 Clause
 =======
@@ -79,22 +93,29 @@ Unification
 
 Resolution
 ===========
+.. _resolution:
 .. autofunction:: gym_saturation.logic_ops.resolution.resolution
 .. autofunction:: gym_saturation.logic_ops.resolution.all_possible_resolvents
 
 Factoring
 ==========
+.. _factoring:
+
 .. autofunction:: gym_saturation.logic_ops.factoring.factoring
 .. autofunction:: gym_saturation.logic_ops.factoring.all_possible_factors
 
 Paramodulation
 ===============
+.. _paramodulation:
+
 .. autofunction:: gym_saturation.logic_ops.paramodulation.paramodulation
 .. autofunction:: gym_saturation.logic_ops.paramodulation.all_paramodulants_from_clause
 .. autofunction:: gym_saturation.logic_ops.paramodulation.all_paramodulants_from_list
 
 Reflexivity Resolution
 =======================
+.. _reflexivity_resolution:
+
 .. autofunction:: gym_saturation.logic_ops.reflexivity_resolution.reflexivity_resolution
 .. autofunction:: gym_saturation.logic_ops.reflexivity_resolution.all_possible_reflexivity_resolvents
 
@@ -123,6 +144,8 @@ CNF Parser
 JSON Encoder
 =============
 .. autoclass:: gym_saturation.parsing.json_grammar.ClauseJSONEncoder
+.. _dict_to_clause:
+
 .. autofunction:: gym_saturation.parsing.json_grammar.dict_to_clause
 .. autofunction:: gym_saturation.parsing.json_grammar.clause_to_dict
 

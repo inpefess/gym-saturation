@@ -40,7 +40,7 @@ class Predicate:
     """ a predicate symbol might be applied to a list of arguments """
 
     name: str
-    arguments: List[Union[Function, Variable]]
+    arguments: List[Term]
 
 
 Proposition = Union[Predicate, Term]
@@ -56,7 +56,21 @@ class Literal:
 
 @dataclass
 class Clause:
-    """ clause is a disjunction of literals """
+    """
+    clause is a disjunction of literals
+
+    :param literals: a list of literals, forming the clause
+    :param label: comes from the problem file or starts with ``inferred_`` if
+         inferred during the episode
+    :param inference_parents: a list of labels from which the clause was
+         inferred. For clauses from the problem statement, this list is empty
+    :param inference_rule: the rule according to which the clause was got from
+         the ``inference_parents``
+    :param processed: boolean value splitting clauses into unprocessed and
+         processed ones; in the beginning, everything is not processed
+    :param birth_step: a number of the step when the clause appeared in the
+         unprocessed set; clauses from the problem have ``birth_step`` zero
+    """
 
     literals: List[Literal]
     label: Optional[str] = None

@@ -89,7 +89,9 @@ def most_general_unifier(
     >>> most_general_unifier([Predicate("s", [Variable("X"), Variable("Y"), Function("f", [Variable("Z")])]), Predicate("s", [Variable("U"), Function("this_is_a_test_case", [Variable("V"), Variable("V")]), Variable("V")])])
     [Substitution(variable=Variable(name='X'), term=Variable(name='U')), Substitution(variable=Variable(name='Y'), term=Function(name='this_is_a_test_case', arguments=[Variable(name='V'), Variable(name='V')])), Substitution(variable=Variable(name='V'), term=Function(name='f', arguments=[Variable(name='Z')]))]
 
-    :param proposition_set: a set of propositions to unify
+    :param propositions: a set of propositions to unify
+    :param substitutions: this function is recursive and uses this param to
+        accumulate its output
     :returns: a map from variables to functions or other variables (aka
         substitution)
     """
