@@ -15,7 +15,7 @@ The best way to install this package is to use `pip`:
 pip install gym-saturation
 ```
 
-You also can run it in a Docker container:
+One also can run it in a Docker container:
 
 ```sh
 docker build -t gym-saturation https://github.com/inpefess/gym-saturation.git
