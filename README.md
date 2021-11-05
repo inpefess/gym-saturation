@@ -1,4 +1,5 @@
 [![PyPI version](https://badge.fury.io/py/gym-saturation.svg)](https://badge.fury.io/py/gym-saturation) [![CircleCI](https://circleci.com/gh/inpefess/gym-saturation.svg?style=svg)](https://circleci.com/gh/inpefess/gym-saturation) [![Documentation Status](https://readthedocs.org/projects/gym-saturation/badge/?version=latest)](https://gym-saturation.readthedocs.io/en/latest/?badge=latest) [![codecov](https://codecov.io/gh/inpefess/gym-saturation/branch/master/graph/badge.svg)](https://codecov.io/gh/inpefess/gym-saturation)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/inpefess/gym-saturation/HEAD?labpath=examples%2Fexample.ipynb)
 
 # gym-saturation
 
@@ -14,9 +15,16 @@ The best way to install this package is to use `pip`:
 pip install gym-saturation
 ```
 
+You also can run it in a Docker container:
+
+```sh
+docker build -t gym-saturation https://github.com/inpefess/gym-saturation.git
+docker run -it --rm -p 8888:8888 gym-saturation jupyter-lab --ip=0.0.0.0 --port=8888 --no-browser
+```
+
 # How to use
 
-See [the notebook](https://github.com/inpefess/gym-saturation/blob/master/examples/example.ipynb) for more information.
+See [the notebook](https://github.com/inpefess/gym-saturation/blob/master/examples/example.ipynb) or run it in [Binder](https://mybinder.org/v2/gh/inpefess/gym-saturation/HEAD?labpath=examples%2Fexample.ipynb) for more information.
 
 # How to Contribute
 
