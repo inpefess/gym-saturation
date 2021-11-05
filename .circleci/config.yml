@@ -9,7 +9,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "poetry.lock" }}
+            - v2-dependencies-{{ checksum "poetry.lock" }}
       - run:
           name: install dependencies
           command: |
@@ -21,7 +21,7 @@ jobs:
       - save_cache:
           paths:
             - ./venv
-          key: v1-dependencies-{{ checksum "poetry.lock" }}
+          key: v2-dependencies-{{ checksum "poetry.lock" }}
       - run:
           name: run tests
           command: |
