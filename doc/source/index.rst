@@ -44,11 +44,20 @@ The best way to install this package is to use ``pip``:
 
    pip install gym-saturation
 
+You also can run it in a Docker container:
+
+.. code:: sh
+
+   docker build -t gym-saturation https://github.com/inpefess/gym-saturation.git
+   docker run -it --rm -p 8888:8888 gym-saturation jupyter-lab --ip=0.0.0.0 --port=8888 --no-browser
+
 How to use
 ==========
 
 See `the
 notebook <https://github.com/inpefess/gym-saturation/blob/master/examples/example.ipynb>`__
+or run it in
+`Binder <https://mybinder.org/v2/gh/inpefess/gym-saturation/HEAD?labpath=examples%2Fexample.ipynb>`__
 for more information.
 
 How to Contribute
