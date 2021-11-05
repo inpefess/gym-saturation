@@ -57,7 +57,7 @@ How to use
 See `the
 notebook <https://github.com/inpefess/gym-saturation/blob/master/examples/example.ipynb>`__
 or run it in
-`Binder <https://mybinder.org/v2/gh/inpefess/gym-saturation/HEAD?labpath=examples%2Fexample.ipynb>`__
+`Binder <https://mybinder.org/v2/gh/inpefess/gym-saturation/HEAD?labpath=example.ipynb>`__
 for more information.
 
 How to Contribute
