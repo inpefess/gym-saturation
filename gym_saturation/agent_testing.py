@@ -37,7 +37,7 @@ class Transition:
 
     state: List[Dict[str, Any]]
     action: int
-    policy_info: Dict[str, Any]
+    agent_info: Dict[str, Any]
     next_state: List[Dict[str, Any]]
     reward: float
     done: bool
@@ -72,14 +72,14 @@ def save_final_state(
 
 
 # pylint: disable=unused-argument
-def size_policy(
-    state: list, policy_info: Dict[str, Any], env_info: Dict[str, Any]
+def size_agent(
+    state: list, agent_info: Dict[str, Any], env_info: Dict[str, Any]
 ) -> Tuple[int, Dict[str, Any]]:
     """
-    an example of an implemented policy
+    an example of an implemented agent
 
     :param state: a list of clauses
-    :param policy_info: added for compatibility purpose
+    :param agent_info: added for compatibility purpose
     :param env_info: added for compatibility purpose
     :returns: the index of the clause with minimal length, empty info dict
     """
@@ -97,14 +97,14 @@ def size_policy(
 
 
 # pylint: disable=unused-argument
-def age_policy(
-    state: list, policy_info: Dict[str, Any], env_info: Dict[str, Any]
+def age_agent(
+    state: list, agent_info: Dict[str, Any], env_info: Dict[str, Any]
 ) -> Tuple[int, Dict[str, Any]]:
     """
-    another example of an implemented policy
+    another example of an implemented agent
 
     :param state: a list of clauses
-    :param policy_info: added for compatibility purpose
+    :param agent_info: added for compatibility purpose
     :param env_info: added for compatibility purpose
     :returns: the index of the first not yet processed clause, empty info dict
     """
@@ -115,14 +115,14 @@ def age_policy(
 
 
 # pylint: disable=unused-argument
-def random_policy(
-    state: list, policy_info: Dict[str, Any], env_info: Dict[str, Any]
+def random_agent(
+    state: list, agent_info: Dict[str, Any], env_info: Dict[str, Any]
 ) -> Tuple[int, Dict[str, Any]]:
     """
-    the most basic RL policy --- only exploration
+    the most basic RL agent --- only exploration
 
     :param state: a list of clauses
-    :param policy_info: added for compatibility purpose
+    :param agent_info: added for compatibility purpose
     :param env_info: added for compatibility purpose
     :returns: (an index of a randomly selected not yet processed clause,
         empty info dict)
@@ -138,7 +138,7 @@ def random_policy(
 def episode(
     problem_filename: str,
     step_limit: int,
-    policy: Callable[
+    agent: Callable[
         [List[Dict[str, Any]], Dict[str, Any], Dict[str, Any]],
         Tuple[int, Dict[str, Any]],
     ],
@@ -147,9 +147,9 @@ def episode(
     tries to solve the problem and logs the clauses
 
     >>> import shutil
-    >>> test_policy_output = "test_policy_output"
-    >>> shutil.rmtree(test_policy_output, ignore_errors=True)
-    >>> os.mkdir(test_policy_output)
+    >>> test_agent_output = "test_agent_output"
+    >>> shutil.rmtree(test_agent_output, ignore_errors=True)
+    >>> os.mkdir(test_agent_output)
     >>> import sys
     >>> if sys.version_info.major == 3 and sys.version_info.minor == 9:
     ...     from importlib.resources import files
@@ -163,31 +163,31 @@ def episode(
     >>> for i in range(2):
     ...     save_final_state(
     ...         problem_list[i],
-    ...         test_policy_output,
-    ...         episode(problem_list[i], 5, size_policy)[1]
+    ...         test_agent_output,
+    ...         episode(problem_list[i], 5, size_agent)[1]
     ...     )
-    >>> print(sorted(policy_testing_report(
-    ...     problem_list + ["this_is_a_test_case"], test_policy_output
+    >>> print(sorted(agent_testing_report(
+    ...     problem_list + ["this_is_a_test_case"], test_agent_output
     ... ).items()))
     [('TST001-1', ('PROOF_FOUND', 2, 2)), ('TST002-1', ('STEP_LIMIT', 5, -1)), ('this_is_a_test_case', ('ERROR', -1, -1))]
 
     :param problem_filename: the name of a problem file
     :param step_limit: a maximal number of steps in an episode
-    :param policy: a function, getting state as an argument and returning
+    :param agent: a function, getting state as an argument and returning
         action and info dict
     :returns: the episode memory
     """
     env = SaturationEnv(step_limit, [problem_filename])
     state, done = env.reset(), False
     episode_memory = []
-    policy_info: Dict[str, Any] = {}
+    agent_info: Dict[str, Any] = {}
     env_info: Dict[str, Any] = {}
     while not done:
-        action, policy_info = policy(state, policy_info, env_info)
+        action, agent_info = agent(state, agent_info, env_info)
         next_state, reward, done, env_info = env.step(action)
         episode_memory.append(
             Transition(
-                state, action, policy_info, next_state, reward, done, env_info
+                state, action, agent_info, next_state, reward, done, env_info
             )
         )
         state = next_state
@@ -262,7 +262,7 @@ def proof_length(empty_clause: Clause, state: List[Clause]) -> int:
     return len({clause.birth_step for clause in proof})
 
 
-def policy_testing_report(
+def agent_testing_report(
     problem_list: List[str], testing_result_folder: str
 ) -> Dict[str, Tuple[str, int, int]]:
     """
@@ -302,7 +302,7 @@ if __name__ == "__main__":
     _, an_episode_memory = episode(
         arguments.problem_filename,
         arguments.step_limit,
-        size_policy,
+        size_agent,
     )
     save_final_state(
         arguments.problem_filename, arguments.output_folder, an_episode_memory

@@ -92,7 +92,7 @@ tracker <https://github.com/inpefess/gym-saturation/issues>`__.
    :caption: Contents:
 	     
    what-is-going-on
-   testing-a-policy
+   testing-an-agent
    package-documentation
 
 Indices and tables
