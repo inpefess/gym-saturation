@@ -44,15 +44,15 @@ class SaturationEnv(Env):
     saturation algorithm defined in a Reiforcement Learning friendly way
 
     >>> import sys
-    >>> if sys.version_info.major == 3 and sys.version_info.minor == 9:
+    >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
     ...     from importlib.resources import files
     ... else:
     ...     from importlib_resources import files
     >>> tptp_folder = files("gym_saturation").joinpath("resources/TPTP-mock")
     >>> from glob import glob
-    >>> problem_list = glob(
+    >>> problem_list = sorted(glob(
     ...     os.path.join(tptp_folder, "Problems", "*", "*1-1.p")
-    ... )
+    ... ))
     >>> env = SaturationEnv(3, problem_list)
 
     there is nothing non-deterministic here, but the seed can be set

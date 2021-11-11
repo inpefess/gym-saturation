@@ -164,17 +164,18 @@ Saturation Environment
    :special-members: __init__
    :members:
 
-Policy Testing
+Agent Testing
 ***************
 
-This module is an example of testing your own trained policy.
+This module is an example of testing your own trained agent.
 
-.. autoclass:: gym_saturation.policy_testing.Transition
+.. autoclass:: gym_saturation.agent_testing.Transition
    :members:
-.. autofunction:: gym_saturation.policy_testing.save_final_state
-.. autofunction:: gym_saturation.policy_testing.size_policy
-.. autofunction:: gym_saturation.policy_testing.age_policy
-.. autofunction:: gym_saturation.policy_testing.random_policy
-.. autofunction:: gym_saturation.policy_testing.episode
-.. autofunction:: gym_saturation.policy_testing.proof_length
-.. autofunction:: gym_saturation.policy_testing.policy_testing_report
+.. autoclass:: gym_saturation.agent_testing.BaseAgent
+.. autoclass:: gym_saturation.agent_testing.SizeAgent
+.. autoclass:: gym_saturation.agent_testing.AgeAgent
+.. autoclass:: gym_saturation.agent_testing.RandomAgent
+.. autofunction:: gym_saturation.agent_testing.save_final_state
+.. autofunction:: gym_saturation.agent_testing.episode
+.. autofunction:: gym_saturation.agent_testing.proof_length
+.. autofunction:: gym_saturation.agent_testing.agent_testing_report
