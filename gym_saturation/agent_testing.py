@@ -161,7 +161,7 @@ def episode(
     >>> shutil.rmtree(test_agent_output, ignore_errors=True)
     >>> os.mkdir(test_agent_output)
     >>> import sys
-    >>> if sys.version_info.major == 3 and sys.version_info.minor == 9:
+    >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
     ...     from importlib.resources import files
     ... else:
     ...     from importlib_resources import files

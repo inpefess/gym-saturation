@@ -22,7 +22,7 @@ from lark import Lark, Token
 from gym_saturation.grammar import Clause, Function, Term
 from gym_saturation.parsing.cnf_parser import CNFParser
 
-if sys.version_info.major == 3 and sys.version_info.minor == 9:
+if sys.version_info.major == 3 and sys.version_info.minor >= 9:
     # pylint: disable=no-name-in-module, import-error
     from importlib.resources import files  # type: ignore
 else:
