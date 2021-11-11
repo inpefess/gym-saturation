@@ -2,3 +2,4 @@ venv*/
 doc/build/
 .mypy_cache/
 dist/
+.idea/

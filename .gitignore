@@ -13,3 +13,4 @@ runs/
 *.whl
 doc/build/
 *.pdf
+.idea/
