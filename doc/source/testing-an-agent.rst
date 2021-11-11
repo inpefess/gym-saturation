@@ -31,9 +31,9 @@ After processing problems, you can get a report about its performance::
   import sys
 
   sys.setrecursionlimit(10000)
-  problem_list = glob(os.path.join(
+  problem_list = sorted(glob(os.path.join(
       os.environ["TPTP_HOME"], "Problems", "*", "*-*.p")
-  )
+  ))
   report = agent_testing_report(problem_list, "TPTP_CNF_20")
 
 Applying different policies ``gym-saturation`` leads to the following results on all CNF problems from TPTP-v7.5.0 with the step limit set to 20:

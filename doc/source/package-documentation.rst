@@ -171,10 +171,11 @@ This module is an example of testing your own trained agent.
 
 .. autoclass:: gym_saturation.agent_testing.Transition
    :members:
+.. autoclass:: gym_saturation.agent_testing.BaseAgent
+.. autoclass:: gym_saturation.agent_testing.SizeAgent
+.. autoclass:: gym_saturation.agent_testing.AgeAgent
+.. autoclass:: gym_saturation.agent_testing.RandomAgent
 .. autofunction:: gym_saturation.agent_testing.save_final_state
-.. autofunction:: gym_saturation.agent_testing.size_agent
-.. autofunction:: gym_saturation.agent_testing.age_agent
-.. autofunction:: gym_saturation.agent_testing.random_agent
 .. autofunction:: gym_saturation.agent_testing.episode
 .. autofunction:: gym_saturation.agent_testing.proof_length
 .. autofunction:: gym_saturation.agent_testing.agent_testing_report
