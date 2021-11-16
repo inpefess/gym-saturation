@@ -24,6 +24,58 @@ bibliography: paper.bib
 
 Current applications of RL to saturation-based ATPs like Enigma [@DBLP:conf/cade/JakubuvCOP0U20] or Deepire [@DBLP:conf/cade/000121a] are similar in that the environment and the agent are not separate pieces of software but parts of larger systems that are hard to disentangle. The same is true for non saturation-based RL-friendly provers too (e.g. lazyCoP, @DBLP:conf/tableaux/RawsonR21). This monolithic approach hinders free experimentation with novel machine learning (ML) models and RL algorithms and creates unnecessary complications for ML and RL experts willing to contribute to the field. In contrast, for interactive theorem provers, some projects like HOList [@DBLP:conf/icml/BansalLRSW19] separate the concepts of environment and agent. Such modular architecture proved to help create multiple successful agents by different groups of researchers (see, e.g. @DBLP:conf/aaai/PaliwalLRBS20 or @DBLP:journals/corr/abs-1905-10501). `gym-saturation` is an attempt to implement a modular environment-agent architecture of an RL-based ATP. In addition, some RL empowered saturation ATPs are not accompanied with their source code [@DBLP:journals/corr/abs-2106-03906], while `gym-saturation` is open-source software.
 
+# Usage example
+
+Suppose we want to prove an extremely simple theorem with a very basic agent. We can do that in the following way:
+
+```python
+# first we create and reset a OpenAI Gym environment
+from importlib.resources import files
+import gym
+
+env = gym.make(
+    "gym_saturation:saturation-v0",
+    # we will try to find a proof shorter than 10 steps
+    step_limit=10,
+    # for a classical syllogism about Socrates
+    problem_list=[
+        files("gym_saturation").joinpath(
+            "resources/TPTP-mock/Problems/TST/TST003-1.p"
+        )
+    ],
+)
+env.reset()
+# we can render the environment (that will become the beginning of the proof)
+print("starting hypotheses:")
+print(env.render("human"))
+# our 'age' agent will always select clauses for inference
+# in the order they appeared in current proof attempt
+action = 0
+done = False
+while not done:
+    observation, reward, done, info = env.step(action)
+    action += 1
+# SaturationEnv has an additional method
+# for extracting only clauses which became parts of the proof
+# (some steps were unnecessary to find the proof)
+print("refutation proof:")
+print(env.tstp_proof)
+print(f"number of attempted steps: {action}")
+```
+
+The output of this script includes a refutation proof found:
+
+```
+starting hypotheses:
+cnf(p_imp_q, hypothesis, ~man(X0) | mortal(X0)).
+cnf(p, hypothesis, man(socrates)).
+cnf(q, hypothesis, ~mortal(socrates)).
+refutation proof:
+cnf(_0, hypothesis, mortal(socrates), inference(resolution, [], [p_imp_q, p])).
+cnf(_2, hypothesis, $false, inference(resolution, [], [q, _0])).
+number of attempted steps: 6
+```
+
 # Architecture
 
 `gym-saturation` includes several sub-packages:
