@@ -77,6 +77,14 @@ welcome. To start:
    # recommended but not necessary
    pre-commit install
 
+All the tests in this package are
+`doctests <https://docs.python.org/3/library/doctest.html>`__. One can
+run them with the following command:
+
+.. code:: sh
+
+   pytest --doctest-modules gym-saturation
+
 To check the code quality before creating a pull request, one might run
 the script ``show_report.sh``. It locally does nearly the same as the CI
 pipeline after the PR is created.
