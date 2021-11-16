@@ -35,7 +35,7 @@ from gym_saturation.logic_ops.utils import (
 from gym_saturation.parsing.json_grammar import clause_to_dict
 from gym_saturation.parsing.tptp_parser import TPTPParser, clause_to_tptp
 
-INFERRED_CLAUSES_PREFIX = "inferred_"
+INFERRED_CLAUSES_PREFIX = "_"
 STATE_DIFF_UPDATED = "state_diff_updated"
 
 
@@ -77,10 +77,10 @@ class SaturationEnv(Env):
     one can look at the current state in TPTP format
 
     >>> print(env.render())
-    cnf(this_is_a_test_case_1, hypothesis, this_is_a_test_case(test_constant) ).
-    cnf(this_is_a_test_case_2, hypothesis, ~this_is_a_test_case(test_constant) ).
-    cnf(test_axiom, hypothesis, =(test_constant,X0) ).
-    cnf(test_axiom_2, hypothesis, ~=(test_constant,0) ).
+    cnf(this_is_a_test_case_1, hypothesis, this_is_a_test_case(test_constant)).
+    cnf(this_is_a_test_case_2, hypothesis, ~this_is_a_test_case(test_constant)).
+    cnf(test_axiom, hypothesis, =(test_constant, X0)).
+    cnf(test_axiom_2, hypothesis, ~=(test_constant, 0)).
 
     ``ansi`` mode returns a JSON representation of the state
     it should be more easily parsable than TPTP, although less human-friendly
@@ -125,7 +125,7 @@ class SaturationEnv(Env):
     for validation purposes)
 
     >>> print(env.tstp_proof)
-    cnf(inferred_0, hypothesis, $false, inference(resolution, [], [this_is_a_test_case_1,this_is_a_test_case_2])).
+    cnf(_0, hypothesis, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
 
     >>> env = SaturationEnv(1, problem_list)
 
@@ -172,6 +172,7 @@ class SaturationEnv(Env):
         else:
             self._problem = problem
         self._step_count = 0
+        self._inference_count = 0
         self._state = reindex_variables(self._init_clauses(), "X")
         self.action_space = list(range(len(self._state)))
         return self.state
@@ -299,9 +300,11 @@ class SaturationEnv(Env):
         :returns: TSTP proof (if found; raises error otherwise)
         """
         return "\n".join(
-            [
-                clause_to_tptp(clause)
-                for clause in reduce_to_proof(self._state)
-                if clause.inference_rule is not None
-            ]
+            reversed(
+                [
+                    clause_to_tptp(clause)
+                    for clause in reduce_to_proof(self._state)
+                    if clause.inference_rule is not None
+                ]
+            )
         )
