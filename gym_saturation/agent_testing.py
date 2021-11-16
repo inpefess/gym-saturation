@@ -176,7 +176,7 @@ def episode(
     ...     problem_list=problem_list,
     ... )
     >>> size_agent = SizeAgent()
-    >>> for i in range(2):
+    >>> for i in range(3):
     ...     save_final_state(
     ...         problem_list[i],
     ...         test_agent_output,
@@ -185,7 +185,7 @@ def episode(
     >>> print(sorted(agent_testing_report(
     ...     problem_list + ["this_is_a_test_case"], test_agent_output
     ... ).items()))
-    [('TST001-1', ('PROOF_FOUND', 2, 2)), ('TST002-1', ('STEP_LIMIT', 5, -1)), ('this_is_a_test_case', ('ERROR', -1, -1))]
+    [('TST001-1', ('PROOF_FOUND', 2, 2)), ('TST002-1', ('STEP_LIMIT', 5, -1)), ('TST003-1', ('PROOF_FOUND', 4, 3)), ('this_is_a_test_case', ('ERROR', -1, -1))]
 
     :param env: a `gym_saturation` environment
     :param agent: an initialized agent. Must have `get_action` method
