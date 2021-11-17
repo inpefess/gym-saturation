@@ -25,14 +25,21 @@ from typing import Any, Dict, List, Optional, Tuple
 import gym
 
 from gym_saturation.envs import SaturationEnv
+from gym_saturation.envs.saturation_env import STATE_DIFF_UPDATED
 from gym_saturation.grammar import Clause
 from gym_saturation.logic_ops.utils import clause_length
 from gym_saturation.parsing.json_grammar import dict_to_clause
 
 
-# pylint: disable=too-few-public-methods
 class BaseAgent:
-    """ a basic RL agent """
+    """a basic RL agent"""
+
+    _state = None
+
+    @property
+    def state(self):
+        """agent can have its inner state"""
+        return self._state
 
     def get_action(
         self,
@@ -94,7 +101,7 @@ def save_final_state(
 
 
 class SizeAgent(BaseAgent):
-    """ agent which selects the shortest clause """
+    """agent which selects the shortest clause"""
 
     def get_action(
         self,
@@ -113,7 +120,7 @@ class SizeAgent(BaseAgent):
 
 
 class AgeAgent(BaseAgent):
-    """ agent which selects the oldest clause """
+    """agent which selects the oldest clause"""
 
     def get_action(
         self,
@@ -131,7 +138,7 @@ class AgeAgent(BaseAgent):
 
 
 class RandomAgent(BaseAgent):
-    """ agent which selects clauses randomly """
+    """agent which selects clauses randomly"""
 
     def get_action(
         self,
@@ -194,14 +201,19 @@ def episode(
     """
     env_state, reward, done = env.reset(problem=problem_filename), 0.0, False
     episode_memory = []
-    agent_state: Dict[str, Any] = {}
-    info: Dict[str, Any] = {}
+    info: Dict[str, Any] = {STATE_DIFF_UPDATED: dict(enumerate(env_state))}
     while not done:
         action = agent.get_action(env_state, reward, info)
         observation, reward, done, info = env.step(action)
         episode_memory.append(
             Transition(
-                env_state, agent_state, action, observation, reward, done, info
+                env_state,
+                agent.state,
+                action,
+                observation,
+                reward,
+                done,
+                info,
             )
         )
         env_state = observation
