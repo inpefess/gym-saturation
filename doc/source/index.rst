@@ -18,17 +18,18 @@ gym-saturation
 
 ``gym-saturation`` is an `OpenAI Gym <https://gym.openai.com/>`__
 environment for reinforcement learning (RL) agents capable of proving
-theorems. Currently, only theorems in CNF sublanguage of
-`TPTP <http://tptp.org>`__ are supported. ``gym-saturation`` implements
-the ‘given clause’ algorithm (similar to one used in
+theorems. Currently, only theorems written in `TPTP
+library <http://tptp.org>`__ formal language in clausal normal form
+(CNF) are supported. ``gym-saturation`` implements the ‘given clause’
+algorithm (similar to one used in
 `Vampire <https://github.com/vprover/vampire>`__ and `E
-Prover <https://github.com/eprover/eprover>`__). Although, being written
-in Python, ``gym-saturation`` is closer to
+Prover <https://github.com/eprover/eprover>`__). Being written in
+Python, ``gym-saturation`` was inspired by
 `PyRes <https://github.com/eprover/PyRes>`__. In contrast to monolithic
-architecture of a typical ATP, ``gym-saturation`` gives different agents
-opportunities to select clauses themselves and train from their
-experience. Combined with a particular agent, ``gym-saturation`` can
-work as an Automated Theorem Prover (ATP).
+architecture of a typical Automated Theorem Prover (ATP),
+``gym-saturation`` gives different agents opportunities to select
+clauses themselves and train from their experience. Combined with a
+particular agent, ``gym-saturation`` can work as an ATP.
 
 ``gym-saturation`` can be interesting for RL practitioners willing to
 apply their experience to theorem proving without coding all the
@@ -44,7 +45,7 @@ The best way to install this package is to use ``pip``:
 
    pip install gym-saturation
 
-You also can run it in a Docker container:
+One can also run it in a Docker container:
 
 .. code:: sh
 
@@ -76,6 +77,14 @@ welcome. To start:
    poetry install
    # recommended but not necessary
    pre-commit install
+
+All the tests in this package are
+`doctests <https://docs.python.org/3/library/doctest.html>`__. One can
+run them with the following command:
+
+.. code:: sh
+
+   pytest --doctest-modules gym-saturation
 
 To check the code quality before creating a pull request, one might run
 the script ``show_report.sh``. It locally does nearly the same as the CI

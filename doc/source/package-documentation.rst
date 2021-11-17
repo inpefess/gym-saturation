@@ -144,6 +144,7 @@ CNF Parser
 JSON Encoder
 =============
 .. autoclass:: gym_saturation.parsing.json_grammar.ClauseJSONEncoder
+   :members:
 .. _dict_to_clause:
 
 .. autofunction:: gym_saturation.parsing.json_grammar.dict_to_clause
@@ -172,9 +173,13 @@ This module is an example of testing your own trained agent.
 .. autoclass:: gym_saturation.agent_testing.Transition
    :members:
 .. autoclass:: gym_saturation.agent_testing.BaseAgent
+   :members:
 .. autoclass:: gym_saturation.agent_testing.SizeAgent
+   :members:
 .. autoclass:: gym_saturation.agent_testing.AgeAgent
+   :members:
 .. autoclass:: gym_saturation.agent_testing.RandomAgent
+   :members:
 .. autofunction:: gym_saturation.agent_testing.save_final_state
 .. autofunction:: gym_saturation.agent_testing.episode
 .. autofunction:: gym_saturation.agent_testing.proof_length

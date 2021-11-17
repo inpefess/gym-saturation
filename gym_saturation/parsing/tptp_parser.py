@@ -104,13 +104,13 @@ def clause_to_tptp(clause: Clause) -> str:
         res += ("~" if literal.negated else "") + (
             literal.atom.name
             + "("
-            + ",".join(
+            + ", ".join(
                 [_term_to_tptp(term) for term in literal.atom.arguments]
             )
-            + ") |"
+            + ") | "
         )
-    if res[-1] == "|":
-        res = res[:-1]
+    if res[-2:] == "| ":
+        res = res[:-3]
     if clause.literals == []:
         res += "$false"
     if (
@@ -119,7 +119,7 @@ def clause_to_tptp(clause: Clause) -> str:
     ):
         res += (
             f", inference({clause.inference_rule}, [], ["
-            + ",".join(clause.inference_parents)
+            + ", ".join(clause.inference_parents)
             + "])"
         )
     return res + ")."
