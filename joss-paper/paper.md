@@ -80,10 +80,10 @@ number of attempted steps: 6
 
 `gym-saturation` includes several sub-packages:
 
-* parsing
-* logic operations
+* parsing (happens during `env.reset()` in example code snippet)
+* logic operations (happen during `env.step(action)` in the example)
 * AI Gym environment implementation
-* agent testing
+* agent testing (a bit more elaborated version of the `while` loop from the examle)
 
 `gym-saturation` relies on a deduction system of four rules which is known to be refutation complete [@doi:10.1137/0204036]:
 
