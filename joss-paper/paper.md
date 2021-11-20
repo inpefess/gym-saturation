@@ -83,7 +83,7 @@ number of attempted steps: 6
 * parsing
 * logic operations
 * AI Gym environment implementation
-* policy testing
+* agent testing
 
 `gym-saturation` relies on a deduction system of four rules which is known to be refutation complete [@doi:10.1137/0204036]:
 
@@ -134,13 +134,13 @@ Clause(
 )
 ```
 
-This grammar serves as the glue for `gym-saturation` sub-packages, which are, in principle, independent of each other. After switching to another parser or another deduction system, the policy testing script won't break, and RL developers won't need to modify their agents for compatibility (for them, the environment will have the same standard OpenAI Gym API).
+This grammar serves as the glue for `gym-saturation` sub-packages, which are, in principle, independent of each other. After switching to another parser or another deduction system, the agent testing script won't break, and RL developers won't need to modify their agents for compatibility (for them, the environment will have the same standard OpenAI Gym API).
 
-![A diagram showing interactions between four main subpackages of `gym-saturation`: 1) parsing; 2) logic operations (including the given clause algorithm); 3) OpenAI Gym Env implementation; 4) the policy testing script.\label{fig:architecture}](architecture.png)
+![A diagram showing interactions between four main subpackages of `gym-saturation`: 1) parsing; 2) logic operations (including the given clause algorithm); 3) OpenAI Gym Env implementation; 4) the agent testing script.\label{fig:architecture}](architecture.png)
 
-Policy testing is a simple episode pipeline (see \autoref{fig:architecture}). It is supposed to be run in parallel (e.g. using GNU Parallel, @tange_2021_5233953) for a testing subset of problems. See the following table for the testing results of two popular heuristic-based agents on TPTP v7.5.0 with 20 steps limit:
+Agent testing is a simple episode pipeline (see \autoref{fig:architecture}). It is supposed to be run in parallel (e.g. using GNU Parallel, @tange_2021_5233953) for a testing subset of problems. See the following table for the testing results of two popular heuristic-based agents on TPTP v7.5.0 with 20 steps limit:
 
-| policy | total problems | proof found | step limit reached | error |
+| agent | total problems | proof found | step limit reached | error |
 |--------|----------------|-------------|--------------------|-------|
 | size   | 8257           | 2245        | 5889               | 123   |
 | age    | 8257           | 234         | 7884               | 139   |
