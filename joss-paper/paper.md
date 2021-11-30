@@ -153,6 +153,6 @@ At the moment of writing this paper, `gym-saturation` was used by its author dur
 
 # Acknowledgements
 
-This work has been supported by the French government, through the 3IA Côte d'Azur Investments in the Future project managed by the National Research Agency (ANR) with the reference number ANR-19-P3IA-0002.
+This work has been supported by the French government, through the 3IA Côte d'Azur Investments in the Future project managed by the National Research Agency (ANR) with the reference number ANR-19-P3IA-0002. This work was performed using HPC resources from GENCI-IDRIS (Grant 2021-AD011013125).
 
 # References
