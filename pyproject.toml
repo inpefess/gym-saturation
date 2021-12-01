@@ -5,7 +5,7 @@ description = "An OpenAI Gym environment for saturation provers"
 authors = ["Boris Shminke <boris@shminke.ml>"]
 license = "Apache-2.0"
 repository = "https://github.com/inpefess/gym-saturation"
-readme = "README.md"
+readme = "README.rst"
 classifiers=[
 	"Programming Language :: Python :: 3.6",
 	"Programming Language :: Python :: 3.7",
