@@ -43,7 +43,7 @@ class BaseAgent:
 
     def get_action(
         self,
-        observation: List[Dict[str, Any]],
+        observation: dict,
         reward: float,
         info: Dict[str, Any],
     ) -> int:
@@ -64,10 +64,10 @@ class Transition:
     before the agent's action, the action itself and its results
     """
 
-    env_state: List[Dict[str, Any]]
+    env_state: dict
     agent_state: Any
     action: int
-    observation: List[Dict[str, Any]]
+    observation: dict
     reward: float
     done: bool
     info: Dict[str, Any]
@@ -97,7 +97,7 @@ def save_final_state(
         "w",
         encoding="utf-8",
     ) as data_file:
-        data_file.write(json.dumps(episode_memory[-1].observation))
+        data_file.write(json.dumps(episode_memory[-1].observation["real_obs"]))
 
 
 class SizeAgent(BaseAgent):
@@ -105,14 +105,14 @@ class SizeAgent(BaseAgent):
 
     def get_action(
         self,
-        observation: List[Dict[str, Any]],
+        observation: dict,
         reward: float,
         info: Dict[str, Any],
     ) -> int:
         return min(
             [
                 (i, clause_length(dict_to_clause(clause)))
-                for i, clause in enumerate(observation)
+                for i, clause in enumerate(observation["real_obs"])
                 if not clause["processed"]
             ],
             key=itemgetter(1),
@@ -124,14 +124,14 @@ class AgeAgent(BaseAgent):
 
     def get_action(
         self,
-        observation: List[Dict[str, Any]],
+        observation: dict,
         reward: float,
         info: Dict[str, Any],
     ) -> int:
         return min(
             [
                 i
-                for i, clause in enumerate(observation)
+                for i, clause in enumerate(observation["real_obs"])
                 if not clause["processed"]
             ]
         )
@@ -142,14 +142,14 @@ class RandomAgent(BaseAgent):
 
     def get_action(
         self,
-        observation: List[Dict[str, Any]],
+        observation: dict,
         reward: float,
         info: Dict[str, Any],
     ) -> int:
         return random.choice(
             [
                 i
-                for i, clause in enumerate(observation)
+                for i, clause in enumerate(observation["real_obs"])
                 if not clause["processed"]
             ]
         )
@@ -173,6 +173,7 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> List[Transition]:
     ...     files("gym_saturation")
     ...     .joinpath("resources/TPTP-mock/Problems/TST")
     ... , "*-*.p")))
+    >>> random.seed(0)
     >>> agents = [SizeAgent(), RandomAgent(), AgeAgent()]
     >>> for i in range(3):
     ...     env = gym.make(
