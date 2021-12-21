@@ -155,11 +155,7 @@ class RandomAgent(BaseAgent):
         )
 
 
-def episode(
-    env: SaturationEnv,
-    agent: BaseAgent,
-    problem_filename: Optional[str] = None,
-) -> List[Transition]:
+def episode(env: SaturationEnv, agent: BaseAgent) -> List[Transition]:
     """
     tries to solve the problem and logs the clauses
 
@@ -177,29 +173,29 @@ def episode(
     ...     files("gym_saturation")
     ...     .joinpath("resources/TPTP-mock/Problems/TST")
     ... , "*-*.p")))
-    >>> env = gym.make(
-    ...     "gym_saturation:saturation-v0",
-    ...     step_limit=5,
-    ...     problem_list=problem_list,
-    ... )
-    >>> size_agent = SizeAgent()
+    >>> agents = [SizeAgent(), RandomAgent(), AgeAgent()]
     >>> for i in range(3):
+    ...     env = gym.make(
+    ...         "gym_saturation:saturation-v0",
+    ...         step_limit=5,
+    ...         problem_list=[problem_list[i]],
+    ...     )
     ...     save_final_state(
     ...         problem_list[i],
     ...         test_agent_output,
-    ...         episode(env, size_agent, problem_list[i])
+    ...         episode(env, agents[i])
     ...     )
     >>> print(sorted(agent_testing_report(
     ...     problem_list + ["this_is_a_test_case"], test_agent_output
     ... ).items()))
-    [('TST001-1', ('PROOF_FOUND', 2, 2)), ('TST002-1', ('STEP_LIMIT', 5, -1)), ('TST003-1', ('PROOF_FOUND', 4, 3)), ('this_is_a_test_case', ('ERROR', -1, -1))]
+    [('TST001-1', ('PROOF_FOUND', 2, 2)), ('TST002-1', ('STEP_LIMIT', 5, -1)), ('TST003-1', ('STEP_LIMIT', 4, -1)), ('this_is_a_test_case', ('ERROR', -1, -1))]
 
     :param env: a `gym_saturation` environment
     :param agent: an initialized agent. Must have `get_action` method
     :param problem_filename: the name of a problem file
     :returns: the episode memory
     """
-    env_state, reward, done = env.reset(problem=problem_filename), 0.0, False
+    env_state, reward, done = env.reset(), 0.0, False
     episode_memory = []
     info: Dict[str, Any] = {STATE_DIFF_UPDATED: dict(enumerate(env_state))}
     while not done:

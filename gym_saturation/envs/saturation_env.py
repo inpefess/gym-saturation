@@ -15,7 +15,7 @@ limitations under the License.
 """
 import os
 import random
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 from gym import Env
 
@@ -60,19 +60,8 @@ class SaturationEnv(Env):
     >>> env.seed(0)
     0
 
-    problem is not chosen yet
-
-    >>> env.problem
-    Traceback (most recent call last):
-     ...
-    ValueError: Problem not defined. Run env.reset() first
     >>> len(env.reset())
     4
-
-    now the problem is defined
-
-    >>> print(os.path.basename(env.problem))
-    TST001-1.p
 
     one can look at the current state in TPTP format
 
@@ -132,7 +121,7 @@ class SaturationEnv(Env):
     one can also choose a particular problem file during reset
 
     >>> problem = os.path.join(tptp_folder, "Problems", "TST", "TST001-1.p")
-    >>> result = env.reset(problem)
+    >>> result = env.reset()
 
     if the proof is not found after a fixed number of steps the reward is ``0``
 
@@ -151,11 +140,11 @@ class SaturationEnv(Env):
         self._step_count = 0
         self._inference_count = 0
         self._state: List[Clause] = []
-        self._problem: Optional[str] = None
 
     def _init_clauses(self):
-        tptp_folder = os.path.join(os.path.dirname(self._problem), "..", "..")
-        with open(self._problem, "r", encoding="utf-8") as problem_file:
+        problem = random.choice(self.problem_list)
+        tptp_folder = os.path.join(os.path.dirname(problem), "..", "..")
+        with open(problem, "r", encoding="utf-8") as problem_file:
             problem_text = problem_file.read()
         clauses = TPTPParser().parse(problem_text, tptp_folder)
         for clause in clauses:
@@ -165,12 +154,7 @@ class SaturationEnv(Env):
             clause.processed = False
         return clauses
 
-    # pylint: disable=arguments-differ
-    def reset(self, problem: Optional[str] = None) -> list:
-        if problem is None:
-            self._problem = random.choice(self.problem_list)
-        else:
-            self._problem = problem
+    def reset(self) -> list:
         self._step_count = 0
         self._inference_count = 0
         self._state = reindex_variables(self._init_clauses(), "X")
@@ -280,15 +264,6 @@ class SaturationEnv(Env):
         :returns: environment state in Python ``dict`` format
         """
         return clause_to_dict(self._state)
-
-    @property
-    def problem(self) -> str:
-        """
-        :returns: full filename of a problem
-        """
-        if self._problem is not None:
-            return self._problem
-        raise ValueError("Problem not defined. Run env.reset() first")
 
     def seed(self, seed=None):
         random.seed(seed)
