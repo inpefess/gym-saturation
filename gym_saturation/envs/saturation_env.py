@@ -15,10 +15,12 @@ limitations under the License.
 """
 import os
 import random
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
-from gym import Env
+import numpy as np
+from gym import Env, spaces
 
+from gym_saturation.clause_space import ClauseSpace
 from gym_saturation.grammar import Clause
 from gym_saturation.logic_ops.factoring import all_possible_factors
 from gym_saturation.logic_ops.paramodulation import all_paramodulants_from_list
@@ -37,6 +39,7 @@ from gym_saturation.parsing.tptp_parser import TPTPParser, clause_to_tptp
 
 INFERRED_CLAUSES_PREFIX = "_"
 STATE_DIFF_UPDATED = "state_diff_updated"
+MAX_CLAUSES = 1000
 
 
 class SaturationEnv(Env):
@@ -53,26 +56,19 @@ class SaturationEnv(Env):
     >>> problem_list = sorted(glob(
     ...     os.path.join(tptp_folder, "Problems", "*", "*1-1.p")
     ... ))
-    >>> env = SaturationEnv(3, problem_list)
-
-    there is nothing non-deterministic here, but the seed can be set
-
+    >>> env = SaturationEnv(3, problem_list, 1)
     >>> env.seed(0)
     0
-
-    problem is not chosen yet
-
-    >>> env.problem
+    >>> env.reset()
     Traceback (most recent call last):
      ...
-    ValueError: Problem not defined. Run env.reset() first
-    >>> len(env.reset())
+    ValueError: Too many clauses: 4
+    consider increasing `max_clauses` parameter of `__init__`
+    >>> env = SaturationEnv(3, problem_list)
+    >>> env.seed(0)
+    0
+    >>> len(env.reset()["real_obs"])
     4
-
-    now the problem is defined
-
-    >>> print(os.path.basename(env.problem))
-    TST001-1.p
 
     one can look at the current state in TPTP format
 
@@ -132,7 +128,7 @@ class SaturationEnv(Env):
     one can also choose a particular problem file during reset
 
     >>> problem = os.path.join(tptp_folder, "Problems", "TST", "TST001-1.p")
-    >>> result = env.reset(problem)
+    >>> result = env.reset()
 
     if the proof is not found after a fixed number of steps the reward is ``0``
 
@@ -144,6 +140,7 @@ class SaturationEnv(Env):
         self,
         step_limit: int,
         problem_list: List[str],
+        max_clauses: int = MAX_CLAUSES,
     ):
         super().__init__()
         self.step_limit = step_limit
@@ -151,11 +148,18 @@ class SaturationEnv(Env):
         self._step_count = 0
         self._inference_count = 0
         self._state: List[Clause] = []
-        self._problem: Optional[str] = None
+        self.action_space = spaces.Discrete(max_clauses)
+        self.observation_space = spaces.Dict(
+            {
+                "action_mask": spaces.Box(0, 1, shape=(max_clauses,)),
+                "real_obs": ClauseSpace(),
+            }
+        )
 
     def _init_clauses(self):
-        tptp_folder = os.path.join(os.path.dirname(self._problem), "..", "..")
-        with open(self._problem, "r", encoding="utf-8") as problem_file:
+        problem = random.choice(self.problem_list)
+        tptp_folder = os.path.join(os.path.dirname(problem), "..", "..")
+        with open(problem, "r", encoding="utf-8") as problem_file:
             problem_text = problem_file.read()
         clauses = TPTPParser().parse(problem_text, tptp_folder)
         for clause in clauses:
@@ -165,16 +169,10 @@ class SaturationEnv(Env):
             clause.processed = False
         return clauses
 
-    # pylint: disable=arguments-differ
-    def reset(self, problem: Optional[str] = None) -> list:
-        if problem is None:
-            self._problem = random.choice(self.problem_list)
-        else:
-            self._problem = problem
+    def reset(self) -> dict:
         self._step_count = 0
         self._inference_count = 0
         self._state = reindex_variables(self._init_clauses(), "X")
-        self.action_space = list(range(len(self._state)))
         return self.state
 
     def _add_to_state(self, new_clauses: List[Clause]) -> None:
@@ -232,8 +230,8 @@ class SaturationEnv(Env):
             + [(action, clause_to_dict(self._state[action]))]
         )
 
-    def step(self, action: int) -> Tuple[list, float, bool, dict]:
-        if action not in self.action_space:
+    def step(self, action: int) -> Tuple[dict, float, bool, dict]:
+        if self._state[action].processed:
             raise ValueError(f"action {action} is not valid")
         self._step_count += 1
         if self._state[action].literals == []:
@@ -259,15 +257,17 @@ class SaturationEnv(Env):
             or self._step_count >= self.step_limit
         ):
             return self.state, 0.0, True, {STATE_DIFF_UPDATED: updated}
-        self.action_space = [
-            i for i, clause in enumerate(self._state) if not clause.processed
-        ]
-        return self.state, 0.0, False, {STATE_DIFF_UPDATED: updated}
+        return (
+            self.state,
+            0.0,
+            False,
+            {STATE_DIFF_UPDATED: updated},
+        )
 
     # pylint: disable=inconsistent-return-statements
     def render(self, mode="human"):
         if mode == "ansi":
-            return str(self.state)
+            return str(self.state["real_obs"])
         if mode == "human":
             return "\n".join(
                 [clause_to_tptp(clause) for clause in self._state]
@@ -275,20 +275,28 @@ class SaturationEnv(Env):
         super().render(mode=mode)
 
     @property
-    def state(self) -> list:
+    def state(self) -> dict:
         """
         :returns: environment state in Python ``dict`` format
         """
-        return clause_to_dict(self._state)
-
-    @property
-    def problem(self) -> str:
-        """
-        :returns: full filename of a problem
-        """
-        if self._problem is not None:
-            return self._problem
-        raise ValueError("Problem not defined. Run env.reset() first")
+        if len(self._state) > self.action_space.n:
+            raise ValueError(
+                f"Too many clauses: {len(self._state)}\n"
+                "consider increasing `max_clauses` parameter of `__init__`"
+            )
+        return {
+            "real_obs": clause_to_dict(self._state),
+            "action_mask": (
+                np.array(
+                    [
+                        0.0 if clause.processed else 1.0
+                        for clause in self._state
+                    ]
+                    + self.action_space.n * [0.0],
+                    np.float32,
+                )
+            )[: self.action_space.n],
+        }
 
     def seed(self, seed=None):
         random.seed(seed)

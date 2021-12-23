@@ -156,6 +156,14 @@ TPTP Parser
    :members:
 .. autofunction:: gym_saturation.parsing.tptp_parser.clause_to_tptp
 
+Clause Space
+*************
+.. _clause_space:
+
+.. autoclass:: gym_saturation.clause_space.ClauseSpace
+   :special-members: __init__
+   :members:
+
 Environments
 *************
 

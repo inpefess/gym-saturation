@@ -43,7 +43,7 @@ class BaseAgent:
 
     def get_action(
         self,
-        observation: List[Dict[str, Any]],
+        observation: dict,
         reward: float,
         info: Dict[str, Any],
     ) -> int:
@@ -64,10 +64,10 @@ class Transition:
     before the agent's action, the action itself and its results
     """
 
-    env_state: List[Dict[str, Any]]
+    env_state: dict
     agent_state: Any
     action: int
-    observation: List[Dict[str, Any]]
+    observation: dict
     reward: float
     done: bool
     info: Dict[str, Any]
@@ -97,7 +97,7 @@ def save_final_state(
         "w",
         encoding="utf-8",
     ) as data_file:
-        data_file.write(json.dumps(episode_memory[-1].observation))
+        data_file.write(json.dumps(episode_memory[-1].observation["real_obs"]))
 
 
 class SizeAgent(BaseAgent):
@@ -105,14 +105,14 @@ class SizeAgent(BaseAgent):
 
     def get_action(
         self,
-        observation: List[Dict[str, Any]],
+        observation: dict,
         reward: float,
         info: Dict[str, Any],
     ) -> int:
         return min(
             [
                 (i, clause_length(dict_to_clause(clause)))
-                for i, clause in enumerate(observation)
+                for i, clause in enumerate(observation["real_obs"])
                 if not clause["processed"]
             ],
             key=itemgetter(1),
@@ -124,14 +124,14 @@ class AgeAgent(BaseAgent):
 
     def get_action(
         self,
-        observation: List[Dict[str, Any]],
+        observation: dict,
         reward: float,
         info: Dict[str, Any],
     ) -> int:
         return min(
             [
                 i
-                for i, clause in enumerate(observation)
+                for i, clause in enumerate(observation["real_obs"])
                 if not clause["processed"]
             ]
         )
@@ -142,24 +142,20 @@ class RandomAgent(BaseAgent):
 
     def get_action(
         self,
-        observation: List[Dict[str, Any]],
+        observation: dict,
         reward: float,
         info: Dict[str, Any],
     ) -> int:
         return random.choice(
             [
                 i
-                for i, clause in enumerate(observation)
+                for i, clause in enumerate(observation["real_obs"])
                 if not clause["processed"]
             ]
         )
 
 
-def episode(
-    env: SaturationEnv,
-    agent: BaseAgent,
-    problem_filename: Optional[str] = None,
-) -> List[Transition]:
+def episode(env: SaturationEnv, agent: BaseAgent) -> List[Transition]:
     """
     tries to solve the problem and logs the clauses
 
@@ -177,29 +173,30 @@ def episode(
     ...     files("gym_saturation")
     ...     .joinpath("resources/TPTP-mock/Problems/TST")
     ... , "*-*.p")))
-    >>> env = gym.make(
-    ...     "gym_saturation:saturation-v0",
-    ...     step_limit=5,
-    ...     problem_list=problem_list,
-    ... )
-    >>> size_agent = SizeAgent()
+    >>> random.seed(0)
+    >>> agents = [SizeAgent(), RandomAgent(), AgeAgent()]
     >>> for i in range(3):
+    ...     env = gym.make(
+    ...         "gym_saturation:saturation-v0",
+    ...         step_limit=5,
+    ...         problem_list=[problem_list[i]],
+    ...     )
     ...     save_final_state(
     ...         problem_list[i],
     ...         test_agent_output,
-    ...         episode(env, size_agent, problem_list[i])
+    ...         episode(env, agents[i])
     ...     )
     >>> print(sorted(agent_testing_report(
     ...     problem_list + ["this_is_a_test_case"], test_agent_output
     ... ).items()))
-    [('TST001-1', ('PROOF_FOUND', 2, 2)), ('TST002-1', ('STEP_LIMIT', 5, -1)), ('TST003-1', ('PROOF_FOUND', 4, 3)), ('this_is_a_test_case', ('ERROR', -1, -1))]
+    [('TST001-1', ('PROOF_FOUND', 2, 2)), ('TST002-1', ('STEP_LIMIT', 5, -1)), ('TST003-1', ('STEP_LIMIT', 4, -1)), ('this_is_a_test_case', ('ERROR', -1, -1))]
 
     :param env: a `gym_saturation` environment
     :param agent: an initialized agent. Must have `get_action` method
     :param problem_filename: the name of a problem file
     :returns: the episode memory
     """
-    env_state, reward, done = env.reset(problem=problem_filename), 0.0, False
+    env_state, reward, done = env.reset(), 0.0, False
     episode_memory = []
     info: Dict[str, Any] = {STATE_DIFF_UPDATED: dict(enumerate(env_state))}
     while not done:

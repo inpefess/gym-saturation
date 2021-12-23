@@ -9,7 +9,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v2-dependencies-{{ checksum "poetry.lock" }}
+            - v1-dependencies-{{ checksum "poetry.lock" }}
       - run:
           name: install dependencies
           command: |
@@ -21,7 +21,7 @@ jobs:
       - save_cache:
           paths:
             - ./venv
-          key: v2-dependencies-{{ checksum "poetry.lock" }}
+          key: v1-dependencies-{{ checksum "poetry.lock" }}
       - run:
           name: run tests
           command: |
@@ -36,11 +36,6 @@ jobs:
             pycodestyle --max-doc-length 10000 --ignore E203,E501,W503\
                         gym_saturation
             pylint --rcfile=.pylintrc gym_saturation
-      - run:
-          name: run type checks
-          command: |
-            . venv/bin/activate
-            mypy --config-file mypy.ini gym_saturation
       - run:
           name: upload data to codecov
           command: |
