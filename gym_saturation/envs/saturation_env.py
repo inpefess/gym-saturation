@@ -39,7 +39,7 @@ from gym_saturation.parsing.tptp_parser import TPTPParser
 
 INFERRED_CLAUSES_PREFIX = "_"
 STATE_DIFF_UPDATED = "state_diff_updated"
-MAX_CLAUSES = 1000
+MAX_CLAUSES = 10000
 
 
 class SaturationEnv(Env):
