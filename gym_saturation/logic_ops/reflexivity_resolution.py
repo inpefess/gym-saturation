@@ -65,8 +65,8 @@ def all_possible_reflexivity_resolvents(
     Traceback (most recent call last):
      ...
     ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, inference_rule=None, processed=None, birth_step=None)
-    >>> all_possible_reflexivity_resolvents(grammar.Clause([grammar.Literal(False, Predicate("p", [Variable("X")])), grammar.Literal(False, Predicate("=", [Variable("X"), Function("g", [])])), grammar.Literal(True, Predicate("!=", [Function("f", []), Function("g", [])]))], label="this_is_a_test_case"), "inferred_", 0)
-    [Clause(literals=[Literal(negated=False, atom=Predicate(name='p', arguments=[Function(name='g', arguments=[])])), Literal(negated=True, atom=Predicate(name='!=', arguments=[Function(name='f', arguments=[]), Function(name='g', arguments=[])]))], label='inferred_0', inference_parents=['this_is_a_test_case'], inference_rule='reflexivity_resolution', processed=None, birth_step=None)]
+    >>> all_possible_reflexivity_resolvents(grammar.Clause([grammar.Literal(False, Predicate("p", [Variable("X")])), grammar.Literal(True, Predicate("=", [Variable("X"), Function("g", [])])), grammar.Literal(False, Predicate("!=", [Function("f", []), Function("g", [])]))], label="this_is_a_test_case"), "inferred_", 0)
+    [Clause(literals=[Literal(negated=False, atom=Predicate(name='p', arguments=[Function(name='g', arguments=[])])), Literal(negated=False, atom=Predicate(name='!=', arguments=[Function(name='f', arguments=[]), Function(name='g', arguments=[])]))], label='inferred_0', inference_parents=['this_is_a_test_case'], inference_rule='reflexivity_resolution', processed=None, birth_step=None)]
 
     :param given_clause: a new clause which should be combined with all the
         processed ones
@@ -81,9 +81,9 @@ def all_possible_reflexivity_resolvents(
     reflexivity_resolvents: List[grammar.Clause] = []
     for i, a_literal in enumerate(given_clause.literals):
         if (
-            not a_literal.negated
+            a_literal.negated
             and a_literal.atom.name == "="
-            or a_literal.negated
+            or not a_literal.negated
             and a_literal.atom.name == "!="
         ) and len(a_literal.atom.arguments) == 2:
             a_clause = grammar.Clause(
