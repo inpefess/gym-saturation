@@ -13,20 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import json
-import os
 import random
 import sys
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
 from operator import itemgetter
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import gym
 
 from gym_saturation.envs import SaturationEnv
 from gym_saturation.envs.saturation_env import STATE_DIFF_UPDATED
-from gym_saturation.grammar import Clause
 from gym_saturation.logic_ops.utils import clause_length
 from gym_saturation.parsing.json_grammar import dict_to_clause
 
@@ -71,33 +68,6 @@ class Transition:
     reward: float
     done: bool
     info: Dict[str, Any]
-
-
-def save_final_state(
-    problem_filename: str, output_folder: str, episode_memory: List[Transition]
-) -> None:
-    """
-    save the final environment state of solving a TPTP problem
-
-    :param problem_filename: a full path to the problem file
-    :param output_folder: where to write subfolders and JSON files
-    :param episode_memory: a list of transitions during the episode
-    :returns:
-    """
-    problem_name = os.path.splitext(os.path.basename(problem_filename))[0]
-    output_subfolder = os.path.join(
-        output_folder, os.path.basename(os.path.dirname(problem_filename))
-    )
-    try:
-        os.mkdir(output_subfolder)
-    except FileExistsError:
-        pass
-    with open(
-        os.path.join(output_subfolder, f"{problem_name}.json"),
-        "w",
-        encoding="utf-8",
-    ) as data_file:
-        data_file.write(json.dumps(episode_memory[-1].observation["real_obs"]))
 
 
 class SizeAgent(BaseAgent):
@@ -191,6 +161,7 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> List[Transition]:
     """
     tries to solve the problem and logs the clauses
 
+    >>> import os
     >>> import shutil
     >>> test_agent_output = "test_agent_output"
     >>> shutil.rmtree(test_agent_output, ignore_errors=True)
@@ -206,22 +177,20 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> List[Transition]:
     ...     .joinpath("resources/TPTP-mock/Problems/TST")
     ... , "*-*.p")))
     >>> random.seed(0)
-    >>> agents = [SizeAgent(), RandomAgent(), AgeAgent()]
-    >>> for i in range(3):
+    >>> agents = [SizeAgeAgent(2, 1), SizeAgeAgent(1, 2), RandomAgent()]
+    >>> for i in range(3):  # doctest: +ELLIPSIS
     ...     env = gym.make(
     ...         "gym_saturation:saturation-v0",
     ...         step_limit=5,
     ...         problem_list=[problem_list[i]],
     ...     )
-    ...     save_final_state(
-    ...         problem_list[i],
-    ...         test_agent_output,
-    ...         episode(env, agents[i])
-    ...     )
-    >>> print(sorted(agent_testing_report(
-    ...     problem_list + ["this_is_a_test_case"], test_agent_output
-    ... ).items()))
-    [('TST001-1', ('PROOF_FOUND', 2, 2)), ('TST002-1', ('STEP_LIMIT', 5, -1)), ('TST003-1', ('STEP_LIMIT', 4, -1)), ('this_is_a_test_case', ('ERROR', -1, -1))]
+    ...     agent_testing_report(env, agents[i])
+    Proof of length 1 found in 4 steps:
+    cnf(_0, hypothesis, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
+    Step limit reached
+    Proof of length 2 found in 5 steps:
+      ...
+    cnf(_2, hypothesis, $false, inference(resolution, [], [p, _1])).
 
     :param env: a `gym_saturation` environment
     :param agent: an initialized agent. Must have `get_action` method
@@ -270,84 +239,25 @@ def parse_args(args: Optional[List[str]] = None) -> Namespace:
     return parsed_args
 
 
-def _analyse_proof(env_state: List[Clause]) -> Tuple[str, int, int]:
-    empty_clauses = [
-        clause
-        for clause in env_state
-        if clause.literals == [] and clause.processed
-    ]
-    step_count = max(
-        [
-            -1 if clause.birth_step is None else clause.birth_step
-            for clause in env_state
-        ]
-    )
-    if len(empty_clauses) > 1:
-        return "ERROR", -1, -1
-    if len(empty_clauses) == 0:
-        return "STEP_LIMIT", step_count, -1
-    return (
-        "PROOF_FOUND",
-        step_count,
-        proof_length(empty_clauses[0], env_state),
-    )
-
-
-def proof_length(empty_clause: Clause, env_state: List[Clause]) -> int:
+def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
     """
+        print a report after testing an agent in an environment
 
-    :param empty_clause: a clause with no literals (final step of a proof)
-    :param env_state: a list of clauses
-    :returns: the number of steps in a refutation proof
+    :param env: an environment
+    :param agent: an agent
+    :returns:
     """
-    proof_parts = (
-        []
-        if empty_clause.inference_parents is None
-        else empty_clause.inference_parents
-    )
-    proof = [empty_clause]
-    while proof_parts != []:
-        label = proof_parts.pop()
-        proof += [clause for clause in env_state if clause.label == label]
-        proof_parts += (
-            []
-            if proof[-1].inference_parents is None
-            else proof[-1].inference_parents
+    an_episode_memory = episode(env, agent)
+    if an_episode_memory[-1].reward == 1.0:
+        a_proof = env.tstp_proof
+        proof_length = len(a_proof.split("\n"))
+        print(
+            f"Proof of length {proof_length} found "
+            f"in {len(an_episode_memory)} steps:"
         )
-    return len({clause.birth_step for clause in proof})
-
-
-def agent_testing_report(
-    problem_list: List[str], testing_result_folder: str
-) -> Dict[str, Tuple[str, int, int]]:
-    """
-
-    :param problem_list: a list of full paths to problem files
-    :param testing_result_folder: a folder filled by runs of ``episode``
-        function over ``problem_list``
-    :returns: a dictionary with problems as keys, and the following values:
-        * status (PROOF_FOUND, STEP_LIMIT, ERROR)
-        * step count (``-1`` for errors)
-        * proof length (``-1`` for no proof)
-    """
-    res = {}
-    for problem in problem_list:
-        problem_name = os.path.splitext(os.path.basename(problem))[0]
-        result_filename = os.path.join(
-            testing_result_folder,
-            os.path.basename(os.path.dirname(problem)),
-            f"{problem_name}.json",
-        )
-        if os.path.exists(result_filename):
-            with open(result_filename, "r", encoding="utf-8") as json_file:
-                env_state = [
-                    dict_to_clause(clause)
-                    for clause in json.loads(json_file.read())
-                ]
-            res[problem_name] = _analyse_proof(env_state)
-        else:
-            res[problem_name] = ("ERROR", -1, -1)
-    return res
+        print(a_proof)
+    else:
+        print("Step limit reached")
 
 
 if __name__ == "__main__":
@@ -358,7 +268,5 @@ if __name__ == "__main__":
         step_limit=arguments.step_limit,
         problem_list=[arguments.problem_filename],
     )
-    an_episode_memory = episode(environment, SizeAgent())
-    save_final_state(
-        arguments.problem_filename, arguments.output_folder, an_episode_memory
-    )
+    print(arguments.problem_filename)
+    agent_testing_report(environment, SizeAgeAgent(5, 1))
