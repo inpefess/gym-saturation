@@ -137,6 +137,38 @@ class AgeAgent(BaseAgent):
         )
 
 
+class SizeAgeAgent(BaseAgent):
+    """
+    agent which takes several times the smallest clause and then several
+    times the oldest
+    """
+
+    def __init__(self, size_steps: int, age_steps: int):
+        self.size_steps = size_steps
+        self.age_steps = age_steps
+        self._step_count = 0
+        self._use_size = True
+        self._size_agent = SizeAgent()
+        self._age_agent = AgeAgent()
+
+    def get_action(
+        self,
+        observation: dict,
+        reward: float,
+        info: Dict[str, Any],
+    ) -> int:
+        self._step_count += 1
+        if self._use_size:
+            if self._step_count >= self.size_steps:
+                self._step_count = 0
+                self._use_size = False
+            return self._size_agent.get_action(observation, reward, info)
+        if self._step_count >= self.age_steps:
+            self._step_count = 0
+            self._use_size = True
+        return self._age_agent.get_action(observation, reward, info)
+
+
 class RandomAgent(BaseAgent):
     """agent which selects clauses randomly"""
 
