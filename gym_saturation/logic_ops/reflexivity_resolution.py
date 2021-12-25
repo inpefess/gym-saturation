@@ -64,9 +64,12 @@ def all_possible_reflexivity_resolvents(
     >>> all_possible_reflexivity_resolvents(grammar.Clause([grammar.Literal(False, Predicate("this_is_a_test_case", []))]), "inferred_", 1)
     Traceback (most recent call last):
      ...
-    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, inference_rule=None, processed=None, birth_step=None)
-    >>> all_possible_reflexivity_resolvents(grammar.Clause([grammar.Literal(False, Predicate("p", [Variable("X")])), grammar.Literal(True, Predicate("=", [Variable("X"), Function("g", [])])), grammar.Literal(False, Predicate("!=", [Function("f", []), Function("g", [])]))], label="this_is_a_test_case"), "inferred_", 0)
-    [Clause(literals=[Literal(negated=False, atom=Predicate(name='p', arguments=[Function(name='g', arguments=[])])), Literal(negated=False, atom=Predicate(name='!=', arguments=[Function(name='f', arguments=[]), Function(name='g', arguments=[])]))], label='inferred_0', inference_parents=['this_is_a_test_case'], inference_rule='reflexivity_resolution', processed=None, birth_step=None)]
+    ValueError: no label: cnf(None, hypothesis, this_is_a_test_case()).
+    >>> from gym_saturation.parsing.tptp_parser import TPTPParser
+    >>> parser = TPTPParser()
+    >>> clause = parser.parse("cnf(this_is_a_test_case, axiom, p(X) | ~ X=a | b != a).", "")[0]
+    >>> all_possible_reflexivity_resolvents(clause, "inferred_", 0)
+    [cnf(inferred_0, hypothesis, p(a) | ~=(b, a), inference(reflexivity_resolution, [], [this_is_a_test_case])).]
 
     :param given_clause: a new clause which should be combined with all the
         processed ones

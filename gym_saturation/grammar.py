@@ -54,6 +54,14 @@ class Literal:
     atom: Predicate
 
 
+def _term_to_tptp(term: Term) -> str:
+    if isinstance(term, Function):
+        arguments = [_term_to_tptp(argument) for argument in term.arguments]
+        if arguments != []:
+            return f"{term.name}({','.join(arguments)})"
+    return term.name
+
+
 @dataclass
 class Clause:
     """
@@ -78,3 +86,29 @@ class Clause:
     inference_rule: Optional[str] = None
     processed: Optional[bool] = None
     birth_step: Optional[int] = None
+
+    def __repr__(self):
+        res = f"cnf({self.label}, hypothesis, "
+        for literal in self.literals:
+            res += ("~" if literal.negated else "") + (
+                literal.atom.name
+                + "("
+                + ", ".join(
+                    [_term_to_tptp(term) for term in literal.atom.arguments]
+                )
+                + ") | "
+            )
+        if res[-2:] == "| ":
+            res = res[:-3]
+        if not self.literals:
+            res += "$false"
+        if (
+            self.inference_parents is not None
+            and self.inference_rule is not None
+        ):
+            res += (
+                f", inference({self.inference_rule}, [], ["
+                + ", ".join(self.inference_parents)
+                + "])"
+            )
+        return res + ")."

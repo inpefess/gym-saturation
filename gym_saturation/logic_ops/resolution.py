@@ -102,13 +102,17 @@ def all_possible_resolvents(
     >>> all_possible_resolvents([Clause([])], Clause([Literal(False, Predicate("this_is_a_test_case", []))]), "inferred_", 0)
     Traceback (most recent call last):
      ...
-    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, inference_rule=None, processed=None, birth_step=None)
+    ValueError: no label: cnf(None, hypothesis, this_is_a_test_case()).
     >>> all_possible_resolvents([Clause([Literal(False, Predicate("this_is_a_test_case", []))])], Clause([], "one"), "inferred_", 0)
     Traceback (most recent call last):
      ...
-    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, inference_rule=None, processed=None, birth_step=None)
-    >>> all_possible_resolvents([Clause([Literal(False, Predicate("q", [Variable("X")])), Literal(False, Predicate("p", [Variable("X")]))], label="input1")], Clause([Literal(True, Predicate("p", [Function("this_is_a_test_case", [])]))], label="input2"), "inferred_", 0)
-    [Clause(literals=[Literal(negated=False, atom=Predicate(name='q', arguments=[Function(name='this_is_a_test_case', arguments=[])]))], label='inferred_0', inference_parents=['input1', 'input2'], inference_rule='resolution', processed=None, birth_step=None)]
+    ValueError: no label: cnf(None, hypothesis, this_is_a_test_case()).
+    >>> from gym_saturation.parsing.tptp_parser import TPTPParser
+    >>> parser = TPTPParser()
+    >>> one = parser.parse("cnf(one, axiom, q(X) | p(X)).", "")[0]
+    >>> two = parser.parse("cnf(two, axiom, ~p(c)).", "")[0]
+    >>> all_possible_resolvents([one], two, "this_is_a_test_case_", 0)
+    [cnf(this_is_a_test_case_0, hypothesis, q(c), inference(resolution, [], [one, two])).]
 
     :param clauses: a list of (processed) clauses
     :param given_clause: a new clause which should be combined with all the

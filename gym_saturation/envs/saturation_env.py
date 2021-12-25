@@ -35,7 +35,7 @@ from gym_saturation.logic_ops.utils import (
     reindex_variables,
 )
 from gym_saturation.parsing.json_grammar import clause_to_dict
-from gym_saturation.parsing.tptp_parser import TPTPParser, clause_to_tptp
+from gym_saturation.parsing.tptp_parser import TPTPParser
 
 INFERRED_CLAUSES_PREFIX = "_"
 STATE_DIFF_UPDATED = "state_diff_updated"
@@ -269,9 +269,7 @@ class SaturationEnv(Env):
         if mode == "ansi":
             return str(self.state["real_obs"])
         if mode == "human":
-            return "\n".join(
-                [clause_to_tptp(clause) for clause in self._state]
-            )
+            return "\n".join(map(str, self._state))
         super().render(mode=mode)
 
     @property
@@ -310,7 +308,7 @@ class SaturationEnv(Env):
         return "\n".join(
             reversed(
                 [
-                    clause_to_tptp(clause)
+                    str(clause)
                     for clause in reduce_to_proof(self._state)
                     if clause.inference_rule is not None
                 ]

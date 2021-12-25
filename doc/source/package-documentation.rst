@@ -154,7 +154,6 @@ TPTP Parser
 ============
 .. autoclass:: gym_saturation.parsing.tptp_parser.TPTPParser
    :members:
-.. autofunction:: gym_saturation.parsing.tptp_parser.clause_to_tptp
 
 Clause Space
 *************

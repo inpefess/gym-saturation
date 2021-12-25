@@ -192,18 +192,25 @@ def all_paramodulants_from_list(
     >>> all_paramodulants_from_list([], Clause([Literal(False, Predicate("this_is_a_test_case", []))]), "inferred_", 0)
     Traceback (most recent call last):
      ...
-    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, inference_rule=None, processed=None, birth_step=None)
+    ValueError: no label: cnf(None, hypothesis, this_is_a_test_case()).
     >>> all_paramodulants_from_list([Clause([Literal(False, Predicate("this_is_a_test_case_2", []))])], Clause([], "empty"), "inferred_", 0)
     Traceback (most recent call last):
      ...
-    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case_2', arguments=[]))], label=None, inference_parents=None, inference_rule=None, processed=None, birth_step=None)
+    ValueError: no label: cnf(None, hypothesis, this_is_a_test_case_2()).
     >>> all_paramodulants_from_list([Clause([Literal(False, Predicate("=", [Function("this_is_a_test_case", [])]))], "one")], Clause([Literal(True, Predicate("p", []))], "two"), "inferred_", 0)
     Traceback (most recent call last):
      ...
     ValueError: expected equality, but got Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='this_is_a_test_case', arguments=[])]))
-    >>> paramodulants = all_paramodulants_from_list([Clause([Literal(False, Predicate("=", [Function("f", []), Function("g", [])])), Literal(False, Predicate("=", [Variable("X"), Variable("X")]))], "this_is_a_test_case")], Clause([Literal(False, Predicate("=", [Function("g", []), Function("h", [])]))], "this_is_a_test_case_2"), "inferred_", 0)
-    >>> print("this_is_a_test_case:", deduplicate([clause.literals for clause in paramodulants]))
-    this_is_a_test_case: [[Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='f', arguments=[]), Function(name='h', arguments=[])])), Literal(negated=False, atom=Predicate(name='=', arguments=[Variable(name='X'), Variable(name='X')]))], [Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='h', arguments=[]), Function(name='g', arguments=[])])), Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='f', arguments=[]), Function(name='g', arguments=[])]))], [Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='g', arguments=[]), Function(name='h', arguments=[])])), Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='f', arguments=[]), Function(name='g', arguments=[])]))]]
+    >>> from gym_saturation.parsing.tptp_parser import TPTPParser
+    >>> parser = TPTPParser()
+    >>> one = parser.parse("cnf(one, axiom, a=b | X=X).", "")[0]
+    >>> two = parser.parse("cnf(two, axiom, b=c).", "")[0]
+    >>> res = all_paramodulants_from_list([one], two, "inferred_", 0)
+    >>> dedup = map(Clause, deduplicate([clause.literals for clause in res]))
+    >>> print("\\n".join(map(str, dedup)))
+    cnf(None, hypothesis, =(a, c) | =(X, X)).
+    cnf(None, hypothesis, =(c, b) | =(a, b)).
+    cnf(None, hypothesis, =(b, c) | =(a, b)).
 
     :param clauses: a list of (processed) clauses
     :param given_clause: a new clause which should be combined with all the
