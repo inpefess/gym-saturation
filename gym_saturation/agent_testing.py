@@ -17,6 +17,7 @@ import random
 import sys
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
+from logging import Logger
 from operator import itemgetter
 from typing import Any, Dict, List, Optional
 
@@ -157,7 +158,9 @@ class RandomAgent(BaseAgent):
         )
 
 
-def episode(env: SaturationEnv, agent: BaseAgent) -> List[Transition]:
+def episode(
+    env: SaturationEnv, agent: BaseAgent, logger: Optional[Logger] = None
+) -> Transition:
     """
     tries to solve the problem and logs the clauses
 
@@ -195,27 +198,28 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> List[Transition]:
     :param env: a `gym_saturation` environment
     :param agent: an initialized agent. Must have `get_action` method
     :param problem_filename: the name of a problem file
-    :returns: the episode memory
+    :param logger: where to log the episode memory;
+        if ``None`` then nothing is logged
+    :returns: the last transition
     """
     env_state, reward, done = env.reset(), 0.0, False
-    episode_memory = []
     info: Dict[str, Any] = {STATE_DIFF_UPDATED: dict(enumerate(env_state))}
     while not done:
         action = agent.get_action(env_state, reward, info)
         observation, reward, done, info = env.step(action)
-        episode_memory.append(
-            Transition(
-                env_state,
-                agent.state,
-                action,
-                observation,
-                reward,
-                done,
-                info,
-            )
+        transition = Transition(
+            env_state,
+            agent.state,
+            action,
+            observation,
+            reward,
+            done,
+            info,
         )
+        if logger is not None:
+            logger.info(transition)
         env_state = observation
-    return episode_memory
+    return transition
 
 
 def parse_args(args: Optional[List[str]] = None) -> Namespace:
@@ -245,13 +249,13 @@ def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
     :param agent: an agent
     :returns:
     """
-    an_episode_memory = episode(env, agent)
-    if an_episode_memory[-1].reward == 1.0:
+    last_transition = episode(env, agent)
+    if last_transition.reward == 1.0:
         a_proof = env.tstp_proof
         proof_length = len(a_proof.split("\n"))
         print(
             f"Proof of length {proof_length} found "
-            f"in {len(an_episode_memory)} steps:"
+            f"in {env.step_count} steps:"
         )
         print(a_proof)
     else:
