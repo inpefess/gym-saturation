@@ -222,17 +222,15 @@ def parse_args(args: Optional[List[str]] = None) -> Namespace:
     """
     >>> parse_args([
     ...     "--problem_filename", "test",
-    ...     "--output_folder", "this_is_a_test_case",
     ...     "--step_limit", "1"
     ... ])
-    Namespace(output_folder='this_is_a_test_case', problem_filename='test', step_limit=1)
+    Namespace(problem_filename='test', step_limit=1)
 
     :param args: a list of string arguments
         (for testing and use in a non script scenario)
     :returns: arguments namespace for the script
     """
     argument_parser = ArgumentParser()
-    argument_parser.add_argument("--output_folder", type=str, required=True)
     argument_parser.add_argument("--problem_filename", type=str, required=True)
     argument_parser.add_argument("--step_limit", type=int, required=True)
     parsed_args = argument_parser.parse_args(args)
