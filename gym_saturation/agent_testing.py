@@ -74,18 +74,36 @@ class Transition:
 class SizeAgent(BaseAgent):
     """agent which selects the shortest clause"""
 
+    def __init__(self):
+        self._state: Dict[int, float] = {}
+
+    def update_state(self, info: Dict[str, Any]) -> None:
+        """
+        update the state of the agent according with the transition
+
+        :param info: an info dict (parm of environment response)
+        :returns:
+        """
+        self._state.update(
+            {
+                index: clause_length(dict_to_clause(clause))
+                for index, clause in info[STATE_DIFF_UPDATED].items()
+                if not clause["processed"]
+            }
+        )
+        for index, clause in info[STATE_DIFF_UPDATED].items():
+            if clause["processed"]:
+                self._state.pop(index)
+
     def get_action(
         self,
         observation: dict,
         reward: float,
         info: Dict[str, Any],
     ) -> int:
+        self.update_state(info)
         return min(
-            [
-                (i, clause_length(dict_to_clause(clause)))
-                for i, clause in enumerate(observation["real_obs"])
-                if not clause["processed"]
-            ],
+            self._state.items(),
             key=itemgetter(1),
         )[0]
 
@@ -137,6 +155,7 @@ class SizeAgeAgent(BaseAgent):
         if self._step_count >= self.age_steps:
             self._step_count = 0
             self._use_size = True
+        self._size_agent.update_state(info)
         return self._age_agent.get_action(observation, reward, info)
 
 
@@ -203,7 +222,9 @@ def episode(
     :returns: the last transition
     """
     env_state, reward, done = env.reset(), 0.0, False
-    info: Dict[str, Any] = {STATE_DIFF_UPDATED: dict(enumerate(env_state))}
+    info: Dict[str, Any] = {
+        STATE_DIFF_UPDATED: dict(enumerate(env_state["real_obs"]))
+    }
     while not done:
         action = agent.get_action(env_state, reward, info)
         observation, reward, done, info = env.step(action)
