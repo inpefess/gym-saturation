@@ -119,8 +119,8 @@ class SaturationEnv(Env):
     TSTP proof is now available (one can add ``include`` directive before it
     for validation purposes)
 
-    >>> print(env.tstp_proof)  # doctest: +ELLIPSIS
-    cnf(..., hypothesis, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
+    >>> print(TPTPParser().parse(env.tstp_proof, "")[0])  # doctest: +ELLIPSIS
+    cnf(..., hypothesis, $false(), inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
 
     >>> env = SaturationEnv(1, problem_list)
 
