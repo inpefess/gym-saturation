@@ -54,33 +54,21 @@ def reflexivity_resolution(
 
 def all_possible_reflexivity_resolvents(
     given_clause: grammar.Clause,
-    label_prefix: str,
-    label_index_base: int,
 ) -> List[grammar.Clause]:
     """
     one of the four basic building blocks of the Given Clause algorithm
 
-    >>> from gym_saturation.grammar import Predicate, Variable, Function
-    >>> all_possible_reflexivity_resolvents(grammar.Clause([grammar.Literal(False, Predicate("this_is_a_test_case", []))]), "inferred_", 1)
-    Traceback (most recent call last):
-     ...
-    ValueError: no label: cnf(None, hypothesis, this_is_a_test_case()).
     >>> from gym_saturation.parsing.tptp_parser import TPTPParser
     >>> parser = TPTPParser()
     >>> clause = parser.parse("cnf(this_is_a_test_case, axiom, p(X) | ~ X=a | b != a).", "")[0]
-    >>> all_possible_reflexivity_resolvents(clause, "inferred_", 0)
-    [cnf(inferred_0, hypothesis, p(a) | ~b = a, inference(reflexivity_resolution, [], [this_is_a_test_case])).]
+    >>> all_possible_reflexivity_resolvents(clause)  # doctest: +ELLIPSIS
+    [cnf(..., hypothesis, p(a) | ~b = a, inference(reflexivity_resolution, [], [this_is_a_test_case])).]
 
     :param given_clause: a new clause which should be combined with all the
         processed ones
-    :param label_prefix: generated clauses will be labeled with this prefix
-    :param label_index_base: generated clauses will be indexed starting
-        with this number
     :returns: results of all possible reflexivity resolvents with each one from
         ``clauses`` and the ``given_clause``
     """
-    if given_clause.label is None:
-        raise ValueError(f"no label: {given_clause}")
     reflexivity_resolvents: List[grammar.Clause] = []
     for i, a_literal in enumerate(given_clause.literals):
         if (
@@ -109,7 +97,6 @@ def all_possible_reflexivity_resolvents(
             literals=reflexivity_resolvent.literals,
             inference_parents=[given_clause.label],
             inference_rule="reflexivity_resolution",
-            label=label_prefix + str(label_index_base + ord_num),
         )
         for ord_num, reflexivity_resolvent in enumerate(reflexivity_resolvents)
     ]

@@ -182,22 +182,12 @@ def _get_new_paramodulants(
 def all_paramodulants_from_list(
     clauses: List[Clause],
     given_clause: Clause,
-    label_prefix: str,
-    label_index_base: int,
 ) -> List[Clause]:
     """
     one of the four basic building block of the Given Clause algorithm
 
-    >>> from gym_saturation.grammar import Predicate, Variable, Function
-    >>> all_paramodulants_from_list([], Clause([Literal(False, Predicate("this_is_a_test_case", []))]), "inferred_", 0)
-    Traceback (most recent call last):
-     ...
-    ValueError: no label: cnf(None, hypothesis, this_is_a_test_case()).
-    >>> all_paramodulants_from_list([Clause([Literal(False, Predicate("this_is_a_test_case_2", []))])], Clause([], "empty"), "inferred_", 0)
-    Traceback (most recent call last):
-     ...
-    ValueError: no label: cnf(None, hypothesis, this_is_a_test_case_2()).
-    >>> all_paramodulants_from_list([Clause([Literal(False, Predicate("=", [Function("this_is_a_test_case", [])]))], "one")], Clause([Literal(True, Predicate("p", []))], "two"), "inferred_", 0)
+    >>> from gym_saturation.grammar import Literal, Function, Predicate
+    >>> all_paramodulants_from_list([Clause([Literal(False, Predicate("=", [Function("this_is_a_test_case", [])]))], "one")], Clause([Literal(True, Predicate("p", []))], "two"))
     Traceback (most recent call last):
      ...
     ValueError: expected equality, but got Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='this_is_a_test_case', arguments=[])]))
@@ -205,12 +195,12 @@ def all_paramodulants_from_list(
     >>> parser = TPTPParser()
     >>> one = parser.parse("cnf(one, axiom, a=b | X=X).", "")[0]
     >>> two = parser.parse("cnf(two, axiom, b=c).", "")[0]
-    >>> res = all_paramodulants_from_list([one], two, "inferred_", 0)
+    >>> res = all_paramodulants_from_list([one], two)
     >>> dedup = map(Clause, deduplicate([clause.literals for clause in res]))
-    >>> print("\\n".join(map(str, dedup)))
-    cnf(None, hypothesis, a = c | X = X).
-    cnf(None, hypothesis, c = b | a = b).
-    cnf(None, hypothesis, b = c | a = b).
+    >>> print("\\n".join(map(str, dedup)))  # doctest: +ELLIPSIS
+    cnf(..., hypothesis, a = c | X = X).
+    cnf(..., hypothesis, c = b | a = b).
+    cnf(..., hypothesis, b = c | a = b).
 
     :param clauses: a list of (processed) clauses
     :param given_clause: a new clause which should be combined with all the
@@ -221,16 +211,12 @@ def all_paramodulants_from_list(
     :returns: results of all possible paramodulants with each one from
         ``clauses`` and the ``given_clause``
     """
-    if given_clause.label is None:
-        raise ValueError(f"no label: {given_clause}")
     paramodulants: List[Clause] = []
     for other_clause in clauses:
         for i, literal_one in enumerate(other_clause.literals):
             clause_one = Clause(
                 other_clause.literals[:i] + other_clause.literals[i + 1 :]
             )
-            if other_clause.label is None:
-                raise ValueError(f"no label: {other_clause}")
             new_paramodulants = _get_new_paramodulants(
                 clause_one, literal_one, given_clause
             )
@@ -243,8 +229,6 @@ def all_paramodulants_from_list(
                             given_clause.label,
                         ],
                         inference_rule="paramodulation",
-                        label=label_prefix
-                        + str(label_index_base + len(paramodulants) + ord_num),
                     )
                     for ord_num, paramodulant in enumerate(new_paramodulants)
                 ]

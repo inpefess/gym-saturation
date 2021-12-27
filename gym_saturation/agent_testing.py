@@ -208,11 +208,11 @@ def episode(
     ...     )
     ...     agent_testing_report(env, agents[i])
     Proof of length 1 found in 4 steps:
-    cnf(i0, hypothesis, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
+    cnf(..., hypothesis, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
     Step limit reached
     Proof of length 2 found in 5 steps:
-      ...
-    cnf(i2, hypothesis, $false, inference(resolution, [], [p, i1])).
+    cnf(..., ..., ~man(socrates), inference(resolution, [], [q, p_imp_q])).
+    cnf(..., hypothesis, $false, inference(resolution, [], [p, ...])).
 
     :param env: a `gym_saturation` environment
     :param agent: an initialized agent. Must have `get_action` method

@@ -26,8 +26,8 @@ class Substitution:
     a mapping from ``Variable`` to ``Term``
 
     >>> substitution = Substitution(grammar.Variable("X"), grammar.Function("this_is_a_test_case", []))
-    >>> substitution(grammar.Clause([grammar.Literal(False, grammar.Predicate("p", [grammar.Function("this_is_a_test_case", [grammar.Variable("X")])]))]))
-    cnf(None, hypothesis, p(this_is_a_test_case(this_is_a_test_case))).
+    >>> substitution(grammar.Clause([grammar.Literal(False, grammar.Predicate("p", [grammar.Function("this_is_a_test_case", [grammar.Variable("X")])]))]))  # doctest: +ELLIPSIS
+    cnf(..., hypothesis, p(this_is_a_test_case(this_is_a_test_case))).
     >>> substitution(grammar.Variable("X"))
     Function(name='this_is_a_test_case', arguments=[])
     """
