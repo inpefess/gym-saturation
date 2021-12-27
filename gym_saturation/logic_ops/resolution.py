@@ -92,45 +92,27 @@ def _get_new_resolvents(
 def all_possible_resolvents(
     clauses: List[Clause],
     given_clause: Clause,
-    label_prefix: str,
-    starting_label_index: int,
 ) -> List[Clause]:
     """
     one of the four basic building blocks of the Given Clause algorithm
 
-    >>> from gym_saturation.grammar import Predicate, Variable, Function
-    >>> all_possible_resolvents([Clause([])], Clause([Literal(False, Predicate("this_is_a_test_case", []))]), "inferred_", 0)
-    Traceback (most recent call last):
-     ...
-    ValueError: no label: cnf(None, hypothesis, this_is_a_test_case()).
-    >>> all_possible_resolvents([Clause([Literal(False, Predicate("this_is_a_test_case", []))])], Clause([], "one"), "inferred_", 0)
-    Traceback (most recent call last):
-     ...
-    ValueError: no label: cnf(None, hypothesis, this_is_a_test_case()).
     >>> from gym_saturation.parsing.tptp_parser import TPTPParser
     >>> parser = TPTPParser()
     >>> one = parser.parse("cnf(one, axiom, q(X) | p(X)).", "")[0]
     >>> two = parser.parse("cnf(two, axiom, ~p(c)).", "")[0]
-    >>> all_possible_resolvents([one], two, "this_is_a_test_case_", 0)
-    [cnf(this_is_a_test_case_0, hypothesis, q(c), inference(resolution, [], [one, two])).]
+    >>> all_possible_resolvents([one], two)  # doctest: +ELLIPSIS
+    [cnf(..., hypothesis, q(c), inference(resolution, [], [one, two])).]
 
     :param clauses: a list of (processed) clauses
     :param given_clause: a new clause which should be combined with all the
         processed ones
-    :param label_prefix: generated clauses will be labeled with this prefix
-    :param starting_label_index: generated clauses will be indexed starting
-        with this number
     :returns: results of all possible resolvents with each one from
         ``clauses`` and the ``given_clause``
     """
-    if given_clause.label is None:
-        raise ValueError(f"no label: {given_clause}")
     resolvents: List[Clause] = []
     for clause in clauses:
         for i, literal_one in enumerate(clause.literals):
             clause_one = Clause(clause.literals[:i] + clause.literals[i + 1 :])
-            if clause.label is None:
-                raise ValueError(f"no label: {clause}")
             new_resolvents = _get_new_resolvents(
                 clause_one, literal_one, given_clause
             )
@@ -140,10 +122,6 @@ def all_possible_resolvents(
                         literals=resolvent.literals,
                         inference_parents=[clause.label, given_clause.label],
                         inference_rule="resolution",
-                        label=label_prefix
-                        + str(
-                            starting_label_index + len(resolvents) + ord_num
-                        ),
                     )
                     for ord_num, resolvent in enumerate(new_resolvents)
                 ]

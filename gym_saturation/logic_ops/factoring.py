@@ -66,33 +66,21 @@ def factoring(
 
 def all_possible_factors(
     given_clause: grammar.Clause,
-    label_prefix: str,
-    starting_label_index: int,
 ) -> List[grammar.Clause]:
     """
     one of the four basic building blocks of the Given Clause algorithm
 
-    >>> from gym_saturation.grammar import Predicate, Variable, Function
-    >>> all_possible_factors(grammar.Clause([grammar.Literal(False, Predicate("this_is_a_test_case", []))]), "inferred_", 0)
-    Traceback (most recent call last):
-     ...
-    ValueError: no label: cnf(None, hypothesis, this_is_a_test_case()).
     >>> from gym_saturation.parsing.tptp_parser import TPTPParser
     >>> parser = TPTPParser()
     >>> clause = parser.parse("cnf(one, axiom, p(c) | p(X) | q).", "")[0]
-    >>> all_possible_factors(clause, "inferred_", 0)
-    [cnf(inferred_0, hypothesis, q() | p(c), inference(factoring, [], [one])).]
+    >>> all_possible_factors(clause)  # doctest: +ELLIPSIS
+    [cnf(..., hypothesis, q() | p(c), inference(factoring, [], [one])).]
 
     :param given_clause: a new clause which should be combined with all the
         processed ones
-    :param label_prefix: generated clauses will be labeled with this prefix
-    :param starting_label_index: generated clauses will be indexed starting
-        with this number
     :returns: results of all possible factors with each one from
         ``clauses`` and the ``given_clause``
     """
-    if given_clause.label is None:
-        raise ValueError(f"no label: {given_clause}")
     factors: List[grammar.Clause] = []
     for i, literal_one in enumerate(given_clause.literals):
         for j in range(i + 1, len(given_clause.literals)):
@@ -118,7 +106,6 @@ def all_possible_factors(
             literals=factor.literals,
             inference_parents=[given_clause.label],
             inference_rule="factoring",
-            label=label_prefix + str(starting_label_index + ord_num),
         )
         for ord_num, factor in enumerate(factors)
     ]

@@ -37,7 +37,6 @@ from gym_saturation.logic_ops.utils import (
 from gym_saturation.parsing.json_grammar import clause_to_dict
 from gym_saturation.parsing.tptp_parser import TPTPParser
 
-INFERRED_CLAUSES_PREFIX = "_"
 STATE_DIFF_UPDATED = "state_diff_updated"
 MAX_CLAUSES = 100000
 
@@ -75,8 +74,8 @@ class SaturationEnv(Env):
     >>> print(env.render())
     cnf(this_is_a_test_case_1, hypothesis, this_is_a_test_case(test_constant)).
     cnf(this_is_a_test_case_2, hypothesis, ~this_is_a_test_case(test_constant)).
-    cnf(test_axiom, hypothesis, =(test_constant, X0)).
-    cnf(test_axiom_2, hypothesis, ~=(test_constant, 0)).
+    cnf(test_axiom, hypothesis, test_constant = X0).
+    cnf(test_axiom_2, hypothesis, ~test_constant = 0).
 
     ``ansi`` mode returns a JSON representation of the state
     it should be more easily parsable than TPTP, although less human-friendly
@@ -120,8 +119,8 @@ class SaturationEnv(Env):
     TSTP proof is now available (one can add ``include`` directive before it
     for validation purposes)
 
-    >>> print(env.tstp_proof)
-    cnf(_0, hypothesis, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
+    >>> print(env.tstp_proof)  # doctest: +ELLIPSIS
+    cnf(..., hypothesis, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
 
     >>> env = SaturationEnv(1, problem_list)
 
@@ -195,30 +194,22 @@ class SaturationEnv(Env):
                 all_possible_resolvents(
                     unprocessed_clauses,
                     given_clause,
-                    INFERRED_CLAUSES_PREFIX,
-                    self._inference_count,
                 )
             )
             self._add_to_state(
                 all_paramodulants_from_list(
                     unprocessed_clauses,
                     given_clause,
-                    INFERRED_CLAUSES_PREFIX,
-                    self._inference_count,
                 )
             )
             self._add_to_state(
                 all_possible_factors(
                     given_clause,
-                    INFERRED_CLAUSES_PREFIX,
-                    self._inference_count,
                 )
             )
             self._add_to_state(
                 all_possible_reflexivity_resolvents(
                     given_clause,
-                    INFERRED_CLAUSES_PREFIX,
-                    self._inference_count,
                 )
             )
         self._state[action].processed = True

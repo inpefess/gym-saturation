@@ -46,7 +46,7 @@ class CNFParser(Transformer):
     ...    cnf(test, axiom, f(X, g(Y), h(Z, c1)) = f(X, Y, c2)
     ...    | ~ better(f(X), g(Y)) | $false | this_is_a_test_case).
     ... '''))
-    cnf(test, hypothesis, =(f(X,g(Y),h(Z,c1)), f(X,Y,c2)) | ~better(f(X), g(Y)) | $false() | this_is_a_test_case()).
+    cnf(test, hypothesis, f(X,g(Y),h(Z,c1)) = f(X,Y,c2) | ~better(f(X), g(Y)) | $false() | this_is_a_test_case()).
     """
 
     def __default_token__(self, token):

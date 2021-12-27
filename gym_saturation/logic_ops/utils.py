@@ -103,6 +103,8 @@ def is_tautology(clause: Clause) -> bool:
     False
     >>> is_tautology(Clause([Literal(False, Predicate("this_is_a_test_case", [])), Literal(True, Predicate("this_is_a_test_case", []))]))
     True
+    >>> is_tautology(Clause([Literal(False, Predicate("=", [Variable("X"), Variable("X")]))], label="this_is_a_test_case"))
+    True
 
     :param clause: a clause to check
     :returns: whether the clause is a primitive tautology or not
@@ -115,6 +117,10 @@ def is_tautology(clause: Clause) -> bool:
                 and literal.atom == another_literal.atom
             ):
                 return True
+        if literal.atom.name == "=" and (
+            literal.atom.arguments[0] == literal.atom.arguments[1]
+        ):
+            return True
     return False
 
 
@@ -276,6 +282,10 @@ def replace_subterm_by_index(
     raise NoSubtermFound(subterm_length)
 
 
+def _flat_list(list_of_lists: List[List[str]]) -> List[str]:
+    return list(reversed(sorted(list(set(chain(*list_of_lists))))))
+
+
 def reduce_to_proof(clauses: List[Clause]) -> List[Clause]:
     """
     leave only clauses belonging to the refutational proof
@@ -307,8 +317,8 @@ def reduce_to_proof(clauses: List[Clause]) -> List[Clause]:
                 ]
                 new_reduced = [
                     state_dict[label]
-                    for label in chain(
-                        *[
+                    for label in _flat_list(
+                        [
                             (
                                 []
                                 if clause.inference_parents is None
