@@ -18,7 +18,7 @@ bibliography: paper.bib
 # Summary
 ---
 
-`gym-saturation` is an OpenAI Gym [@DBLP:journals/corr/BrockmanCPSSTZ16] environment for reinforcement learning (RL) agents capable of proving theorems. Currently, only theorems written in a formal language of the Thousands of Problems for Theorem Provers (TPTP) library [@Sut17] in clausal normal form (CNF) are supported. `gym-saturation` implements the 'given clause' algorithm (similar to the one used in Vampire [@DBLP:conf/cav/KovacsV13] and E Prover [@DBLP:conf/cade/0001CV19]). Being written in Python, `gym-saturation` was inspired by PyRes [@DBLP:conf/cade/0001P20]. In contrast to the monolithic architecture of a typical Automated Theorem Prover (ATP), `gym-saturation` gives different agents opportunities to select clauses themselves and train from their experience. Combined with a particular agent, `gym-saturation` can work as an ATP. Even with a non trained agent based on the clause size heuristic, `gym-saturation` can find refutations for 2245 (of 8257) CNF problems from TPTP v7.5.0.
+`gym-saturation` is an OpenAI Gym [@DBLP:journals/corr/BrockmanCPSSTZ16] environment for reinforcement learning (RL) agents capable of proving theorems. Currently, only theorems written in a formal language of the Thousands of Problems for Theorem Provers (TPTP) library [@Sut17] in clausal normal form (CNF) are supported. `gym-saturation` implements the 'given clause' algorithm (similar to the one used in Vampire [@DBLP:conf/cav/KovacsV13] and E Prover [@DBLP:conf/cade/0001CV19]). Being written in Python, `gym-saturation` was inspired by PyRes [@DBLP:conf/cade/0001P20]. In contrast to the monolithic architecture of a typical Automated Theorem Prover (ATP), `gym-saturation` gives different agents opportunities to select clauses themselves and train from their experience. Combined with a particular agent, `gym-saturation` can work as an ATP. Even with a non trained agent based on heuristics, `gym-saturation` can find refutations for 688 (of 8257) CNF problems from TPTP v7.5.0.
 
 # Statement of need
 
@@ -138,14 +138,23 @@ This grammar serves as the glue for `gym-saturation` sub-packages, which are, in
 
 ![A diagram showing interactions between four main subpackages of `gym-saturation`: 1) parsing; 2) logic operations (including the given clause algorithm); 3) OpenAI Gym Env implementation; 4) the agent testing script.\label{fig:architecture}](architecture.png)
 
-Agent testing is a simple episode pipeline (see \autoref{fig:architecture}). It is supposed to be run in parallel (e.g. using GNU Parallel, @tange_2021_5233953) for a testing subset of problems. See the following table for the testing results of two popular heuristic-based agents on TPTP v7.5.0 with 20 steps limit:
+Agent testing is a simple episode pipeline (see \autoref{fig:architecture}). It is supposed to be run in parallel (e.g. using GNU Parallel, @tange_2021_5233953) for a testing subset of problems. See the following table for the testing results of two popular heuristic-based agents on TPTP v7.5.0 (trained RL agents should strive to be more successful than those primitive baselines):
 
-| agent | total problems | proof found | step limit reached | error |
-|--------|----------------|-------------|--------------------|-------|
-| size   | 8257           | 2245        | 5889               | 123   |
-| age    | 8257           | 234         | 7884               | 139   |
+| | __size agent__ | __age agent__ | __size&age agent__ |
+|-|-|-|-|
+| __proof found__ | 509 | 206 | 688 |
+| __step limit__ | 1385 | 35 | 223 |
+| __out of memory__ | 148 | 149 | 148 |
+| __5 min time out__ | 6215 | 7867 | 7198 |
+| __total__ | 8257 | 8257 | 8257 |
 
-`size` is an agent, which always selects the shortest not yet processed clause as an action. `age` is an agent which chooses clauses in FIFO order. An error means an out-of-memory or one-hour timeout event. Trained RL agents should strive to be more successful than those primitive baselines.
+`size agent` is an agent which always selects the shortest clause.
+     
+`age agent` is an agent which always selects the clause which arrived first to the set of unprocessed clauses ('the oldest one').
+     
+`size&age agent` is an agent which selects the shortest clause five times in a row and then one time --- the oldest one.
+     
+'Step limit' means an agent didn't find proof after 1000 steps (the longest proof found consists of 287 steps). This can work as a 'soft timeout'.
 
 # Mentions
 
