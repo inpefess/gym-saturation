@@ -181,10 +181,13 @@ This module is an example of testing your own trained agent.
    :members:
 .. autoclass:: gym_saturation.agent_testing.BaseAgent
    :members:
+.. _size_agent:      
 .. autoclass:: gym_saturation.agent_testing.SizeAgent
    :members:
+.. _age_agent:
 .. autoclass:: gym_saturation.agent_testing.AgeAgent
    :members:
+.. _size_age_agent:
 .. autoclass:: gym_saturation.agent_testing.SizeAgeAgent
    :members:
 .. autoclass:: gym_saturation.agent_testing.RandomAgent
