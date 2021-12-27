@@ -27,7 +27,7 @@ class Substitution:
 
     >>> substitution = Substitution(grammar.Variable("X"), grammar.Function("this_is_a_test_case", []))
     >>> substitution(grammar.Clause([grammar.Literal(False, grammar.Predicate("p", [grammar.Function("this_is_a_test_case", [grammar.Variable("X")])]))]))
-    Clause(literals=[Literal(negated=False, atom=Predicate(name='p', arguments=[Function(name='this_is_a_test_case', arguments=[Function(name='this_is_a_test_case', arguments=[])])]))], label=None, inference_parents=None, inference_rule=None, processed=None, birth_step=None)
+    cnf(None, hypothesis, p(this_is_a_test_case(this_is_a_test_case))).
     >>> substitution(grammar.Variable("X"))
     Function(name='this_is_a_test_case', arguments=[])
     """

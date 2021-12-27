@@ -46,7 +46,7 @@ class CNFParser(Transformer):
     ...    cnf(test, axiom, f(X, g(Y), h(Z, c1)) = f(X, Y, c2)
     ...    | ~ better(f(X), g(Y)) | $false | this_is_a_test_case).
     ... '''))
-    Clause(literals=[Literal(negated=False, atom=Predicate(name='=', arguments=[Function(name='f', arguments=[Variable(name='X'), Function(name='g', arguments=[Variable(name='Y')]), Function(name='h', arguments=[Variable(name='Z'), Function(name='c1', arguments=[])])]), Function(name='f', arguments=[Variable(name='X'), Variable(name='Y'), Function(name='c2', arguments=[])])])), Literal(negated=True, atom=Predicate(name='better', arguments=[Function(name='f', arguments=[Variable(name='X')]), Function(name='g', arguments=[Variable(name='Y')])])), Literal(negated=False, atom=Predicate(name='$false', arguments=[])), Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label='test', inference_parents=None, inference_rule=None, processed=None, birth_step=None)
+    cnf(test, hypothesis, =(f(X,g(Y),h(Z,c1)), f(X,Y,c2)) | ~better(f(X), g(Y)) | $false() | this_is_a_test_case()).
     """
 
     def __default_token__(self, token):

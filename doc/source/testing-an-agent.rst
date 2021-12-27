@@ -38,16 +38,42 @@ After processing problems, you can get a report about its performance::
   ))
   report = agent_testing_report(problem_list, "TPTP_CNF_20")
 
-Applying different policies ``gym-saturation`` leads to the following results on all CNF problems from TPTP-v7.5.0 with the step limit set to 20:
+Applying different policies ``gym-saturation`` leads to the following results on all CNF problems from TPTP-v7.5.0:
 
-+--------+----------------+-------------+--------------------+-------+
-| agent  | total problems | proof found | step limit reached | error |
-+========+================+=============+====================+=======+
-| size   | 8257           | 2245        | 5889               | 123   |
-+--------+----------------+-------------+--------------------+-------+
-| age    | 8257           | 234         | 7884               | 139   |
-+--------+----------------+-------------+--------------------+-------+
+.. list-table:: Numbers of problems
+   :header-rows: 1
 
-Can your agent do better?
+   * - 
+     - size agent
+     - age agent
+     - size&age agent
+   * - **proof found**
+     - 509
+     - 206
+     - 688
+   * - **step limit**
+     - 1385
+     - 35
+     - 223
+   * - **out of memory**
+     - 148
+     - 149
+     - 148
+   * - **5 min time out**
+     - 6215
+     - 7867
+     - 7198
+   * - **total**
+     - 8257
+     - 8257
+     - 8257
+
+:ref:`Size agent<size_agent>` is an agent which always selects the shortest clause.
+     
+:ref:`Age agent<age_agent>` is an agent which always selects the clause which arrived first to the set of unprocessed clauses ('the oldest one').
+     
+:ref:`Size&age agent<size_age_agent>` is an agent which selects the shortest clause five times in a row and then one time --- the oldest one.
+     
+'Step limit' means an agent didn't find proof after 1000 steps (the longest proof found consists of 287 steps). This can work as a 'soft timeout'.
 
 .. _an agent testing script: https://github.com/inpefess/gym-saturation/blob/master/gym_saturation/agent_testing.py

@@ -76,9 +76,12 @@ def all_possible_factors(
     >>> all_possible_factors(grammar.Clause([grammar.Literal(False, Predicate("this_is_a_test_case", []))]), "inferred_", 0)
     Traceback (most recent call last):
      ...
-    ValueError: no label: Clause(literals=[Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))], label=None, inference_parents=None, inference_rule=None, processed=None, birth_step=None)
-    >>> all_possible_factors(grammar.Clause([grammar.Literal(False, Predicate("p", [Function("f", [])])), grammar.Literal(False, Predicate("p", [Variable("X")])), grammar.Literal(False, Predicate("q", []))], label="this_is_a_test_case"), "inferred_", 0)
-    [Clause(literals=[Literal(negated=False, atom=Predicate(name='q', arguments=[])), Literal(negated=False, atom=Predicate(name='p', arguments=[Function(name='f', arguments=[])]))], label='inferred_0', inference_parents=['this_is_a_test_case'], inference_rule='factoring', processed=None, birth_step=None)]
+    ValueError: no label: cnf(None, hypothesis, this_is_a_test_case()).
+    >>> from gym_saturation.parsing.tptp_parser import TPTPParser
+    >>> parser = TPTPParser()
+    >>> clause = parser.parse("cnf(one, axiom, p(c) | p(X) | q).", "")[0]
+    >>> all_possible_factors(clause, "inferred_", 0)
+    [cnf(inferred_0, hypothesis, q() | p(c), inference(factoring, [], [one])).]
 
     :param given_clause: a new clause which should be combined with all the
         processed ones

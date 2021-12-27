@@ -35,11 +35,11 @@ from gym_saturation.logic_ops.utils import (
     reindex_variables,
 )
 from gym_saturation.parsing.json_grammar import clause_to_dict
-from gym_saturation.parsing.tptp_parser import TPTPParser, clause_to_tptp
+from gym_saturation.parsing.tptp_parser import TPTPParser
 
 INFERRED_CLAUSES_PREFIX = "_"
 STATE_DIFF_UPDATED = "state_diff_updated"
-MAX_CLAUSES = 1000
+MAX_CLAUSES = 100000
 
 
 class SaturationEnv(Env):
@@ -145,7 +145,7 @@ class SaturationEnv(Env):
         super().__init__()
         self.step_limit = step_limit
         self.problem_list = problem_list
-        self._step_count = 0
+        self.step_count = 0
         self._inference_count = 0
         self._state: List[Clause] = []
         self.action_space = spaces.Discrete(max_clauses)
@@ -170,7 +170,7 @@ class SaturationEnv(Env):
         return clauses
 
     def reset(self) -> dict:
-        self._step_count = 0
+        self.step_count = 0
         self._inference_count = 0
         self._state = reindex_variables(self._init_clauses(), "X")
         return self.state
@@ -180,7 +180,7 @@ class SaturationEnv(Env):
         for clause in new_clauses:
             if not is_tautology(clause):
                 if not clause_in_a_list(clause, self._state):
-                    clause.birth_step = self._step_count
+                    clause.birth_step = self.step_count
                     clause.processed = False
                     self._state.append(clause)
 
@@ -233,7 +233,7 @@ class SaturationEnv(Env):
     def step(self, action: int) -> Tuple[dict, float, bool, dict]:
         if self._state[action].processed:
             raise ValueError(f"action {action} is not valid")
-        self._step_count += 1
+        self.step_count += 1
         if self._state[action].literals == []:
             self._state[action].processed = True
             return (
@@ -254,7 +254,7 @@ class SaturationEnv(Env):
                     for clause in self._state
                 ]
             )
-            or self._step_count >= self.step_limit
+            or self.step_count >= self.step_limit
         ):
             return self.state, 0.0, True, {STATE_DIFF_UPDATED: updated}
         return (
@@ -269,9 +269,7 @@ class SaturationEnv(Env):
         if mode == "ansi":
             return str(self.state["real_obs"])
         if mode == "human":
-            return "\n".join(
-                [clause_to_tptp(clause) for clause in self._state]
-            )
+            return "\n".join(map(str, self._state))
         super().render(mode=mode)
 
     @property
@@ -310,7 +308,7 @@ class SaturationEnv(Env):
         return "\n".join(
             reversed(
                 [
-                    clause_to_tptp(clause)
+                    str(clause)
                     for clause in reduce_to_proof(self._state)
                     if clause.inference_rule is not None
                 ]

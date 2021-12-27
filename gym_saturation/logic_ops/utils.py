@@ -302,7 +302,9 @@ def reduce_to_proof(clauses: List[Clause]) -> List[Clause]:
             reduced = []
             new_reduced = [empty_clauses[0]]
             while len(new_reduced) > 0:
-                reduced += new_reduced
+                reduced += [
+                    clause for clause in new_reduced if clause not in reduced
+                ]
                 new_reduced = [
                     state_dict[label]
                     for label in chain(
