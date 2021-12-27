@@ -103,6 +103,8 @@ def is_tautology(clause: Clause) -> bool:
     False
     >>> is_tautology(Clause([Literal(False, Predicate("this_is_a_test_case", [])), Literal(True, Predicate("this_is_a_test_case", []))]))
     True
+    >>> is_tautology(Clause([Literal(False, Predicate("=", [Variable("X"), Variable("X")]))], label="this_is_a_test_case"))
+    True
 
     :param clause: a clause to check
     :returns: whether the clause is a primitive tautology or not
@@ -115,6 +117,10 @@ def is_tautology(clause: Clause) -> bool:
                 and literal.atom == another_literal.atom
             ):
                 return True
+        if literal.atom.name == "=" and (
+            literal.atom.arguments[0] == literal.atom.arguments[1]
+        ):
+            return True
     return False
 
 
