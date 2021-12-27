@@ -80,18 +80,19 @@ def all_possible_reflexivity_resolvents(
             a_clause = grammar.Clause(
                 given_clause.literals[:i] + given_clause.literals[i + 1 :]
             )
-            try:
-                reflexivity_resolvents.append(
-                    reflexivity_resolution(
-                        a_clause,
-                        (
-                            a_literal.atom.arguments[0],
-                            a_literal.atom.arguments[1],
-                        ),
+            if a_clause.literals:
+                try:
+                    reflexivity_resolvents.append(
+                        reflexivity_resolution(
+                            a_clause,
+                            (
+                                a_literal.atom.arguments[0],
+                                a_literal.atom.arguments[1],
+                            ),
+                        )
                     )
-                )
-            except NonUnifiableError:
-                pass
+                except NonUnifiableError:
+                    pass
     return [
         grammar.Clause(
             literals=reflexivity_resolvent.literals,
