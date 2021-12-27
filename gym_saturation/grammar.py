@@ -62,6 +62,26 @@ def _term_to_tptp(term: Term) -> str:
     return term.name
 
 
+def _literal_to_tptp(literal: Literal) -> str:
+    res = "~" if literal.negated else ""
+    if literal.atom.name != "=":
+        res += (
+            literal.atom.name
+            + "("
+            + ", ".join(
+                [_term_to_tptp(term) for term in literal.atom.arguments]
+            )
+            + ")"
+        )
+    else:
+        res += (
+            _term_to_tptp(literal.atom.arguments[0])
+            + " = "
+            + _term_to_tptp(literal.atom.arguments[1])
+        )
+    return res
+
+
 @dataclass
 class Clause:
     """
@@ -90,14 +110,7 @@ class Clause:
     def __repr__(self):
         res = f"cnf({self.label}, hypothesis, "
         for literal in self.literals:
-            res += ("~" if literal.negated else "") + (
-                literal.atom.name
-                + "("
-                + ", ".join(
-                    [_term_to_tptp(term) for term in literal.atom.arguments]
-                )
-                + ") | "
-            )
+            res += _literal_to_tptp(literal) + " | "
         if res[-2:] == "| ":
             res = res[:-3]
         if not self.literals:

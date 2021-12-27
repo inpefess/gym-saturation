@@ -34,7 +34,7 @@ class TPTPParser:
     """
     >>> from gym_saturation.grammar import (Literal, Predicate, Variable,
     ...     Function)
-    >>> clause = Clause([Literal(True, Predicate("this_is_a_test_case", [Function("f", [Variable("X")])]))], inference_rule="resolution", inference_parents=["one", "two"], label="clause")
+    >>> clause = Clause([Literal(True, Predicate("=", [Function("this_is_a_test_case", [Variable("X")]), Variable("Y")]))], inference_rule="resolution", inference_parents=["one", "two"], label="clause")
     >>> TPTPParser().parse(str(clause), "") == [clause]
     True
     >>> tptp_parser = TPTPParser()
@@ -49,8 +49,8 @@ class TPTPParser:
     ... ))))
     cnf(this_is_a_test_case_1, hypothesis, this_is_a_test_case(test_constant), inference(resolution, [], [one, two])).
     cnf(this_is_a_test_case_2, hypothesis, ~this_is_a_test_case(test_constant)).
-    cnf(test_axiom, hypothesis, =(test_constant, X)).
-    cnf(test_axiom_2, hypothesis, ~=(test_constant, 0)).
+    cnf(test_axiom, hypothesis, test_constant = X).
+    cnf(test_axiom_2, hypothesis, ~test_constant = 0).
     """
 
     def __init__(self):

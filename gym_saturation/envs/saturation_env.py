@@ -75,8 +75,8 @@ class SaturationEnv(Env):
     >>> print(env.render())
     cnf(this_is_a_test_case_1, hypothesis, this_is_a_test_case(test_constant)).
     cnf(this_is_a_test_case_2, hypothesis, ~this_is_a_test_case(test_constant)).
-    cnf(test_axiom, hypothesis, =(test_constant, X0)).
-    cnf(test_axiom_2, hypothesis, ~=(test_constant, 0)).
+    cnf(test_axiom, hypothesis, test_constant = X0).
+    cnf(test_axiom_2, hypothesis, ~test_constant = 0).
 
     ``ansi`` mode returns a JSON representation of the state
     it should be more easily parsable than TPTP, although less human-friendly
