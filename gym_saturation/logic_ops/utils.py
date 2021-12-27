@@ -276,6 +276,10 @@ def replace_subterm_by_index(
     raise NoSubtermFound(subterm_length)
 
 
+def _flat_list(list_of_lists: List[List[str]]) -> List[str]:
+    return list(reversed(sorted(list(set(chain(*list_of_lists))))))
+
+
 def reduce_to_proof(clauses: List[Clause]) -> List[Clause]:
     """
     leave only clauses belonging to the refutational proof
@@ -307,8 +311,8 @@ def reduce_to_proof(clauses: List[Clause]) -> List[Clause]:
                 ]
                 new_reduced = [
                     state_dict[label]
-                    for label in chain(
-                        *[
+                    for label in _flat_list(
+                        [
                             (
                                 []
                                 if clause.inference_parents is None
