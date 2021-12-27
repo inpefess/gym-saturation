@@ -102,7 +102,9 @@ class Clause:
     """
 
     literals: List[Literal]
-    label: str = field(default_factory=lambda: str(uuid1()))
+    label: str = field(
+        default_factory=lambda: "x" + str(uuid1()).replace("-", "_")
+    )
     inference_parents: Optional[List[str]] = None
     inference_rule: Optional[str] = None
     processed: Optional[bool] = None

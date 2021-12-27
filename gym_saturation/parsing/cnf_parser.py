@@ -172,7 +172,19 @@ class CNFParser(Transformer):
         return Clause(literals)
 
     @staticmethod
-    def cnf_annotated(children):
+    def _parse_inference_parents(inference_parents):
+        if isinstance(inference_parents[0], list):
+            clause_inference_parents = list(
+                map(
+                    itemgetter(0),
+                    inference_parents,
+                )
+            )
+        else:
+            clause_inference_parents = [inference_parents[0]]
+        return clause_inference_parents
+
+    def cnf_annotated(self, children):
         """
         <cnf_annotated>        ::= cnf(<name>,<formula_role>,<cnf_formula> <annotations>).
 
@@ -187,10 +199,9 @@ class CNFParser(Transformer):
                         clause.inference_rule = annotation["inference_record"][
                             0
                         ]
-                        clause.inference_parents = list(
-                            map(
-                                itemgetter(0),
-                                annotation["inference_record"][1],
+                        clause.inference_parents = (
+                            self._parse_inference_parents(
+                                annotation["inference_record"][1]
                             )
                         )
         return clause
