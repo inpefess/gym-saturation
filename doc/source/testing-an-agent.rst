@@ -21,7 +21,7 @@ Suppose you already have a trained agent implemented. Then you can use `an agent
 
   find $TPTP_HOME/Problems/*/*-*.p | parallel --bar --jobs 80% --timeout 30000% python agent_testing.py --problem_file {} --output_folder TPTP_CNF --step_limit 20
 
-Or you can use `Slurm Workload Manager <https://slurm.schedmd.com/>`__. See `an example <https://github.com/inpefess/gym-saturation/blob/master/gym_saturation/slurm-jobs>`__ from the project's repo.
+Or you can use `Slurm Workload Manager <https://slurm.schedmd.com/>`__. See `an example <https://github.com/inpefess/gym-saturation/tree/master/slurm-jobs>`__ from the project's repo.
   
 You can write your own agent testing script based on ``agent_testing.py`` by calling ``episode`` function with your agent as an argument.
 
@@ -76,4 +76,4 @@ Applying different policies ``gym-saturation`` leads to the following results on
      
 'Step limit' means an agent didn't find proof after 1000 steps (the longest proof found consists of 287 steps). This can work as a 'soft timeout'.
 
-.. _an agent testing script: https://github.com/inpefess/gym-saturation/blob/master/gym_saturation/agent_testing.py
+.. _an agent testing script: https://github.com/inpefess/gym-saturation/tree/master/gym_saturation/agent_testing.py

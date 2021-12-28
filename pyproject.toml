@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "0.1.11"
+version = "0.1.12"
 description = "An OpenAI Gym environment for saturation provers"
 authors = ["Boris Shminke <boris@shminke.ml>"]
 license = "Apache-2.0"
@@ -30,22 +30,16 @@ importlib_resources = {version = "*", markers = "python_version < \"3.9\" and py
 dataclasses = {version = "*", markers = "python_version < \"3.7\""}
 
 [tool.poetry.dev-dependencies]
-jedi = "*"
-rope = "*"
 black = "*"
 jupyterlab = "*"
 mypy = "!=0.930"
-pycodestyle = "*"
 pylint = "*"
-pytest = "*"
 pytest-coverage = "*"
 pre-commit = "*"
-tomlkit = "*"
 types-dataclasses = "*"
-vulture = "*"
-Sphinx = "*"
 sphinx-rtd-theme = "*"
 sphinx-autodoc-typehints = "*"
+flake8 = "*"
 
 [tool.black]
 line-length=79

@@ -1,17 +1,19 @@
+# Copyright 2021 Boris Shminke
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     https://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 """
-Copyright 2021 Boris Shminke
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    https://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Saturation Environment
+=======================
 """
 import os
 import random
@@ -50,12 +52,14 @@ class SaturationEnv(Env):
     ...     from importlib.resources import files
     ... else:
     ...     from importlib_resources import files
-    >>> tptp_folder = files("gym_saturation").joinpath("resources/TPTP-mock")
+    >>> tptp_folder = files("gym_saturation").joinpath(
+    ...     os.path.join("resources", "TPTP-mock")
+    ... )
     >>> from glob import glob
     >>> problem_list = sorted(glob(
     ...     os.path.join(tptp_folder, "Problems", "*", "*1-1.p")
     ... ))
-    >>> env = SaturationEnv(3, problem_list, 1)
+    >>> env = SaturationEnv(problem_list, 1)
     >>> env.seed(0)
     0
     >>> env.reset()
@@ -63,7 +67,7 @@ class SaturationEnv(Env):
      ...
     ValueError: Too many clauses: 4
     consider increasing `max_clauses` parameter of `__init__`
-    >>> env = SaturationEnv(3, problem_list)
+    >>> env = SaturationEnv(problem_list)
     >>> env.seed(0)
     0
     >>> len(env.reset()["real_obs"])
@@ -121,31 +125,15 @@ class SaturationEnv(Env):
 
     >>> print(TPTPParser().parse(env.tstp_proof, "")[0])  # doctest: +ELLIPSIS
     cnf(..., hypothesis, $false(), inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
-
-    >>> env = SaturationEnv(1, problem_list)
-
-    one can also choose a particular problem file during reset
-
-    >>> problem = os.path.join(tptp_folder, "Problems", "TST", "TST001-1.p")
-    >>> result = env.reset()
-
-    if the proof is not found after a fixed number of steps the reward is ``0``
-
-    >>> env.step(0)[1:3]
-    (0.0, True)
     """
 
     def __init__(
         self,
-        step_limit: int,
         problem_list: List[str],
         max_clauses: int = MAX_CLAUSES,
     ):
         super().__init__()
-        self.step_limit = step_limit
         self.problem_list = problem_list
-        self.step_count = 0
-        self._inference_count = 0
         self._state: List[Clause] = []
         self.action_space = spaces.Discrete(max_clauses)
         self.observation_space = spaces.Dict(
@@ -169,17 +157,17 @@ class SaturationEnv(Env):
         return clauses
 
     def reset(self) -> dict:
-        self.step_count = 0
-        self._inference_count = 0
         self._state = reindex_variables(self._init_clauses(), "X")
         return self.state
 
     def _add_to_state(self, new_clauses: List[Clause]) -> None:
-        self._inference_count += len(new_clauses)
+        birth_step = 1 + max(
+            [getattr(clause, "birth_step", 0) for clause in self._state]
+        )
         for clause in new_clauses:
             if not is_tautology(clause):
                 if not clause_in_a_list(clause, self._state):
-                    clause.birth_step = self.step_count
+                    clause.birth_step = birth_step
                     clause.processed = False
                     self._state.append(clause)
 
@@ -224,7 +212,6 @@ class SaturationEnv(Env):
     def step(self, action: int) -> Tuple[dict, float, bool, dict]:
         if self._state[action].processed:
             raise ValueError(f"action {action} is not valid")
-        self.step_count += 1
         if self._state[action].literals == []:
             self._state[action].processed = True
             return (
@@ -238,14 +225,11 @@ class SaturationEnv(Env):
                 },
             )
         updated = self._do_deductions(action)
-        if (
-            min(
-                [
-                    False if clause.processed is None else clause.processed
-                    for clause in self._state
-                ]
-            )
-            or self.step_count >= self.step_limit
+        if min(
+            [
+                False if clause.processed is None else clause.processed
+                for clause in self._state
+            ]
         ):
             return self.state, 0.0, True, {STATE_DIFF_UPDATED: updated}
         return (
