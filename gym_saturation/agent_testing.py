@@ -203,9 +203,9 @@ def episode(
     >>> for i in range(3):  # doctest: +ELLIPSIS
     ...     env = gym.make(
     ...         "gym_saturation:saturation-v0",
-    ...         step_limit=5,
     ...         problem_list=[problem_list[i]],
     ...     )
+    ...     env._max_episode_steps = 5
     ...     agent_testing_report(env, agents[i])
     Proof of length 1 found in 4 steps:
     cnf(..., hypothesis, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
@@ -274,9 +274,9 @@ def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
     if last_transition.reward == 1.0:
         a_proof = env.tstp_proof
         proof_length = len(a_proof.split("\n"))
+        step_count = getattr(env, "_elapsed_steps")
         print(
-            f"Proof of length {proof_length} found "
-            f"in {env.step_count} steps:"
+            f"Proof of length {proof_length} found " f"in {step_count} steps:"
         )
         print(a_proof)
     else:
