@@ -30,20 +30,13 @@ importlib_resources = {version = "*", markers = "python_version < \"3.9\" and py
 dataclasses = {version = "*", markers = "python_version < \"3.7\""}
 
 [tool.poetry.dev-dependencies]
-jedi = "*"
-rope = "*"
 black = "*"
 jupyterlab = "*"
 mypy = "!=0.930"
-pycodestyle = "*"
 pylint = "*"
-pytest = "*"
 pytest-coverage = "*"
 pre-commit = "*"
-tomlkit = "*"
 types-dataclasses = "*"
-vulture = "*"
-Sphinx = "*"
 sphinx-rtd-theme = "*"
 sphinx-autodoc-typehints = "*"
 
