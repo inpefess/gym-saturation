@@ -17,180 +17,47 @@
 Package Documentation
 ######################
 
-Grammar
-********
-
-.. _Variable:
-
-Variable
-=========
-.. autoclass:: gym_saturation.grammar.Variable
+Environment and Agent Testing
+******************************
+.. automodule:: gym_saturation.envs.saturation_env
+   :members:
+.. automodule:: gym_saturation.agent_testing
+   :members:
+.. automodule:: gym_saturation.clause_space
    :members:
 
-.. _Function:
+Common modules
+***************
 
-Function
-=========
-.. autoclass:: gym_saturation.grammar.Function
-   :members:		   
-
-.. _Predicate:
-
-Predicate
-==========
-.. autoclass:: gym_saturation.grammar.Predicate
+.. automodule:: gym_saturation.grammar
    :members:
-
-.. _Term:
-
-Term
-=====
-.. autoclass:: gym_saturation.grammar.Term
+.. automodule:: gym_saturation.utils
    :members:
+      
+Logical Operations
+*******************
 
-.. _Proposition:
-
-Proposition
-============
-.. autoclass:: gym_saturation.grammar.Proposition
+.. automodule:: gym_saturation.logic_ops.factoring
    :members:
-
-.. _Literal:
-
-Literal
-========
-.. autoclass:: gym_saturation.grammar.Literal
-   :members:		   
-
-.. _Clause:
-
-Clause
-=======
-.. autoclass:: gym_saturation.grammar.Clause
+.. automodule:: gym_saturation.logic_ops.paramodulation
    :members:
-
-Utils
-******
-
-Some general utils useful for different submodules.
-
-.. autofunction:: gym_saturation.utils.deduplicate
-.. autofunction:: gym_saturation.utils.pickle_copy
-
-   
-Logic Operations
-*****************
-
-Substitution
-=============
-.. autoclass:: gym_saturation.logic_ops.substitution.Substitution
-   :special-members: __init__, __call__
+.. automodule:: gym_saturation.logic_ops.reflexivity_resolution
    :members:
-
-Unification
-============
-.. autofunction:: gym_saturation.logic_ops.unification.most_general_unifier
-
-Resolution
-===========
-.. _resolution:
-.. autofunction:: gym_saturation.logic_ops.resolution.resolution
-.. autofunction:: gym_saturation.logic_ops.resolution.all_possible_resolvents
-
-Factoring
-==========
-.. _factoring:
-
-.. autofunction:: gym_saturation.logic_ops.factoring.factoring
-.. autofunction:: gym_saturation.logic_ops.factoring.all_possible_factors
-
-Paramodulation
-===============
-.. _paramodulation:
-
-.. autofunction:: gym_saturation.logic_ops.paramodulation.paramodulation
-.. autofunction:: gym_saturation.logic_ops.paramodulation.all_paramodulants_from_clause
-.. autofunction:: gym_saturation.logic_ops.paramodulation.all_paramodulants_from_list
-
-Reflexivity Resolution
-=======================
-.. _reflexivity_resolution:
-
-.. autofunction:: gym_saturation.logic_ops.reflexivity_resolution.reflexivity_resolution
-.. autofunction:: gym_saturation.logic_ops.reflexivity_resolution.all_possible_reflexivity_resolvents
-
-utils
-======
-.. autofunction:: gym_saturation.logic_ops.utils.is_subproposition
-.. autofunction:: gym_saturation.logic_ops.utils.get_variable_list
-.. autofunction:: gym_saturation.logic_ops.utils.reindex_variables
-.. autofunction:: gym_saturation.logic_ops.utils.is_tautology
-.. autofunction:: gym_saturation.logic_ops.utils.clause_length
-.. autofunction:: gym_saturation.logic_ops.utils.proposition_length
-.. autofunction:: gym_saturation.logic_ops.utils.clause_in_a_list
-.. autofunction:: gym_saturation.logic_ops.utils.subterm_by_index
-.. autofunction:: gym_saturation.logic_ops.utils.replace_subterm_by_index
-.. autofunction:: gym_saturation.logic_ops.utils.reduce_to_proof
+.. automodule:: gym_saturation.logic_ops.resolution
+   :members:
+.. automodule:: gym_saturation.logic_ops.substitution
+   :members:
+.. automodule:: gym_saturation.logic_ops.unification
+   :members:
+.. automodule:: gym_saturation.logic_ops.utils
+   :members:
 
 Parsing
 ********
 
-CNF Parser
-===========
-.. autoclass:: gym_saturation.parsing.cnf_parser.CNFParser
-   :special-members: __default__, __default_token__
+.. automodule:: gym_saturation.parsing.cnf_parser
    :members:
-
-JSON Encoder
-=============
-.. autoclass:: gym_saturation.parsing.json_grammar.ClauseJSONEncoder
+.. automodule:: gym_saturation.parsing.json_grammar
    :members:
-.. _dict_to_clause:
-
-.. autofunction:: gym_saturation.parsing.json_grammar.dict_to_clause
-.. autofunction:: gym_saturation.parsing.json_grammar.clause_to_dict
-
-TPTP Parser
-============
-.. autoclass:: gym_saturation.parsing.tptp_parser.TPTPParser
+.. automodule:: gym_saturation.parsing.tptp_parser
    :members:
-
-Clause Space
-*************
-.. _clause_space:
-
-.. autoclass:: gym_saturation.clause_space.ClauseSpace
-   :special-members: __init__
-   :members:
-
-Environments
-*************
-
-Saturation Environment
-=======================
-.. autoclass:: gym_saturation.envs.saturation_env.SaturationEnv
-   :special-members: __init__
-   :members:
-
-Agent Testing
-***************
-
-This module is an example of testing your own trained agent.
-
-.. autoclass:: gym_saturation.agent_testing.Transition
-   :members:
-.. autoclass:: gym_saturation.agent_testing.BaseAgent
-   :members:
-.. _size_agent:      
-.. autoclass:: gym_saturation.agent_testing.SizeAgent
-   :members:
-.. _age_agent:
-.. autoclass:: gym_saturation.agent_testing.AgeAgent
-   :members:
-.. _size_age_agent:
-.. autoclass:: gym_saturation.agent_testing.SizeAgeAgent
-   :members:
-.. autoclass:: gym_saturation.agent_testing.RandomAgent
-   :members:
-.. autofunction:: gym_saturation.agent_testing.episode
-.. autofunction:: gym_saturation.agent_testing.agent_testing_report

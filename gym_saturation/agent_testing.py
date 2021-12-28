@@ -1,17 +1,21 @@
+# Copyright 2021 Boris Shminke
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     https://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 """
-Copyright 2021 Boris Shminke
+Agent Testing
+==============
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    https://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+This module is an example of testing your own trained agent.
 """
 import random
 import sys
@@ -72,7 +76,11 @@ class Transition:
 
 
 class SizeAgent(BaseAgent):
-    """agent which selects the shortest clause"""
+    """
+    .. _size_agent:
+
+    agent which selects the shortest clause
+    """
 
     def __init__(self):
         self._state: Dict[int, float] = {}
@@ -109,7 +117,11 @@ class SizeAgent(BaseAgent):
 
 
 class AgeAgent(BaseAgent):
-    """agent which selects the oldest clause"""
+    """
+    .. _age_agent:
+
+    agent which selects the oldest clause
+    """
 
     def get_action(
         self,
@@ -128,6 +140,8 @@ class AgeAgent(BaseAgent):
 
 class SizeAgeAgent(BaseAgent):
     """
+    .. _size_age_agent:
+
     agent which takes several times the smallest clause and then several
     times the oldest
     """

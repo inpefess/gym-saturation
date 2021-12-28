@@ -39,6 +39,7 @@ pre-commit = "*"
 types-dataclasses = "*"
 sphinx-rtd-theme = "*"
 sphinx-autodoc-typehints = "*"
+flake8 = "*"
 
 [tool.black]
 line-length=79
