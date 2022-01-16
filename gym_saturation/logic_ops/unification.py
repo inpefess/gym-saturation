@@ -1,4 +1,4 @@
-# Copyright 2021 Boris Shminke
+# Copyright 2021-2022 Boris Shminke
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ from gym_saturation.utils import deduplicate
 
 
 class NonUnifiableError(Exception):
-    """ exception raised when terms are not unifiable """
+    """exception raised when terms are not unifiable"""
 
 
 def _get_disagreement(one: Proposition, two: Proposition) -> List[Proposition]:

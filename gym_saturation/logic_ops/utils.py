@@ -1,4 +1,4 @@
-# Copyright 2021 Boris Shminke
+# Copyright 2021-2022 Boris Shminke
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -184,7 +184,7 @@ def clause_in_a_list(clause: Clause, clauses: List[Clause]) -> bool:
 
 
 class NoSubtermFound(Exception):
-    """ sometimes a subterm index is larger than term length """
+    """sometimes a subterm index is larger than term length"""
 
 
 def subterm_by_index(atom: Proposition, index: int) -> Term:
@@ -227,11 +227,11 @@ def subterm_by_index(atom: Proposition, index: int) -> Term:
 
 
 class CantReplaceTheWholeTerm(Exception):
-    """ an exception raised when trying to replace a subterm with index 0 """
+    """an exception raised when trying to replace a subterm with index 0"""
 
 
 class TermSelfReplace(Exception):
-    """ an exception raised when trying to replace a subterm with itself """
+    """an exception raised when trying to replace a subterm with itself"""
 
 
 def _replace_if_not_the_same(
