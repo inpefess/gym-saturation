@@ -89,7 +89,7 @@ run them with the following command:
    pytest --doctest-modules gym-saturation
 
 To check the code quality before creating a pull request, one might run
-the script ``show_report.sh``. It locally does nearly the same as the CI
+the script ``local-build.sh``. It locally does nearly the same as the CI
 pipeline after the PR is created.
 
 Reporting issues or problems with the software
