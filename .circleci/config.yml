@@ -26,7 +26,7 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            pytest --cov gym_saturation --cov-report xml --cov-fail-under=98\
+            pytest --cov gym_saturation --cov-report xml --cov-fail-under=99\
                    --junit-xml test-results/gym-saturation.xml\
                    --doctest-modules gym_saturation
       - run:

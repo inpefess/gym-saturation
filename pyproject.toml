@@ -1,16 +1,16 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "0.1.12"
+version = "0.2.1"
 description = "An OpenAI Gym environment for saturation provers"
 authors = ["Boris Shminke <boris@shminke.ml>"]
 license = "Apache-2.0"
 repository = "https://github.com/inpefess/gym-saturation"
 readme = "README.rst"
 classifiers=[
-	"Programming Language :: Python :: 3.6",
 	"Programming Language :: Python :: 3.7",
 	"Programming Language :: Python :: 3.8",
 	"Programming Language :: Python :: 3.9",
+	"Programming Language :: Python :: 3.10",
 	"License :: OSI Approved :: Apache Software License",
 	"Operating System :: OS Independent",
 	"Intended Audience :: Science/Research",
@@ -23,16 +23,15 @@ classifiers=[
 include = ["gym_saturation/py.typed"]
 
 [tool.poetry.dependencies]
-python = ">= 3.6.1, < 3.10"
+python = ">= 3.7.1, < 3.11"
 lark-parser = "*"
 gym = "*"
-importlib_resources = {version = "*", markers = "python_version < \"3.9\" and python_version >= \"3.7\""}
-dataclasses = {version = "*", markers = "python_version < \"3.7\""}
+importlib_resources = {version = "*", markers = "python_version < \"3.9\""}
 
 [tool.poetry.dev-dependencies]
 black = "*"
 jupyterlab = "*"
-mypy = "!=0.930"
+mypy = "*"
 pylint = "*"
 pytest-coverage = "*"
 pre-commit = "*"

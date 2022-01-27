@@ -1,4 +1,4 @@
-# Copyright 2021 Boris Shminke
+# Copyright 2021-2022 Boris Shminke
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ from operator import itemgetter
 from typing import Any, Dict, List, Optional
 
 import gym
+from gym.wrappers import TimeLimit
 
 from gym_saturation.envs import SaturationEnv
 from gym_saturation.envs.saturation_env import STATE_DIFF_UPDATED
@@ -297,13 +298,40 @@ def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
         print("Step limit reached")
 
 
-if __name__ == "__main__":
+def main(args: Optional[List[str]] = None) -> None:
+    """
+    the main function for this module
+
+    >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
+    ...     from importlib.resources import files
+    ... else:
+    ...     from importlib_resources import files
+    >>> import os
+    >>> problem_filename = os.path.join(
+    ...     files("gym_saturation")
+    ...     .joinpath("resources/TPTP-mock/Problems/TST/TST001-1.p")
+    ... )
+    >>> main([
+    ...     "--problem_filename", problem_filename,
+    ...     "--step_limit", "3"
+    ... ]) # doctest: +ELLIPSIS
+    /.../gym_saturation/resources/TPTP-mock/Problems/TST/TST001-1.p
+    Proof of length 1 found in 3 steps:
+    cnf(..., hypothesis, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
+
+    """
     sys.setrecursionlimit(10000)
-    arguments = parse_args()
-    environment = gym.make(
-        "gym_saturation:saturation-v0",
-        step_limit=arguments.step_limit,
-        problem_list=[arguments.problem_filename],
+    arguments = parse_args(args)
+    environment = TimeLimit(
+        gym.make(
+            "gym_saturation:saturation-v0",
+            problem_list=[arguments.problem_filename],
+        ),
+        arguments.step_limit,
     )
     print(arguments.problem_filename)
     agent_testing_report(environment, SizeAgeAgent(5, 1))
+
+
+if __name__ == "__main__":
+    main()
