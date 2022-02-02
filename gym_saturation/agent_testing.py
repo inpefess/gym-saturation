@@ -228,8 +228,8 @@ def episode(
     cnf(..., hypothesis, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
     Step limit reached
     Proof of length 2 found in 5 steps:
-    cnf(..., ..., ~man(socrates), inference(resolution, [], [q, p_imp_q])).
-    cnf(..., hypothesis, $false, inference(resolution, [], [p, ...])).
+    cnf(..., hypothesis, ..., inference(resolution, [], [..., ...])).
+    cnf(..., hypothesis, $false, inference(resolution, [], [..., ...])).
 
     :param env: a `gym_saturation` environment
     :param agent: an initialized agent. Must have `get_action` method
