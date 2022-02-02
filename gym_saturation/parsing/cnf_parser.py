@@ -34,13 +34,15 @@ class CNFParser(Transformer):
     methods are not typed since nobody calls them directly
 
     >>> import sys
+    >>> import os
     >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
     ...     from importlib.resources import files
     ... else:
     ...     from importlib_resources import files
     >>> from lark import Lark
     >>> parser = Lark(
-    ...     files("gym_saturation").joinpath("resources/TPTP.lark")
+    ...     files("gym_saturation")
+    ...     .joinpath(os.path.join("resources", "TPTP.lark"))
     ...     .read_text(),
     ...     start="tptp_file"
     ... )

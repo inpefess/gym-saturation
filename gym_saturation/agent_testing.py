@@ -211,7 +211,9 @@ def episode(
     >>> from glob import glob
     >>> problem_list = sorted(glob(os.path.join(
     ...     files("gym_saturation")
-    ...     .joinpath("resources/TPTP-mock/Problems/TST")
+    ...     .joinpath(os.path.join(
+    ...         "resources", "TPTP-mock", "Problems", "TST"
+    ...     ))
     ... , "*-*.p")))
     >>> random.seed(0)
     >>> agents = [SizeAgeAgent(2, 1), SizeAgeAgent(1, 2), RandomAgent()]
@@ -309,13 +311,15 @@ def main(args: Optional[List[str]] = None) -> None:
     >>> import os
     >>> problem_filename = os.path.join(
     ...     files("gym_saturation")
-    ...     .joinpath("resources/TPTP-mock/Problems/TST/TST001-1.p")
+    ...     .joinpath(os.path.join(
+    ...         "resources", "TPTP-mock", "Problems", "TST", "TST001-1.p"
+    ...     ))
     ... )
     >>> main([
     ...     "--problem_filename", problem_filename,
     ...     "--step_limit", "3"
     ... ]) # doctest: +ELLIPSIS
-    /.../gym_saturation/resources/TPTP-mock/Problems/TST/TST001-1.p
+    Problem file: ...TST001-1.p
     Proof of length 1 found in 3 steps:
     cnf(..., hypothesis, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
 
@@ -329,7 +333,7 @@ def main(args: Optional[List[str]] = None) -> None:
         ),
         arguments.step_limit,
     )
-    print(arguments.problem_filename)
+    print(f"Problem file: {arguments.problem_filename}")
     agent_testing_report(environment, SizeAgeAgent(5, 1))
 
 
