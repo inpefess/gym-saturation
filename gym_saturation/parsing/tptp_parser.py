@@ -42,12 +42,15 @@ class TPTPParser:
     >>> tptp_parser = TPTPParser()
     >>> tptp_text = (
     ...     files("gym_saturation")
-    ...     .joinpath("resources/TPTP-mock/Problems/TST/TST001-1.p")
+    ...     .joinpath(os.path.join(
+    ...         "resources", "TPTP-mock", "Problems", "TST", "TST001-1.p"
+    ...     ))
     ...     .read_text()
     ... )
     >>> print("\\n".join(map(str, tptp_parser.parse(
     ...     tptp_text,
-    ...     files("gym_saturation").joinpath("resources/TPTP-mock")
+    ...     files("gym_saturation")
+    ...     .joinpath(os.path.join("resources", "TPTP-mock"))
     ... ))))
     cnf(this_is_a_test_case_1, hypothesis, this_is_a_test_case(test_constant), inference(resolution, [], [one, two])).
     cnf(this_is_a_test_case_2, hypothesis, ~this_is_a_test_case(test_constant)).
@@ -59,7 +62,7 @@ class TPTPParser:
         # pylint: disable=unspecified-encoding
         self.parser = Lark(
             files("gym_saturation")
-            .joinpath("resources/TPTP.lark")
+            .joinpath(os.path.join("resources", "TPTP.lark"))
             .read_text(),
             start="tptp_file",
         )

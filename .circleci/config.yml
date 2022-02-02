@@ -37,6 +37,11 @@ jobs:
                         gym_saturation
             pylint --rcfile=.pylintrc gym_saturation
       - run:
+          name: run type checks
+          command: |
+            . venv/bin/activate
+            mypy --config-file mypy.ini gym_saturation
+      - run:
           name: upload data to codecov
           command: |
             bash <(curl -s https://codecov.io/bash) -X gcov -X coveragepy
