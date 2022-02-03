@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-|PyPI version| |CircleCI| |Documentation Status| |codecov| |Binder|
+|PyPI version| |CircleCI| |Documentation Status| |codecov| |Binder| |JOSS|
 
 gym-saturation
 ==============
@@ -114,3 +114,5 @@ More documentation can be found
    :target: https://codecov.io/gh/inpefess/gym-saturation
 .. |Binder| image:: https://mybinder.org/badge_logo.svg
    :target: https://mybinder.org/v2/gh/inpefess/gym-saturation/HEAD?labpath=example.ipynb
+.. |JOSS| image:: https://joss.theoj.org/papers/c4f36ec7331a0dde54d8c3808fbff9c3/status.svg
+   :target: https://joss.theoj.org/papers/c4f36ec7331a0dde54d8c3808fbff9c3
