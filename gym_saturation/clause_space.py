@@ -54,6 +54,7 @@ class ClauseSpace(spaces.Space):
                 "class": "Clause",
                 "literals": [],
                 "label": "test",
+                "role": "lemma",
                 "birth_step": 0,
                 "processed": False,
                 "inference_parents": [],

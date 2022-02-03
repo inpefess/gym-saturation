@@ -86,6 +86,7 @@ class ClauseJSONEncoder(json.JSONEncoder):
             "class": "Clause",
             "literals": literals,
             "label": o.label,
+            "role": o.role,
             "birth_step": o.birth_step,
             "processed": o.processed,
             "inference_parents": o.inference_parents,
@@ -103,6 +104,7 @@ def dict_to_clause(json_dict):
         return grammar.Clause(
             [dict_to_clause(literal) for literal in json_dict["literals"]],
             label=json_dict["label"],
+            role=json_dict["role"],
             birth_step=json_dict["birth_step"],
             processed=json_dict["processed"],
             inference_parents=json_dict["inference_parents"],
