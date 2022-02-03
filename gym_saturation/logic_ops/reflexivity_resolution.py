@@ -66,7 +66,7 @@ def all_possible_reflexivity_resolvents(
     >>> parser = TPTPParser()
     >>> clause = parser.parse("cnf(this_is_a_test_case, axiom, p(X) | ~ X=a | b != a).", "")[0]
     >>> all_possible_reflexivity_resolvents(clause)  # doctest: +ELLIPSIS
-    [cnf(..., hypothesis, p(a) | ~b = a, inference(reflexivity_resolution, [], [this_is_a_test_case])).]
+    [cnf(..., lemma, p(a) | ~b = a, inference(reflexivity_resolution, [], [this_is_a_test_case])).]
 
     :param given_clause: a new clause which should be combined with all the
         processed ones

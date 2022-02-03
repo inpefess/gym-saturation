@@ -50,7 +50,7 @@ class CNFParser(Transformer):
     ...    cnf(test, axiom, f(X, g(Y), h(Z, c1)) = f(X, Y, c2)
     ...    | ~ better(f(X), g(Y)) | $false | this_is_a_test_case).
     ... '''))
-    cnf(test, hypothesis, f(X,g(Y),h(Z,c1)) = f(X,Y,c2) | ~better(f(X), g(Y)) | $false() | this_is_a_test_case()).
+    cnf(test, axiom, f(X,g(Y),h(Z,c1)) = f(X,Y,c2) | ~better(f(X), g(Y)) | $false() | this_is_a_test_case()).
     """
 
     def __default_token__(self, token):
@@ -196,6 +196,7 @@ class CNFParser(Transformer):
         """
         clause = children[2]
         clause.label = children[0]
+        clause.role = children[1]
         if isinstance(children[3], list):
             for annotation in children[3]:
                 if isinstance(annotation, dict):

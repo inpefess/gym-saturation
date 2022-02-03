@@ -78,7 +78,7 @@ def all_possible_factors(
     >>> parser = TPTPParser()
     >>> clause = parser.parse("cnf(one, axiom, p(c) | p(X) | q).", "")[0]
     >>> all_possible_factors(clause)  # doctest: +ELLIPSIS
-    [cnf(..., hypothesis, q() | p(c), inference(factoring, [], [one])).]
+    [cnf(..., lemma, q() | p(c), inference(factoring, [], [one])).]
 
     :param given_clause: a new clause which should be combined with all the
         processed ones
