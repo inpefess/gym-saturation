@@ -105,7 +105,7 @@ def all_possible_resolvents(
     >>> one = parser.parse("cnf(one, axiom, q(X) | p(X)).", "")[0]
     >>> two = parser.parse("cnf(two, axiom, ~p(c)).", "")[0]
     >>> all_possible_resolvents([one], two)  # doctest: +ELLIPSIS
-    [cnf(..., hypothesis, q(c), inference(resolution, [], [one, two])).]
+    [cnf(..., lemma, q(c), inference(resolution, [], [one, two])).]
 
     :param clauses: a list of (processed) clauses
     :param given_clause: a new clause which should be combined with all the

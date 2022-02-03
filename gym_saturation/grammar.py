@@ -111,6 +111,7 @@ class Clause:
     :param literals: a list of literals, forming the clause
     :param label: comes from the problem file or starts with ``inferred_`` if
          inferred during the episode
+    :param role: formula role (axiom, hypothesis, etc)
     :param inference_parents: a list of labels from which the clause was
          inferred. For clauses from the problem statement, this list is empty
     :param inference_rule: the rule according to which the clause was got from
@@ -125,13 +126,14 @@ class Clause:
     label: str = field(
         default_factory=lambda: "x" + str(uuid1()).replace("-", "_")
     )
+    role: str = "lemma"
     inference_parents: Optional[List[str]] = None
     inference_rule: Optional[str] = None
     processed: Optional[bool] = None
     birth_step: Optional[int] = None
 
     def __repr__(self):
-        res = f"cnf({self.label}, hypothesis, "
+        res = f"cnf({self.label}, {self.role}, "
         for literal in self.literals:
             res += _literal_to_tptp(literal) + " | "
         if res[-2:] == "| ":

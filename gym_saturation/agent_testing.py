@@ -225,11 +225,11 @@ def episode(
     ...     env._max_episode_steps = 5
     ...     agent_testing_report(env, agents[i])
     Proof of length 1 found in 4 steps:
-    cnf(..., hypothesis, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
+    cnf(..., lemma, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
     Step limit reached
     Proof of length 2 found in 5 steps:
-    cnf(..., hypothesis, ..., inference(resolution, [], [..., ...])).
-    cnf(..., hypothesis, $false, inference(resolution, [], [..., ...])).
+    cnf(..., lemma, ..., inference(resolution, [], [..., ...])).
+    cnf(..., lemma, $false, inference(resolution, [], [..., ...])).
 
     :param env: a `gym_saturation` environment
     :param agent: an initialized agent. Must have `get_action` method
@@ -321,7 +321,7 @@ def main(args: Optional[List[str]] = None) -> None:
     ... ]) # doctest: +ELLIPSIS
     Problem file: ...TST001-1.p
     Proof of length 1 found in 3 steps:
-    cnf(..., hypothesis, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
+    cnf(..., lemma, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
 
     """
     sys.setrecursionlimit(10000)

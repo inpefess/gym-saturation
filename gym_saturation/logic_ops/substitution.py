@@ -29,7 +29,7 @@ class Substitution:
 
     >>> substitution = Substitution(grammar.Variable("X"), grammar.Function("this_is_a_test_case", []))
     >>> substitution(grammar.Clause([grammar.Literal(False, grammar.Predicate("p", [grammar.Function("this_is_a_test_case", [grammar.Variable("X")])]))]))  # doctest: +ELLIPSIS
-    cnf(..., hypothesis, p(this_is_a_test_case(this_is_a_test_case))).
+    cnf(..., lemma, p(this_is_a_test_case(this_is_a_test_case))).
     >>> substitution(grammar.Variable("X"))
     Function(name='this_is_a_test_case', arguments=[])
     """

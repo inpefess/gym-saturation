@@ -202,9 +202,9 @@ def all_paramodulants_from_list(
     >>> res = all_paramodulants_from_list([one], two)
     >>> dedup = map(Clause, deduplicate([clause.literals for clause in res]))
     >>> print("\\n".join(map(str, dedup)))  # doctest: +ELLIPSIS
-    cnf(..., hypothesis, a = c | X = X).
-    cnf(..., hypothesis, c = b | a = b).
-    cnf(..., hypothesis, b = c | a = b).
+    cnf(..., lemma, a = c | X = X).
+    cnf(..., lemma, c = b | a = b).
+    cnf(..., lemma, b = c | a = b).
 
     :param clauses: a list of (processed) clauses
     :param given_clause: a new clause which should be combined with all the
