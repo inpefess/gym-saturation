@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-|PyPI version| |CircleCI| |Documentation Status| |codecov| |Binder| |JOSS|
+|PyPI version| |Anaconda| |CircleCI| |Documentation Status| |codecov| |Binder| |JOSS|
 
 gym-saturation
 ==============
@@ -47,6 +47,12 @@ The best way to install this package is to use ``pip``:
 
    pip install gym-saturation
 
+Another option is to use ``conda``:
+
+.. code:: sh
+
+   conda install -c conda-forge gym-saturation
+   
 One can also run it in a Docker container:
 
 .. code:: sh
@@ -116,3 +122,5 @@ More documentation can be found
    :target: https://mybinder.org/v2/gh/inpefess/gym-saturation/HEAD?labpath=example.ipynb
 .. |JOSS| image:: https://joss.theoj.org/papers/c4f36ec7331a0dde54d8c3808fbff9c3/status.svg
    :target: https://joss.theoj.org/papers/c4f36ec7331a0dde54d8c3808fbff9c3
+.. |Anaconda| image:: https://anaconda.org/conda-forge/gym-saturation/badges/version.svg
+   :target: https://anaconda.org/conda-forge/gym-saturation
