@@ -17,7 +17,6 @@ Saturation Environment
 """
 import os
 import random
-from dataclasses import asdict
 from typing import Dict, List, Tuple
 
 import numpy as np
@@ -148,13 +147,16 @@ class SaturationEnv(Env):
         tptp_folder = os.path.join(os.path.dirname(problem), "..", "..")
         with open(problem, "r", encoding="utf-8") as problem_file:
             problem_text = problem_file.read()
-        clauses = TPTPParser().parse(problem_text, tptp_folder)
-        for clause in clauses:
-            clause.birth_step = 0
-            clause.inference_parents = []
-            clause.inference_rule = None
-            clause.processed = False
-        return clauses
+        parsed_clauses = TPTPParser().parse(problem_text, tptp_folder)
+        return [
+            clause._replace(
+                birth_step=0,
+                inference_parents=[],
+                inference_rule=None,
+                processed=False,
+            )
+            for clause in parsed_clauses
+        ]
 
     def reset(self) -> dict:
         self._state = reindex_variables(self._init_clauses(), "X")
@@ -167,9 +169,9 @@ class SaturationEnv(Env):
         for clause in new_clauses:
             if not is_tautology(clause):
                 if not clause_in_a_list(clause, self._state):
-                    clause.birth_step = birth_step
-                    clause.processed = False
-                    self._state.append(clause)
+                    self._state.append(
+                        clause._replace(birth_step=birth_step, processed=False)
+                    )
 
     def _do_deductions(self, action: int) -> Dict[int, dict]:
         state_len_before = len(self._state)
@@ -200,25 +202,25 @@ class SaturationEnv(Env):
                     given_clause,
                 )
             )
-        self._state[action].processed = True
+        self._state[action] = self._state[action]._replace(processed=True)
         return dict(
             [
-                (i + state_len_before, asdict(clause))
+                (i + state_len_before, clause.todict())
                 for i, clause in enumerate(self._state[state_len_before:])
             ]
-            + [(action, asdict(self._state[action]))]
+            + [(action, self._state[action].todict())]
         )
 
     def step(self, action: int) -> Tuple[dict, float, bool, dict]:
         if self._state[action].processed:
             raise ValueError(f"action {action} is not valid")
         if self._state[action].literals == []:
-            self._state[action].processed = True
+            self._state[action] = self._state[action]._replace(processed=True)
             return (
                 self.state,
                 1.0,
                 True,
-                {STATE_DIFF_UPDATED: {action: asdict(self._state[action])}},
+                {STATE_DIFF_UPDATED: {action: self._state[action].todict()}},
             )
         updated = self._do_deductions(action)
         if min(
@@ -254,7 +256,7 @@ class SaturationEnv(Env):
                 "consider increasing `max_clauses` parameter of `__init__`"
             )
         return {
-            "real_obs": list(map(asdict, self._state)),
+            "real_obs": [clause.todict() for clause in self._state],
             "action_mask": (
                 np.array(
                     [

@@ -41,7 +41,7 @@ def reflexivity_resolution(
     * :math:`\sigma` is a most general unifier of :math:`s` and :math:`t`
 
     >>> from gym_saturation.grammar import Predicate, Variable, Function
-    >>> reflexivity_resolution(grammar.Clause([grammar.Literal(True, Predicate("this_is_a_test_case", [Variable("X")]))]), [Variable("X"), Function("f", [])]).literals
+    >>> reflexivity_resolution(grammar.new_clause([grammar.Literal(True, Predicate("this_is_a_test_case", [Variable("X")]))]), [Variable("X"), Function("f", [])]).literals
     [Literal(negated=True, atom=Predicate(name='this_is_a_test_case', arguments=[Function(name='f', arguments=[])]))]
 
     :param given_clause: :math:`C`
@@ -50,7 +50,7 @@ def reflexivity_resolution(
     """
     substitutions = most_general_unifier([a_literal[0], a_literal[1]])
     new_literals = utils.pickle_copy(given_clause.literals)
-    result = grammar.Clause(new_literals)
+    result = grammar.new_clause(new_literals)
     for substitution in substitutions:
         result = substitution.substitute_in_clause(result)
     return result
@@ -66,7 +66,7 @@ def all_possible_reflexivity_resolvents(
     >>> parser = TPTPParser()
     >>> clause = parser.parse("cnf(this_is_a_test_case, axiom, p(X) | ~ X=a | b != a).", "")[0]
     >>> all_possible_reflexivity_resolvents(clause)  # doctest: +ELLIPSIS
-    [cnf(..., lemma, p(a) | ~b = a, inference(reflexivity_resolution, [], [this_is_a_test_case])).]
+    [cnf(x..., lemma, p(a) | ~b = a, inference(reflexivity_resolution, [], [this_is_a_test_case])).]
 
     :param given_clause: a new clause which should be combined with all the
         processed ones
@@ -81,7 +81,7 @@ def all_possible_reflexivity_resolvents(
             or not a_literal.negated
             and a_literal.atom.name == "!="
         ) and len(a_literal.atom.arguments) == 2:
-            a_clause = grammar.Clause(
+            a_clause = grammar.new_clause(
                 given_clause.literals[:i] + given_clause.literals[i + 1 :]
             )
             if a_clause.literals:
@@ -98,7 +98,7 @@ def all_possible_reflexivity_resolvents(
                 except NonUnifiableError:
                     pass
     return [
-        grammar.Clause(
+        grammar.new_clause(
             literals=reflexivity_resolvent.literals,
             inference_parents=[given_clause.label],
             inference_rule="reflexivity_resolution",

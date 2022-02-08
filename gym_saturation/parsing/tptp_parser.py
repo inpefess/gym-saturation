@@ -35,8 +35,8 @@ else:
 class TPTPParser:
     """
     >>> from gym_saturation.grammar import (Literal, Predicate, Variable,
-    ...     Function)
-    >>> clause = Clause([Literal(True, Predicate("=", [Function("this_is_a_test_case", [Variable("X")]), Variable("Y")]))], inference_rule="resolution", inference_parents=["one", "two"])
+    ...     Function, new_clause)
+    >>> clause = new_clause([Literal(True, Predicate("=", [Function("this_is_a_test_case", [Variable("X")]), Variable("Y")]))], inference_rule="resolution", inference_parents=["one", "two"])
     >>> TPTPParser().parse(str(clause), "") == [clause]
     True
     >>> tptp_parser = TPTPParser()

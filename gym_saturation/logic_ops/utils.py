@@ -135,8 +135,7 @@ def clause_length(clause: dict) -> int:
     :return: sctructural length of a clause
 
     >>> from gym_saturation.grammar import Literal
-    >>> from dataclasses import asdict
-    >>> clause_length(asdict(Clause([Literal(True, Predicate("p", [Function("this_is_a_test_case", [])]))])))
+    >>> clause_length(Clause([Literal(True, Predicate("p", [Function("this_is_a_test_case", [])]))]).todict())
     3
     """
     length = 0

@@ -85,6 +85,4 @@ class Substitution:
                     self._substitute_in_predicate(literal.atom),
                 )
             )
-        new_clause: grammar.Clause = pickle_copy(clause)
-        new_clause.literals = literals
-        return new_clause
+        return clause._replace(literals=literals)

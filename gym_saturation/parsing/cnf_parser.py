@@ -123,8 +123,10 @@ class CNFParser(Transformer):
             return Literal(True, children[1])
         if isinstance(children[0], Predicate):
             if children[0].name == "!=":
-                children[0].name = "="
-                return Literal(True, children[0])
+                return Literal(
+                    negated=True,
+                    atom=Predicate(name="=", arguments=children[0].arguments),
+                )
         return Literal(False, children[0])
 
     @staticmethod
@@ -195,21 +197,22 @@ class CNFParser(Transformer):
         annotated CNF formula (clause)
         """
         clause = children[2]
-        clause.label = children[0]
-        clause.role = children[1]
+        inference_rule = None
+        inference_parents = None
         if isinstance(children[3], list):
             for annotation in children[3]:
                 if isinstance(annotation, dict):
                     if "inference_record" in annotation:
-                        clause.inference_rule = annotation["inference_record"][
-                            0
-                        ]
-                        clause.inference_parents = (
-                            self._parse_inference_parents(
-                                annotation["inference_record"][1]
-                            )
+                        inference_rule = annotation["inference_record"][0]
+                        inference_parents = self._parse_inference_parents(
+                            annotation["inference_record"][1]
                         )
-        return clause
+        return clause._replace(
+            label=children[0],
+            role=children[1],
+            inference_rule=inference_rule,
+            inference_parents=inference_parents,
+        )
 
     @staticmethod
     def inference_record(children):

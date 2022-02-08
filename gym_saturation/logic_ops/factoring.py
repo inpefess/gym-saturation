@@ -44,9 +44,9 @@ def factoring(
     * :math:`\sigma` is a most general unifier of :math:`A_1` and :math:`A_2`
 
     >>> from gym_saturation.grammar import Predicate, Variable, Function
-    >>> factoring(grammar.Clause([grammar.Literal(True, Predicate("q", [Variable("X")]))]), grammar.Literal(False, Predicate("p", [Variable("X")])), grammar.Literal(False, Predicate("p", [Function("this_is_a_test_case", [])]))).literals
+    >>> factoring(grammar.new_clause([grammar.Literal(True, Predicate("q", [Variable("X")]))]), grammar.Literal(False, Predicate("p", [Variable("X")])), grammar.Literal(False, Predicate("p", [Function("this_is_a_test_case", [])]))).literals
     [Literal(negated=True, atom=Predicate(name='q', arguments=[Function(name='this_is_a_test_case', arguments=[])])), Literal(negated=False, atom=Predicate(name='p', arguments=[Function(name='this_is_a_test_case', arguments=[])]))]
-    >>> factoring(grammar.Clause([]), grammar.Literal(False, Predicate("f", [])), grammar.Literal(True, Predicate("this_is_a_test_case", [])))
+    >>> factoring(grammar.new_clause([]), grammar.Literal(False, Predicate("f", [])), grammar.Literal(True, Predicate("this_is_a_test_case", [])))
     Traceback (most recent call last):
      ...
     ValueError: factoring is not possible for Literal(negated=False, atom=Predicate(name='f', arguments=[])) and Literal(negated=True, atom=Predicate(name='this_is_a_test_case', arguments=[]))
@@ -62,7 +62,7 @@ def factoring(
         )
     substitutions = most_general_unifier([literal_one.atom, literal_two.atom])
     new_literals = pickle_copy(given_clause.literals + [literal_one])
-    result = grammar.Clause(new_literals)
+    result = grammar.new_clause(new_literals)
     for substitution in substitutions:
         result = substitution.substitute_in_clause(result)
     return result
@@ -78,7 +78,7 @@ def all_possible_factors(
     >>> parser = TPTPParser()
     >>> clause = parser.parse("cnf(one, axiom, p(c) | p(X) | q).", "")[0]
     >>> all_possible_factors(clause)  # doctest: +ELLIPSIS
-    [cnf(..., lemma, q() | p(c), inference(factoring, [], [one])).]
+    [cnf(x..., lemma, q() | p(c), inference(factoring, [], [one])).]
 
     :param given_clause: a new clause which should be combined with all the
         processed ones
@@ -92,7 +92,7 @@ def all_possible_factors(
                 not literal_one.negated
                 and not given_clause.literals[j].negated
             ):
-                a_clause = grammar.Clause(
+                a_clause = grammar.new_clause(
                     given_clause.literals[:i]
                     + given_clause.literals[i + 1 : j]
                     + given_clause.literals[j + 1 :]
@@ -106,7 +106,7 @@ def all_possible_factors(
                 except NonUnifiableError:
                     pass
     return [
-        grammar.Clause(
+        grammar.new_clause(
             literals=factor.literals,
             inference_parents=[given_clause.label],
             inference_rule="factoring",

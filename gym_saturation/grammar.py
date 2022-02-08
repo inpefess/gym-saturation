@@ -11,17 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# type: ignore
 """
 Grammar
 ********
 """
-from dataclasses import dataclass, field
-from typing import List, Optional, Union
+from typing import List, NamedTuple, Optional, Union
 from uuid import uuid1
 
 
-@dataclass
-class Variable:
+class Variable(NamedTuple):
     """
     .. _variable:
 
@@ -30,9 +29,15 @@ class Variable:
 
     name: str
 
+    def todict(self) -> dict:
+        """
+        :returns: a value similar to `_asdict` but with fields represented
+            recursively as dicts too
+        """
+        return self._asdict()  # pylint: disable=no-member
 
-@dataclass
-class Function:
+
+class Function(NamedTuple):
     """
     .. _Function:
 
@@ -42,12 +47,26 @@ class Function:
     name: str
     arguments: List[Union[Variable, "Function"]]
 
+    def todict(self) -> dict:
+        """
+        :returns: a value similar to `_asdict` but with fields represented
+            recursively as dicts too
+        """
+        return {
+            "name": self.name,
+            "arguments": [argument.todict() for argument in self.arguments],
+        }
+
 
 Term = Union[Variable, Function]
+Term.__doc__ = """
+.. _Term:
+
+Term is either a :ref:`Variable <Variable>` or a :ref:`Function <Function>`
+"""
 
 
-@dataclass
-class Predicate:
+class Predicate(NamedTuple):
     """
     .. _Predicate:
 
@@ -57,12 +76,26 @@ class Predicate:
     name: str
     arguments: List[Term]
 
+    def todict(self) -> dict:
+        """
+        :returns: a value similar to `_asdict` but with fields represented
+            recursively as dicts too
+        """
+        return {
+            "name": self.name,
+            "arguments": [argument.todict() for argument in self.arguments],
+        }
+
 
 Proposition = Union[Predicate, Term]
+Proposition.__doc__ = """
+.. _Proposition:
+
+Proposition is either a :ref:`Predicate <Predicate>` or a :ref:`Term <Term>`
+"""
 
 
-@dataclass
-class Literal:
+class Literal(NamedTuple):
     """
     .. _Literal:
 
@@ -71,6 +104,13 @@ class Literal:
 
     negated: bool
     atom: Predicate
+
+    def todict(self) -> dict:
+        """
+        :returns: a value similar to `_asdict` but with fields represented
+            recursively as dicts too
+        """
+        return {"negated": self.negated, "atom": self.atom.todict()}
 
 
 def _term_to_tptp(term: Term) -> str:
@@ -101,8 +141,7 @@ def _literal_to_tptp(literal: Literal) -> str:
     return res
 
 
-@dataclass
-class Clause:
+class Clause(NamedTuple):
     """
     .. _Clause:
 
@@ -123,9 +162,7 @@ class Clause:
     """
 
     literals: List[Literal]
-    label: str = field(
-        default_factory=lambda: "x" + str(uuid1()).replace("-", "_")
-    )
+    label: Optional[str] = None
     role: str = "lemma"
     inference_parents: Optional[List[str]] = None
     inference_rule: Optional[str] = None
@@ -150,3 +187,35 @@ class Clause:
                 + "])"
             )
         return res + ")."
+
+    def todict(self) -> dict:
+        """
+        :returns: a value similar to `_asdict` but with fields represented
+            recursively as dicts too
+        """
+        return {
+            "literals": [literal.todict() for literal in self.literals],
+            "label": self.label,
+            "role": self.role,
+            "birth_step": self.birth_step,
+            "inference_parents": self.inference_parents,
+            "inference_rule": self.inference_rule,
+            "processed": self.processed,
+        }
+
+
+def new_clause(
+    literals: List[Literal], label: Optional[str] = None, **kwargs
+) -> Clause:
+    """
+    a trivial clause factory
+
+    :param literals: a list of literals
+    :param label: if empty, it will be randomly generated
+    :returns: a new clause
+    """
+    if label is None:
+        new_label = "x" + str(uuid1()).replace("-", "_")
+    else:
+        new_label = label
+    return Clause(literals=literals, label=new_label, **kwargs)

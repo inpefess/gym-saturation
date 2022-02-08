@@ -17,7 +17,7 @@ Resolution
 """
 from typing import List
 
-from gym_saturation.grammar import Clause, Literal
+from gym_saturation.grammar import Clause, Literal, new_clause
 from gym_saturation.logic_ops.unification import (
     NonUnifiableError,
     most_general_unifier,
@@ -45,9 +45,9 @@ def resolution(
     * :math:`\sigma` is a most general unifier of atoms from :math:`L_1` and :math:`L_2`
 
     >>> from gym_saturation.grammar import Predicate, Variable, Function
-    >>> resolution(Clause([Literal(False, Predicate("q", [Variable("X")]))]), Literal(False, Predicate("p", [Variable("X")])), Clause([Literal(False, Predicate("r", [Variable("X")]))]), Literal(True, Predicate("p", [Function("this_is_a_test_case", [])]))).literals
+    >>> resolution(new_clause([Literal(False, Predicate("q", [Variable("X")]))]), Literal(False, Predicate("p", [Variable("X")])), new_clause([Literal(False, Predicate("r", [Variable("X")]))]), Literal(True, Predicate("p", [Function("this_is_a_test_case", [])]))).literals
     [Literal(negated=False, atom=Predicate(name='q', arguments=[Function(name='this_is_a_test_case', arguments=[])])), Literal(negated=False, atom=Predicate(name='r', arguments=[Function(name='this_is_a_test_case', arguments=[])]))]
-    >>> resolution(Clause([]), Literal(False, Predicate("f", [])), Clause([]), Literal(False, Predicate("this_is_a_test_case", [])))
+    >>> resolution(new_clause([]), Literal(False, Predicate("f", [])), new_clause([]), Literal(False, Predicate("this_is_a_test_case", [])))
     Traceback (most recent call last):
      ...
     ValueError: resolution is not possible for Literal(negated=False, atom=Predicate(name='f', arguments=[])) and Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))
@@ -67,7 +67,7 @@ def resolution(
     for literal in clause_two.literals:
         if literal not in new_literals:
             new_literals.append(pickle_copy(literal))
-    result = Clause(new_literals)
+    result = new_clause(new_literals)
     for substitution in substitutions:
         result = substitution.substitute_in_clause(result)
     return result
@@ -79,7 +79,7 @@ def _get_new_resolvents(
     resolvents: List[Clause] = []
     for j, literal_two in enumerate(given_clause.literals):
         if literal_one.negated != literal_two.negated:
-            clause_two = Clause(
+            clause_two = new_clause(
                 given_clause.literals[:j] + given_clause.literals[j + 1 :]
             )
             try:
@@ -105,7 +105,7 @@ def all_possible_resolvents(
     >>> one = parser.parse("cnf(one, axiom, q(X) | p(X)).", "")[0]
     >>> two = parser.parse("cnf(two, axiom, ~p(c)).", "")[0]
     >>> all_possible_resolvents([one], two)  # doctest: +ELLIPSIS
-    [cnf(..., lemma, q(c), inference(resolution, [], [one, two])).]
+    [cnf(x..., lemma, q(c), inference(resolution, [], [one, two])).]
 
     :param clauses: a list of (processed) clauses
     :param given_clause: a new clause which should be combined with all the
@@ -116,13 +116,15 @@ def all_possible_resolvents(
     resolvents: List[Clause] = []
     for clause in clauses:
         for i, literal_one in enumerate(clause.literals):
-            clause_one = Clause(clause.literals[:i] + clause.literals[i + 1 :])
+            clause_one = new_clause(
+                clause.literals[:i] + clause.literals[i + 1 :]
+            )
             new_resolvents = _get_new_resolvents(
                 clause_one, literal_one, given_clause
             )
             resolvents.extend(
                 [
-                    Clause(
+                    new_clause(
                         literals=resolvent.literals,
                         inference_parents=[clause.label, given_clause.label],
                         inference_rule="resolution",
