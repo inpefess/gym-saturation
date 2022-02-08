@@ -34,7 +34,7 @@ class Variable(NamedTuple):
         :returns: a value similar to `_asdict` but with fields represented
             recursively as dicts too
         """
-        return self._asdict()  # pylint: disable=no-member
+        return {"name": self.name}
 
 
 class Function(NamedTuple):
