@@ -17,22 +17,19 @@ Clause Space
 """
 from gym import spaces
 
-from gym_saturation.grammar import Clause
-from gym_saturation.parsing.json_grammar import dict_to_clause
-
 
 class ClauseSpace(spaces.Space):
     """
     .. _clause_space:
 
-    an OpenAI Gym space for a list of clauses
+    an OpenAI Gym space for a list of dictionaries
 
     >>> space = ClauseSpace()
     >>> space.sample() in space
     True
     >>> "no" in space
     False
-    >>> [{"class": "no"}] in space
+    >>> ["no"] in space
     False
     """
 
@@ -42,16 +39,12 @@ class ClauseSpace(spaces.Space):
     def contains(self, x):
         if isinstance(x, list):
             for clause in x:
-                try:
-                    return isinstance(dict_to_clause(clause), Clause)
-                except (ValueError, KeyError):
-                    return False
+                return isinstance(clause, dict)
         return False
 
     def sample(self):
         return [
             {
-                "class": "Clause",
                 "literals": [],
                 "label": "test",
                 "role": "lemma",

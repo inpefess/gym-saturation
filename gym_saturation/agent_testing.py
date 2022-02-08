@@ -31,7 +31,6 @@ from gym.wrappers import TimeLimit
 from gym_saturation.envs import SaturationEnv
 from gym_saturation.envs.saturation_env import STATE_DIFF_UPDATED
 from gym_saturation.logic_ops.utils import clause_length
-from gym_saturation.parsing.json_grammar import dict_to_clause
 
 
 class BaseAgent:
@@ -95,7 +94,7 @@ class SizeAgent(BaseAgent):
         """
         self._state.update(
             {
-                index: clause_length(dict_to_clause(clause))
+                index: clause_length(clause)
                 for index, clause in info[STATE_DIFF_UPDATED].items()
                 if not clause["processed"]
             }

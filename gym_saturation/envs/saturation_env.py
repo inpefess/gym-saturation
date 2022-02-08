@@ -17,6 +17,7 @@ Saturation Environment
 """
 import os
 import random
+from dataclasses import asdict
 from typing import Dict, List, Tuple
 
 import numpy as np
@@ -36,7 +37,6 @@ from gym_saturation.logic_ops.utils import (
     reduce_to_proof,
     reindex_variables,
 )
-from gym_saturation.parsing.json_grammar import clause_to_dict
 from gym_saturation.parsing.tptp_parser import TPTPParser
 
 STATE_DIFF_UPDATED = "state_diff_updated"
@@ -84,8 +84,8 @@ class SaturationEnv(Env):
     ``ansi`` mode returns a JSON representation of the state
     it should be more easily parsable than TPTP, although less human-friendly
 
-    >>> env.render("ansi")[:73]
-    "[{'class': 'Clause', 'literals': [{'class': 'Literal', 'negated': False, "
+    >>> env.render("ansi")  # doctest: +ELLIPSIS
+    "[{'literals': [{'negated': False, 'atom': {'name': 'this_is_a_test_case', 'arguments': [{'name':...
 
     other modes are not implemented yet
 
@@ -171,7 +171,7 @@ class SaturationEnv(Env):
                     clause.processed = False
                     self._state.append(clause)
 
-    def _do_deductions(self, action: int) -> Dict[int, Clause]:
+    def _do_deductions(self, action: int) -> Dict[int, dict]:
         state_len_before = len(self._state)
         given_clause = self._state[action]
         if not given_clause.processed:
@@ -203,10 +203,10 @@ class SaturationEnv(Env):
         self._state[action].processed = True
         return dict(
             [
-                (i + state_len_before, clause_to_dict(clause))
+                (i + state_len_before, asdict(clause))
                 for i, clause in enumerate(self._state[state_len_before:])
             ]
-            + [(action, clause_to_dict(self._state[action]))]
+            + [(action, asdict(self._state[action]))]
         )
 
     def step(self, action: int) -> Tuple[dict, float, bool, dict]:
@@ -218,11 +218,7 @@ class SaturationEnv(Env):
                 self.state,
                 1.0,
                 True,
-                {
-                    STATE_DIFF_UPDATED: {
-                        action: clause_to_dict(self._state[action])
-                    }
-                },
+                {STATE_DIFF_UPDATED: {action: asdict(self._state[action])}},
             )
         updated = self._do_deductions(action)
         if min(
@@ -258,7 +254,7 @@ class SaturationEnv(Env):
                 "consider increasing `max_clauses` parameter of `__init__`"
             )
         return {
-            "real_obs": clause_to_dict(self._state),
+            "real_obs": list(map(asdict, self._state)),
             "action_mask": (
                 np.array(
                     [

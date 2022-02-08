@@ -57,7 +57,5 @@ Parsing
 
 .. automodule:: gym_saturation.parsing.cnf_parser
    :members:
-.. automodule:: gym_saturation.parsing.json_grammar
-   :members:
 .. automodule:: gym_saturation.parsing.tptp_parser
    :members:

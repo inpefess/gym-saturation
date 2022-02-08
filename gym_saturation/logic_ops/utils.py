@@ -126,7 +126,7 @@ def is_tautology(clause: Clause) -> bool:
     return False
 
 
-def clause_length(clause: Clause) -> int:
+def clause_length(clause: dict) -> int:
     """
     total length of arguments of each predicate.
     Negation adds one to each literal
@@ -135,16 +135,20 @@ def clause_length(clause: Clause) -> int:
     :return: sctructural length of a clause
 
     >>> from gym_saturation.grammar import Literal
-    >>> clause_length(Clause([Literal(True, Predicate("p", [Function("this_is_a_test_case", [])]))]))
+    >>> from dataclasses import asdict
+    >>> clause_length(asdict(Clause([Literal(True, Predicate("p", [Function("this_is_a_test_case", [])]))])))
     3
     """
     length = 0
-    for literal in clause.literals:
-        if literal.negated:
-            length += 1
-        for term in literal.atom.arguments:
-            length += proposition_length(term)
-        length += 1
+    if isinstance(clause, dict):
+        for key, value in clause.items():
+            if key in {"negated", "name"}:
+                length += 1
+            if isinstance(value, dict):
+                length += clause_length(value)
+            if isinstance(value, list):
+                for item in value:
+                    length += clause_length(item)
     return length
 
 
