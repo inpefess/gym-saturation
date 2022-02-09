@@ -21,7 +21,6 @@ import random
 import sys
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
-from logging import Logger
 from operator import itemgetter
 from typing import Any, Dict, List, Optional
 
@@ -191,9 +190,7 @@ class RandomAgent(BaseAgent):
         )
 
 
-def episode(
-    env: SaturationEnv, agent: BaseAgent, logger: Optional[Logger] = None
-) -> Transition:
+def episode(env: SaturationEnv, agent: BaseAgent) -> Transition:
     """
     tries to solve the problem and logs the clauses
 
@@ -233,8 +230,6 @@ def episode(
     :param env: a `gym_saturation` environment
     :param agent: an initialized agent. Must have `get_action` method
     :param problem_filename: the name of a problem file
-    :param logger: where to log the episode memory;
-        if ``None`` then nothing is logged
     :returns: the last transition
     """
     env_state, reward, done = env.reset(), 0.0, False
@@ -253,8 +248,6 @@ def episode(
             done,
             info,
         )
-        if logger is not None:
-            logger.info(transition)
         env_state = observation
     return transition
 
