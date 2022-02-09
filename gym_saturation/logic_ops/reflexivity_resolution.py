@@ -15,9 +15,9 @@
 Reflexivity Resolution
 =======================
 """
-from typing import List, Tuple
+from typing import Tuple
 
-from gym_saturation import grammar, utils
+from gym_saturation import grammar
 from gym_saturation.logic_ops.unification import (
     NonUnifiableError,
     most_general_unifier,
@@ -41,15 +41,15 @@ def reflexivity_resolution(
     * :math:`\sigma` is a most general unifier of :math:`s` and :math:`t`
 
     >>> from gym_saturation.grammar import Predicate, Variable, Function
-    >>> reflexivity_resolution(grammar.new_clause([grammar.Literal(True, Predicate("this_is_a_test_case", [Variable("X")]))]), [Variable("X"), Function("f", [])]).literals
-    [Literal(negated=True, atom=Predicate(name='this_is_a_test_case', arguments=[Function(name='f', arguments=[])]))]
+    >>> reflexivity_resolution(grammar.new_clause((grammar.Literal(True, Predicate("this_is_a_test_case", (Variable("X"),))),)), (Variable("X"), Function("f", ()))).literals
+    (Literal(negated=True, atom=Predicate(name='this_is_a_test_case', arguments=(Function(name='f', arguments=()),))),)
 
     :param given_clause: :math:`C`
     :param a_literal: :math:`s\not\approx t`
     :returns: a new clause --- the reflexivity resolution result
     """
-    substitutions = most_general_unifier([a_literal[0], a_literal[1]])
-    new_literals = utils.pickle_copy(given_clause.literals)
+    substitutions = most_general_unifier((a_literal[0], a_literal[1]))
+    new_literals = given_clause.literals
     result = grammar.new_clause(new_literals)
     for substitution in substitutions:
         result = substitution.substitute_in_clause(result)
@@ -58,7 +58,7 @@ def reflexivity_resolution(
 
 def all_possible_reflexivity_resolvents(
     given_clause: grammar.Clause,
-) -> List[grammar.Clause]:
+) -> Tuple[grammar.Clause, ...]:
     """
     one of the four basic building blocks of the Given Clause algorithm
 
@@ -66,14 +66,14 @@ def all_possible_reflexivity_resolvents(
     >>> parser = TPTPParser()
     >>> clause = parser.parse("cnf(this_is_a_test_case, axiom, p(X) | ~ X=a | b != a).", "")[0]
     >>> all_possible_reflexivity_resolvents(clause)  # doctest: +ELLIPSIS
-    [cnf(x..., lemma, p(a) | ~b = a, inference(reflexivity_resolution, [], [this_is_a_test_case])).]
+    (cnf(x..., lemma, p(a) | ~b = a, inference(reflexivity_resolution, [], [this_is_a_test_case])).,)
 
     :param given_clause: a new clause which should be combined with all the
         processed ones
     :returns: results of all possible reflexivity resolvents with each one from
         ``clauses`` and the ``given_clause``
     """
-    reflexivity_resolvents: List[grammar.Clause] = []
+    reflexivity_resolvents: Tuple[grammar.Clause, ...] = ()
     for i, a_literal in enumerate(given_clause.literals):
         if (
             a_literal.negated
@@ -86,22 +86,22 @@ def all_possible_reflexivity_resolvents(
             )
             if a_clause.literals:
                 try:
-                    reflexivity_resolvents.append(
+                    reflexivity_resolvents = reflexivity_resolvents + (
                         reflexivity_resolution(
                             a_clause,
                             (
                                 a_literal.atom.arguments[0],
                                 a_literal.atom.arguments[1],
                             ),
-                        )
+                        ),
                     )
                 except NonUnifiableError:
                     pass
-    return [
+    return tuple(
         grammar.new_clause(
             literals=reflexivity_resolvent.literals,
             inference_parents=[given_clause.label],
             inference_rule="reflexivity_resolution",
         )
         for ord_num, reflexivity_resolvent in enumerate(reflexivity_resolvents)
-    ]
+    )

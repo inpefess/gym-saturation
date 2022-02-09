@@ -11,12 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# type: ignore
 """
 Grammar
 ********
 """
-from typing import List, NamedTuple, Optional, Union
+from typing import Any, NamedTuple, Optional, Tuple, Union
 from uuid import uuid1
 
 
@@ -45,7 +44,7 @@ class Function(NamedTuple):
     """
 
     name: str
-    arguments: List[Union[Variable, "Function"]]
+    arguments: Tuple[Union[Variable, Any], ...]
 
     def todict(self) -> dict:
         """
@@ -54,7 +53,9 @@ class Function(NamedTuple):
         """
         return {
             "name": self.name,
-            "arguments": [argument.todict() for argument in self.arguments],
+            "arguments": tuple(
+                arg.todict() for arg in self.arguments  # type: ignore
+            ),
         }
 
 
@@ -74,7 +75,7 @@ class Predicate(NamedTuple):
     """
 
     name: str
-    arguments: List[Term]
+    arguments: Tuple[Term, ...]
 
     def todict(self) -> dict:
         """
@@ -83,7 +84,9 @@ class Predicate(NamedTuple):
         """
         return {
             "name": self.name,
-            "arguments": [argument.todict() for argument in self.arguments],
+            "arguments": tuple(
+                argument.todict() for argument in self.arguments
+            ),
         }
 
 
@@ -115,8 +118,10 @@ class Literal(NamedTuple):
 
 def _term_to_tptp(term: Term) -> str:
     if isinstance(term, Function):
-        arguments = [_term_to_tptp(argument) for argument in term.arguments]
-        if arguments != []:
+        arguments = tuple(
+            _term_to_tptp(argument) for argument in term.arguments
+        )
+        if arguments != tuple():
             return f"{term.name}({','.join(arguments)})"
     return term.name
 
@@ -128,7 +133,7 @@ def _literal_to_tptp(literal: Literal) -> str:
             literal.atom.name
             + "("
             + ", ".join(
-                [_term_to_tptp(term) for term in literal.atom.arguments]
+                tuple(_term_to_tptp(term) for term in literal.atom.arguments)
             )
             + ")"
         )
@@ -161,10 +166,10 @@ class Clause(NamedTuple):
          unprocessed set; clauses from the problem have ``birth_step`` zero
     """
 
-    literals: List[Literal]
+    literals: Tuple[Literal, ...]
     label: Optional[str] = None
     role: str = "lemma"
-    inference_parents: Optional[List[str]] = None
+    inference_parents: Optional[Tuple[str, ...]] = None
     inference_rule: Optional[str] = None
     processed: Optional[bool] = None
     birth_step: Optional[int] = None
@@ -194,7 +199,7 @@ class Clause(NamedTuple):
             recursively as dicts too
         """
         return {
-            "literals": [literal.todict() for literal in self.literals],
+            "literals": tuple(literal.todict() for literal in self.literals),
             "label": self.label,
             "role": self.role,
             "birth_step": self.birth_step,
@@ -205,7 +210,7 @@ class Clause(NamedTuple):
 
 
 def new_clause(
-    literals: List[Literal], label: Optional[str] = None, **kwargs
+    literals: Tuple[Literal, ...], label: Optional[str] = None, **kwargs
 ) -> Clause:
     """
     a trivial clause factory

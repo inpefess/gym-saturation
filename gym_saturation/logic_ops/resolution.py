@@ -15,14 +15,13 @@
 Resolution
 ===========
 """
-from typing import List
+from typing import Tuple
 
 from gym_saturation.grammar import Clause, Literal, new_clause
 from gym_saturation.logic_ops.unification import (
     NonUnifiableError,
     most_general_unifier,
 )
-from gym_saturation.utils import pickle_copy
 
 
 def resolution(
@@ -45,12 +44,12 @@ def resolution(
     * :math:`\sigma` is a most general unifier of atoms from :math:`L_1` and :math:`L_2`
 
     >>> from gym_saturation.grammar import Predicate, Variable, Function
-    >>> resolution(new_clause([Literal(False, Predicate("q", [Variable("X")]))]), Literal(False, Predicate("p", [Variable("X")])), new_clause([Literal(False, Predicate("r", [Variable("X")]))]), Literal(True, Predicate("p", [Function("this_is_a_test_case", [])]))).literals
-    [Literal(negated=False, atom=Predicate(name='q', arguments=[Function(name='this_is_a_test_case', arguments=[])])), Literal(negated=False, atom=Predicate(name='r', arguments=[Function(name='this_is_a_test_case', arguments=[])]))]
-    >>> resolution(new_clause([]), Literal(False, Predicate("f", [])), new_clause([]), Literal(False, Predicate("this_is_a_test_case", [])))
+    >>> resolution(new_clause((Literal(False, Predicate("q", (Variable("X"),))),)), Literal(False, Predicate("p", (Variable("X"),))), new_clause((Literal(False, Predicate("r", (Variable("X"),))),)), Literal(True, Predicate("p", (Function("this_is_a_test_case", ()),)))).literals
+    (Literal(negated=False, atom=Predicate(name='q', arguments=(Function(name='this_is_a_test_case', arguments=()),))), Literal(negated=False, atom=Predicate(name='r', arguments=(Function(name='this_is_a_test_case', arguments=()),))))
+    >>> resolution(new_clause(()), Literal(False, Predicate("f", ())), new_clause(()), Literal(False, Predicate("this_is_a_test_case", ())))
     Traceback (most recent call last):
      ...
-    ValueError: resolution is not possible for Literal(negated=False, atom=Predicate(name='f', arguments=[])) and Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=[]))
+    ValueError: resolution is not possible for Literal(negated=False, atom=Predicate(name='f', arguments=())) and Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=()))
 
     :param clause_one: :math:`C_1`
     :param literal_one: :math:`L_1`
@@ -62,11 +61,11 @@ def resolution(
         raise ValueError(
             f"resolution is not possible for {literal_one} and {literal_two}"
         )
-    substitutions = most_general_unifier([literal_one.atom, literal_two.atom])
-    new_literals = pickle_copy(clause_one.literals)
+    substitutions = most_general_unifier((literal_one.atom, literal_two.atom))
+    new_literals = clause_one.literals
     for literal in clause_two.literals:
         if literal not in new_literals:
-            new_literals.append(pickle_copy(literal))
+            new_literals = new_literals + (literal,)
     result = new_clause(new_literals)
     for substitution in substitutions:
         result = substitution.substitute_in_clause(result)
@@ -75,18 +74,18 @@ def resolution(
 
 def _get_new_resolvents(
     clause_one: Clause, literal_one: Literal, given_clause: Clause
-) -> List[Clause]:
-    resolvents: List[Clause] = []
+) -> Tuple[Clause, ...]:
+    resolvents: Tuple[Clause, ...] = ()
     for j, literal_two in enumerate(given_clause.literals):
         if literal_one.negated != literal_two.negated:
             clause_two = new_clause(
                 given_clause.literals[:j] + given_clause.literals[j + 1 :]
             )
             try:
-                resolvents.append(
+                resolvents = resolvents + (
                     resolution(
                         clause_one, literal_one, clause_two, literal_two
-                    )
+                    ),
                 )
             except NonUnifiableError:
                 pass
@@ -94,9 +93,9 @@ def _get_new_resolvents(
 
 
 def all_possible_resolvents(
-    clauses: List[Clause],
+    clauses: Tuple[Clause, ...],
     given_clause: Clause,
-) -> List[Clause]:
+) -> Tuple[Clause, ...]:
     """
     one of the four basic building blocks of the Given Clause algorithm
 
@@ -104,8 +103,8 @@ def all_possible_resolvents(
     >>> parser = TPTPParser()
     >>> one = parser.parse("cnf(one, axiom, q(X) | p(X)).", "")[0]
     >>> two = parser.parse("cnf(two, axiom, ~p(c)).", "")[0]
-    >>> all_possible_resolvents([one], two)  # doctest: +ELLIPSIS
-    [cnf(x..., lemma, q(c), inference(resolution, [], [one, two])).]
+    >>> all_possible_resolvents((one,), two)  # doctest: +ELLIPSIS
+    (cnf(x..., lemma, q(c), inference(resolution, [], [one, two])).,)
 
     :param clauses: a list of (processed) clauses
     :param given_clause: a new clause which should be combined with all the
@@ -113,7 +112,7 @@ def all_possible_resolvents(
     :returns: results of all possible resolvents with each one from
         ``clauses`` and the ``given_clause``
     """
-    resolvents: List[Clause] = []
+    resolvents: Tuple[Clause, ...] = ()
     for clause in clauses:
         for i, literal_one in enumerate(clause.literals):
             clause_one = new_clause(
@@ -122,14 +121,12 @@ def all_possible_resolvents(
             new_resolvents = _get_new_resolvents(
                 clause_one, literal_one, given_clause
             )
-            resolvents.extend(
-                [
-                    new_clause(
-                        literals=resolvent.literals,
-                        inference_parents=[clause.label, given_clause.label],
-                        inference_rule="resolution",
-                    )
-                    for ord_num, resolvent in enumerate(new_resolvents)
-                ]
+            resolvents = resolvents + tuple(
+                new_clause(
+                    literals=resolvent.literals,
+                    inference_parents=(clause.label, given_clause.label),
+                    inference_rule="resolution",
+                )
+                for ord_num, resolvent in enumerate(new_resolvents)
             )
     return resolvents

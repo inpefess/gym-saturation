@@ -84,7 +84,7 @@ class SaturationEnv(Env):
     it should be more easily parsable than TPTP, although less human-friendly
 
     >>> env.render("ansi")  # doctest: +ELLIPSIS
-    "[{'literals': [{'negated': False, 'atom': {'name': 'this_is_a_test_case', 'arguments': [{'name':...
+    "[{'literals': ({'negated': False, 'atom': {'name': 'this_is_a_test_case', 'arguments': ({'name':...
 
     other modes are not implemented yet
 
@@ -133,7 +133,7 @@ class SaturationEnv(Env):
     ):
         super().__init__()
         self.problem_list = problem_list
-        self._state: List[Clause] = []
+        self._state: Tuple[Clause, ...] = ()
         self.action_space = spaces.Discrete(max_clauses)
         self.observation_space = spaces.Dict(
             {
@@ -142,44 +142,46 @@ class SaturationEnv(Env):
             }
         )
 
-    def _init_clauses(self):
+    def _init_clauses(self) -> Tuple[Clause, ...]:
         problem = random.choice(self.problem_list)
         tptp_folder = os.path.join(os.path.dirname(problem), "..", "..")
         with open(problem, "r", encoding="utf-8") as problem_file:
             problem_text = problem_file.read()
         parsed_clauses = TPTPParser().parse(problem_text, tptp_folder)
-        return [
+        return tuple(
             clause._replace(
                 birth_step=0,
-                inference_parents=[],
+                inference_parents=(),
                 inference_rule=None,
                 processed=False,
             )
             for clause in parsed_clauses
-        ]
+        )
 
     def reset(self) -> dict:
         self._state = reindex_variables(self._init_clauses(), "X")
         return self.state
 
-    def _add_to_state(self, new_clauses: List[Clause]) -> None:
+    def _add_to_state(self, new_clauses: Tuple[Clause, ...]) -> None:
         birth_step = 1 + max(
             [getattr(clause, "birth_step", 0) for clause in self._state]
         )
         for clause in new_clauses:
             if not is_tautology(clause):
                 if not clause_in_a_list(clause, self._state):
-                    self._state.append(
-                        clause._replace(birth_step=birth_step, processed=False)
+                    self._state = self._state + (
+                        clause._replace(
+                            birth_step=birth_step, processed=False
+                        ),
                     )
 
     def _do_deductions(self, action: int) -> Dict[int, dict]:
         state_len_before = len(self._state)
         given_clause = self._state[action]
         if not given_clause.processed:
-            unprocessed_clauses = [
+            unprocessed_clauses = tuple(
                 clause for clause in self._state if clause.processed
-            ]
+            )
             self._add_to_state(
                 all_possible_resolvents(
                     unprocessed_clauses,
@@ -202,7 +204,11 @@ class SaturationEnv(Env):
                     given_clause,
                 )
             )
-        self._state[action] = self._state[action]._replace(processed=True)
+        self._state = (
+            self._state[:action]
+            + (self._state[action]._replace(processed=True),)
+            + self._state[action + 1 :]
+        )
         return dict(
             [
                 (i + state_len_before, clause.todict())
@@ -214,8 +220,12 @@ class SaturationEnv(Env):
     def step(self, action: int) -> Tuple[dict, float, bool, dict]:
         if self._state[action].processed:
             raise ValueError(f"action {action} is not valid")
-        if self._state[action].literals == []:
-            self._state[action] = self._state[action]._replace(processed=True)
+        if self._state[action].literals == ():
+            self._state = (
+                self._state[:action]
+                + (self._state[action]._replace(processed=True),)
+                + self._state[action + 1 :]
+            )
             return (
                 self.state,
                 1.0,
