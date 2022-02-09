@@ -31,9 +31,7 @@ Common modules
 
 .. automodule:: gym_saturation.grammar
    :members:
-.. automodule:: gym_saturation.utils
-   :members:
-      
+
 Logical Operations
 *******************
 
