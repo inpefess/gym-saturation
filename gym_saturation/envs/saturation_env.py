@@ -15,11 +15,13 @@
 Saturation Environment
 =======================
 """
+import dataclasses
 import os
 import random
 from typing import Dict, List, Tuple
 
 import numpy as np
+import orjson
 from gym import Env, spaces
 
 from gym_saturation.clause_space import ClauseSpace
@@ -31,7 +33,6 @@ from gym_saturation.logic_ops.reflexivity_resolution import (
 )
 from gym_saturation.logic_ops.resolution import all_possible_resolvents
 from gym_saturation.logic_ops.utils import (
-    clause_in_a_list,
     is_tautology,
     reduce_to_proof,
     reindex_variables,
@@ -83,8 +84,8 @@ class SaturationEnv(Env):
     ``ansi`` mode returns a JSON representation of the state
     it should be more easily parsable than TPTP, although less human-friendly
 
-    >>> env.render("ansi")  # doctest: +ELLIPSIS
-    "[{'literals': ({'negated': False, 'atom': {'name': 'this_is_a_test_case', 'arguments': ({'name':...
+    >>> env.render("ansi") # doctest: +ELLIPSIS
+    '...{"literals":[{"negated":false,"atom":{"name":"this_is_a_test_case","arguments":[{"name":...
 
     other modes are not implemented yet
 
@@ -99,7 +100,8 @@ class SaturationEnv(Env):
 
     ``info`` dict contains the state diff, for example
 
-    >>> info["state_diff_updated"][0]["processed"]
+    >>> import json
+    >>> json.loads(info["state_diff_updated"][0])["processed"]
     True
 
     repeating actions is not allowed
@@ -149,7 +151,8 @@ class SaturationEnv(Env):
             problem_text = problem_file.read()
         parsed_clauses = TPTPParser().parse(problem_text, tptp_folder)
         return tuple(
-            clause._replace(
+            dataclasses.replace(
+                clause,
                 birth_step=0,
                 inference_parents=(),
                 inference_rule=None,
@@ -166,16 +169,24 @@ class SaturationEnv(Env):
         birth_step = 1 + max(
             [getattr(clause, "birth_step", 0) for clause in self._state]
         )
+        state_set = set(
+            map(
+                lambda clause: tuple(sorted(orjson.dumps(clause.literals))),
+                self._state,
+            )
+        )
         for clause in new_clauses:
             if not is_tautology(clause):
-                if not clause_in_a_list(clause, self._state):
+                sorted_literals = tuple(sorted(orjson.dumps(clause.literals)))
+                if sorted_literals not in self._state:
                     self._state = self._state + (
-                        clause._replace(
-                            birth_step=birth_step, processed=False
+                        dataclasses.replace(
+                            clause, birth_step=birth_step, processed=False
                         ),
                     )
+                    state_set.add(sorted_literals)
 
-    def _do_deductions(self, action: int) -> Dict[int, dict]:
+    def _do_deductions(self, action: int) -> Dict[int, bytes]:
         state_len_before = len(self._state)
         given_clause = self._state[action]
         if not given_clause.processed:
@@ -206,15 +217,15 @@ class SaturationEnv(Env):
             )
         self._state = (
             self._state[:action]
-            + (self._state[action]._replace(processed=True),)
+            + (dataclasses.replace(self._state[action], processed=True),)
             + self._state[action + 1 :]
         )
         return dict(
             [
-                (i + state_len_before, clause.todict())
+                (i + state_len_before, orjson.dumps(clause))
                 for i, clause in enumerate(self._state[state_len_before:])
             ]
-            + [(action, self._state[action].todict())]
+            + [(action, orjson.dumps(self._state[action]))]
         )
 
     def step(self, action: int) -> Tuple[dict, float, bool, dict]:
@@ -223,14 +234,18 @@ class SaturationEnv(Env):
         if self._state[action].literals == ():
             self._state = (
                 self._state[:action]
-                + (self._state[action]._replace(processed=True),)
+                + (dataclasses.replace(self._state[action], processed=True),)
                 + self._state[action + 1 :]
             )
             return (
                 self.state,
                 1.0,
                 True,
-                {STATE_DIFF_UPDATED: {action: self._state[action].todict()}},
+                {
+                    STATE_DIFF_UPDATED: {
+                        action: orjson.dumps(self._state[action])
+                    }
+                },
             )
         updated = self._do_deductions(action)
         if min(
@@ -266,7 +281,7 @@ class SaturationEnv(Env):
                 "consider increasing `max_clauses` parameter of `__init__`"
             )
         return {
-            "real_obs": [clause.todict() for clause in self._state],
+            "real_obs": [orjson.dumps(clause) for clause in self._state],
             "action_mask": (
                 np.array(
                     [

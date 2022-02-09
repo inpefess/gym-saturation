@@ -17,7 +17,7 @@ Paramodulation
 """
 from typing import Tuple
 
-from gym_saturation.grammar import Clause, Literal, Term, new_clause
+from gym_saturation.grammar import Clause, Literal, Term
 from gym_saturation.logic_ops.unification import (
     NonUnifiableError,
     most_general_unifier,
@@ -53,8 +53,9 @@ def paramodulation(
     * :math:`\sigma` is a most general unifier of :math:`s` and :math:`r`
 
     >>> from gym_saturation.grammar import Predicate, Variable, Function
-    >>> sorted(list(paramodulation(new_clause((Literal(False, Predicate("q", (Variable("X"),))),)), (Variable("X"), Function("this_is_a_test_case", ())), new_clause((Literal(False, Predicate("r", (Variable("X"),))),)), Literal(True, Predicate("p", (Function("f", ()),))), 1).literals))
-    [Literal(negated=False, atom=Predicate(name='q', arguments=(Function(name='f', arguments=()),))), Literal(negated=False, atom=Predicate(name='r', arguments=(Function(name='f', arguments=()),))), Literal(negated=True, atom=Predicate(name='p', arguments=(Function(name='this_is_a_test_case', arguments=()),)))]
+    >>> res = paramodulation(Clause((Literal(False, Predicate("q", (Variable("X"),))),)), (Variable("X"), Function("this_is_a_test_case", ())), Clause((Literal(False, Predicate("r", (Variable("X"),))),)), Literal(True, Predicate("p", (Function("f", ()),))), 1).literals
+    >>> list(sorted(map(str, res)))
+    ["Literal(negated=False, atom=Predicate(name='q', arguments=(Function(name='f', arguments=()),)))", "Literal(negated=False, atom=Predicate(name='r', arguments=(Function(name='f', arguments=()),)))", "Literal(negated=True, atom=Predicate(name='p', arguments=(Function(name='this_is_a_test_case', arguments=()),)))"]
 
     :param clause_one: :math:`C_1`
     :param literal_one: :math:`s\approx t`
@@ -81,7 +82,7 @@ def paramodulation(
             + clause_two.literals
         )
     )
-    result = new_clause(new_literals)
+    result = Clause(new_literals)
     for substitution in substitutions:
         result = substitution.substitute_in_clause(result)
     return result
@@ -162,7 +163,7 @@ def _get_new_paramodulants(
 ) -> Tuple[Clause, ...]:
     paramodulants: Tuple[Clause, ...] = ()
     for j, literal_two in enumerate(given_clause.literals):
-        clause_two = new_clause(
+        clause_two = Clause(
             given_clause.literals[:j] + given_clause.literals[j + 1 :]
         )
         if not literal_one.negated and literal_one.atom.name == "=":
@@ -185,7 +186,7 @@ def all_paramodulants_from_list(
     one of the four basic building block of the Given Clause algorithm
 
     >>> from gym_saturation.grammar import Literal, Function, Predicate
-    >>> all_paramodulants_from_list((new_clause((Literal(False, Predicate("=", (Function("this_is_a_test_case", ()),))),), "one"),), new_clause((Literal(True, Predicate("p", ())),), "two"))
+    >>> all_paramodulants_from_list((Clause((Literal(False, Predicate("=", (Function("this_is_a_test_case", ()),))),), "one"),), Clause((Literal(True, Predicate("p", ())),), "two"))
     Traceback (most recent call last):
      ...
     ValueError: expected equality, but got Literal(negated=False, atom=Predicate(name='=', arguments=(Function(name='this_is_a_test_case', arguments=()),)))
@@ -209,19 +210,22 @@ def all_paramodulants_from_list(
     paramodulants: Tuple[Clause, ...] = ()
     for other_clause in clauses:
         for i, literal_one in enumerate(other_clause.literals):
-            clause_one = new_clause(
+            clause_one = Clause(
                 other_clause.literals[:i] + other_clause.literals[i + 1 :]
             )
             new_paramodulants = _get_new_paramodulants(
                 clause_one, literal_one, given_clause
             )
             paramodulants = paramodulants + tuple(
-                new_clause(
+                Clause(
                     literals=paramodulant.literals,
                     inference_parents=(
                         other_clause.label,
                         given_clause.label,
-                    ),
+                    )
+                    if other_clause.label is not None
+                    and given_clause.label is not None
+                    else None,
                     inference_rule="paramodulation",
                 )
                 for ord_num, paramodulant in enumerate(new_paramodulants)

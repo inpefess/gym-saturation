@@ -25,6 +25,7 @@ from operator import itemgetter
 from typing import Any, Dict, List, Optional
 
 import gym
+import orjson
 from gym.wrappers import TimeLimit
 
 from gym_saturation.envs import SaturationEnv
@@ -91,14 +92,18 @@ class SizeAgent(BaseAgent):
         :param info: an info dict (parm of environment response)
         :returns:
         """
+        parsed_state_diff = tuple(
+            (index, orjson.loads(clause))
+            for index, clause in info[STATE_DIFF_UPDATED].items()
+        )
         self._state.update(
             {
                 index: clause_length(clause)
-                for index, clause in info[STATE_DIFF_UPDATED].items()
+                for index, clause in parsed_state_diff
                 if not clause["processed"]
             }
         )
-        for index, clause in info[STATE_DIFF_UPDATED].items():
+        for index, clause in parsed_state_diff:
             if clause["processed"]:
                 self._state.pop(index)
 
@@ -131,7 +136,9 @@ class AgeAgent(BaseAgent):
         return min(
             [
                 i
-                for i, clause in enumerate(observation["real_obs"])
+                for i, clause in enumerate(
+                    map(orjson.loads, observation["real_obs"])
+                )
                 if not clause["processed"]
             ]
         )
@@ -184,7 +191,9 @@ class RandomAgent(BaseAgent):
         return random.choice(
             [
                 i
-                for i, clause in enumerate(observation["real_obs"])
+                for i, clause in enumerate(
+                    map(orjson.loads, observation["real_obs"])
+                )
                 if not clause["processed"]
             ]
         )

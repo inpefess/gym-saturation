@@ -17,7 +17,7 @@ Resolution
 """
 from typing import Tuple
 
-from gym_saturation.grammar import Clause, Literal, new_clause
+from gym_saturation.grammar import Clause, Literal
 from gym_saturation.logic_ops.unification import (
     NonUnifiableError,
     most_general_unifier,
@@ -44,9 +44,9 @@ def resolution(
     * :math:`\sigma` is a most general unifier of atoms from :math:`L_1` and :math:`L_2`
 
     >>> from gym_saturation.grammar import Predicate, Variable, Function
-    >>> resolution(new_clause((Literal(False, Predicate("q", (Variable("X"),))),)), Literal(False, Predicate("p", (Variable("X"),))), new_clause((Literal(False, Predicate("r", (Variable("X"),))),)), Literal(True, Predicate("p", (Function("this_is_a_test_case", ()),)))).literals
+    >>> resolution(Clause((Literal(False, Predicate("q", (Variable("X"),))),)), Literal(False, Predicate("p", (Variable("X"),))), Clause((Literal(False, Predicate("r", (Variable("X"),))),)), Literal(True, Predicate("p", (Function("this_is_a_test_case", ()),)))).literals
     (Literal(negated=False, atom=Predicate(name='q', arguments=(Function(name='this_is_a_test_case', arguments=()),))), Literal(negated=False, atom=Predicate(name='r', arguments=(Function(name='this_is_a_test_case', arguments=()),))))
-    >>> resolution(new_clause(()), Literal(False, Predicate("f", ())), new_clause(()), Literal(False, Predicate("this_is_a_test_case", ())))
+    >>> resolution(Clause(()), Literal(False, Predicate("f", ())), Clause(()), Literal(False, Predicate("this_is_a_test_case", ())))
     Traceback (most recent call last):
      ...
     ValueError: resolution is not possible for Literal(negated=False, atom=Predicate(name='f', arguments=())) and Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=()))
@@ -66,7 +66,7 @@ def resolution(
     for literal in clause_two.literals:
         if literal not in new_literals:
             new_literals = new_literals + (literal,)
-    result = new_clause(new_literals)
+    result = Clause(new_literals)
     for substitution in substitutions:
         result = substitution.substitute_in_clause(result)
     return result
@@ -78,7 +78,7 @@ def _get_new_resolvents(
     resolvents: Tuple[Clause, ...] = ()
     for j, literal_two in enumerate(given_clause.literals):
         if literal_one.negated != literal_two.negated:
-            clause_two = new_clause(
+            clause_two = Clause(
                 given_clause.literals[:j] + given_clause.literals[j + 1 :]
             )
             try:
@@ -115,16 +115,17 @@ def all_possible_resolvents(
     resolvents: Tuple[Clause, ...] = ()
     for clause in clauses:
         for i, literal_one in enumerate(clause.literals):
-            clause_one = new_clause(
-                clause.literals[:i] + clause.literals[i + 1 :]
-            )
+            clause_one = Clause(clause.literals[:i] + clause.literals[i + 1 :])
             new_resolvents = _get_new_resolvents(
                 clause_one, literal_one, given_clause
             )
             resolvents = resolvents + tuple(
-                new_clause(
+                Clause(
                     literals=resolvent.literals,
-                    inference_parents=(clause.label, given_clause.label),
+                    inference_parents=(clause.label, given_clause.label)
+                    if given_clause.label is not None
+                    and clause.label is not None
+                    else None,
                     inference_rule="resolution",
                 )
                 for ord_num, resolvent in enumerate(new_resolvents)

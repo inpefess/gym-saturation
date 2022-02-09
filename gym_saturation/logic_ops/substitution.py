@@ -15,13 +15,13 @@
 Substitution
 =============
 """
-from dataclasses import dataclass
+import dataclasses
 from typing import Union
 
 from gym_saturation import grammar
 
 
-@dataclass
+@dataclasses.dataclass
 class Substitution:
     """
     a mapping from ``Variable`` to ``Term``
@@ -83,4 +83,4 @@ class Substitution:
             )
             for literal in clause.literals
         )
-        return clause._replace(literals=literals)
+        return dataclasses.replace(clause, literals=literals)

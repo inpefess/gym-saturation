@@ -15,6 +15,7 @@
 CNF Parser
 ===========
 """
+import dataclasses
 from operator import itemgetter
 
 from lark import Transformer
@@ -207,7 +208,8 @@ class CNFParser(Transformer):
                         inference_parents = self._parse_inference_parents(
                             annotation["inference_record"][1]
                         )
-        return clause._replace(
+        return dataclasses.replace(
+            clause,
             label=children[0],
             role=children[1],
             inference_rule=inference_rule,

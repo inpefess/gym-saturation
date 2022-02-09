@@ -15,6 +15,7 @@
 Logic Operations Utils
 =======================
 """
+import dataclasses
 from itertools import chain
 from typing import List, Tuple, Union
 
@@ -134,11 +135,14 @@ def clause_length(clause: dict) -> int:
     total length of arguments of each predicate.
     Negation adds one to each literal
 
-    :param clause: a clause
+    :param clause: a clause in JSON representation
     :return: sctructural length of a clause
 
     >>> from gym_saturation.grammar import Literal
-    >>> clause_length(Clause((Literal(True, Predicate("p", (Function("this_is_a_test_case", ()),))),)).todict())
+    >>> import orjson
+    >>> clause_length(orjson.loads(orjson.dumps(
+    ...     Clause((Literal(True, Predicate("p", (Function("this_is_a_test_case", ()),))),))
+    ... )))
     3
     """
     length = 0
@@ -148,7 +152,7 @@ def clause_length(clause: dict) -> int:
                 length += 1
             if isinstance(value, dict):
                 length += clause_length(value)
-            if isinstance(value, tuple):
+            if isinstance(value, (list, tuple)):
                 for item in value:
                     length += clause_length(item)
     return length
@@ -183,10 +187,7 @@ def clause_in_a_list(clause: Clause, clauses: Tuple[Clause, ...]) -> bool:
     :returns: whether in the list there is a clause with a literals set to a
         given clause
     """
-    for a_clause in clauses:
-        if a_clause.literals == clause.literals:
-            return True
-    return False
+    return clause.literals in set(map(lambda clause: clause.literals, clauses))
 
 
 class NoSubtermFound(Exception):
@@ -271,20 +272,22 @@ def replace_subterm_by_index(
     if not isinstance(atom, Variable):
         for i, argument in enumerate(atom.arguments):
             if index == subterm_length:
-                return atom._replace(
+                return dataclasses.replace(
+                    atom,
                     arguments=atom.arguments[:i]
                     + (_replace_if_not_the_same(argument, term),)
-                    + atom.arguments[i + 1 :]
+                    + atom.arguments[i + 1 :],
                 )
             try:
-                return atom._replace(
-                    arguments=atom.arguments[:i]  # type: ignore
+                return dataclasses.replace(
+                    atom,
+                    arguments=atom.arguments[:i]
                     + (
                         replace_subterm_by_index(
                             argument, index - subterm_length, term
                         ),
                     )
-                    + atom.arguments[i + 1 :]
+                    + atom.arguments[i + 1 :],
                 )
             except NoSubtermFound as error:
                 subterm_length += error.args[0]

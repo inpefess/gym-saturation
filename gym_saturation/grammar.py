@@ -15,11 +15,13 @@
 Grammar
 ********
 """
-from typing import Any, NamedTuple, Optional, Tuple, Union
+from dataclasses import dataclass, field
+from typing import Optional, Tuple, Union
 from uuid import uuid1
 
 
-class Variable(NamedTuple):
+@dataclass(frozen=True)
+class Variable:
     """
     .. _variable:
 
@@ -28,15 +30,9 @@ class Variable(NamedTuple):
 
     name: str
 
-    def todict(self) -> dict:
-        """
-        :returns: a value similar to `_asdict` but with fields represented
-            recursively as dicts too
-        """
-        return {"name": self.name}
 
-
-class Function(NamedTuple):
+@dataclass(frozen=True)
+class Function:
     """
     .. _Function:
 
@@ -44,19 +40,7 @@ class Function(NamedTuple):
     """
 
     name: str
-    arguments: Tuple[Union[Variable, Any], ...]
-
-    def todict(self) -> dict:
-        """
-        :returns: a value similar to `_asdict` but with fields represented
-            recursively as dicts too
-        """
-        return {
-            "name": self.name,
-            "arguments": tuple(
-                arg.todict() for arg in self.arguments  # type: ignore
-            ),
-        }
+    arguments: Tuple[Union[Variable, "Function"], ...]
 
 
 Term = Union[Variable, Function]
@@ -67,7 +51,8 @@ Term is either a :ref:`Variable <Variable>` or a :ref:`Function <Function>`
 """
 
 
-class Predicate(NamedTuple):
+@dataclass(frozen=True)
+class Predicate:
     """
     .. _Predicate:
 
@@ -76,18 +61,6 @@ class Predicate(NamedTuple):
 
     name: str
     arguments: Tuple[Term, ...]
-
-    def todict(self) -> dict:
-        """
-        :returns: a value similar to `_asdict` but with fields represented
-            recursively as dicts too
-        """
-        return {
-            "name": self.name,
-            "arguments": tuple(
-                argument.todict() for argument in self.arguments
-            ),
-        }
 
 
 Proposition = Union[Predicate, Term]
@@ -98,7 +71,8 @@ Proposition is either a :ref:`Predicate <Predicate>` or a :ref:`Term <Term>`
 """
 
 
-class Literal(NamedTuple):
+@dataclass(frozen=True)
+class Literal:
     """
     .. _Literal:
 
@@ -107,13 +81,6 @@ class Literal(NamedTuple):
 
     negated: bool
     atom: Predicate
-
-    def todict(self) -> dict:
-        """
-        :returns: a value similar to `_asdict` but with fields represented
-            recursively as dicts too
-        """
-        return {"negated": self.negated, "atom": self.atom.todict()}
 
 
 def _term_to_tptp(term: Term) -> str:
@@ -146,7 +113,8 @@ def _literal_to_tptp(literal: Literal) -> str:
     return res
 
 
-class Clause(NamedTuple):
+@dataclass(frozen=True)
+class Clause:
     """
     .. _Clause:
 
@@ -167,7 +135,9 @@ class Clause(NamedTuple):
     """
 
     literals: Tuple[Literal, ...]
-    label: Optional[str] = None
+    label: Optional[str] = field(
+        default_factory=lambda: "x" + str(uuid1()).replace("-", "_")
+    )
     role: str = "lemma"
     inference_parents: Optional[Tuple[str, ...]] = None
     inference_rule: Optional[str] = None
@@ -192,35 +162,3 @@ class Clause(NamedTuple):
                 + "])"
             )
         return res + ")."
-
-    def todict(self) -> dict:
-        """
-        :returns: a value similar to `_asdict` but with fields represented
-            recursively as dicts too
-        """
-        return {
-            "literals": tuple(literal.todict() for literal in self.literals),
-            "label": self.label,
-            "role": self.role,
-            "birth_step": self.birth_step,
-            "inference_parents": self.inference_parents,
-            "inference_rule": self.inference_rule,
-            "processed": self.processed,
-        }
-
-
-def new_clause(
-    literals: Tuple[Literal, ...], label: Optional[str] = None, **kwargs
-) -> Clause:
-    """
-    a trivial clause factory
-
-    :param literals: a list of literals
-    :param label: if empty, it will be randomly generated
-    :returns: a new clause
-    """
-    if label is None:
-        new_label = "x" + str(uuid1()).replace("-", "_")
-    else:
-        new_label = label
-    return Clause(literals=literals, label=new_label, **kwargs)
