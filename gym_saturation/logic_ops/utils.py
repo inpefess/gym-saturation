@@ -175,7 +175,7 @@ def proposition_length(proposition: Proposition) -> int:
 def clause_in_a_list(clause: Clause, clauses: Tuple[Clause, ...]) -> bool:
     """
 
-    >>> clause_in_a_list(Clause((), label="one"), (Clause((), label="two"),)])
+    >>> clause_in_a_list(Clause((), label="one"), (Clause((), label="two"),))
     True
 
     :param clause: some clause
@@ -238,18 +238,10 @@ class TermSelfReplace(Exception):
     """an exception raised when trying to replace a subterm with itself"""
 
 
-def _replace_if_not_the_same(
-    atom: Proposition, index: int, term: Term
-) -> Proposition:
-    if not isinstance(atom, Variable):
-        if atom.arguments[index] == term:
-            raise TermSelfReplace
-        return atom._replace(
-            arguments=atom.arguments[:index]
-            + (term,)
-            + atom.arguments[index + 1 :]
-        )
-    return atom
+def _replace_if_not_the_same(old_term: Term, new_term: Term) -> Term:
+    if old_term == new_term:
+        raise TermSelfReplace
+    return new_term
 
 
 def replace_subterm_by_index(
@@ -279,7 +271,11 @@ def replace_subterm_by_index(
     if not isinstance(atom, Variable):
         for i, argument in enumerate(atom.arguments):
             if index == subterm_length:
-                return _replace_if_not_the_same(atom, i, term)
+                return atom._replace(
+                    arguments=atom.arguments[:i]
+                    + (_replace_if_not_the_same(argument, term),)
+                    + atom.arguments[i + 1 :]
+                )
             try:
                 return atom._replace(
                     arguments=atom.arguments[:i]  # type: ignore
