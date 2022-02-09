@@ -18,7 +18,7 @@ Saturation Environment
 import dataclasses
 import os
 import random
-from typing import Dict, List, Tuple
+from typing import Dict, List, Set, Tuple
 
 import numpy as np
 import orjson
@@ -136,6 +136,7 @@ class SaturationEnv(Env):
         super().__init__()
         self.problem_list = problem_list
         self._state: Tuple[Clause, ...] = ()
+        self._state_set: Set[Tuple[bytes, ...]] = set()
         self.action_space = spaces.Discrete(max_clauses)
         self.observation_space = spaces.Dict(
             {
@@ -163,28 +164,32 @@ class SaturationEnv(Env):
 
     def reset(self) -> dict:
         self._state = reindex_variables(self._init_clauses(), "X")
+        self._state_set = set(
+            map(
+                lambda clause: tuple(
+                    sorted(map(orjson.dumps, clause.literals))
+                ),
+                self._state,
+            )
+        )
         return self.state
 
     def _add_to_state(self, new_clauses: Tuple[Clause, ...]) -> None:
         birth_step = 1 + max(
             [getattr(clause, "birth_step", 0) for clause in self._state]
         )
-        state_set = set(
-            map(
-                lambda clause: tuple(sorted(orjson.dumps(clause.literals))),
-                self._state,
-            )
-        )
         for clause in new_clauses:
             if not is_tautology(clause):
-                sorted_literals = tuple(sorted(orjson.dumps(clause.literals)))
-                if sorted_literals not in self._state:
+                sorted_literals = tuple(
+                    sorted(map(orjson.dumps, clause.literals))
+                )
+                if sorted_literals not in self._state_set:
                     self._state = self._state + (
                         dataclasses.replace(
                             clause, birth_step=birth_step, processed=False
                         ),
                     )
-                    state_set.add(sorted_literals)
+                    self._state_set.add(sorted_literals)
 
     def _do_deductions(self, action: int) -> Dict[int, bytes]:
         state_len_before = len(self._state)
