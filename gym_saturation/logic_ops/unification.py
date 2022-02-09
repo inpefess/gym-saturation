@@ -15,19 +15,20 @@
 Unification
 ============
 """
-from typing import List, Optional
+from typing import Optional, Tuple
 
 from gym_saturation.grammar import Function, Predicate, Proposition, Variable
 from gym_saturation.logic_ops.substitution import Substitution
 from gym_saturation.logic_ops.utils import is_subproposition
-from gym_saturation.utils import deduplicate
 
 
 class NonUnifiableError(Exception):
     """exception raised when terms are not unifiable"""
 
 
-def _get_disagreement(one: Proposition, two: Proposition) -> List[Proposition]:
+def _get_disagreement(
+    one: Proposition, two: Proposition
+) -> Tuple[Proposition, ...]:
     """
     find a disagreement set of two first order propositions
 
@@ -38,8 +39,8 @@ def _get_disagreement(one: Proposition, two: Proposition) -> List[Proposition]:
     """
     if isinstance(one, Variable) and isinstance(two, Variable):
         if one.name != two.name:
-            return [one, two]
-        return []
+            return (one, two)
+        return ()
     if (
         isinstance(one, Predicate)
         and isinstance(two, Predicate)
@@ -47,17 +48,18 @@ def _get_disagreement(one: Proposition, two: Proposition) -> List[Proposition]:
         and isinstance(two, Function)
     ):
         if one.name != two.name or len(one.arguments) != len(two.arguments):
-            return [one, two]
+            return (one, two)
         for argument_one, argument_two in zip(one.arguments, two.arguments):
             disagreement = _get_disagreement(argument_one, argument_two)
-            if disagreement != []:
+            if disagreement != ():
                 return disagreement
-        return []
-    return [one, two]
+        return ()
+    return (one, two)
 
 
 def _propose_substitution(
-    disagreement: List[Proposition], propositions: List[Proposition]
+    disagreement: Tuple[Proposition, ...],
+    propositions: Tuple[Proposition, ...],
 ) -> Substitution:
     substitution = None
     if isinstance(disagreement[0], Variable) and isinstance(
@@ -76,20 +78,20 @@ def _propose_substitution(
 
 
 def most_general_unifier(
-    propositions: List[Proposition],
-    substitutions: Optional[List[Substitution]] = None,
-) -> List[Substitution]:
+    propositions: Tuple[Proposition, ...],
+    substitutions: Optional[Tuple[Substitution, ...]] = None,
+) -> Tuple[Substitution, ...]:
     """
     Robinson's 1965 unification algorithm
 
-    >>> most_general_unifier([Variable("X"), Variable("X")])
-    []
-    >>> most_general_unifier([Variable("X"), Function("this_is_a_test_case", [Variable("X")])])
+    >>> most_general_unifier((Variable("X"), Variable("X")))
+    ()
+    >>> most_general_unifier((Variable("X"), Function("this_is_a_test_case", (Variable("X"),))))
     Traceback (most recent call last):
      ...
-    gym_saturation.logic_ops.unification.NonUnifiableError: (Variable(name='X'), Function(name='this_is_a_test_case', arguments=[Variable(name='X')]))
-    >>> most_general_unifier([Predicate("s", [Variable("X"), Variable("Y"), Function("f", [Variable("Z")])]), Predicate("s", [Variable("U"), Function("this_is_a_test_case", [Variable("V"), Variable("V")]), Variable("V")])])
-    [Substitution(variable=Variable(name='X'), term=Variable(name='U')), Substitution(variable=Variable(name='Y'), term=Function(name='this_is_a_test_case', arguments=[Variable(name='V'), Variable(name='V')])), Substitution(variable=Variable(name='V'), term=Function(name='f', arguments=[Variable(name='Z')]))]
+    gym_saturation.logic_ops.unification.NonUnifiableError: (Variable(name='X'), Function(name='this_is_a_test_case', arguments=(Variable(name='X'),)))
+    >>> most_general_unifier((Predicate("s", (Variable("X"), Variable("Y"), Function("f", (Variable("Z"),)))), Predicate("s", (Variable("U"), Function("this_is_a_test_case", (Variable("V"), Variable("V"))), Variable("V")))))
+    (Substitution(variable=Variable(name='X'), term=Variable(name='U')), Substitution(variable=Variable(name='Y'), term=Function(name='this_is_a_test_case', arguments=(Variable(name='V'), Variable(name='V')))), Substitution(variable=Variable(name='V'), term=Function(name='f', arguments=(Variable(name='Z'),))))
 
     :param propositions: a set of propositions to unify
     :param substitutions: this function is recursive and uses this param to
@@ -97,16 +99,19 @@ def most_general_unifier(
     :returns: a map from variables to functions or other variables (aka
         substitution)
     """
-    not_none_substitutions = [] if substitutions is None else substitutions
+    not_none_substitutions = () if substitutions is None else substitutions
     if len(propositions) == 1:
         return not_none_substitutions
     disagreement = _get_disagreement(propositions[0], propositions[1])
-    if disagreement == []:
-        return []
+    if disagreement == ():
+        return ()
     substitution = _propose_substitution(disagreement, propositions)
     return most_general_unifier(
-        deduplicate(
-            [substitution(proposition) for proposition in propositions]
+        tuple(
+            set(
+                substitution(proposition)  # type: ignore
+                for proposition in propositions
+            )
         ),
-        not_none_substitutions + [substitution],
+        not_none_substitutions + (substitution,),
     )

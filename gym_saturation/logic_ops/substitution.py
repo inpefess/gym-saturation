@@ -15,23 +15,22 @@
 Substitution
 =============
 """
-from dataclasses import dataclass
+import dataclasses
 from typing import Union
 
 from gym_saturation import grammar
-from gym_saturation.utils import pickle_copy
 
 
-@dataclass
+@dataclasses.dataclass
 class Substitution:
     """
     a mapping from ``Variable`` to ``Term``
 
-    >>> substitution = Substitution(grammar.Variable("X"), grammar.Function("this_is_a_test_case", []))
-    >>> substitution(grammar.Clause([grammar.Literal(False, grammar.Predicate("p", [grammar.Function("this_is_a_test_case", [grammar.Variable("X")])]))]))  # doctest: +ELLIPSIS
+    >>> substitution = Substitution(grammar.Variable("X"), grammar.Function("this_is_a_test_case", ()))
+    >>> substitution(grammar.Clause((grammar.Literal(False, grammar.Predicate("p", (grammar.Function("this_is_a_test_case", (grammar.Variable("X"),)),))),)))  # doctest: +ELLIPSIS
     cnf(..., lemma, p(this_is_a_test_case(this_is_a_test_case))).
     >>> substitution(grammar.Variable("X"))
-    Function(name='this_is_a_test_case', arguments=[])
+    Function(name='this_is_a_test_case', arguments=())
     """
 
     variable: grammar.Variable
@@ -50,24 +49,24 @@ class Substitution:
         if isinstance(term, grammar.Function):
             return grammar.Function(
                 term.name,
-                [
+                tuple(
                     self._substitute_in_term(argument)
                     for argument in term.arguments
-                ],
+                ),
             )
         if term.name == self.variable.name:
-            return pickle_copy(self.term)
-        return pickle_copy(term)
+            return self.term
+        return term
 
     def _substitute_in_predicate(
         self, predicate: grammar.Predicate
     ) -> grammar.Predicate:
         return grammar.Predicate(
             predicate.name,
-            [
+            tuple(
                 self._substitute_in_term(argument)
                 for argument in predicate.arguments
-            ],
+            ),
         )
 
     def substitute_in_clause(self, clause: grammar.Clause) -> grammar.Clause:
@@ -77,14 +76,11 @@ class Substitution:
         :param clause: a clause to apply substitution to
         :returns: the result of the substitution
         """
-        literals = []
-        for literal in clause.literals:
-            literals.append(
-                grammar.Literal(
-                    literal.negated,
-                    self._substitute_in_predicate(literal.atom),
-                )
+        literals = tuple(
+            grammar.Literal(
+                literal.negated,
+                self._substitute_in_predicate(literal.atom),
             )
-        new_clause: grammar.Clause = pickle_copy(clause)
-        new_clause.literals = literals
-        return new_clause
+            for literal in clause.literals
+        )
+        return dataclasses.replace(clause, literals=literals)

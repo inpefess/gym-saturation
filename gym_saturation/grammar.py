@@ -16,11 +16,11 @@ Grammar
 ********
 """
 from dataclasses import dataclass, field
-from typing import List, Optional, Union
+from typing import Optional, Tuple, Union
 from uuid import uuid1
 
 
-@dataclass
+@dataclass(frozen=True)
 class Variable:
     """
     .. _variable:
@@ -31,7 +31,7 @@ class Variable:
     name: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class Function:
     """
     .. _Function:
@@ -40,13 +40,18 @@ class Function:
     """
 
     name: str
-    arguments: List[Union[Variable, "Function"]]
+    arguments: Tuple[Union[Variable, "Function"], ...]
 
 
 Term = Union[Variable, Function]
+Term.__doc__ = """
+.. _Term:
+
+Term is either a :ref:`Variable <Variable>` or a :ref:`Function <Function>`
+"""
 
 
-@dataclass
+@dataclass(frozen=True)
 class Predicate:
     """
     .. _Predicate:
@@ -55,13 +60,18 @@ class Predicate:
     """
 
     name: str
-    arguments: List[Term]
+    arguments: Tuple[Term, ...]
 
 
 Proposition = Union[Predicate, Term]
+Proposition.__doc__ = """
+.. _Proposition:
+
+Proposition is either a :ref:`Predicate <Predicate>` or a :ref:`Term <Term>`
+"""
 
 
-@dataclass
+@dataclass(frozen=True)
 class Literal:
     """
     .. _Literal:
@@ -75,8 +85,10 @@ class Literal:
 
 def _term_to_tptp(term: Term) -> str:
     if isinstance(term, Function):
-        arguments = [_term_to_tptp(argument) for argument in term.arguments]
-        if arguments != []:
+        arguments = tuple(
+            _term_to_tptp(argument) for argument in term.arguments
+        )
+        if arguments != tuple():
             return f"{term.name}({','.join(arguments)})"
     return term.name
 
@@ -88,7 +100,7 @@ def _literal_to_tptp(literal: Literal) -> str:
             literal.atom.name
             + "("
             + ", ".join(
-                [_term_to_tptp(term) for term in literal.atom.arguments]
+                tuple(_term_to_tptp(term) for term in literal.atom.arguments)
             )
             + ")"
         )
@@ -101,7 +113,7 @@ def _literal_to_tptp(literal: Literal) -> str:
     return res
 
 
-@dataclass
+@dataclass(frozen=True)
 class Clause:
     """
     .. _Clause:
@@ -122,12 +134,12 @@ class Clause:
          unprocessed set; clauses from the problem have ``birth_step`` zero
     """
 
-    literals: List[Literal]
-    label: str = field(
+    literals: Tuple[Literal, ...]
+    label: Optional[str] = field(
         default_factory=lambda: "x" + str(uuid1()).replace("-", "_")
     )
     role: str = "lemma"
-    inference_parents: Optional[List[str]] = None
+    inference_parents: Optional[Tuple[str, ...]] = None
     inference_rule: Optional[str] = None
     processed: Optional[bool] = None
     birth_step: Optional[int] = None

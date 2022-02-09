@@ -17,7 +17,7 @@ TPTP Parser
 """
 import os
 import sys
-from typing import List
+from typing import Tuple
 
 from lark import Lark, Token
 
@@ -36,8 +36,8 @@ class TPTPParser:
     """
     >>> from gym_saturation.grammar import (Literal, Predicate, Variable,
     ...     Function)
-    >>> clause = Clause([Literal(True, Predicate("=", [Function("this_is_a_test_case", [Variable("X")]), Variable("Y")]))], inference_rule="resolution", inference_parents=["one", "two"])
-    >>> TPTPParser().parse(str(clause), "") == [clause]
+    >>> clause = Clause(literals=(Literal(True, Predicate("=", (Function("this_is_a_test_case", (Variable("X"), )), Variable("Y")))),), inference_rule="resolution", inference_parents=("one", "two"))
+    >>> TPTPParser().parse(str(clause), "")[0] == clause
     True
     >>> tptp_parser = TPTPParser()
     >>> tptp_text = (
@@ -67,7 +67,7 @@ class TPTPParser:
             start="tptp_file",
         )
 
-    def parse(self, tptp_text: str, tptp_folder: str) -> List[Clause]:
+    def parse(self, tptp_text: str, tptp_folder: str) -> Tuple[Clause, ...]:
         """
         recursively parse a string containing a TPTP problem
 
@@ -76,10 +76,10 @@ class TPTPParser:
         :returns: a list of clauses (including those of the axioms)
         """
         problem_tree = self.parser.parse(tptp_text)
-        clauses = [
+        clauses = tuple(
             CNFParser().transform(cnf_formula)
             for cnf_formula in problem_tree.find_data("cnf_annotated")
-        ]
+        )
         for include in problem_tree.find_data("include"):
             token = include.children[0]
             if isinstance(token, Token):
@@ -88,7 +88,7 @@ class TPTPParser:
                     "r",
                     encoding="utf-8",
                 ) as included_file:
-                    clauses.extend(
-                        self.parse(included_file.read(), tptp_folder)
+                    clauses = clauses + self.parse(
+                        included_file.read(), tptp_folder
                     )
         return clauses

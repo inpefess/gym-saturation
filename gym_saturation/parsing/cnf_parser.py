@@ -15,6 +15,7 @@
 CNF Parser
 ===========
 """
+import dataclasses
 from operator import itemgetter
 
 from lark import Transformer
@@ -67,8 +68,8 @@ class CNFParser(Transformer):
         a functional symbol with arguments
         """
         if len(children) > 1:
-            return Function(children[0], children[1])
-        return Function(children[0], [])
+            return Function(children[0], tuple(children[1]))
+        return Function(children[0], ())
 
     def fof_defined_plain_formula(self, children):
         """
@@ -104,12 +105,12 @@ class CNFParser(Transformer):
 
         a list of arguments, organised in pairs
         """
-        result = []
+        result = ()
         for item in children:
-            if isinstance(item, list):
-                result.extend(item)
+            if not isinstance(item, (Variable, Function)):
+                result = result + tuple(item)
             else:
-                result.append(item)
+                result = result + (item,)
         return result
 
     @staticmethod
@@ -123,16 +124,18 @@ class CNFParser(Transformer):
             return Literal(True, children[1])
         if isinstance(children[0], Predicate):
             if children[0].name == "!=":
-                children[0].name = "="
-                return Literal(True, children[0])
+                return Literal(
+                    negated=True,
+                    atom=Predicate(name="=", arguments=children[0].arguments),
+                )
         return Literal(False, children[0])
 
     @staticmethod
     def _predicate(children):
         """predicates are atomic formulae"""
         if len(children) > 1:
-            return Predicate(children[0], children[1])
-        return Predicate(children[0], [])
+            return Predicate(children[0], tuple(children[1]))
+        return Predicate(children[0], ())
 
     def fof_plain_atomic_formula(self, children):
         """
@@ -147,7 +150,7 @@ class CNFParser(Transformer):
 
         some predicates are in the infix form, so we translate to them prefix
         """
-        return Predicate(children[1], [children[0], children[2]])
+        return Predicate(children[1], (children[0], children[2]))
 
     @staticmethod
     def fof_infix_unary(children):
@@ -156,7 +159,7 @@ class CNFParser(Transformer):
 
         some predicates are in the infix form, so we translate to them prefix
         """
-        return Predicate(children[1], [children[0], children[2]])
+        return Predicate(children[1], (children[0], children[2]))
 
     @staticmethod
     def disjunction(children):
@@ -166,26 +169,26 @@ class CNFParser(Transformer):
         basic clause structure
         """
         if len(children) == 1:
-            return Clause(children)
-        literals = []
-        for item in [children[0], children[2]]:
+            return Clause(tuple(children))
+        literals = ()
+        for item in (children[0], children[2]):
             if isinstance(item, Clause):
-                literals.extend(item.literals)
+                literals = literals + item.literals
             else:
-                literals.append(item)
+                literals = literals + (item,)
         return Clause(literals)
 
     @staticmethod
     def _parse_inference_parents(inference_parents):
         if isinstance(inference_parents[0], list):
-            clause_inference_parents = list(
+            clause_inference_parents = tuple(
                 map(
                     itemgetter(0),
                     inference_parents,
                 )
             )
         else:
-            clause_inference_parents = [inference_parents[0]]
+            clause_inference_parents = (inference_parents[0],)
         return clause_inference_parents
 
     def cnf_annotated(self, children):
@@ -195,21 +198,23 @@ class CNFParser(Transformer):
         annotated CNF formula (clause)
         """
         clause = children[2]
-        clause.label = children[0]
-        clause.role = children[1]
+        inference_rule = None
+        inference_parents = None
         if isinstance(children[3], list):
             for annotation in children[3]:
                 if isinstance(annotation, dict):
                     if "inference_record" in annotation:
-                        clause.inference_rule = annotation["inference_record"][
-                            0
-                        ]
-                        clause.inference_parents = (
-                            self._parse_inference_parents(
-                                annotation["inference_record"][1]
-                            )
+                        inference_rule = annotation["inference_record"][0]
+                        inference_parents = self._parse_inference_parents(
+                            annotation["inference_record"][1]
                         )
-        return clause
+        return dataclasses.replace(
+            clause,
+            label=children[0],
+            role=children[1],
+            inference_rule=inference_rule,
+            inference_parents=inference_parents,
+        )
 
     @staticmethod
     def inference_record(children):
@@ -226,7 +231,7 @@ class CNFParser(Transformer):
         """
         if isinstance(children, list):
             if len(children) == 1:
-                return children[0]
+                return tuple(children[0])
         return children
 
     @staticmethod
