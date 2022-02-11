@@ -44,7 +44,7 @@ Grammar is encoded in Python objects in a self-explanatory way. Each grammar obj
 What is an Observation
 ***********************
 
-An observation visible by an agent is a Python dictionary having two keys: `action_mask` and `real_obs`. Action mask is a `numpy` array of zeros and ones of some fixed length. A user can change a default value (10000) for this length by passing a `max_clauses` argument to the environment constructor. If at some point there are more than `max_clauses` clauses in the state, the environment raises an error. For any index in `action_mask`, if there is no clause with such an index in the state, the mask value is zero. It's also zero if the clause is marked as processed. For the indices of the clauses available to become a so-called 'given clause', the mask equals one.
+An observation visible by an agent is a Python dictionary having two keys: `action_mask` and `real_obs`. Action mask is a `numpy` array of zeros and ones of some fixed length. A user can change a default value (100000) for this length by passing a `max_clauses` argument to the environment constructor. If at some step there are more than `max_clauses` clauses in the state, the environment returns ``done == True``. For any index in `action_mask`, if there is no clause with such an index in the state, the mask value is zero. It's also zero if the clause is marked as processed. For the indices of the clauses available to become a so-called 'given clause', the mask equals one.
 
 `real_obs` is the state (a list of clauses). Since in OpenAI Gym observations have to live in some pre-defined space, there is a OpenAI compatible :ref:`space class<clause_space>` for a list of clauses.
 

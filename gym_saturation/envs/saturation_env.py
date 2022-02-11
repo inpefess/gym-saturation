@@ -59,14 +59,6 @@ class SaturationEnv(Env):
     >>> problem_list = sorted(glob(
     ...     os.path.join(tptp_folder, "Problems", "*", "*1-1.p")
     ... ))
-    >>> env = SaturationEnv(problem_list, 1)
-    >>> env.seed(0)
-    0
-    >>> env.reset()
-    Traceback (most recent call last):
-     ...
-    ValueError: Too many clauses: 4
-    consider increasing `max_clauses` parameter of `__init__`
     >>> env = SaturationEnv(problem_list)
     >>> env.seed(0)
     0
@@ -126,6 +118,39 @@ class SaturationEnv(Env):
 
     >>> print(TPTPParser().parse(env.tstp_proof, "")[0])  # doctest: +ELLIPSIS
     cnf(..., lemma, $false(), inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
+
+    the total number of clauses in the state is limited by the ``max_clauses``
+    parameter. Let's try setting it and repeating the same solution of the same
+    problem:
+
+    >>> env = SaturationEnv(problem_list, max_clauses=4)
+    >>> _ = env.seed(0)
+    >>> _ = env.reset()
+
+    after the first step, the number of clauses in the state doesn't change
+
+    >>> old_obs, _, _, _ = env.step(0)
+
+    but during the second step we bypass ``max_clauses`` by one, so everything
+    is rolled back:
+
+    >>> obs, reward, done, _ = env.step(1)
+
+    the episode is consedered to be finished
+
+    >>> done
+    True
+
+    the task --- failed
+
+    >>> reward
+    0.0
+
+    and the state contains the same clauses as at the end of the previous step
+
+    >>> (obs["real_obs"] == old_obs["real_obs"] and
+    ...     obs["real_obs"] is not old_obs["real_obs"])
+    True
     """
 
     def __init__(
@@ -175,9 +200,7 @@ class SaturationEnv(Env):
         return self.state
 
     def _add_to_state(self, new_clauses: Tuple[Clause, ...]) -> None:
-        birth_step = 1 + max(
-            [getattr(clause, "birth_step", 0) for clause in self._state]
-        )
+        birth_step = 1 + self.last_birth_step
         for clause in new_clauses:
             if not is_tautology(clause):
                 sorted_literals = tuple(
@@ -234,6 +257,7 @@ class SaturationEnv(Env):
         )
 
     def step(self, action: int) -> Tuple[dict, float, bool, dict]:
+        old_state = self._state
         if self._state[action].processed:
             raise ValueError(f"action {action} is not valid")
         if self._state[action].literals == ():
@@ -260,11 +284,23 @@ class SaturationEnv(Env):
             ]
         ):
             return self.state, 0.0, True, {STATE_DIFF_UPDATED: updated}
+        if len(self._state) > self.action_space.n:
+            self._state = old_state
+            return self.state, 0.0, True, {}
         return (
             self.state,
             0.0,
             False,
             {STATE_DIFF_UPDATED: updated},
+        )
+
+    @property
+    def last_birth_step(self) -> int:
+        """
+        :returns: the last birth step number of the clauses in the proof state
+        """
+        return max(
+            [getattr(clause, "birth_step", 0) for clause in self._state]
         )
 
     # pylint: disable=inconsistent-return-statements
@@ -280,11 +316,6 @@ class SaturationEnv(Env):
         """
         :returns: environment state in Python ``dict`` format
         """
-        if len(self._state) > self.action_space.n:
-            raise ValueError(
-                f"Too many clauses: {len(self._state)}\n"
-                "consider increasing `max_clauses` parameter of `__init__`"
-            )
         return {
             "real_obs": [orjson.dumps(clause) for clause in self._state],
             "action_mask": (

@@ -221,20 +221,20 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> Transition:
     ...     ))
     ... , "*-*.p")))
     >>> random.seed(0)
-    >>> agents = [SizeAgeAgent(2, 1), SizeAgeAgent(1, 2), RandomAgent()]
+    >>> agents = (SizeAgeAgent(2, 1), SizeAgeAgent(1, 2), RandomAgent())
+    >>> max_clauses = (100, 100, 4)
     >>> for i in range(3):  # doctest: +ELLIPSIS
     ...     env = gym.make(
     ...         "gym_saturation:saturation-v0",
     ...         problem_list=[problem_list[i]],
+    ...         max_clauses=max_clauses[i]
     ...     )
     ...     env._max_episode_steps = 5
     ...     agent_testing_report(env, agents[i])
     Proof of length 1 found in 4 steps:
     cnf(..., lemma, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
     Step limit reached
-    Proof of length 2 found in 5 steps:
-    cnf(..., lemma, ..., inference(resolution, [], [..., ...])).
-    cnf(..., lemma, $false, inference(resolution, [], [..., ...])).
+    Proof state size limit reached
 
     :param env: a `gym_saturation` environment
     :param agent: an initialized agent. Must have `get_action` method
@@ -289,16 +289,20 @@ def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
     :returns:
     """
     last_transition = episode(env, agent)
+    step_count = getattr(env, "_elapsed_steps")
     if last_transition.reward == 1.0:
         a_proof = env.tstp_proof
         proof_length = len(a_proof.split("\n"))
-        step_count = getattr(env, "_elapsed_steps")
         print(
-            f"Proof of length {proof_length} found " f"in {step_count} steps:"
+            f"Proof of length {proof_length} found "
+            f"in {step_count} steps:\n{a_proof}"
         )
-        print(a_proof)
     else:
-        print("Step limit reached")
+        print(
+            "Step limit reached"
+            if step_count == getattr(env, "_max_episode_steps")
+            else "Proof state size limit reached"
+        )
 
 
 def main(args: Optional[List[str]] = None) -> None:
