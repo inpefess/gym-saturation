@@ -40,6 +40,7 @@ from gym_saturation.logic_ops.utils import (
 from gym_saturation.parsing.tptp_parser import TPTPParser
 
 STATE_DIFF_UPDATED = "state_diff_updated"
+POSITIVE_ACTIONS = "positive_actions"
 MAX_CLAUSES = 100000
 
 
@@ -118,6 +119,11 @@ class SaturationEnv(Env):
 
     >>> print(TPTPParser().parse(env.tstp_proof, "")[0])  # doctest: +ELLIPSIS
     cnf(..., lemma, $false(), inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
+
+    the relevant actions are filtered too
+
+    >>> env.positibe_actions
+    (0, 1, 4)
 
     the total number of clauses in the state is limited by the ``max_clauses``
     parameter. Let's try setting it and repeating the same solution of the same
@@ -273,7 +279,8 @@ class SaturationEnv(Env):
                 {
                     STATE_DIFF_UPDATED: {
                         action: orjson.dumps(self._state[action])
-                    }
+                    },
+                    POSITIVE_ACTIONS: self.positibe_actions,
                 },
             )
         updated = self._do_deductions(action)
@@ -337,7 +344,7 @@ class SaturationEnv(Env):
     @property
     def tstp_proof(self) -> str:
         """
-        :returns: TSTP proof (if found; raises error otherwise)
+        :returns: TSTP proof (if found; raises an error otherwise)
         """
         return "\n".join(
             reversed(
@@ -347,4 +354,17 @@ class SaturationEnv(Env):
                     if clause.inference_rule is not None
                 ]
             )
+        )
+
+    @property
+    def positibe_actions(self) -> Tuple[int, ...]:
+        """
+        :returns: a sequence of actions which contributed to the proof found
+            (if found; raises an error otherwise)
+        """
+        proof = reduce_to_proof(self._state)
+        return tuple(
+            action
+            for action, clause in enumerate(self._state)
+            if clause in proof
         )
