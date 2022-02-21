@@ -18,9 +18,9 @@ It's registered using a limit for steps in an episode
 from gym.envs.registration import register
 
 register(
-    id="saturation-v0",
+    id="GymSaturation-v0",
     entry_point="gym_saturation.envs:SaturationEnv",
     max_episode_steps=1000,
     reward_threshold=1.0,
 )
-__version__ = "0.2.6"
+__version__ = "0.2.9"

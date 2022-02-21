@@ -225,7 +225,7 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> Transition:
     >>> max_clauses = (100, 100, 4)
     >>> for i in range(3):  # doctest: +ELLIPSIS
     ...     env = gym.make(
-    ...         "gym_saturation:saturation-v0",
+    ...         "GymSaturation-v0",
     ...         problem_list=[problem_list[i]],
     ...         max_clauses=max_clauses[i]
     ...     )
@@ -333,7 +333,7 @@ def main(args: Optional[List[str]] = None) -> None:
     arguments = parse_args(args)
     environment = TimeLimit(
         gym.make(
-            "gym_saturation:saturation-v0",
+            "GymSaturation-v0",
             problem_list=[arguments.problem_filename],
         ),
         arguments.step_limit,
