@@ -1,0 +1,23 @@
+{
+    "@context": "https://raw.githubusercontent.com/codemeta/codemeta/master/codemeta.jsonld",
+    "@type": "Code",
+    "author": [
+        {
+            "@id": "0000-0002-1291-9896",
+            "@type": "Person",
+            "email": "boris.shminke@univ-cotedazur.fr",
+            "name": "Boris Shminke",
+            "affiliation": "Laboratoire J.A. Dieudonné, CNRS and Université Côte d'Azur, France",
+        }
+    ],
+    "identifier": "",
+    "codeRepository": "https://github.com/inpefess/gym-saturation",
+    "datePublished": "2021-10-01",
+    "dateModified": "2021-10-01",
+    "dateCreated": "2021-10-01",
+    "description": "an OpenAI Gym environment for saturation provers",
+    "keywords": "OpenAI Gym, reinforcement learning, automated theorem prover, saturation prover",
+    "license": "Apache 2.0",
+    "title": "gym-saturation",
+    "version": "v0.1.4",
+}
