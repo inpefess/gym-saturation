@@ -100,7 +100,7 @@ number of attempted steps: 6
 \frac{C\vee s\not\approx t}{\sigma\left(C\right)},\sigma=mgu\left(s,t\right)\quad\text{(reflexivity resolution)}
 \end{align*}
 
-where $C,C_1,C_2$ are clauses, $A_1,A_2$ are atomic formulae, $L$ is a literal, $r,s,t$ are terms, and $\sigma$ is a substitution (most general unifier). $L\left[t\right]$ is a result of substituting the term $r$ in $L\left[r\right]$ for the term $t$ at only one chosen position.
+where $C,C_1,C_2$ are clauses, $A_1,A_2$ are atomic formulae, $L$ is a literal, $r,s,t$ are terms, and $\sigma$ is a substitution (most general unifier). $L\left[t\right]$ is a result of substituting the term $t$ in $L\left[r\right]$ for the term $r$ at only one chosen position.
 
 For parsing, we use the LARK parser [@LARK]. We represent the clauses as Python classes forming tree-like structures. `gym-saturation` also includes a JSON serializer/deserializer for those trees. For example, a TPTP clause
 
