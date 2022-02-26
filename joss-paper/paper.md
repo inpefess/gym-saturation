@@ -85,7 +85,7 @@ number of attempted steps: 6
 * AI Gym environment implementation
 * agent testing (a bit more elaborated version of the `while` loop from the examle)
 
-`gym-saturation` relies on a deduction system of four rules which is known to be refutation complete [@doi:10.1137/0204036]:
+`gym-saturation` relies on a deduction system of four rules which is known to be refutationally complete [@doi:10.1137/0204036]:
 
 \begin{align*}
 {\frac{C_1\vee A_1,C_2\vee\neg A_2}{\sigma\left(C_1\vee C_2\right)}},\sigma=mgu\left(A_1,A_2\right)\quad\text{(resolution)}
