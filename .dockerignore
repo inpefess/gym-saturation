@@ -3,3 +3,4 @@ doc/build/
 .mypy_cache/
 dist/
 .idea/
+joss-paper/

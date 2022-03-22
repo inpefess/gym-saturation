@@ -14,3 +14,10 @@ runs/
 doc/build/
 *.pdf
 .idea/
+*.out
+*.bbl
+*.aux
+*.bcf
+*.blg
+*.log
+.dir-locals.el
