@@ -1,11 +1,11 @@
 # Copyright 2021-2022 Boris Shminke
-
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,7 @@ Saturation Environment
 import dataclasses
 import os
 import random
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 import numpy as np
 import orjson
@@ -41,6 +41,7 @@ from gym_saturation.parsing.tptp_parser import TPTPParser
 
 STATE_DIFF_UPDATED = "state_diff_updated"
 POSITIVE_ACTIONS = "positive_actions"
+PROBLEM_FILENAME = "problem_filename"
 MAX_CLAUSES = 100000
 
 
@@ -122,7 +123,7 @@ class SaturationEnv(Env):
 
     the relevant actions are filtered too
 
-    >>> env.positibe_actions
+    >>> env.positive_actions
     (0, 1, 4)
 
     the total number of clauses in the state is limited by the ``max_clauses``
@@ -175,11 +176,12 @@ class SaturationEnv(Env):
                 "real_obs": ClauseSpace(),
             }
         )
+        self.problem: Optional[str] = None
 
     def _init_clauses(self) -> Tuple[Clause, ...]:
-        problem = random.choice(self.problem_list)
-        tptp_folder = os.path.join(os.path.dirname(problem), "..", "..")
-        with open(problem, "r", encoding="utf-8") as problem_file:
+        self.problem = random.choice(self.problem_list)
+        tptp_folder = os.path.join(os.path.dirname(self.problem), "..", "..")
+        with open(self.problem, "r", encoding="utf-8") as problem_file:
             problem_text = problem_file.read()
         parsed_clauses = TPTPParser().parse(problem_text, tptp_folder)
         return tuple(
@@ -280,7 +282,8 @@ class SaturationEnv(Env):
                     STATE_DIFF_UPDATED: {
                         action: orjson.dumps(self._state[action])
                     },
-                    POSITIVE_ACTIONS: self.positibe_actions,
+                    POSITIVE_ACTIONS: self.positive_actions,
+                    PROBLEM_FILENAME: self.problem,
                 },
             )
         updated = self._do_deductions(action)
@@ -290,15 +293,20 @@ class SaturationEnv(Env):
                 for clause in self._state
             ]
         ):
-            return self.state, 0.0, True, {STATE_DIFF_UPDATED: updated}
+            return (
+                self.state,
+                0.0,
+                True,
+                {STATE_DIFF_UPDATED: updated, PROBLEM_FILENAME: self.problem},
+            )
         if len(self._state) > self.action_space.n:
             self._state = old_state
-            return self.state, 0.0, True, {}
+            return self.state, 0.0, True, {PROBLEM_FILENAME: self.problem}
         return (
             self.state,
             0.0,
             False,
-            {STATE_DIFF_UPDATED: updated},
+            {STATE_DIFF_UPDATED: updated, PROBLEM_FILENAME: self.problem},
         )
 
     @property
@@ -357,7 +365,7 @@ class SaturationEnv(Env):
         )
 
     @property
-    def positibe_actions(self) -> Tuple[int, ...]:
+    def positive_actions(self) -> Tuple[int, ...]:
         """
         :returns: a sequence of actions which contributed to the proof found
             (if found; raises an error otherwise)
