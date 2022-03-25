@@ -123,7 +123,7 @@ class SaturationEnv(Env):
 
     the relevant actions are filtered too
 
-    >>> env.positibe_actions
+    >>> env.positive_actions
     (0, 1, 4)
 
     the total number of clauses in the state is limited by the ``max_clauses``
@@ -282,7 +282,7 @@ class SaturationEnv(Env):
                     STATE_DIFF_UPDATED: {
                         action: orjson.dumps(self._state[action])
                     },
-                    POSITIVE_ACTIONS: self.positibe_actions,
+                    POSITIVE_ACTIONS: self.positive_actions,
                     PROBLEM_FILENAME: self.problem,
                 },
             )
@@ -365,7 +365,7 @@ class SaturationEnv(Env):
         )
 
     @property
-    def positibe_actions(self) -> Tuple[int, ...]:
+    def positive_actions(self) -> Tuple[int, ...]:
         """
         :returns: a sequence of actions which contributed to the proof found
             (if found; raises an error otherwise)
