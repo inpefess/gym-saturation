@@ -18,7 +18,7 @@ Saturation Environment
 import dataclasses
 import os
 import random
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
 import orjson
@@ -107,12 +107,12 @@ class SaturationEnv(Env):
 
     there is no reward until the end of an episode
 
-    >>> env.step(1)[1:3]
+    >>> (reward, done)
     (0.0, False)
 
     if a proof is found, then reward is ``+1``
 
-    >>> env.step(4)[1:3]
+    >>> env.step(1)[1:3]
     (1.0, True)
 
     TSTP proof is now available (one can add ``include`` directive before it
@@ -130,18 +130,14 @@ class SaturationEnv(Env):
     parameter. Let's try setting it and repeating the same solution of the same
     problem:
 
-    >>> env = SaturationEnv(problem_list, max_clauses=4)
+    >>> env = SaturationEnv(problem_list, max_clauses=3)
     >>> _ = env.seed(0)
-    >>> _ = env.reset()
+    >>> old_obs = env.reset()
 
-    after the first step, the number of clauses in the state doesn't change
-
-    >>> old_obs, _, _, _ = env.step(0)
-
-    but during the second step we bypass ``max_clauses`` by one, so everything
+    after the first step we bypass ``max_clauses`` by one, so everything
     is rolled back:
 
-    >>> obs, reward, done, _ = env.step(1)
+    >>> obs, reward, done, _ = env.step(0)
 
     the episode is consedered to be finished
 
@@ -264,50 +260,47 @@ class SaturationEnv(Env):
             + [(action, orjson.dumps(self._state[action]))]
         )
 
-    def step(self, action: int) -> Tuple[dict, float, bool, dict]:
+    def _proof_found_result(
+        self, reward: float, done: bool, info: Dict[str, Any]
+    ) -> Tuple[float, bool, Dict[str, Any]]:
+        if not done:
+            if tuple(True for clause in self._state if clause.literals == ()):
+                info[POSITIVE_ACTIONS] = self.positive_actions
+                return 1.0, True, info
+        return reward, done, info
+
+    def _max_clauses_result(
+        self,
+        old_state: Tuple[Clause, ...],
+        reward: float,
+        done: bool,
+        info: Dict[str, Any],
+    ) -> Tuple[float, bool, Dict[str, Any]]:
+        if not done:
+            if len(self._state) > self.action_space.n:
+                self._state = old_state
+                info.pop(STATE_DIFF_UPDATED)
+                return reward, True, info
+        return reward, done, info
+
+    def step(self, action: int) -> Tuple[dict, float, bool, Dict[str, Any]]:
         old_state = self._state
         if self._state[action].processed:
             raise ValueError(f"action {action} is not valid")
-        if self._state[action].literals == ():
-            self._state = (
-                self._state[:action]
-                + (dataclasses.replace(self._state[action], processed=True),)
-                + self._state[action + 1 :]
-            )
-            return (
-                self.state,
-                1.0,
-                True,
-                {
-                    STATE_DIFF_UPDATED: {
-                        action: orjson.dumps(self._state[action])
-                    },
-                    POSITIVE_ACTIONS: self.positive_actions,
-                    PROBLEM_FILENAME: self.problem,
-                },
-            )
         updated = self._do_deductions(action)
-        if min(
+        reward = 0.0
+        info = {STATE_DIFF_UPDATED: updated, PROBLEM_FILENAME: self.problem}
+        done = min(
             [
                 False if clause.processed is None else clause.processed
                 for clause in self._state
             ]
-        ):
-            return (
-                self.state,
-                0.0,
-                True,
-                {STATE_DIFF_UPDATED: updated, PROBLEM_FILENAME: self.problem},
-            )
-        if len(self._state) > self.action_space.n:
-            self._state = old_state
-            return self.state, 0.0, True, {PROBLEM_FILENAME: self.problem}
-        return (
-            self.state,
-            0.0,
-            False,
-            {STATE_DIFF_UPDATED: updated, PROBLEM_FILENAME: self.problem},
         )
+        reward, done, info = self._proof_found_result(reward, done, info)
+        reward, done, info = self._max_clauses_result(
+            old_state, reward, done, info
+        )
+        return (self.state, reward, done, info)
 
     @property
     def last_birth_step(self) -> int:

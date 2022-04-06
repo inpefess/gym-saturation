@@ -231,7 +231,7 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> Transition:
     ...     )
     ...     env._max_episode_steps = 5
     ...     agent_testing_report(env, agents[i])
-    Proof of length 1 found in 4 steps:
+    Proof of length 1 found in 2 steps:
     cnf(..., lemma, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
     Step limit reached
     Proof state size limit reached
@@ -325,7 +325,7 @@ def main(args: Optional[List[str]] = None) -> None:
     ...     "--step_limit", "3"
     ... ]) # doctest: +ELLIPSIS
     Problem file: ...TST001-1.p
-    Proof of length 1 found in 3 steps:
+    Proof of length 1 found in 2 steps:
     cnf(..., lemma, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
 
     """

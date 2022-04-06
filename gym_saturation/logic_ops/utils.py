@@ -302,11 +302,11 @@ def reduce_to_proof(clauses: Tuple[Clause, ...]) -> List[Clause]:
     """
     leave only clauses belonging to the refutational proof
 
-    >>> reduce_to_proof([Clause(())])
+    >>> reduce_to_proof([Clause(()), Clause(())])
     Traceback (most recent call last):
      ...
     ValueError: wrong refutation proof
-    >>> state = [Clause((), label="one", processed=True)]
+    >>> state = [Clause((), label="one")]
     >>> reduce_to_proof(state) == state
     True
 
@@ -317,7 +317,7 @@ def reduce_to_proof(clauses: Tuple[Clause, ...]) -> List[Clause]:
     empty_clauses = [
         clause
         for label, clause in state_dict.items()
-        if clause.literals == tuple() and clause.processed
+        if clause.literals == tuple()
     ]
     if len(empty_clauses) == 1:
         if empty_clauses[0].label is not None:
