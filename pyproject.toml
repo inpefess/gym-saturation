@@ -28,6 +28,7 @@ lark-parser = "*"
 gym = "*"
 importlib_resources = {version = "*", markers = "python_version < \"3.9\""}
 orjson = "*"
+pexpect = "*"
 
 [tool.poetry.dev-dependencies]
 black = "*"
