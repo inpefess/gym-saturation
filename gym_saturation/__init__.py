@@ -23,4 +23,10 @@ register(
     max_episode_steps=1000,
     reward_threshold=1.0,
 )
+register(
+    id="GymVampire-v0",
+    entry_point="gym_saturation.envs:VampireEnv",
+    max_episode_steps=1000,
+    reward_threshold=1.0,
+)
 __version__ = "0.3.0"

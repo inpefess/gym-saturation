@@ -119,7 +119,7 @@ class SaturationEnv(Env):
     for validation purposes)
 
     >>> print(TPTPParser().parse(env.tstp_proof, "")[0])  # doctest: +ELLIPSIS
-    cnf(..., lemma, $false(), inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
+    cnf(..., lemma, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
 
     the relevant actions are filtered too
 
@@ -301,7 +301,7 @@ class SaturationEnv(Env):
         reward, done, info = self._max_clauses_result(
             old_state, reward, done, info
         )
-        return (self.state, reward, done, info)
+        return self.state, reward, done, info
 
     @property
     def last_birth_step(self) -> int:
