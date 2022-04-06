@@ -173,13 +173,14 @@ class SaturationEnv(Env):
             }
         )
         self.problem: Optional[str] = None
+        self._tptp_parser = TPTPParser()
 
     def _init_clauses(self) -> Tuple[Clause, ...]:
         self.problem = random.choice(self.problem_list)
         tptp_folder = os.path.join(os.path.dirname(self.problem), "..", "..")
         with open(self.problem, "r", encoding="utf-8") as problem_file:
             problem_text = problem_file.read()
-        parsed_clauses = TPTPParser().parse(problem_text, tptp_folder)
+        parsed_clauses = self._tptp_parser.parse(problem_text, tptp_folder)
         return tuple(
             dataclasses.replace(
                 clause,
