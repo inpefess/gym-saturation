@@ -72,7 +72,7 @@ class SaturationEnv(Env):
     >>> print(env.render())
     cnf(this_is_a_test_case_1, hypothesis, this_is_a_test_case(test_constant)).
     cnf(this_is_a_test_case_2, hypothesis, ~this_is_a_test_case(test_constant)).
-    cnf(test_axiom, axiom, test_constant = X0).
+    cnf(test_axiom, axiom, test_constant = test_constant_2).
     cnf(test_axiom_2, axiom, ~test_constant = 0).
 
     ``ansi`` mode returns a JSON representation of the state
@@ -119,7 +119,7 @@ class SaturationEnv(Env):
     for validation purposes)
 
     >>> print(TPTPParser().parse(env.tstp_proof, "")[0])  # doctest: +ELLIPSIS
-    cnf(..., lemma, $false(), inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
+    cnf(..., lemma, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
 
     the relevant actions are filtered too
 
@@ -173,13 +173,14 @@ class SaturationEnv(Env):
             }
         )
         self.problem: Optional[str] = None
+        self._tptp_parser = TPTPParser()
 
     def _init_clauses(self) -> Tuple[Clause, ...]:
         self.problem = random.choice(self.problem_list)
         tptp_folder = os.path.join(os.path.dirname(self.problem), "..", "..")
         with open(self.problem, "r", encoding="utf-8") as problem_file:
             problem_text = problem_file.read()
-        parsed_clauses = TPTPParser().parse(problem_text, tptp_folder)
+        parsed_clauses = self._tptp_parser.parse(problem_text, tptp_folder)
         return tuple(
             dataclasses.replace(
                 clause,
@@ -300,7 +301,7 @@ class SaturationEnv(Env):
         reward, done, info = self._max_clauses_result(
             old_state, reward, done, info
         )
-        return (self.state, reward, done, info)
+        return self.state, reward, done, info
 
     @property
     def last_birth_step(self) -> int:

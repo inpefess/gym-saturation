@@ -30,7 +30,10 @@ from gym.wrappers import TimeLimit
 
 from gym_saturation.envs import SaturationEnv
 from gym_saturation.envs.saturation_env import STATE_DIFF_UPDATED
-from gym_saturation.logic_ops.utils import clause_length
+from gym_saturation.logic_ops.utils import (
+    WrongRefutationProofError,
+    clause_length,
+)
 
 
 class BaseAgent:
@@ -199,7 +202,7 @@ class RandomAgent(BaseAgent):
         )
 
 
-def episode(env: SaturationEnv, agent: BaseAgent) -> Transition:
+def episode(env: SaturationEnv, agent: BaseAgent) -> None:
     """
     tries to solve the problem and logs the clauses
 
@@ -239,26 +242,20 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> Transition:
     :param env: a `gym_saturation` environment
     :param agent: an initialized agent. Must have `get_action` method
     :param problem_filename: the name of a problem file
-    :returns: the last transition
+    :returns:
     """
-    env_state, reward, done = env.reset(), 0.0, False
+    obs, reward, done = env.reset(), 0.0, False
     info: Dict[str, Any] = {
-        STATE_DIFF_UPDATED: dict(enumerate(env_state["real_obs"]))
+        STATE_DIFF_UPDATED: dict(enumerate(obs["real_obs"]))
     }
+    try:
+        if env.tstp_proof is not None:
+            reward, done = 1.0, True
+    except WrongRefutationProofError:
+        pass
     while not done:
-        action = agent.get_action(env_state, reward, info)
-        observation, reward, done, info = env.step(action)
-        transition = Transition(
-            env_state,
-            agent.state,
-            action,
-            observation,
-            reward,
-            done,
-            info,
-        )
-        env_state = observation
-    return transition
+        action = agent.get_action(obs, reward, info)
+        obs, reward, done, info = env.step(action)
 
 
 def parse_args(args: Optional[List[str]] = None) -> Namespace:
@@ -267,7 +264,7 @@ def parse_args(args: Optional[List[str]] = None) -> Namespace:
     ...     "--problem_filename", "test",
     ...     "--step_limit", "1"
     ... ])
-    Namespace(problem_filename='test', step_limit=1)
+    Namespace(problem_filename='test', step_limit=1, vampire_binary_path=None)
 
     :param args: a list of string arguments
         (for testing and use in a non script scenario)
@@ -276,6 +273,9 @@ def parse_args(args: Optional[List[str]] = None) -> Namespace:
     argument_parser = ArgumentParser()
     argument_parser.add_argument("--problem_filename", type=str, required=True)
     argument_parser.add_argument("--step_limit", type=int, required=True)
+    argument_parser.add_argument(
+        "--vampire_binary_path", type=str, required=False
+    )
     parsed_args = argument_parser.parse_args(args)
     return parsed_args
 
@@ -288,16 +288,16 @@ def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
     :param agent: an agent
     :returns:
     """
-    last_transition = episode(env, agent)
+    episode(env, agent)
     step_count = getattr(env, "_elapsed_steps")
-    if last_transition.reward == 1.0:
+    try:
         a_proof = env.tstp_proof
         proof_length = len(a_proof.split("\n"))
         print(
             f"Proof of length {proof_length} found "
             f"in {step_count} steps:\n{a_proof}"
         )
-    else:
+    except WrongRefutationProofError:
         print(
             "Step limit reached"
             if step_count == getattr(env, "_max_episode_steps")
@@ -305,7 +305,7 @@ def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
         )
 
 
-def main(args: Optional[List[str]] = None) -> None:
+def test_agent(args: Optional[List[str]] = None) -> None:
     """
     the main function for this module
 
@@ -314,33 +314,54 @@ def main(args: Optional[List[str]] = None) -> None:
     ... else:
     ...     from importlib_resources import files
     >>> import os
-    >>> problem_filename = os.path.join(
+    >>> from glob import glob
+    >>> problem_filenames = sorted(glob(os.path.join(
     ...     files("gym_saturation")
     ...     .joinpath(os.path.join(
-    ...         "resources", "TPTP-mock", "Problems", "TST", "TST001-1.p"
+    ...         "resources", "TPTP-mock", "Problems", "TST", "TST00*-1.p"
     ...     ))
-    ... )
-    >>> main([
-    ...     "--problem_filename", problem_filename,
+    ... )))
+    >>> test_agent([
+    ...     "--problem_filename", problem_filenames[0],
     ...     "--step_limit", "3"
-    ... ]) # doctest: +ELLIPSIS
+    ... ])  # doctest: +ELLIPSIS
     Problem file: ...TST001-1.p
     Proof of length 1 found in 2 steps:
     cnf(..., lemma, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
-
+    >>> for problem_filename in problem_filenames:
+    ...     test_agent([
+    ...         "--problem_filename", problem_filename,
+    ...         "--step_limit", "10",
+    ...         "--vampire_binary_path", "vampire",
+    ...     ])  # doctest: +ELLIPSIS
+    Problem file: ...TST001-1.p
+    Proof of length 6 found in 0 steps:
+    ...
+    Problem file: ...TST002-1.p
+    Proof of length 10 found in 4 steps:
+    ...
+    Problem file: ...TST003-1.p
+    Proof of length 5 found in 3 steps:
+    ...
+    cnf(x5, hyp..., $false, inference(subsumption_resolution, [], [x4, x3])).
     """
     sys.setrecursionlimit(10000)
     arguments = parse_args(args)
-    environment = TimeLimit(
-        gym.make(
+    if arguments.vampire_binary_path is not None:
+        env = gym.make(
+            "GymVampire-v0",
+            problem_list=[arguments.problem_filename],
+            vampire_binary_path=arguments.vampire_binary_path,
+        )
+    else:
+        env = gym.make(
             "GymSaturation-v0",
             problem_list=[arguments.problem_filename],
-        ),
-        arguments.step_limit,
-    )
+        )
+    environment = TimeLimit(env, arguments.step_limit)
     print(f"Problem file: {arguments.problem_filename}")
     agent_testing_report(environment, SizeAgeAgent(5, 1))
 
 
 if __name__ == "__main__":
-    main()
+    test_agent()

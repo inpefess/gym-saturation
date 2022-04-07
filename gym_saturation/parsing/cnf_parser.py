@@ -169,6 +169,8 @@ class CNFParser(Transformer):
         basic clause structure
         """
         if len(children) == 1:
+            if children[0].atom.name == "$false":
+                return Clause(tuple())
             return Clause(tuple(children))
         literals = ()
         for item in (children[0], children[2]):
@@ -180,16 +182,18 @@ class CNFParser(Transformer):
 
     @staticmethod
     def _parse_inference_parents(inference_parents):
-        if isinstance(inference_parents[0], list):
-            clause_inference_parents = tuple(
-                map(
-                    itemgetter(0),
-                    inference_parents,
+        if inference_parents != []:
+            if isinstance(inference_parents[0], list):
+                clause_inference_parents = tuple(
+                    map(
+                        itemgetter(0),
+                        inference_parents,
+                    )
                 )
-            )
-        else:
-            clause_inference_parents = (inference_parents[0],)
-        return clause_inference_parents
+            else:
+                clause_inference_parents = (inference_parents[0],)
+            return clause_inference_parents
+        return inference_parents
 
     def cnf_annotated(self, children):
         """

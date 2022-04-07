@@ -54,7 +54,7 @@ class TPTPParser:
     ... ))))
     cnf(this_is_a_test_case_1, hypothesis, this_is_a_test_case(test_constant), inference(resolution, [], [one, two])).
     cnf(this_is_a_test_case_2, hypothesis, ~this_is_a_test_case(test_constant)).
-    cnf(test_axiom, axiom, test_constant = X).
+    cnf(test_axiom, axiom, test_constant = test_constant_2).
     cnf(test_axiom_2, axiom, ~test_constant = 0).
     """
 
