@@ -30,6 +30,12 @@ from gym_saturation.grammar import (
 from gym_saturation.logic_ops.substitution import Substitution
 
 
+class WrongRefutationProofError(Exception):
+    """
+    exception raised when proof is requested but is malformed or not found yet
+    """
+
+
 def is_subproposition(one: Proposition, two: Proposition) -> bool:
     """
     check whether proposition ``one`` is part of a proposition ``two``
@@ -305,7 +311,7 @@ def reduce_to_proof(clauses: Tuple[Clause, ...]) -> List[Clause]:
     >>> reduce_to_proof([Clause(()), Clause(())])
     Traceback (most recent call last):
      ...
-    ValueError: wrong refutation proof
+    gym_saturation.logic_ops.utils.WrongRefutationProofError
     >>> state = [Clause((), label="one")]
     >>> reduce_to_proof(state) == state
     True
@@ -341,4 +347,4 @@ def reduce_to_proof(clauses: Tuple[Clause, ...]) -> List[Clause]:
                     )
                 ]
             return reduced
-    raise ValueError("wrong refutation proof")
+    raise WrongRefutationProofError
