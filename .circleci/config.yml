@@ -18,6 +18,15 @@ jobs:
             pip install -U pip
             pip install -U wheel setuptools poetry
             poetry install
+      - run:
+          name: install vampire
+          command: |
+            mkdir vampire_bin
+            cd vampire_bin
+            wget https://github.com/vprover/vampire/releases/download/v4.6.1/vampire_z3_rel_static_master_5921.2.zip -O vampire.zip
+            unzip vampire.zip
+            mv vampire_z3_rel_static_master_5921 vampire
+            chmod u+x vampire
       - save_cache:
           paths:
             - ./venv
@@ -25,6 +34,7 @@ jobs:
       - run:
           name: run tests
           command: |
+            export PATH=$(pwd)/vampire_bin:$PATH
             . venv/bin/activate
             pytest --cov gym_saturation --cov-report xml --cov-fail-under=98\
                    --junit-xml test-results/gym-saturation.xml\
