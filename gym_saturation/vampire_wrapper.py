@@ -49,8 +49,8 @@ class VampireWrapper:
         self.binary_path = binary_path
         self._proc = None
 
-    def _get_stdout(self) -> Tuple[Tuple[str, int, str], ...]:
-        result: Tuple[Tuple[str, int, str], ...] = ()
+    def _get_stdout(self) -> Tuple[Tuple[str, str, str], ...]:
+        result: Tuple[Tuple[str, str, str], ...] = ()
         self.proc.expect(["Pick a clause:", pexpect.EOF])
         for line in self.proc.before.decode("utf-8").split("\r\n"):
             if line[:5] == "[SA] " or line[:12] in (
@@ -58,15 +58,15 @@ class VampireWrapper:
                 "[PP] input: ",
             ):
                 result_type, result_body = line[5:].split(": ")
-                clause_number, clause = result_body.split(". ")
-                result += ((result_type, int(clause_number), clause),)
+                clause_label, clause = result_body.split(". ")
+                result += ((result_type, clause_label, clause),)
         if result:
             return result
         raise ValueError(self.proc.before.decode("utf-8"))
 
     def start(
         self, problem_filename: str, tptp_folder: str
-    ) -> Tuple[Tuple[str, int, str], ...]:
+    ) -> Tuple[Tuple[str, str, str], ...]:
         """
         start Vampire in a manual mode on a given problem
         time limit is one day, Vampire prints everything
@@ -83,15 +83,15 @@ class VampireWrapper:
         return self._get_stdout()
 
     def pick_a_clause(
-        self, clause_number: int
-    ) -> Tuple[Tuple[str, int, str], ...]:
+        self, clause_label: str
+    ) -> Tuple[Tuple[str, str, str], ...]:
         """
         select a clause and get response from Vampire
 
-        :param clause_number: a given clause order number
+        :param clause_label: a given clause order number
         :returns: a sequence of action type, clause number and clause
         """
-        self.proc.sendline(f"{clause_number}")
+        self.proc.sendline(clause_label)
         return self._get_stdout()
 
     @property
