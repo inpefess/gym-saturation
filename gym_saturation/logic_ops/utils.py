@@ -326,25 +326,24 @@ def reduce_to_proof(clauses: Tuple[Clause, ...]) -> List[Clause]:
         if clause.literals == tuple()
     ]
     if len(empty_clauses) == 1:
-        if empty_clauses[0].label is not None:
-            reduced = []
-            new_reduced = [empty_clauses[0]]
-            while len(new_reduced) > 0:
-                reduced += [
-                    clause for clause in new_reduced if clause not in reduced
-                ]
-                new_reduced = [
-                    state_dict[label]
-                    for label in _flat_list(
-                        [
-                            (
-                                []
-                                if clause.inference_parents is None
-                                else list(clause.inference_parents)
-                            )
-                            for clause in new_reduced
-                        ]
-                    )
-                ]
-            return reduced
+        reduced = []
+        new_reduced = [empty_clauses[0]]
+        while len(new_reduced) > 0:
+            reduced += [
+                clause for clause in new_reduced if clause not in reduced
+            ]
+            new_reduced = [
+                state_dict[label]
+                for label in _flat_list(
+                    [
+                        (
+                            []
+                            if clause.inference_parents is None
+                            else list(clause.inference_parents)
+                        )
+                        for clause in new_reduced
+                    ]
+                )
+            ]
+        return reduced
     raise WrongRefutationProofError

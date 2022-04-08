@@ -120,6 +120,6 @@ class VampireEnv(SaturationEnv):
         else:
             updated = ()
         return {
-            int(clause.label[1:]) - 1: orjson.dumps(clause)  # type: ignore
+            int(clause.label[1:]) - 1: orjson.dumps(clause)
             for clause in updated
         }

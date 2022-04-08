@@ -122,10 +122,7 @@ def all_possible_resolvents(
             resolvents = resolvents + tuple(
                 Clause(
                     literals=resolvent.literals,
-                    inference_parents=(clause.label, given_clause.label)
-                    if given_clause.label is not None
-                    and clause.label is not None
-                    else None,
+                    inference_parents=(clause.label, given_clause.label),
                     inference_rule="resolution",
                 )
                 for ord_num, resolvent in enumerate(new_resolvents)
