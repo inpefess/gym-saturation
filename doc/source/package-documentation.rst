@@ -21,6 +21,8 @@ Environment and Agent Testing
 ******************************
 .. automodule:: gym_saturation.envs.saturation_env
    :members:
+.. automodule:: gym_saturation.envs.vampire_env
+   :members:
 .. automodule:: gym_saturation.agent_testing
    :members:
 .. automodule:: gym_saturation.clause_space
@@ -30,6 +32,8 @@ Common modules
 ***************
 
 .. automodule:: gym_saturation.grammar
+   :members:
+.. automodule:: gym_saturation.vampire_wrapper
    :members:
 
 Logical Operations
