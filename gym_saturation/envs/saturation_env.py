@@ -203,7 +203,7 @@ class SaturationEnv(Env):
                     )
                     self._state_set.add(sorted_literals)
 
-    def _do_deductions(self, action: int) -> Dict[int, bytes]:
+    def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
         state_len_before = len(self._state)
         given_clause_label, given_clause = list(self._state.items())[action]
         if not given_clause.processed:
@@ -235,15 +235,9 @@ class SaturationEnv(Env):
         self._state[given_clause_label] = dataclasses.replace(
             given_clause, processed=True
         )
-        return dict(
-            [
-                (i + state_len_before, orjson.dumps(clause))
-                for i, clause in enumerate(
-                    list(self._state.values())[state_len_before:]
-                )
-            ]
-            + [(action, orjson.dumps(list(self._state.values())[action]))]
-        )
+        return tuple(
+            map(orjson.dumps, list(self._state.values())[state_len_before:])
+        ) + (orjson.dumps(list(self._state.values())[action]),)
 
     def _proof_found_result(
         self, reward: float, done: bool, info: Dict[str, Any]

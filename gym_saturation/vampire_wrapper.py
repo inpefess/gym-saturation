@@ -35,14 +35,14 @@ class VampireWrapper:
     ...     .joinpath(os.path.join("resources", "vampire-mock"))
     ... )
     >>> vampire = VampireWrapper(vampire_binary)
-    >>> vampire.pick_a_clause(2)
+    >>> vampire.pick_a_clause("2")
     Traceback (most recent call last):
      ...
     ValueError: start solving a problem first!
     >>> vampire.start("mock_folder", "mock_problem")
-    (('passive', 1, 'this_is_a_test_case(test_constants) [input]'),)
-    >>> vampire.pick_a_clause(2)
-    (('passive', 2, '~this_is_a_test_case(test_constants) [input]'), ('new', 3, ' [subsumption resolution 1,2]'))
+    (('passive', '1', 'this_is_a_test_case(test_constants) [input]'),)
+    >>> vampire.pick_a_clause("2")
+    (('passive', '2', '~this_is_a_test_case(test_constants) [input]'), ('new', '3', ' [subsumption resolution 1,2]'))
     """
 
     def __init__(self, binary_path: str):
