@@ -100,9 +100,7 @@ def all_possible_reflexivity_resolvents(
     return tuple(
         grammar.Clause(
             literals=reflexivity_resolvent.literals,
-            inference_parents=(given_clause.label,)
-            if given_clause.label is not None
-            else None,
+            inference_parents=(given_clause.label,),
             inference_rule="reflexivity_resolution",
         )
         for ord_num, reflexivity_resolvent in enumerate(reflexivity_resolvents)

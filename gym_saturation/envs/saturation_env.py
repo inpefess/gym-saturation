@@ -134,26 +134,12 @@ class SaturationEnv(Env):
     >>> _ = env.seed(0)
     >>> old_obs = env.reset()
 
-    after the first step we bypass ``max_clauses`` by one, so everything
-    is rolled back:
+    after the first step we bypass ``max_clauses`` by one, so the episode
+    finishes with failure:
 
     >>> obs, reward, done, _ = env.step(0)
-
-    the episode is consedered to be finished
-
-    >>> done
-    True
-
-    the task --- failed
-
-    >>> reward
-    0.0
-
-    and the state contains the same clauses as at the end of the previous step
-
-    >>> (obs["real_obs"] == old_obs["real_obs"] and
-    ...     obs["real_obs"] is not old_obs["real_obs"])
-    True
+    >>> done, reward
+    (True, 0.0)
     """
 
     def __init__(
@@ -163,7 +149,7 @@ class SaturationEnv(Env):
     ):
         super().__init__()
         self.problem_list = problem_list
-        self._state: Tuple[Clause, ...] = ()
+        self._state: Dict[str, Clause] = {}
         self._state_set: Set[Tuple[bytes, ...]] = set()
         self.action_space = spaces.Discrete(max_clauses)
         self.observation_space = spaces.Dict(
@@ -175,14 +161,14 @@ class SaturationEnv(Env):
         self.problem: Optional[str] = None
         self._tptp_parser = TPTPParser()
 
-    def _init_clauses(self) -> Tuple[Clause, ...]:
+    def _init_clauses(self) -> Dict[str, Clause]:
         self.problem = random.choice(self.problem_list)
         tptp_folder = os.path.join(os.path.dirname(self.problem), "..", "..")
         with open(self.problem, "r", encoding="utf-8") as problem_file:
             problem_text = problem_file.read()
         parsed_clauses = self._tptp_parser.parse(problem_text, tptp_folder)
-        return tuple(
-            dataclasses.replace(
+        return {
+            clause.label: dataclasses.replace(
                 clause,
                 birth_step=0,
                 inference_parents=(),
@@ -190,7 +176,7 @@ class SaturationEnv(Env):
                 processed=False,
             )
             for clause in parsed_clauses
-        )
+        }
 
     def reset(self) -> dict:
         self._state = reindex_variables(self._init_clauses(), "X")
@@ -199,7 +185,7 @@ class SaturationEnv(Env):
                 lambda clause: tuple(
                     sorted(map(orjson.dumps, clause.literals))
                 ),
-                self._state,
+                self._state.values(),
             )
         )
         return self.state
@@ -212,19 +198,17 @@ class SaturationEnv(Env):
                     sorted(map(orjson.dumps, clause.literals))
                 )
                 if sorted_literals not in self._state_set:
-                    self._state = self._state + (
-                        dataclasses.replace(
-                            clause, birth_step=birth_step, processed=False
-                        ),
+                    self._state[clause.label] = dataclasses.replace(
+                        clause, birth_step=birth_step, processed=False
                     )
                     self._state_set.add(sorted_literals)
 
-    def _do_deductions(self, action: int) -> Dict[int, bytes]:
+    def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
         state_len_before = len(self._state)
-        given_clause = self._state[action]
+        given_clause_label, given_clause = list(self._state.items())[action]
         if not given_clause.processed:
             unprocessed_clauses = tuple(
-                clause for clause in self._state if clause.processed
+                clause for clause in self._state.values() if clause.processed
             )
             self._add_to_state(
                 all_possible_resolvents(
@@ -248,45 +232,40 @@ class SaturationEnv(Env):
                     given_clause,
                 )
             )
-        self._state = (
-            self._state[:action]
-            + (dataclasses.replace(self._state[action], processed=True),)
-            + self._state[action + 1 :]
+        self._state[given_clause_label] = dataclasses.replace(
+            given_clause, processed=True
         )
-        return dict(
-            [
-                (i + state_len_before, orjson.dumps(clause))
-                for i, clause in enumerate(self._state[state_len_before:])
-            ]
-            + [(action, orjson.dumps(self._state[action]))]
-        )
+        return tuple(
+            map(orjson.dumps, list(self._state.values())[state_len_before:])
+        ) + (orjson.dumps(list(self._state.values())[action]),)
 
     def _proof_found_result(
         self, reward: float, done: bool, info: Dict[str, Any]
     ) -> Tuple[float, bool, Dict[str, Any]]:
         if not done:
-            if tuple(True for clause in self._state if clause.literals == ()):
+            if tuple(
+                True
+                for clause in self._state.values()
+                if clause.literals == ()
+            ):
                 info[POSITIVE_ACTIONS] = self.positive_actions
                 return 1.0, True, info
         return reward, done, info
 
     def _max_clauses_result(
         self,
-        old_state: Tuple[Clause, ...],
         reward: float,
         done: bool,
         info: Dict[str, Any],
     ) -> Tuple[float, bool, Dict[str, Any]]:
         if not done:
             if len(self._state) > self.action_space.n:
-                self._state = old_state
                 info.pop(STATE_DIFF_UPDATED)
                 return reward, True, info
         return reward, done, info
 
     def step(self, action: int) -> Tuple[dict, float, bool, Dict[str, Any]]:
-        old_state = self._state
-        if self._state[action].processed:
+        if list(self._state.values())[action].processed:
             raise ValueError(f"action {action} is not valid")
         updated = self._do_deductions(action)
         reward = 0.0
@@ -294,13 +273,11 @@ class SaturationEnv(Env):
         done = min(
             [
                 False if clause.processed is None else clause.processed
-                for clause in self._state
+                for clause in self._state.values()
             ]
         )
         reward, done, info = self._proof_found_result(reward, done, info)
-        reward, done, info = self._max_clauses_result(
-            old_state, reward, done, info
-        )
+        reward, done, info = self._max_clauses_result(reward, done, info)
         return self.state, reward, done, info
 
     @property
@@ -317,7 +294,7 @@ class SaturationEnv(Env):
         if mode == "ansi":
             return str(self.state["real_obs"])
         if mode == "human":
-            return "\n".join(map(str, self._state))
+            return "\n".join(map(str, self._state.values()))
         super().render(mode=mode)
 
     @property
@@ -326,12 +303,14 @@ class SaturationEnv(Env):
         :returns: environment state in Python ``dict`` format
         """
         return {
-            "real_obs": [orjson.dumps(clause) for clause in self._state],
+            "real_obs": [
+                orjson.dumps(clause) for clause in self._state.values()
+            ],
             "action_mask": (
                 np.array(
                     [
                         0.0 if clause.processed else 1.0
-                        for clause in self._state
+                        for clause in self._state.values()
                     ]
                     + self.action_space.n * [0.0],
                     np.float32,
@@ -367,6 +346,6 @@ class SaturationEnv(Env):
         proof = reduce_to_proof(self._state)
         return tuple(
             action
-            for action, clause in enumerate(self._state)
+            for action, clause in enumerate(self._state.values())
             if clause in proof
         )

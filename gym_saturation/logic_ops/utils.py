@@ -17,7 +17,7 @@ Logic Operations Utils
 """
 import dataclasses
 from itertools import chain
-from typing import List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 from gym_saturation.grammar import (
     Clause,
@@ -80,19 +80,19 @@ def get_variable_list(
 
 
 def reindex_variables(
-    clauses: Tuple[Clause, ...], prefix: str
-) -> Tuple[Clause, ...]:
+    clauses: Dict[str, Clause], prefix: str
+) -> Dict[str, Clause]:
     """
     rename variables in a list of clauses so that each clause has its unique
     set of variables
 
-    :param clauses: a list of clauses
+    :param clauses: a map of clause labels to clauses
     :param prefix: new variables will be named ``prefix[order_num)``
     :returns: the list of clauses with renamed variables
     """
     variable_count = 0
-    new_clauses: Tuple[Clause, ...] = ()
-    for clause in clauses:
+    new_clauses: Dict[str, Clause] = {}
+    for label, clause in clauses.items():
         new_clause = clause
         variable_list = tuple(set(get_variable_list(clause)))
         new_variables_count = len(variable_list)
@@ -101,7 +101,7 @@ def reindex_variables(
                 variable_list[i], Variable(f"{prefix}{i + variable_count}")
             ).substitute_in_clause(new_clause)
         variable_count += new_variables_count
-        new_clauses = new_clauses + (new_clause,)
+        new_clauses[label] = new_clause
     return new_clauses
 
 
@@ -304,47 +304,45 @@ def _flat_list(list_of_lists: List[List[str]]) -> List[str]:
     return list(reversed(sorted(list(set(chain(*list_of_lists))))))
 
 
-def reduce_to_proof(clauses: Tuple[Clause, ...]) -> List[Clause]:
+def reduce_to_proof(clauses: Dict[str, Clause]) -> List[Clause]:
     """
     leave only clauses belonging to the refutational proof
 
-    >>> reduce_to_proof([Clause(()), Clause(())])
+    >>> reduce_to_proof({
+    ...     "one": Clause((), label="one"), "two": Clause((), label="two")
+    ... })
     Traceback (most recent call last):
      ...
     gym_saturation.logic_ops.utils.WrongRefutationProofError
-    >>> state = [Clause((), label="one")]
-    >>> reduce_to_proof(state) == state
+    >>> state = {"one": Clause((), label="one")}
+    >>> reduce_to_proof(state) == [Clause((), label="one")]
     True
 
-    :param clauses: a list of clauses with labels and inference records
+    :param clauses: a map of clause labels to clauses
     :returns: the reduced list of clauses
     """
-    state_dict = {clause.label: clause for clause in clauses}
     empty_clauses = [
-        clause
-        for label, clause in state_dict.items()
-        if clause.literals == tuple()
+        clause for clause in clauses.values() if clause.literals == tuple()
     ]
     if len(empty_clauses) == 1:
-        if empty_clauses[0].label is not None:
-            reduced = []
-            new_reduced = [empty_clauses[0]]
-            while len(new_reduced) > 0:
-                reduced += [
-                    clause for clause in new_reduced if clause not in reduced
-                ]
-                new_reduced = [
-                    state_dict[label]
-                    for label in _flat_list(
-                        [
-                            (
-                                []
-                                if clause.inference_parents is None
-                                else list(clause.inference_parents)
-                            )
-                            for clause in new_reduced
-                        ]
-                    )
-                ]
-            return reduced
+        reduced = []
+        new_reduced = [empty_clauses[0]]
+        while len(new_reduced) > 0:
+            reduced += [
+                clause for clause in new_reduced if clause not in reduced
+            ]
+            new_reduced = [
+                clauses[label]
+                for label in _flat_list(
+                    [
+                        (
+                            []
+                            if clause.inference_parents is None
+                            else list(clause.inference_parents)
+                        )
+                        for clause in new_reduced
+                    ]
+                )
+            ]
+        return reduced
     raise WrongRefutationProofError

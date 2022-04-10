@@ -46,57 +46,45 @@ class VampireEnv(SaturationEnv):
         self._vampire = VampireWrapper(vampire_binary_path)
 
     def _parse_vampire_clause(
-        self, clause_number: int, clause_text: str
-    ) -> Tuple[Clause, ...]:
+        self, clause_label: str, clause_text: str
+    ) -> Clause:
         formula, inference_info = clause_text.split("[")
         pre_inference = inference_info.split("]")[0].split(" ")
         if len(pre_inference) > 1:
-            inference_parents = ",".join(
-                [f"x{index}" for index in pre_inference[-1].split(",")]
-            )
+            inference_parents = ",".join(pre_inference[-1].split(","))
             inference_rule = "_".join(pre_inference[:-1])
         else:
             inference_parents, inference_rule = "", pre_inference[0]
-        return self._tptp_parser.parse(
-            f"cnf(x{clause_number}, hypothesis, ({formula}), "
+        parsed_clause = self._tptp_parser.parse(
+            f"cnf({clause_label}, hypothesis, ({formula}), "
             + f"inference({inference_rule}, [], [{inference_parents}])).",
             "",
-        )
-
-    def _add_new_clause(
-        self, clause_number: int, clause_text: str
-    ) -> Tuple[Clause, ...]:
-        expected_next_number = len(self._state) + 1
-        if clause_number > expected_next_number:
-            raise ValueError(
-                "Unexpected order of clauses: ", clause_number, clause_text
-            )
-        if clause_number < expected_next_number:
-            return ()
-        new_clause = self._parse_vampire_clause(clause_number, clause_text)
-        self._state += new_clause
-        return new_clause
+        )[0]
+        return dataclasses.replace(parsed_clause, processed=True)
 
     def _parse_vampire_reponse(
-        self, vampire_response: Tuple[Tuple[str, int, str], ...]
-    ) -> Tuple[Clause, ...]:
-        updated: Tuple[Clause, ...] = ()
-        for response_type, clause_number, clause_text in vampire_response:
+        self, vampire_response: Tuple[Tuple[str, str, str], ...]
+    ) -> Dict[str, Clause]:
+        updated: Dict[str, Clause] = {}
+        for response_type, clause_label, clause_text in vampire_response:
             if response_type in ("new", "final", "input"):
-                updated += self._add_new_clause(clause_number, clause_text)
-            elif response_type in ("active", "forward reduce"):
-                processed_clause = (
-                    dataclasses.replace(
-                        self._state[clause_number - 1], processed=True
-                    ),
+                updated[clause_label] = self._parse_vampire_clause(
+                    clause_label, clause_text
                 )
-                updated += processed_clause
-                self._state = (
-                    self._state[: clause_number - 1]
-                    + processed_clause
-                    + self._state[clause_number:]
+            elif response_type in (
+                "active",
+                "forward reduce",
+                "passive",
+                "backward reduce",
+            ):
+                changed_clause = dataclasses.replace(
+                    self._state[clause_label]
+                    if clause_label in self._state
+                    else updated[clause_label],
+                    processed=response_type != "passive",
                 )
-            elif response_type not in ("passive", "new propositional"):
+                updated[clause_label] = changed_clause
+            elif response_type not in ("new propositional"):
                 raise ValueError("Unexpected reposnse type: ", response_type)
         return updated
 
@@ -104,22 +92,20 @@ class VampireEnv(SaturationEnv):
         self.problem = random.choice(self.problem_list)
         tptp_folder = os.path.join(os.path.dirname(self.problem), "..", "..")
         vampire_response = self._vampire.start(self.problem, tptp_folder)
-        self._parse_vampire_reponse(vampire_response)
-        self._state = tuple(
-            dataclasses.replace(clause, birth_step=0, processed=False)
-            for clause in self._state
-        )
+        updated = self._parse_vampire_reponse(vampire_response)
+        self._state = {
+            clause.label: dataclasses.replace(clause, birth_step=0)
+            for clause in updated.values()
+        }
         return self.state
 
-    def _do_deductions(self, action: int) -> Dict[int, bytes]:
-        given_clause = self._state[action]
+    def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
+        given_clause = list(self._state.values())[action]
         if not given_clause.processed:
             updated = self._parse_vampire_reponse(
-                self._vampire.pick_a_clause(action + 1)
+                self._vampire.pick_a_clause(given_clause.label)
             )
         else:
-            updated = ()
-        return {
-            int(clause.label[1:]) - 1: orjson.dumps(clause)  # type: ignore
-            for clause in updated
-        }
+            updated = {}
+        self._state.update(updated)
+        return tuple(map(orjson.dumps, updated.values()))

@@ -22,7 +22,7 @@ import sys
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
 from operator import itemgetter
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import gym
 import orjson
@@ -86,7 +86,7 @@ class SizeAgent(BaseAgent):
     """
 
     def __init__(self):
-        self._state: Dict[int, float] = {}
+        self._state: Dict[str, Tuple[float, bool]] = {}
 
     def update_state(self, info: Dict[str, Any]) -> None:
         """
@@ -95,20 +95,13 @@ class SizeAgent(BaseAgent):
         :param info: an info dict (parm of environment response)
         :returns:
         """
-        parsed_state_diff = tuple(
-            (index, orjson.loads(clause))
-            for index, clause in info[STATE_DIFF_UPDATED].items()
-        )
+        parsed_state_diff = tuple(map(orjson.loads, info[STATE_DIFF_UPDATED]))
         self._state.update(
             {
-                index: clause_length(clause)
-                for index, clause in parsed_state_diff
-                if not clause["processed"]
+                clause["label"]: (clause_length(clause), clause["processed"])
+                for clause in parsed_state_diff
             }
         )
-        for index, clause in parsed_state_diff:
-            if clause["processed"]:
-                self._state.pop(index)
 
     def get_action(
         self,
@@ -118,7 +111,11 @@ class SizeAgent(BaseAgent):
     ) -> int:
         self.update_state(info)
         return min(
-            self._state.items(),
+            (
+                (key, value[0])
+                for key, value in enumerate(self._state.values())
+                if not value[1]
+            ),
             key=itemgetter(1),
         )[0]
 
@@ -245,9 +242,7 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> None:
     :returns:
     """
     obs, reward, done = env.reset(), 0.0, False
-    info: Dict[str, Any] = {
-        STATE_DIFF_UPDATED: dict(enumerate(obs["real_obs"]))
-    }
+    info: Dict[str, Any] = {STATE_DIFF_UPDATED: obs["real_obs"]}
     try:
         if env.tstp_proof is not None:
             reward, done = 1.0, True
@@ -343,7 +338,7 @@ def test_agent(args: Optional[List[str]] = None) -> None:
     Problem file: ...TST003-1.p
     Proof of length 5 found in 3 steps:
     ...
-    cnf(x5, hyp..., $false, inference(subsumption_resolution, [], [x4, x3])).
+    cnf(5, hyp..., $false, inference(subsumption_resolution, [], [4, 3])).
     """
     sys.setrecursionlimit(10000)
     arguments = parse_args(args)

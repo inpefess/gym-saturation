@@ -219,13 +219,7 @@ def all_paramodulants_from_list(
             paramodulants = paramodulants + tuple(
                 Clause(
                     literals=paramodulant.literals,
-                    inference_parents=(
-                        other_clause.label,
-                        given_clause.label,
-                    )
-                    if other_clause.label is not None
-                    and given_clause.label is not None
-                    else None,
+                    inference_parents=(other_clause.label, given_clause.label),
                     inference_rule="paramodulation",
                 )
                 for ord_num, paramodulant in enumerate(new_paramodulants)

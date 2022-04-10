@@ -107,9 +107,7 @@ def all_possible_factors(
     return tuple(
         gram.Clause(
             literals=factor.literals,
-            inference_parents=(given_clause.label,)
-            if given_clause.label is not None
-            else None,
+            inference_parents=(given_clause.label,),
             inference_rule="factoring",
         )
         for ord_num, factor in enumerate(factors)

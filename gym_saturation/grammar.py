@@ -135,7 +135,7 @@ class Clause:
     """
 
     literals: Tuple[Literal, ...]
-    label: Optional[str] = field(
+    label: str = field(
         default_factory=lambda: "x" + str(uuid1()).replace("-", "_")
     )
     role: str = "lemma"
