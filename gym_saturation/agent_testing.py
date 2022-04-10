@@ -113,7 +113,7 @@ class SizeAgent(BaseAgent):
         return min(
             (
                 (key, value[0])
-                for key, value in enumerate(self._state.values())
+                for key, value in enumerate(self.state.values())
                 if not value[1]
             ),
             key=itemgetter(1),
@@ -199,7 +199,15 @@ class RandomAgent(BaseAgent):
         )
 
 
-def episode(env: SaturationEnv, agent: BaseAgent) -> None:
+def _proof_found_before_the_start(env: SaturationEnv) -> Tuple[float, bool]:
+    try:
+        _ = env.tstp_proof
+        return 1.0, True
+    except WrongRefutationProofError:
+        return 0.0, False
+
+
+def episode(env: SaturationEnv, agent: BaseAgent) -> float:
     """
     tries to solve the problem and logs the clauses
 
@@ -239,18 +247,17 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> None:
     :param env: a `gym_saturation` environment
     :param agent: an initialized agent. Must have `get_action` method
     :param problem_filename: the name of a problem file
-    :returns:
+    :returns: total reward
     """
-    obs, reward, done = env.reset(), 0.0, False
+    obs = env.reset()
     info: Dict[str, Any] = {STATE_DIFF_UPDATED: obs["real_obs"]}
-    try:
-        if env.tstp_proof is not None:
-            reward, done = 1.0, True
-    except WrongRefutationProofError:
-        pass
+    reward, done = _proof_found_before_the_start(env)
+    total_reward = reward
     while not done:
         action = agent.get_action(obs, reward, info)
         obs, reward, done, info = env.step(action)
+        total_reward += reward
+    return total_reward
 
 
 def parse_args(args: Optional[List[str]] = None) -> Namespace:
@@ -283,15 +290,16 @@ def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
     :param agent: an agent
     :returns:
     """
-    episode(env, agent)
+    total_reward = episode(env, agent)
     step_count = getattr(env, "_elapsed_steps")
     try:
         a_proof = env.tstp_proof
-        proof_length = len(a_proof.split("\n"))
-        print(
-            f"Proof of length {proof_length} found "
-            f"in {step_count} steps:\n{a_proof}"
-        )
+        if total_reward == 1.0:
+            proof_length = len(a_proof.split("\n"))
+            print(
+                f"Proof of length {proof_length} found "
+                f"in {step_count} steps:\n{a_proof}"
+            )
     except WrongRefutationProofError:
         print(
             "Step limit reached"

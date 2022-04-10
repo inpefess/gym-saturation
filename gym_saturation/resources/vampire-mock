@@ -1,7 +1,0 @@
-#!/bin/sh
-
-echo "[SA] passive: 1. this_is_a_test_case(test_constants) [input]"
-echo "Pick a clause:"
-read CLAUSE
-echo "[SA] passive: 2. ~this_is_a_test_case(test_constants) [input]"
-echo "[SA] new: 3. $false [subsumption resolution 1,2]"

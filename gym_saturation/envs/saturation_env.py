@@ -206,32 +206,31 @@ class SaturationEnv(Env):
     def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
         state_len_before = len(self._state)
         given_clause_label, given_clause = list(self._state.items())[action]
-        if not given_clause.processed:
-            unprocessed_clauses = tuple(
-                clause for clause in self._state.values() if clause.processed
+        unprocessed_clauses = tuple(
+            clause for clause in self._state.values() if clause.processed
+        )
+        self._add_to_state(
+            all_possible_resolvents(
+                unprocessed_clauses,
+                given_clause,
             )
-            self._add_to_state(
-                all_possible_resolvents(
-                    unprocessed_clauses,
-                    given_clause,
-                )
+        )
+        self._add_to_state(
+            all_paramodulants_from_list(
+                unprocessed_clauses,
+                given_clause,
             )
-            self._add_to_state(
-                all_paramodulants_from_list(
-                    unprocessed_clauses,
-                    given_clause,
-                )
+        )
+        self._add_to_state(
+            all_possible_factors(
+                given_clause,
             )
-            self._add_to_state(
-                all_possible_factors(
-                    given_clause,
-                )
+        )
+        self._add_to_state(
+            all_possible_reflexivity_resolvents(
+                given_clause,
             )
-            self._add_to_state(
-                all_possible_reflexivity_resolvents(
-                    given_clause,
-                )
-            )
+        )
         self._state[given_clause_label] = dataclasses.replace(
             given_clause, processed=True
         )
@@ -240,17 +239,14 @@ class SaturationEnv(Env):
         ) + (orjson.dumps(list(self._state.values())[action]),)
 
     def _proof_found_result(
-        self, reward: float, done: bool, info: Dict[str, Any]
+        self, reward: float, info: Dict[str, Any]
     ) -> Tuple[float, bool, Dict[str, Any]]:
-        if not done:
-            if tuple(
-                True
-                for clause in self._state.values()
-                if clause.literals == ()
-            ):
-                info[POSITIVE_ACTIONS] = self.positive_actions
-                return 1.0, True, info
-        return reward, done, info
+        if tuple(
+            True for clause in self._state.values() if clause.literals == ()
+        ):
+            info[POSITIVE_ACTIONS] = self.positive_actions
+            return 1.0, True, info
+        return reward, False, info
 
     def _max_clauses_result(
         self,
@@ -270,13 +266,13 @@ class SaturationEnv(Env):
         updated = self._do_deductions(action)
         reward = 0.0
         info = {STATE_DIFF_UPDATED: updated, PROBLEM_FILENAME: self.problem}
-        done = min(
+        reward, done, info = self._proof_found_result(reward, info)
+        done |= min(
             [
                 False if clause.processed is None else clause.processed
                 for clause in self._state.values()
             ]
         )
-        reward, done, info = self._proof_found_result(reward, done, info)
         reward, done, info = self._max_clauses_result(reward, done, info)
         return self.state, reward, done, info
 
