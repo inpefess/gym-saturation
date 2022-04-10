@@ -101,11 +101,8 @@ class VampireEnv(SaturationEnv):
 
     def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
         given_clause = list(self._state.values())[action]
-        if not given_clause.processed:
-            updated = self._parse_vampire_reponse(
-                self._vampire.pick_a_clause(given_clause.label)
-            )
-        else:
-            updated = {}
+        updated = self._parse_vampire_reponse(
+            self._vampire.pick_a_clause(given_clause.label)
+        )
         self._state.update(updated)
         return tuple(map(orjson.dumps, updated.values()))

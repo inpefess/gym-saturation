@@ -30,19 +30,25 @@ class VampireWrapper:
     ... else:
     ...     from importlib_resources import files
     >>> import os
-    >>> vampire_binary = os.path.join(
-    ...     files("gym_saturation")
-    ...     .joinpath(os.path.join("resources", "vampire-mock"))
+    >>> tptp_folder = files("gym_saturation").joinpath(
+    ...     os.path.join("resources", "TPTP-mock")
     ... )
-    >>> vampire = VampireWrapper(vampire_binary)
+    >>> tptp_problem = os.path.join(
+    ...     tptp_folder, "Problems", "TST", "TST003-1.p"
+    ... )
+    >>> vampire = VampireWrapper("vampire")
     >>> vampire.pick_a_clause("2")
     Traceback (most recent call last):
      ...
     ValueError: start solving a problem first!
-    >>> vampire.start("mock_folder", "mock_problem")
-    (('passive', '1', 'this_is_a_test_case(test_constants) [input]'),)
-    >>> vampire.pick_a_clause("2")
-    (('passive', '2', '~this_is_a_test_case(test_constants) [input]'), ('new', '3', ' [subsumption resolution 1,2]'))
+    >>> vampire.start(tptp_problem, tptp_folder)  # doctest: +ELLIPSIS
+    (('input', '1', 'mortal(X0) | ~man(X0) [input]'),...
+    >>> vampire.pick_a_clause("wrong")  # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+     ...
+    ValueError:
+    wrong
+    ...
     """
 
     def __init__(self, binary_path: str):
