@@ -71,7 +71,12 @@ class VampireEnv(SaturationEnv):
                 updated[clause_label] = self._parse_vampire_clause(
                     clause_label, clause_text
                 )
-            elif response_type in ("active", "forward reduce", "passive"):
+            elif response_type in (
+                "active",
+                "forward reduce",
+                "passive",
+                "backward reduce",
+            ):
                 changed_clause = dataclasses.replace(
                     self._state[clause_label]
                     if clause_label in self._state
