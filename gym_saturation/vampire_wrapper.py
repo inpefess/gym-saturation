@@ -81,6 +81,8 @@ class VampireWrapper:
         :param tptp_folder: the root folder for TPTP library
         :returns: a sequence of action type, clause number and clause
         """
+        if self._proc is not None:
+            self._proc.close()
         self._proc = pexpect.spawn(
             f"{self.binary_path} --manual_cs on --show_everything on "
             + "--time_limit 1D --avatar off "
