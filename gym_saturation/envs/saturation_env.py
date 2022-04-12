@@ -250,15 +250,14 @@ class SaturationEnv(Env):
 
     def _max_clauses_result(
         self,
-        reward: float,
         done: bool,
         info: Dict[str, Any],
-    ) -> Tuple[float, bool, Dict[str, Any]]:
+    ) -> Tuple[bool, Dict[str, Any]]:
         if not done:
             if len(self._state) > self.action_space.n:
                 info.pop(STATE_DIFF_UPDATED)
-                return reward, True, info
-        return reward, done, info
+                return True, info
+        return done, info
 
     def step(self, action: int) -> Tuple[dict, float, bool, Dict[str, Any]]:
         if list(self._state.values())[action].processed:
@@ -273,7 +272,7 @@ class SaturationEnv(Env):
                 for clause in self._state.values()
             ]
         )
-        reward, done, info = self._max_clauses_result(reward, done, info)
+        done, info = self._max_clauses_result(done, info)
         return self.state, reward, done, info
 
     @property
