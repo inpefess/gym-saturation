@@ -92,6 +92,7 @@ class VampireEnv(SaturationEnv):
         self.problem = random.choice(self.problem_list)
         tptp_folder = os.path.join(os.path.dirname(self.problem), "..", "..")
         vampire_response = self._vampire.start(self.problem, tptp_folder)
+        self._state = {}
         updated = self._parse_vampire_reponse(vampire_response)
         self._state = {
             clause.label: dataclasses.replace(clause, birth_step=0)
