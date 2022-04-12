@@ -45,12 +45,12 @@ class ClauseSpace(spaces.Space):
     def sample(self):
         return [
             {
-                "literals": [],
+                "literals": (),
                 "label": "test",
                 "role": "lemma",
                 "birth_step": 0,
                 "processed": False,
-                "inference_parents": [],
+                "inference_parents": (),
                 "inference_rule": "",
             }
         ]
