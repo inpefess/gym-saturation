@@ -1,4 +1,6 @@
 gym
 lark
+orjson
+pexpect
 sphinx-autodoc-typehints
 importlib_resources
