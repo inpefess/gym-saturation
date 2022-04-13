@@ -49,9 +49,9 @@ class CNFParser(Transformer):
     >>> CNFParser().transform(parser.parse('''
     ...    cnf(test, axiom, f(X, g(Y), h(Z, c1)) = f(X, Y, c2)
     ...    | ~ better(f(X), g(Y)) | $false | this_is_a_test_case,
-    ...    inference(resolution, [], [this, that])).
+    ...    inference(resolution, [], [this, that, third])).
     ... '''))
-    cnf(test, axiom, f(X,g(Y),h(Z,c1)) = f(X,Y,c2) | ~better(f(X), g(Y)) | $false() | this_is_a_test_case(), inference(resolution, [], [this, that])).
+    cnf(test, axiom, f(X,g(Y),h(Z,c1)) = f(X,Y,c2) | ~better(f(X), g(Y)) | $false() | this_is_a_test_case(), inference(resolution, [], [this, that, third])).
     """
 
     def __default_token__(self, token):
@@ -228,3 +228,12 @@ class CNFParser(Transformer):
         <parent_info>          :== <source><parent_details>
         """
         return children[0]
+
+    @staticmethod
+    def parent_list(children):
+        """
+        <parent_list>          :== <parent_info> | <parent_info>,<parent_list>
+        """
+        if len(children) == 2:
+            return (children[0],) + tuple(children[1])
+        return children
