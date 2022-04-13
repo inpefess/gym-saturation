@@ -16,7 +16,6 @@ CNF Parser
 ===========
 """
 import dataclasses
-from operator import itemgetter
 
 from lark import Transformer
 
@@ -49,9 +48,10 @@ class CNFParser(Transformer):
     ... )
     >>> CNFParser().transform(parser.parse('''
     ...    cnf(test, axiom, f(X, g(Y), h(Z, c1)) = f(X, Y, c2)
-    ...    | ~ better(f(X), g(Y)) | $false | this_is_a_test_case).
+    ...    | ~ better(f(X), g(Y)) | $false | this_is_a_test_case,
+    ...    inference(resolution, [], [this, that])).
     ... '''))
-    cnf(test, axiom, f(X,g(Y),h(Z,c1)) = f(X,Y,c2) | ~better(f(X), g(Y)) | $false() | this_is_a_test_case()).
+    cnf(test, axiom, f(X,g(Y),h(Z,c1)) = f(X,Y,c2) | ~better(f(X), g(Y)) | $false() | this_is_a_test_case(), inference(resolution, [], [this, that])).
     """
 
     def __default_token__(self, token):
@@ -181,21 +181,7 @@ class CNFParser(Transformer):
         return Clause(literals)
 
     @staticmethod
-    def _parse_inference_parents(inference_parents):
-        if inference_parents != []:
-            if isinstance(inference_parents[0], list):
-                clause_inference_parents = tuple(
-                    map(
-                        itemgetter(0),
-                        inference_parents,
-                    )
-                )
-            else:
-                clause_inference_parents = (inference_parents[0],)
-            return clause_inference_parents
-        return inference_parents
-
-    def cnf_annotated(self, children):
+    def cnf_annotated(children):
         """
         <cnf_annotated>        ::= cnf(<name>,<formula_role>,<cnf_formula> <annotations>).
 
@@ -209,9 +195,7 @@ class CNFParser(Transformer):
                 if isinstance(annotation, dict):
                     if "inference_record" in annotation:
                         inference_rule = annotation["inference_record"][0]
-                        inference_parents = self._parse_inference_parents(
-                            annotation["inference_record"][1]
-                        )
+                        inference_parents = annotation["inference_record"][1]
         return dataclasses.replace(
             clause,
             label=children[0],
@@ -226,7 +210,7 @@ class CNFParser(Transformer):
         <inference_record>     :== inference(<inference_rule>,<useful_info>,
         <inference_parents>)
         """
-        return {"inference_record": (children[0], children[2])}
+        return {"inference_record": (children[0], tuple(children[2]))}
 
     @staticmethod
     def annotations(children):
@@ -239,23 +223,8 @@ class CNFParser(Transformer):
         return children
 
     @staticmethod
-    def source(children):
+    def parent_info(children):
         """
-        <source>               ::= <general_term>
-        <source>               :== <dag_source> | <internal_source> |
-        <external_source> | unknown | [<sources>]
+        <parent_info>          :== <source><parent_details>
         """
-        if isinstance(children, list):
-            if len(children) == 1:
-                return children[0]
-        return children
-
-    @staticmethod
-    def dag_source(children):
-        """
-        <dag_source>           :==  <inference_record> | <name>
-        """
-        if isinstance(children, list):
-            if len(children) == 1:
-                return children[0]
-        return children
+        return children[0]
