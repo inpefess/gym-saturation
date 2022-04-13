@@ -17,7 +17,7 @@ Logic Operations Utils
 """
 import dataclasses
 from itertools import chain
-from typing import Dict, List, Tuple, Union
+from typing import Dict, Tuple, Union
 
 from gym_saturation.grammar import (
     Clause,
@@ -300,11 +300,11 @@ def replace_subterm_by_index(
     raise NoSubtermFound(subterm_length)
 
 
-def _flat_list(list_of_lists: List[List[str]]) -> List[str]:
-    return list(reversed(sorted(list(set(chain(*list_of_lists))))))
+def _flat_list(list_of_lists: Tuple[Tuple[str, ...], ...]) -> Tuple[str, ...]:
+    return tuple(reversed(sorted(tuple(set(chain(*list_of_lists))))))
 
 
-def reduce_to_proof(clauses: Dict[str, Clause]) -> List[Clause]:
+def reduce_to_proof(clauses: Dict[str, Clause]) -> Tuple[Clause, ...]:
     """
     leave only clauses belonging to the refutational proof
 
@@ -315,34 +315,34 @@ def reduce_to_proof(clauses: Dict[str, Clause]) -> List[Clause]:
      ...
     gym_saturation.logic_ops.utils.WrongRefutationProofError
     >>> state = {"one": Clause((), label="one")}
-    >>> reduce_to_proof(state) == [Clause((), label="one")]
+    >>> reduce_to_proof(state) == (Clause((), label="one"), )
     True
 
     :param clauses: a map of clause labels to clauses
     :returns: the reduced list of clauses
     """
-    empty_clauses = [
+    empty_clauses = tuple(
         clause for clause in clauses.values() if clause.literals == tuple()
-    ]
+    )
     if len(empty_clauses) == 1:
-        reduced = []
-        new_reduced = [empty_clauses[0]]
+        reduced: Tuple[Clause, ...] = ()
+        new_reduced: Tuple[Clause, ...] = (empty_clauses[0],)
         while len(new_reduced) > 0:
-            reduced += [
+            reduced += tuple(
                 clause for clause in new_reduced if clause not in reduced
-            ]
-            new_reduced = [
+            )
+            new_reduced = tuple(
                 clauses[label]
                 for label in _flat_list(
-                    [
+                    tuple(
                         (
-                            []
+                            ()
                             if clause.inference_parents is None
-                            else list(clause.inference_parents)
+                            else clause.inference_parents
                         )
                         for clause in new_reduced
-                    ]
+                    )
                 )
-            ]
+            )
         return reduced
     raise WrongRefutationProofError
