@@ -21,7 +21,6 @@ import random
 from typing import Dict, List, Tuple
 
 import orjson
-
 from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
 from gym_saturation.grammar import Clause
 from gym_saturation.vampire_wrapper import VampireWrapper
@@ -67,7 +66,7 @@ class VampireEnv(SaturationEnv):
     ) -> Dict[str, Clause]:
         updated: Dict[str, Clause] = {}
         for response_type, clause_label, clause_text in vampire_response:
-            if response_type in ("new", "final", "input"):
+            if response_type in ("new", "final", "input", "fn def discovered"):
                 updated[clause_label] = self._parse_vampire_clause(
                     clause_label, clause_text
                 )

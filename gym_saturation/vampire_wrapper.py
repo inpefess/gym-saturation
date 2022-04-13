@@ -59,9 +59,10 @@ class VampireWrapper:
         result: Tuple[Tuple[str, str, str], ...] = ()
         self.proc.expect(["Pick a clause:", pexpect.EOF])
         for line in self.proc.before.decode("utf-8").split("\r\n"):
-            if line[:5] == "[SA] " or line[:12] in (
-                "[PP] final: ",
-                "[PP] input: ",
+            if (
+                line[:5] == "[SA] "
+                or line[:12] in ("[PP] final: ", "[PP] input: ")
+                or "[PP] fn def discovered: " in line
             ):
                 result_type, result_body = line[5:].split(": ")
                 clause_label, clause = result_body.split(". ")
