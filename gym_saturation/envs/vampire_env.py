@@ -21,6 +21,7 @@ import random
 from typing import Dict, List, Tuple
 
 import orjson
+
 from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
 from gym_saturation.grammar import Clause
 from gym_saturation.vampire_wrapper import VampireWrapper
@@ -32,7 +33,22 @@ class VampireEnv(SaturationEnv):
     saturation algorithm defined in a Reiforcement Learning friendly way
 
     This class has the same API as SaturationEnv but uses another backend.
-    For testing, see ``gym_saturation.agent_testing`` module.
+    Here we have only a simple smoke test.
+    For rigorous testing, see ``gym_saturation.agent_testing`` module.
+
+    >>> import sys
+    >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
+    ...     from importlib.resources import files
+    ... else:
+    ...     from importlib_resources import files
+    >>> vampire_binary_path = files("gym_saturation").joinpath(
+    ...     os.path.join("resources", "vampire-mock")
+    ... )
+    >>> vampire_env = VampireEnv(vampire_binary_path, ["test"])
+    >>> vampire_env.reset()
+    Traceback (most recent call last):
+     ...
+    ValueError: ('Unexpected reposnse type: ', 'who could expect that?')
     """
 
     def __init__(
