@@ -367,4 +367,4 @@ def test_agent(args: Optional[List[str]] = None) -> None:
 
 
 if __name__ == "__main__":
-    test_agent()
+    test_agent()  # pragma: no cover

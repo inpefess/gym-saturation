@@ -21,6 +21,7 @@ import random
 from typing import Dict, List, Tuple
 
 import orjson
+
 from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
 from gym_saturation.grammar import Clause
 from gym_saturation.vampire_wrapper import VampireWrapper
@@ -32,7 +33,22 @@ class VampireEnv(SaturationEnv):
     saturation algorithm defined in a Reiforcement Learning friendly way
 
     This class has the same API as SaturationEnv but uses another backend.
-    For testing, see ``gym_saturation.agent_testing`` module.
+    Here we have only a simple smoke test.
+    For rigorous testing, see ``gym_saturation.agent_testing`` module.
+
+    >>> import sys
+    >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
+    ...     from importlib.resources import files
+    ... else:
+    ...     from importlib_resources import files
+    >>> vampire_binary_path = files("gym_saturation").joinpath(
+    ...     os.path.join("resources", "vampire-mock")
+    ... )
+    >>> vampire_env = VampireEnv(vampire_binary_path, ["test"])
+    >>> vampire_env.reset()
+    Traceback (most recent call last):
+     ...
+    ValueError: ('Unexpected reposnse type: ', 'who could expect that?')
     """
 
     def __init__(
@@ -75,15 +91,17 @@ class VampireEnv(SaturationEnv):
                 "forward reduce",
                 "passive",
                 "backward reduce",
+                "new propositional",
             ):
                 changed_clause = dataclasses.replace(
                     self._state[clause_label]
                     if clause_label in self._state
                     else updated[clause_label],
-                    processed=response_type != "passive",
+                    processed=response_type
+                    not in ("passive", "new propositional"),
                 )
                 updated[clause_label] = changed_clause
-            elif response_type not in ("new propositional"):
+            else:
                 raise ValueError("Unexpected reposnse type: ", response_type)
         return updated
 
@@ -101,8 +119,13 @@ class VampireEnv(SaturationEnv):
 
     def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
         given_clause = list(self._state.values())[action]
-        updated = self._parse_vampire_reponse(
-            self._vampire.pick_a_clause(given_clause.label)
-        )
+        if not tuple(
+            True for clause in self._state.values() if clause.literals == ()
+        ):
+            updated = self._parse_vampire_reponse(
+                self._vampire.pick_a_clause(given_clause.label)
+            )
+        else:
+            updated = {}
         self._state.update(updated)
         return tuple(map(orjson.dumps, updated.values()))
