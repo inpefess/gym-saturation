@@ -52,3 +52,9 @@ src_paths = ["gym_saturation"]
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--doctest-modules --cov gym_saturation --cov-report xml --cov-fail-under=99 --junit-xml test-results/saturation_gym.xml"
+testpaths = ["gym_saturation"]
+doctest_optionflags = "NORMALIZE_WHITESPACE"
