@@ -13,7 +13,7 @@ repos:
         types: [python]
     -   id: mypy
         name: mypy
-        entry: mypy --config-file mypy.ini
+        entry: mypy
         language: system
         types: [python]
     -   id: pylint

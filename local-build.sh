@@ -7,6 +7,6 @@ make clean html
 cd ..
 flake8 ${PACKAGE_NAME}
 pylint ${PACKAGE_NAME}
-mypy --config-file mypy.ini ${PACKAGE_NAME}
+mypy ${PACKAGE_NAME}
 pytest --cov-report term-missing
 scc -i py ${PACKAGE_NAME}

@@ -71,3 +71,16 @@ max-statements = 10
 
 [tool.pylint.typecheck]
 generated-members = ["orjson"]
+
+[tool.mypy]
+show_error_codes = true
+incremental = false
+disable_error_code = "no-redef"
+
+[[tool.mypy.overrides]]
+module = [
+    "gym.*",
+    "pexpect",
+    "importlib_resources"
+]
+ignore_missing_imports = true
