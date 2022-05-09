@@ -41,8 +41,7 @@ jobs:
           name: run linters
           command: |
             . venv/bin/activate
-            pycodestyle --max-doc-length 10000 --ignore E203,E501,W503\
-                        gym_saturation
+            flake8 gym_saturation
             pylint --rcfile=.pylintrc gym_saturation
       - run:
           name: run type checks
