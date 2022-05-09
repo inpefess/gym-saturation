@@ -1,7 +1,0 @@
-[TYPECHECK]
-
-max-line-length=79
-disable=bad-continuation
-max-statements=10
-ignore-long-lines=(::=|:==|this_is_a_test_case|gym_saturation.saturation_prover.saturation_algorithm|:math:|.. math::|https://)
-generated-members=orjson

@@ -42,7 +42,7 @@ jobs:
           command: |
             . venv/bin/activate
             flake8 gym_saturation
-            pylint --rcfile=.pylintrc gym_saturation
+            pylint gym_saturation
       - run:
           name: run type checks
           command: |

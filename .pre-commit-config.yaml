@@ -18,6 +18,6 @@ repos:
         types: [python]
     -   id: pylint
         name:  pylint
-        entry: pylint --rcfile=.pylintrc
+        entry: pylint
         language: system
         types: [python]
