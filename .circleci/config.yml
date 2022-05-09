@@ -2,14 +2,19 @@ version: 2.1
 
 jobs:
   build-and-test:
+    parameters:
+      python_version:
+        description: "Python version to test against"
+        default: "3.10.4"
+        type: string
     docker:
-      - image: cimg/python:3.9.7
+      - image: cimg/python:<< parameters.python_version >>
     working_directory: ~/repo
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "poetry.lock" }}
+            - v1-dependencies-<< parameters.python_version >>-{{ checksum "poetry.lock" }}
       - run:
           name: install dependencies
           command: |
@@ -58,6 +63,13 @@ jobs:
           path: test-results
 
 workflows:
-  main:
+  workflow:
     jobs:
-      - build-and-test
+      - build-and-test:
+          python_version: "3.7.13"
+      - build-and-test:
+          python_version: "3.8.13"
+      - build-and-test:
+          python_version: "3.9.12"
+      - build-and-test:
+          python_version: "3.10.4"      
