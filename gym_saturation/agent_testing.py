@@ -28,8 +28,10 @@ import gym
 import orjson
 from gym.wrappers import TimeLimit
 
-from gym_saturation.envs import SaturationEnv
-from gym_saturation.envs.saturation_env import STATE_DIFF_UPDATED
+from gym_saturation.envs.saturation_env import (
+    STATE_DIFF_UPDATED,
+    SaturationEnv,
+)
 from gym_saturation.logic_ops.utils import (
     WrongRefutationProofError,
     clause_length,

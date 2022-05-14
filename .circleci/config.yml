@@ -2,14 +2,19 @@ version: 2.1
 
 jobs:
   build-and-test:
+    parameters:
+      python_version:
+        description: "Python version to test against"
+        default: "3.10.4"
+        type: string
     docker:
-      - image: cimg/python:3.9.7
+      - image: cimg/python:<< parameters.python_version >>
     working_directory: ~/repo
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "poetry.lock" }}
+            - v1-dependencies-<< parameters.python_version >>-{{ checksum "poetry.lock" }}
       - run:
           name: install dependencies
           command: |
@@ -36,21 +41,18 @@ jobs:
           command: |
             export PATH=$(pwd)/vampire_bin:$PATH
             . venv/bin/activate
-            pytest --cov gym_saturation --cov-report xml --cov-fail-under=99\
-                   --junit-xml test-results/gym-saturation.xml\
-                   --doctest-modules gym_saturation
+            pytest
       - run:
           name: run linters
           command: |
             . venv/bin/activate
-            pycodestyle --max-doc-length 10000 --ignore E203,E501,W503\
-                        gym_saturation
-            pylint --rcfile=.pylintrc gym_saturation
+            flake8 gym_saturation
+            pylint gym_saturation
       - run:
           name: run type checks
           command: |
             . venv/bin/activate
-            mypy --config-file mypy.ini gym_saturation
+            mypy gym_saturation
       - run:
           name: upload data to codecov
           command: |
@@ -61,6 +63,13 @@ jobs:
           path: test-results
 
 workflows:
-  main:
+  workflow:
     jobs:
-      - build-and-test
+      - build-and-test:
+          python_version: "3.7.13"
+      - build-and-test:
+          python_version: "3.8.13"
+      - build-and-test:
+          python_version: "3.9.12"
+      - build-and-test:
+          python_version: "3.10.4"      

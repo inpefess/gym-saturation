@@ -21,3 +21,4 @@ doc/build/
 *.blg
 *.log
 .dir-locals.el
+coverage.xml

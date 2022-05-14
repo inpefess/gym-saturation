@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "0.3.7"
+version = "0.3.8"
 description = "An OpenAI Gym environment for saturation provers"
 authors = ["Boris Shminke <boris@shminke.ml>"]
 license = "Apache-2.0"
@@ -52,3 +52,35 @@ src_paths = ["gym_saturation"]
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--doctest-modules --cov gym_saturation --cov-report xml --cov-fail-under=99 --junit-xml test-results/saturation_gym.xml"
+testpaths = ["gym_saturation"]
+doctest_optionflags = "NORMALIZE_WHITESPACE"
+
+[tool.pylint.master]
+disable = "bad-continuation"
+
+[tool.pylint.format]
+ignore-long-lines = "(::=|:==|this_is_a_test_case|gym_saturation.saturation_prover.saturation_algorithm|:math:|.. math::|https://)"
+max-line-length = 79
+
+[tool.pylint.design]
+max-statements = 10
+
+[tool.pylint.typecheck]
+generated-members = ["orjson"]
+
+[tool.mypy]
+show_error_codes = true
+incremental = false
+disable_error_code = "no-redef"
+
+[[tool.mypy.overrides]]
+module = [
+    "gym.*",
+    "pexpect",
+    "importlib_resources"
+]
+ignore_missing_imports = true

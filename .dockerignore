@@ -4,3 +4,5 @@ doc/build/
 dist/
 .idea/
 joss-paper/
+coverage.*
+test-results/
