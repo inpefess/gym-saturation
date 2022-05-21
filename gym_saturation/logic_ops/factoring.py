@@ -1,11 +1,11 @@
 # Copyright 2021-2022 Boris Shminke
-
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +17,8 @@ Factoring
 """
 from typing import Tuple
 
-from gym_saturation import grammar as gram
+from tptp_lark_parser import grammar as gram
+
 from gym_saturation.logic_ops.unification import (
     NonUnifiableError,
     most_general_unifier,
@@ -42,7 +43,7 @@ def factoring(
     * :math:`A_1` and :math:`A_2` are atomic formulae (positive literals)
     * :math:`\sigma` is a most general unifier of :math:`A_1` and :math:`A_2`
 
-    >>> from gym_saturation.grammar import Predicate, Variable, Function
+    >>> from tptp_lark_parser.grammar import Predicate, Variable, Function
     >>> factoring(gram.Clause((gram.Literal(True, Predicate("q", (Variable("X"),))),)), gram.Literal(False, Predicate("p", (Variable("X"),))), gram.Literal(False, Predicate("p", (Function("this_is_a_test_case", ()),)))).literals
     (Literal(negated=True, atom=Predicate(name='q', arguments=(Function(name='this_is_a_test_case', arguments=()),))), Literal(negated=False, atom=Predicate(name='p', arguments=(Function(name='this_is_a_test_case', arguments=()),))))
     >>> factoring(gram.Clause(()), gram.Literal(False, Predicate("f", ())), gram.Literal(True, Predicate("this_is_a_test_case", ())))
@@ -73,7 +74,7 @@ def all_possible_factors(
     """
     one of the four basic building blocks of the Given Clause algorithm
 
-    >>> from gym_saturation.parsing.tptp_parser import TPTPParser
+    >>> from tptp_lark_parser.tptp_parser import TPTPParser
     >>> parser = TPTPParser()
     >>> clause = parser.parse("cnf(one, axiom, p(c) | p(X) | q).", "")[0]
     >>> all_possible_factors(clause)  # doctest: +ELLIPSIS
