@@ -35,11 +35,11 @@ What is a State
 
 (More or less resembles `ProofState class of PyRes`_)
 
-The environment's state is a list of logical clauses. Each clause is a list of literals and also has several :ref:`properties <Clause>`.
+The environment's state is a list of logical clauses. Each clause is a list of literals and also has several `properties <https://tptp-lark-parser.readthedocs.io/en/latest/package-documentation.html#tptp_lark_parser.grammar.Clause>`__.
 
 Literal is a predicate, negated or not. A predicate can have arguments, which can be functions or variables. Functions can have arguments, which in turn can be functions or variables.
 
-Grammar is encoded in Python objects in a self-explanatory way. Each grammar object is a dictionary with an obligatory key ``class`` (:ref:`Clause <Clause>`, :ref:`Literal <Literal>`, :ref:`Predicate <Predicate>`, :ref:`Function <Function>`, :ref:`Variable <Variable>`), and other keys representing this object's properties (such as being negated or having a list of arguments).
+Grammar is encoded in Python objects in a self-explanatory way (see `tptp-lark-parser <https://tptp-lark-parser.readthedocs.io>`__ for more information).
 
 What is an Observation
 ***********************

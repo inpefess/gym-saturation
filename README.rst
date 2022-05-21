@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-|PyPI version| |Anaconda| |CircleCI| |Documentation Status| |codecov| |Binder| |JOSS|
+|Binder|\ |PyPI version|\ |Anaconda|\ |CircleCI|\ |Documentation Status|\ |codecov|\ |JOSS|
 
 gym-saturation
 ==============
@@ -62,6 +62,15 @@ One can also run it in a Docker container:
 
 How to use
 ==========
+
+.. code:: python
+	  
+   import gym
+   import os
+
+   env = gym.make("GymSaturation-v0", problem_list=["..."])
+   observation = env.reset()
+   observation, reward, done, info = env.step(action)
 
 See `the
 notebook <https://github.com/inpefess/gym-saturation/blob/master/examples/example.ipynb>`__
