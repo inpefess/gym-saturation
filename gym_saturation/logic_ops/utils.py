@@ -19,7 +19,7 @@ import dataclasses
 from itertools import chain
 from typing import Dict, Tuple, Union
 
-from gym_saturation.grammar import (
+from tptp_lark_parser.grammar import (
     Clause,
     Function,
     Predicate,
@@ -27,6 +27,7 @@ from gym_saturation.grammar import (
     Term,
     Variable,
 )
+
 from gym_saturation.logic_ops.substitution import Substitution
 
 
@@ -59,7 +60,7 @@ def get_variable_list(
     """
     find all variables present in a clause
 
-    >>> from gym_saturation.grammar import Literal
+    >>> from tptp_lark_parser.grammar import Literal
     >>> get_variable_list(Clause((Literal(False, Predicate("this_is_a_test_case", (Function("f", (Variable("X"), Variable("X"))),))),)))
     (Variable(name='X'), Variable(name='X'))
 
@@ -110,7 +111,7 @@ def is_tautology(clause: Clause) -> bool:
     check whether there are two literals, one negated and the other not, with
     the same atom
 
-    >>> from gym_saturation.grammar import Literal
+    >>> from tptp_lark_parser.grammar import Literal
     >>> is_tautology(Clause((Literal(False, Predicate("this_is_a_test_case", ())),)))
     False
     >>> is_tautology(Clause((Literal(False, Predicate("this_is_a_test_case", ())), Literal(True, Predicate("this_is_a_test_case", ())))))
@@ -144,7 +145,7 @@ def clause_length(clause: dict) -> int:
     :param clause: a clause in JSON representation
     :return: sctructural length of a clause
 
-    >>> from gym_saturation.grammar import Literal
+    >>> from tptp_lark_parser.grammar import Literal
     >>> import orjson
     >>> clause_length(orjson.loads(orjson.dumps(
     ...     Clause((Literal(True, Predicate("p", (Function("this_is_a_test_case", ()),))),))

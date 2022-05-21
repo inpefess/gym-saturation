@@ -17,7 +17,8 @@ Paramodulation
 """
 from typing import Tuple
 
-from gym_saturation.grammar import Clause, Literal, Term
+from tptp_lark_parser.grammar import Clause, Literal, Term
+
 from gym_saturation.logic_ops.unification import (
     NonUnifiableError,
     most_general_unifier,
@@ -52,7 +53,7 @@ def paramodulation(
     * :math:`s` and :math:`t` are terms, :math:`\approx` is a syntactic equality symbol
     * :math:`\sigma` is a most general unifier of :math:`s` and :math:`r`
 
-    >>> from gym_saturation.grammar import Predicate, Variable, Function
+    >>> from tptp_lark_parser.grammar import Predicate, Variable, Function
     >>> res = paramodulation(Clause((Literal(False, Predicate("q", (Variable("X"),))),)), (Variable("X"), Function("this_is_a_test_case", ())), Clause((Literal(False, Predicate("r", (Variable("X"),))),)), Literal(True, Predicate("p", (Function("f", ()),))), 1).literals
     >>> list(sorted(map(str, res)))
     ["Literal(negated=False, atom=Predicate(name='q', arguments=(Function(name='f', arguments=()),)))", "Literal(negated=False, atom=Predicate(name='r', arguments=(Function(name='f', arguments=()),)))", "Literal(negated=True, atom=Predicate(name='p', arguments=(Function(name='this_is_a_test_case', arguments=()),)))"]
@@ -185,12 +186,12 @@ def all_paramodulants_from_list(
     """
     one of the four basic building block of the Given Clause algorithm
 
-    >>> from gym_saturation.grammar import Literal, Function, Predicate
+    >>> from tptp_lark_parser.grammar import Literal, Function, Predicate
     >>> all_paramodulants_from_list((Clause((Literal(False, Predicate("=", (Function("this_is_a_test_case", ()),))),), "one"),), Clause((Literal(True, Predicate("p", ())),), "two"))
     Traceback (most recent call last):
      ...
     ValueError: expected equality, but got Literal(negated=False, atom=Predicate(name='=', arguments=(Function(name='this_is_a_test_case', arguments=()),)))
-    >>> from gym_saturation.parsing.tptp_parser import TPTPParser
+    >>> from tptp_lark_parser.tptp_parser import TPTPParser
     >>> parser = TPTPParser()
     >>> one = parser.parse("cnf(one, axiom, a=b | X=X).", "")[0]
     >>> two = parser.parse("cnf(two, axiom, b=c).", "")[0]

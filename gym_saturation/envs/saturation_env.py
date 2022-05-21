@@ -23,9 +23,10 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 import numpy as np
 import orjson
 from gym import Env, spaces
+from tptp_lark_parser.grammar import Clause
+from tptp_lark_parser.tptp_parser import TPTPParser
 
 from gym_saturation.clause_space import ClauseSpace
-from gym_saturation.grammar import Clause
 from gym_saturation.logic_ops.factoring import all_possible_factors
 from gym_saturation.logic_ops.paramodulation import all_paramodulants_from_list
 from gym_saturation.logic_ops.reflexivity_resolution import (
@@ -37,7 +38,6 @@ from gym_saturation.logic_ops.utils import (
     reduce_to_proof,
     reindex_variables,
 )
-from gym_saturation.parsing.tptp_parser import TPTPParser
 
 STATE_DIFF_UPDATED = "state_diff_updated"
 POSITIVE_ACTIONS = "positive_actions"

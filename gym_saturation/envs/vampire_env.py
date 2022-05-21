@@ -21,9 +21,9 @@ import random
 from typing import Dict, List, Tuple
 
 import orjson
+from tptp_lark_parser.grammar import Clause
 
 from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
-from gym_saturation.grammar import Clause
 from gym_saturation.vampire_wrapper import VampireWrapper
 
 

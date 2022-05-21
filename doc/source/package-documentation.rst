@@ -31,8 +31,6 @@ Environment and Agent Testing
 Common modules
 ***************
 
-.. automodule:: gym_saturation.grammar
-   :members:
 .. automodule:: gym_saturation.vampire_wrapper
    :members:
 
@@ -53,11 +51,4 @@ Logical Operations
    :members:
 .. automodule:: gym_saturation.logic_ops.utils
    :members:
-
-Parsing
-********
-
-.. automodule:: gym_saturation.parsing.cnf_parser
-   :members:
-.. automodule:: gym_saturation.parsing.tptp_parser
-   :members:
+      

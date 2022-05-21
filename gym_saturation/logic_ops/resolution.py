@@ -1,11 +1,11 @@
 # Copyright 2021-2022 Boris Shminke
-
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-
+#
 #     https://www.apache.org/licenses/LICENSE-2.0
-
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +17,8 @@ Resolution
 """
 from typing import Tuple
 
-from gym_saturation.grammar import Clause, Literal
+from tptp_lark_parser.grammar import Clause, Literal
+
 from gym_saturation.logic_ops.unification import (
     NonUnifiableError,
     most_general_unifier,
@@ -43,7 +44,7 @@ def resolution(
     * :math:`L_1` and :math:`L_2` are literals (one negated and one not)
     * :math:`\sigma` is a most general unifier of atoms from :math:`L_1` and :math:`L_2`
 
-    >>> from gym_saturation.grammar import Predicate, Variable, Function
+    >>> from tptp_lark_parser.grammar import Predicate, Variable, Function
     >>> resolution(Clause((Literal(False, Predicate("q", (Variable("X"),))),)), Literal(False, Predicate("p", (Variable("X"),))), Clause((Literal(False, Predicate("r", (Variable("X"),))),)), Literal(True, Predicate("p", (Function("this_is_a_test_case", ()),)))).literals
     (Literal(negated=False, atom=Predicate(name='q', arguments=(Function(name='this_is_a_test_case', arguments=()),))), Literal(negated=False, atom=Predicate(name='r', arguments=(Function(name='this_is_a_test_case', arguments=()),))))
     >>> resolution(Clause(()), Literal(False, Predicate("f", ())), Clause(()), Literal(False, Predicate("this_is_a_test_case", ())))
@@ -99,7 +100,7 @@ def all_possible_resolvents(
     """
     one of the four basic building blocks of the Given Clause algorithm
 
-    >>> from gym_saturation.parsing.tptp_parser import TPTPParser
+    >>> from tptp_lark_parser.tptp_parser import TPTPParser
     >>> parser = TPTPParser()
     >>> one = parser.parse("cnf(one, axiom, q(X) | p(X)).", "")[0]
     >>> two = parser.parse("cnf(two, axiom, ~p(c)).", "")[0]
