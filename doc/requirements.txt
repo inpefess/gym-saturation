@@ -1,5 +1,5 @@
 gym
-lark
+tptp_lark_parser
 orjson
 pexpect
 sphinx-autodoc-typehints
