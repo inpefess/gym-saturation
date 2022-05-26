@@ -28,7 +28,7 @@ gym = "*"
 importlib_resources = {version = "*", markers = "python_version < \"3.9\""}
 orjson = "*"
 pexpect = "*"
-tptp-lark-parser = "^0.0.2"
+tptp-lark-parser = "*"
 
 [tool.poetry.dev-dependencies]
 black = "*"
