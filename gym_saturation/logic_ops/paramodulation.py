@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# noqa: D205, D400
 """
 Paramodulation
 ===============
@@ -39,9 +41,9 @@ def paramodulation(
     r_position: int,
 ) -> Clause:
     r"""
-    .. _paramodulation:
+    Apply the binary paramodulation rule.
 
-    binary paramodulation rule
+    .. _paramodulation:
 
     .. math:: {\frac{C_1\vee s\approx t,C_2\vee L\left[r\right]}{\sigma\left(L\left[t\right]\vee C_1\vee C_2\right)}}
 
@@ -133,8 +135,9 @@ def all_paramodulants_from_clause(
     literal_two: Literal,
 ) -> Tuple[Clause, ...]:
     r"""
-    applies ``paramodulation`` with varying ``r_position`` argument
-    also varies for equality symmetry
+    Apply ``paramodulation`` with varying ``r_position`` argument.
+
+    Also varies for equality symmetry
 
     :param clause_one: :math:`C_1`
     :param literal_one: :math:`s\approx t`
@@ -184,7 +187,7 @@ def all_paramodulants_from_list(
     given_clause: Clause,
 ) -> Tuple[Clause, ...]:
     """
-    one of the four basic building block of the Given Clause algorithm
+    One of the four basic building block of the Given Clause algorithm.
 
     >>> from tptp_lark_parser.grammar import Literal, Function, Predicate
     >>> all_paramodulants_from_list((Clause((Literal(False, Predicate("=", (Function("this_is_a_test_case", ()),))),), "one"),), Clause((Literal(True, Predicate("p", ())),), "two"))

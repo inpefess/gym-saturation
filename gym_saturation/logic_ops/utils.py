@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# noqa: D205, D400
 """
 Logic Operations Utils
 =======================
@@ -32,14 +34,12 @@ from gym_saturation.logic_ops.substitution import Substitution
 
 
 class WrongRefutationProofError(Exception):
-    """
-    exception raised when proof is requested but is malformed or not found yet
-    """
+    """Exception raised when proof is requested but not found yet."""
 
 
 def is_subproposition(one: Proposition, two: Proposition) -> bool:
     """
-    check whether proposition ``one`` is part of a proposition ``two``
+    Check whether proposition ``one`` is part of a proposition ``two``.
 
     :param one: presumably shorter proposition which is probably a part
     :param two: presumably longer proposition which is probably the whole
@@ -58,7 +58,7 @@ def get_variable_list(
     clause: Union[Clause, Proposition]
 ) -> Tuple[Variable, ...]:
     """
-    find all variables present in a clause
+    Find all variables present in a clause.
 
     >>> from tptp_lark_parser.grammar import Literal
     >>> get_variable_list(Clause((Literal(False, Predicate("this_is_a_test_case", (Function("f", (Variable("X"), Variable("X"))),))),)))
@@ -84,8 +84,7 @@ def reindex_variables(
     clauses: Dict[str, Clause], prefix: str
 ) -> Dict[str, Clause]:
     """
-    rename variables in a list of clauses so that each clause has its unique
-    set of variables
+    Rename variables so that each clause has its unique set of variables.
 
     :param clauses: a map of clause labels to clauses
     :param prefix: new variables will be named ``prefix[order_num)``
@@ -108,8 +107,7 @@ def reindex_variables(
 
 def is_tautology(clause: Clause) -> bool:
     """
-    check whether there are two literals, one negated and the other not, with
-    the same atom
+    Check whether there are two literals (negated and not) with the same atom.
 
     >>> from tptp_lark_parser.grammar import Literal
     >>> is_tautology(Clause((Literal(False, Predicate("this_is_a_test_case", ())),)))
@@ -139,8 +137,9 @@ def is_tautology(clause: Clause) -> bool:
 
 def clause_length(clause: dict) -> int:
     """
-    total length of arguments of each predicate.
-    Negation adds one to each literal
+    Find the length of arguments of each predicate.
+
+    Negation adds one to each literal.
 
     :param clause: a clause in JSON representation
     :return: sctructural length of a clause
@@ -167,7 +166,7 @@ def clause_length(clause: dict) -> int:
 
 def proposition_length(proposition: Proposition) -> int:
     """
-    total number of functional, predicate and variable symbols
+    Find the number of functional, predicate and variable symbols.
 
     :param proposition: a function, a predicate or a variable
     :return: sctructural length of a proposition
@@ -185,6 +184,7 @@ def proposition_length(proposition: Proposition) -> int:
 
 def clause_in_a_list(clause: Clause, clauses: Tuple[Clause, ...]) -> bool:
     """
+    Check whether a clause is in a list.
 
     >>> clause_in_a_list(Clause((), label="one"), (Clause((), label="two"),))
     True
@@ -198,13 +198,12 @@ def clause_in_a_list(clause: Clause, clauses: Tuple[Clause, ...]) -> bool:
 
 
 class NoSubtermFound(Exception):
-    """sometimes a subterm index is larger than term length"""
+    """Sometimes a subterm index is larger than term length."""
 
 
 def subterm_by_index(atom: Proposition, index: int) -> Term:
     """
-    extract a subterm using depth-first search through the tree of logical
-    operations
+    Extract a subterm using depth-first search.
 
     >>> atom = Predicate("this_is_a_test_case", (Function("f", (Variable("X"),)), Function("g", (Variable("Y"),))))
     >>> subterm_by_index(atom, 0)
@@ -239,11 +238,11 @@ def subterm_by_index(atom: Proposition, index: int) -> Term:
 
 
 class CantReplaceTheWholeTerm(Exception):
-    """an exception raised when trying to replace a subterm with index 0"""
+    """An exception raised when trying to replace a subterm with index 0."""
 
 
 class TermSelfReplace(Exception):
-    """an exception raised when trying to replace a subterm with itself"""
+    """An exception raised when trying to replace a subterm with itself."""
 
 
 def _replace_if_not_the_same(old_term: Term, new_term: Term) -> Term:
@@ -256,7 +255,7 @@ def replace_subterm_by_index(
     atom: Proposition, index: int, term: Term
 ) -> Proposition:
     """
-    replace a subterm with a given index (depth-first search) by a new term
+    Replace a subterm with a given index (depth-first search) by a new term.
 
     >>> atom = Predicate("this_is_a_test_case", (Function("f", (Variable("X"),)), Function("g", (Variable("Y"),))))
     >>> replace_subterm_by_index(atom, 0, Variable("Z"))
@@ -307,7 +306,7 @@ def _flat_list(list_of_lists: Tuple[Tuple[str, ...], ...]) -> Tuple[str, ...]:
 
 def reduce_to_proof(clauses: Dict[str, Clause]) -> Tuple[Clause, ...]:
     """
-    leave only clauses belonging to the refutational proof
+    Leave only clauses belonging to the refutational proof.
 
     >>> reduce_to_proof({
     ...     "one": Clause((), label="one"), "two": Clause((), label="two")

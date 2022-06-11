@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# noqa: D205, D400
 """
 Saturation Environment
 =======================
@@ -47,7 +49,7 @@ MAX_CLAUSES = 100000
 
 class SaturationEnv(Env):
     """
-    saturation algorithm defined in a Reiforcement Learning friendly way
+    Saturation algorithm defined in a Reiforcement Learning friendly way.
 
     >>> import sys
     >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
@@ -147,6 +149,12 @@ class SaturationEnv(Env):
         problem_list: List[str],
         max_clauses: int = MAX_CLAUSES,
     ):
+        """
+        Initialize spaces et al.
+
+        :param problem_list: a list of the names of TPTP problem files
+        :param max_clauses: maximal number of clauses to store in proof state
+        """
         super().__init__()
         self.problem_list = problem_list
         self._state: Dict[str, Clause] = {}
@@ -178,7 +186,7 @@ class SaturationEnv(Env):
             for clause in parsed_clauses
         }
 
-    def reset(self) -> dict:
+    def reset(self) -> dict:  # noqa: D102
         self._state = reindex_variables(self._init_clauses(), "X")
         self._state_set = set(
             map(
@@ -259,7 +267,9 @@ class SaturationEnv(Env):
                 return True, info
         return done, info
 
-    def step(self, action: int) -> Tuple[dict, float, bool, Dict[str, Any]]:
+    def step(
+        self, action: int
+    ) -> Tuple[dict, float, bool, Dict[str, Any]]:  # noqa: D102
         if list(self._state.values())[action].processed:
             raise ValueError(f"action {action} is not valid")
         updated = self._do_deductions(action)
@@ -277,15 +287,13 @@ class SaturationEnv(Env):
 
     @property
     def last_birth_step(self) -> int:
-        """
-        :returns: the last birth step number of the clauses in the proof state
-        """
+        """Return the last birth step number of clauses in the proof state."""
         return max(
             [getattr(clause, "birth_step", 0) for clause in self._state]
         )
 
     # pylint: disable=inconsistent-return-statements
-    def render(self, mode="human"):
+    def render(self, mode="human"):  # noqa: D102
         if mode == "ansi":
             return str(self.state["real_obs"])
         if mode == "human":
@@ -294,9 +302,7 @@ class SaturationEnv(Env):
 
     @property
     def state(self) -> dict:
-        """
-        :returns: environment state in Python ``dict`` format
-        """
+        """Return environment state in Python ``dict`` format."""
         return {
             "real_obs": [
                 orjson.dumps(clause) for clause in self._state.values()
@@ -313,15 +319,13 @@ class SaturationEnv(Env):
             )[: self.action_space.n],
         }
 
-    def seed(self, seed=None):
+    def seed(self, seed=None):  # noqa: D102
         random.seed(seed)
         return seed
 
     @property
     def tstp_proof(self) -> str:
-        """
-        :returns: TSTP proof (if found; raises an error otherwise)
-        """
+        """Return TSTP proof (if found; raises an error otherwise)."""
         return "\n".join(
             reversed(
                 [
@@ -335,8 +339,9 @@ class SaturationEnv(Env):
     @property
     def positive_actions(self) -> Tuple[int, ...]:
         """
-        :returns: a sequence of actions which contributed to the proof found
-            (if found; raises an error otherwise)
+        Return a sequence of actions which contributed to the proof found.
+
+        If there is no proof yet, raises an error.
         """
         proof = reduce_to_proof(self._state)
         return tuple(

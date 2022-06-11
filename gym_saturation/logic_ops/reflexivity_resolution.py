@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# noqa: D205, D400
 """
 Reflexivity Resolution
 =======================
@@ -29,9 +31,9 @@ def reflexivity_resolution(
     given_clause: grammar.Clause, a_literal: Tuple[grammar.Term, grammar.Term]
 ) -> grammar.Clause:
     r"""
-    .. _reflexivity_resolution:
+    Apply reflexivity resolution rule.
 
-    reflexivity resolution rule
+    .. _reflexivity_resolution:
 
     .. math:: \frac{C\vee s\not\approx t}{\sigma\left(C\right)}
 
@@ -61,7 +63,7 @@ def all_possible_reflexivity_resolvents(
     given_clause: grammar.Clause,
 ) -> Tuple[grammar.Clause, ...]:
     """
-    one of the four basic building blocks of the Given Clause algorithm
+    One of the four basic building blocks of the Given Clause algorithm.
 
     >>> from tptp_lark_parser.tptp_parser import TPTPParser
     >>> parser = TPTPParser()

@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# noqa: D205, D400
 """
 Substitution
 =============
@@ -24,7 +26,7 @@ from tptp_lark_parser import grammar
 @dataclasses.dataclass
 class Substitution:
     """
-    a mapping from ``Variable`` to ``Term``
+    A mapping from ``Variable`` to ``Term``.
 
     >>> substitution = Substitution(grammar.Variable("X"), grammar.Function("this_is_a_test_case", ()))
     >>> substitution(grammar.Clause((grammar.Literal(False, grammar.Predicate("p", (grammar.Function("this_is_a_test_case", (grammar.Variable("X"),)),))),)))  # doctest: +ELLIPSIS
@@ -39,6 +41,11 @@ class Substitution:
     def __call__(
         self, target: Union[grammar.Clause, grammar.Proposition]
     ) -> Union[grammar.Clause, grammar.Proposition]:
+        """
+        Apply a substitution to a given target clause.
+
+        :param target: a clause to which to apply the substitution
+        """
         if isinstance(target, grammar.Clause):
             return self.substitute_in_clause(target)
         if isinstance(target, grammar.Predicate):
@@ -71,7 +78,7 @@ class Substitution:
 
     def substitute_in_clause(self, clause: grammar.Clause) -> grammar.Clause:
         """
-        apply the substitution to something which is known to be a ``Clause``
+        Apply the substitution to something which is known to be a ``Clause``.
 
         :param clause: a clause to apply substitution to
         :returns: the result of the substitution

@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# noqa: D205, D400
 """
 Agent Testing
 ==============
@@ -39,13 +41,13 @@ from gym_saturation.logic_ops.utils import (
 
 
 class BaseAgent:
-    """a basic RL agent"""
+    """A basic RL agent."""
 
     _state = None
 
     @property
     def state(self):
-        """agent can have its inner state"""
+        """Agent can have its inner state."""
         return self._state
 
     def get_action(
@@ -55,6 +57,8 @@ class BaseAgent:
         info: Dict[str, Any],
     ) -> int:
         """
+        Get an action given observations and other inputs.
+
         :param observation: an observation returned by the environment after
             the latest action (or it's initial state)
         :param reward: reward from the previous step
@@ -67,8 +71,9 @@ class BaseAgent:
 @dataclass
 class Transition:
     """
-    an object describing environment's and agent's states
-    before the agent's action, the action itself and its results
+    An object describing environment's and agent's states.
+
+    Before the agent's action, the action itself and its results
     """
 
     env_state: dict
@@ -82,17 +87,18 @@ class Transition:
 
 class SizeAgent(BaseAgent):
     """
-    .. _size_agent:
+    Agent which selects the shortest clause.
 
-    agent which selects the shortest clause
+    .. _size_agent:
     """
 
     def __init__(self):
+        """Don't compute the formulae lengths twice."""
         self._state: Dict[str, Tuple[float, bool]] = {}
 
     def update_state(self, info: Dict[str, Any]) -> None:
         """
-        update the state of the agent according with the transition
+        Update the state of the agent according with the transition.
 
         :param info: an info dict (parm of environment response)
         :returns:
@@ -110,7 +116,7 @@ class SizeAgent(BaseAgent):
         observation: dict,
         reward: float,
         info: Dict[str, Any],
-    ) -> int:
+    ) -> int:  # noqa: D102
         self.update_state(info)
         return min(
             (
@@ -124,9 +130,9 @@ class SizeAgent(BaseAgent):
 
 class AgeAgent(BaseAgent):
     """
-    .. _age_agent:
+    Agent which selects the oldest clause.
 
-    agent which selects the oldest clause
+    .. _age_agent:
     """
 
     def get_action(
@@ -134,7 +140,7 @@ class AgeAgent(BaseAgent):
         observation: dict,
         reward: float,
         info: Dict[str, Any],
-    ) -> int:
+    ) -> int:  # noqa: D102
         return min(
             [
                 i
@@ -148,13 +154,18 @@ class AgeAgent(BaseAgent):
 
 class SizeAgeAgent(BaseAgent):
     """
-    .. _size_age_agent:
+    Agent taking several times the smallest clause and then the oldest.
 
-    agent which takes several times the smallest clause and then several
-    times the oldest
+    .. _size_age_agent:
     """
 
     def __init__(self, size_steps: int, age_steps: int):
+        """
+        Initialize two sub-agents.
+
+        :param size_steps: how many times to select the shortest clause
+        :param age_steps: how many times to select the oldest clause
+        """
         self.size_steps = size_steps
         self.age_steps = age_steps
         self._step_count = 0
@@ -167,7 +178,7 @@ class SizeAgeAgent(BaseAgent):
         observation: dict,
         reward: float,
         info: Dict[str, Any],
-    ) -> int:
+    ) -> int:  # noqa: D102
         self._step_count += 1
         if self._use_size:
             if self._step_count >= self.size_steps:
@@ -182,14 +193,14 @@ class SizeAgeAgent(BaseAgent):
 
 
 class RandomAgent(BaseAgent):
-    """agent which selects clauses randomly"""
+    """Agent which selects clauses randomly."""
 
     def get_action(
         self,
         observation: dict,
         reward: float,
         info: Dict[str, Any],
-    ) -> int:
+    ) -> int:  # noqa: D102
         return random.choice(
             [
                 i
@@ -211,7 +222,7 @@ def _proof_found_before_the_start(env: SaturationEnv) -> Tuple[float, bool]:
 
 def episode(env: SaturationEnv, agent: BaseAgent) -> float:
     """
-    tries to solve the problem and logs the clauses
+    Try to solve the problem and logs the clauses.
 
     >>> import os
     >>> import shutil
@@ -264,6 +275,8 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> float:
 
 def parse_args(args: Optional[List[str]] = None) -> Namespace:
     """
+    Parse script arguments.
+
     >>> parse_args([
     ...     "--problem_filename", "test",
     ...     "--step_limit", "1"
@@ -286,7 +299,7 @@ def parse_args(args: Optional[List[str]] = None) -> Namespace:
 
 def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
     """
-        print a report after testing an agent in an environment
+    Print a report after testing an agent in an environment.
 
     :param env: an environment
     :param agent: an agent
@@ -312,7 +325,7 @@ def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
 
 def test_agent(args: Optional[List[str]] = None) -> None:
     """
-    the main function for this module
+    The main function for this module.
 
     >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
     ...     from importlib.resources import files

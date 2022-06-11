@@ -41,6 +41,7 @@ types-dataclasses = "*"
 sphinx-rtd-theme = "*"
 sphinx-autodoc-typehints = "*"
 flake8 = "*"
+pydocstyle = "*"
 
 [tool.black]
 line-length=79

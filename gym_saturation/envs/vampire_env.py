@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# noqa: D205, D400
 """
 Saturation Environment with Vampire backend
 ============================================
@@ -29,8 +31,7 @@ from gym_saturation.vampire_wrapper import VampireWrapper
 
 class VampireEnv(SaturationEnv):
     """
-    an RL environment around a Vampire prover
-    saturation algorithm defined in a Reiforcement Learning friendly way
+    An RL environment around a Vampire prover.
 
     This class has the same API as SaturationEnv but uses another backend.
     Here we have only a simple smoke test.
@@ -57,6 +58,13 @@ class VampireEnv(SaturationEnv):
         problem_list: List[str],
         max_clauses: int = MAX_CLAUSES,
     ):
+        """
+        Initialize a :ref:`VampireWrapper <vampire-wrapper>`.
+
+        :param vampire_binary_path: a path to Vampire binary
+        :param problem_list: a list of names of TPTP problem files
+        :param max_clauses: maximal number of clauses in proof state
+        """
         super().__init__(problem_list, max_clauses)
         self._vampire = VampireWrapper(vampire_binary_path)
 
@@ -105,7 +113,7 @@ class VampireEnv(SaturationEnv):
                 raise ValueError("Unexpected reposnse type: ", response_type)
         return updated
 
-    def reset(self) -> dict:
+    def reset(self) -> dict:  # noqa: D102
         self.problem = random.choice(self.problem_list)
         tptp_folder = os.path.join(os.path.dirname(self.problem), "..", "..")
         vampire_response = self._vampire.start(self.problem, tptp_folder)

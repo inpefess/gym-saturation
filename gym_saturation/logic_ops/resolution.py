@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# noqa: D205, D400
 """
 Resolution
 ===========
@@ -32,9 +34,9 @@ def resolution(
     literal_two: Literal,
 ) -> Clause:
     r"""
-    .. _resolution:
+    Do inference accoring to the standard first-order resolution rule.
 
-    standard first-order resolution rule
+    .. _resolution:
 
     .. math:: {\frac{C_1\vee L_1,C_2\vee L_2}{\sigma\left(C_1\vee C_2\right)}}
 
@@ -98,7 +100,7 @@ def all_possible_resolvents(
     given_clause: Clause,
 ) -> Tuple[Clause, ...]:
     """
-    one of the four basic building blocks of the Given Clause algorithm
+    One of the four basic building blocks of the Given Clause algorithm.
 
     >>> from tptp_lark_parser.tptp_parser import TPTPParser
     >>> parser = TPTPParser()

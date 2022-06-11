@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# noqa: D205, D400
 """
 Unification
 ============
@@ -24,14 +26,14 @@ from gym_saturation.logic_ops.utils import is_subproposition
 
 
 class NonUnifiableError(Exception):
-    """exception raised when terms are not unifiable"""
+    """Exception raised when terms are not unifiable."""
 
 
 def _get_disagreement(
     one: Proposition, two: Proposition
 ) -> Tuple[Proposition, ...]:
     """
-    find a disagreement set of two first order propositions
+    Find a disagreement set of two first order propositions.
 
     :param one: some proposition
     :param two: some (other but might be the same) proposition
@@ -83,7 +85,7 @@ def most_general_unifier(
     substitutions: Optional[Tuple[Substitution, ...]] = None,
 ) -> Tuple[Substitution, ...]:
     """
-    Robinson's 1965 unification algorithm
+    Follow the Robinson's 1965 unification algorithm.
 
     >>> most_general_unifier((Variable("X"), Variable("X")))
     ()

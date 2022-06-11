@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# noqa: D205, D400
 """
 Vampire Wrapper
 ================
@@ -22,7 +24,9 @@ import pexpect
 
 class VampireWrapper:
     """
-    a wrapper around Vampire binary running in a manual clause selection mode
+    A wrapper around Vampire binary running in a manual clause selection mode.
+
+    .. _vampire-wrapper :
 
     >>> import sys
     >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
@@ -56,6 +60,11 @@ class VampireWrapper:
     """
 
     def __init__(self, binary_path: str):
+        """
+        Remember the path to Vampire, don't start the process yet.
+
+        :param binary_path: an absolute path to Vampire binary
+        """
         self.binary_path = binary_path
         self._proc = None
 
@@ -79,8 +88,9 @@ class VampireWrapper:
         self, problem_filename: str, tptp_folder: str
     ) -> Tuple[Tuple[str, str, str], ...]:
         """
-        start Vampire in a manual mode on a given problem
-        time limit is one day, Vampire prints everything
+        Start Vampire in a manual mode on a given problem.
+
+        Time limit is one day, Vampire prints everything
 
         :param problem_filename: full path of a TPTP problem file
         :param tptp_folder: the root folder for TPTP library
@@ -99,7 +109,7 @@ class VampireWrapper:
         self, clause_label: str
     ) -> Tuple[Tuple[str, str, str], ...]:
         """
-        select a clause and get response from Vampire
+        Select a clause and get response from Vampire.
 
         :param clause_label: a given clause order number
         :returns: a sequence of action type, clause number and clause
@@ -109,7 +119,7 @@ class VampireWrapper:
 
     @property
     def proc(self) -> pexpect.spawn:
-        """Vampire process"""
+        """Vampire process."""
         if self._proc is None:
             raise ValueError("start solving a problem first!")
         return self._proc
