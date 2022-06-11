@@ -58,7 +58,7 @@ build-backend = "poetry.core.masonry.api"
 minversion = "6.0"
 addopts = "--doctest-modules --cov gym_saturation --cov-report xml --cov-fail-under=99 --junit-xml test-results/saturation_gym.xml"
 testpaths = ["gym_saturation"]
-doctest_optionflags = "NORMALIZE_WHITESPACE"
+doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
 
 [tool.pylint.master]
 disable = "bad-continuation"

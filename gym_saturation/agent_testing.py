@@ -244,7 +244,7 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> float:
     >>> random.seed(0)
     >>> agents = (SizeAgeAgent(2, 1), SizeAgeAgent(1, 2), RandomAgent())
     >>> max_clauses = (100, 100, 4)
-    >>> for i in range(3):  # doctest: +ELLIPSIS
+    >>> for i in range(3):
     ...     env = gym.make(
     ...         "GymSaturation-v0",
     ...         problem_list=[problem_list[i]],
@@ -342,7 +342,7 @@ def test_agent(args: Optional[List[str]] = None) -> None:
     >>> test_agent([
     ...     "--problem_filename", problem_filenames[0],
     ...     "--step_limit", "3"
-    ... ])  # doctest: +ELLIPSIS
+    ... ])
     Problem file: ...TST001-1.p
     Proof of length 1 found in 2 steps:
     cnf(..., lemma, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
@@ -351,7 +351,7 @@ def test_agent(args: Optional[List[str]] = None) -> None:
     ...         "--problem_filename", problem_filename,
     ...         "--step_limit", "10",
     ...         "--vampire_binary_path", "vampire",
-    ...     ])  # doctest: +ELLIPSIS
+    ...     ])
     Problem file: ...TST001-1.p
     Proof of length 6 found in 0 steps:
     ...

@@ -80,8 +80,7 @@ class VampireEnv(SaturationEnv):
             inference_parents, inference_rule = "", pre_inference[0]
         parsed_clause = self._tptp_parser.parse(
             f"cnf({clause_label}, hypothesis, ({formula}), "
-            + f"inference({inference_rule}, [], [{inference_parents}])).",
-            "",
+            + f"inference({inference_rule}, [], [{inference_parents}]))."
         )[0]
         return dataclasses.replace(parsed_clause, processed=True)
 

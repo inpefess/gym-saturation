@@ -46,12 +46,12 @@ class VampireWrapper:
      ...
     ValueError: start solving a problem first!
     >>> old_result = vampire.start(tptp_problem, tptp_folder)
-    >>> print(old_result)  # doctest: +ELLIPSIS
+    >>> print(old_result)
     (('input', '1', 'mortal(X0) | ~man(X0) [input]'),...
     >>> new_result = vampire.start(tptp_problem, tptp_folder)
     >>> old_result == new_result
     True
-    >>> vampire.pick_a_clause("wrong")  # doctest: +ELLIPSIS
+    >>> vampire.pick_a_clause("wrong")
     Traceback (most recent call last):
      ...
     ValueError:

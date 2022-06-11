@@ -72,16 +72,16 @@ class SaturationEnv(Env):
     one can look at the current state in TPTP format
 
     >>> print(env.render())
-    cnf(this_is_a_test_case_1, hypothesis, this_is_a_test_case(test_constant)).
-    cnf(this_is_a_test_case_2, hypothesis, ~this_is_a_test_case(test_constant)).
-    cnf(test_axiom, axiom, test_constant = test_constant_2).
-    cnf(test_axiom_2, axiom, ~test_constant = 0).
+    cnf(this_is_a_test_case_1, hypothesis, p3(f1)).
+    cnf(this_is_a_test_case_2, hypothesis, ~p3(f1)).
+    cnf(test_axiom, axiom, f1 = f2).
+    cnf(test_axiom_2, axiom, ~f1 = f3).
 
     ``ansi`` mode returns a JSON representation of the state
     it should be more easily parsable than TPTP, although less human-friendly
 
-    >>> env.render("ansi") # doctest: +ELLIPSIS
-    '...{"literals":[{"negated":false,"atom":{"name":"this_is_a_test_case","arguments":[{"name":...
+    >>> env.render("ansi")
+    '...{"literals":[{"negated":false,"atom":{"name":1,"arguments":[{"name":...
 
     other modes are not implemented yet
 
@@ -120,7 +120,7 @@ class SaturationEnv(Env):
     TSTP proof is now available (one can add ``include`` directive before it
     for validation purposes)
 
-    >>> print(TPTPParser().parse(env.tstp_proof, "")[0])  # doctest: +ELLIPSIS
+    >>> print(TPTPParser().parse(env.tstp_proof)[0])
     cnf(..., lemma, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
 
     the relevant actions are filtered too
@@ -167,14 +167,16 @@ class SaturationEnv(Env):
             }
         )
         self.problem: Optional[str] = None
-        self._tptp_parser = TPTPParser()
+        tptp_folder = os.path.join(
+            os.path.dirname(problem_list[0]), "..", ".."
+        )
+        self._tptp_parser = TPTPParser(tptp_folder, True)
 
     def _init_clauses(self) -> Dict[str, Clause]:
         self.problem = random.choice(self.problem_list)
-        tptp_folder = os.path.join(os.path.dirname(self.problem), "..", "..")
         with open(self.problem, "r", encoding="utf-8") as problem_file:
             problem_text = problem_file.read()
-        parsed_clauses = self._tptp_parser.parse(problem_text, tptp_folder)
+        parsed_clauses = self._tptp_parser.parse(problem_text)
         return {
             clause.label: dataclasses.replace(
                 clause,
@@ -187,7 +189,7 @@ class SaturationEnv(Env):
         }
 
     def reset(self) -> dict:  # noqa: D102
-        self._state = reindex_variables(self._init_clauses(), "X")
+        self._state = reindex_variables(self._init_clauses())
         self._state_set = set(
             map(
                 lambda clause: tuple(

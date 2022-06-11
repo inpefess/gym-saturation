@@ -80,14 +80,11 @@ def get_variable_list(
     return variable_list
 
 
-def reindex_variables(
-    clauses: Dict[str, Clause], prefix: str
-) -> Dict[str, Clause]:
+def reindex_variables(clauses: Dict[str, Clause]) -> Dict[str, Clause]:
     """
     Rename variables so that each clause has its unique set of variables.
 
     :param clauses: a map of clause labels to clauses
-    :param prefix: new variables will be named ``prefix[order_num)``
     :returns: the list of clauses with renamed variables
     """
     variable_count = 0
@@ -98,7 +95,7 @@ def reindex_variables(
         new_variables_count = len(variable_list)
         for i in range(new_variables_count):
             new_clause = Substitution(
-                variable_list[i], Variable(f"{prefix}{i + variable_count}")
+                variable_list[i], Variable(i)
             ).substitute_in_clause(new_clause)
         variable_count += new_variables_count
         new_clauses[label] = new_clause
