@@ -21,34 +21,45 @@ Environment and Agent Testing
 ******************************
 .. automodule:: gym_saturation.envs.saturation_env
    :members:
+   :special-members: __init__, __call__
 .. automodule:: gym_saturation.envs.vampire_env
    :members:
+   :special-members: __init__, __call__
 .. automodule:: gym_saturation.agent_testing
    :members:
+   :special-members: __init__, __call__
 .. automodule:: gym_saturation.clause_space
    :members:
+   :special-members: __init__, __call__
 
 Common modules
 ***************
 
 .. automodule:: gym_saturation.vampire_wrapper
    :members:
+   :special-members: __init__, __call__
 
 Logical Operations
 *******************
 
 .. automodule:: gym_saturation.logic_ops.factoring
    :members:
+   :special-members: __init__, __call__
 .. automodule:: gym_saturation.logic_ops.paramodulation
    :members:
+   :special-members: __init__, __call__
 .. automodule:: gym_saturation.logic_ops.reflexivity_resolution
    :members:
+   :special-members: __init__, __call__
 .. automodule:: gym_saturation.logic_ops.resolution
    :members:
+   :special-members: __init__, __call__
 .. automodule:: gym_saturation.logic_ops.substitution
    :members:
+   :special-members: __init__, __call__
 .. automodule:: gym_saturation.logic_ops.unification
    :members:
+   :special-members: __init__, __call__
 .. automodule:: gym_saturation.logic_ops.utils
    :members:
-      
+   :special-members: __init__, __call__
