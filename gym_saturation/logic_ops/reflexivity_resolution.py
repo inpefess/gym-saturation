@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# noqa: D205, D400
 """
 Reflexivity Resolution
 =======================
@@ -29,9 +31,9 @@ def reflexivity_resolution(
     given_clause: grammar.Clause, a_literal: Tuple[grammar.Term, grammar.Term]
 ) -> grammar.Clause:
     r"""
-    .. _reflexivity_resolution:
+    Apply reflexivity resolution rule.
 
-    reflexivity resolution rule
+    .. _reflexivity_resolution:
 
     .. math:: \frac{C\vee s\not\approx t}{\sigma\left(C\right)}
 
@@ -61,13 +63,16 @@ def all_possible_reflexivity_resolvents(
     given_clause: grammar.Clause,
 ) -> Tuple[grammar.Clause, ...]:
     """
-    one of the four basic building blocks of the Given Clause algorithm
+    One of the four basic building blocks of the Given Clause algorithm.
 
     >>> from tptp_lark_parser.tptp_parser import TPTPParser
     >>> parser = TPTPParser()
-    >>> clause = parser.parse("cnf(this_is_a_test_case, axiom, p(X) | ~ X=a | b != a).", "")[0]
-    >>> all_possible_reflexivity_resolvents(clause)  # doctest: +ELLIPSIS
-    (cnf(x..., lemma, p(a) | ~b = a, inference(reflexivity_resolution, [], [this_is_a_test_case])).,)
+    >>> clause = parser.parse("cnf(this_is_a_test_case, axiom, p(X) | ~ X=a | b != a).")[0]
+    >>> tuple(map(
+    ...     parser.cnf_parser.pretty_print,
+    ...     all_possible_reflexivity_resolvents(clause)
+    ... ))
+    ('cnf(x..., lemma, p(a) | ~b = a, inference(reflexivity_resolution, [], [this_is_a_test_case])).',)
 
     :param given_clause: a new clause which should be combined with all the
         processed ones
@@ -78,9 +83,9 @@ def all_possible_reflexivity_resolvents(
     for i, a_literal in enumerate(given_clause.literals):
         if (
             a_literal.negated
-            and a_literal.atom.name == "="
+            and a_literal.atom.name == grammar.EQUALITY_SYMBOL_ID
             or not a_literal.negated
-            and a_literal.atom.name == "!="
+            and a_literal.atom.name == grammar.INEQUALITY_SYMBOL_ID
         ) and len(a_literal.atom.arguments) == 2:
             a_clause = grammar.Clause(
                 given_clause.literals[:i] + given_clause.literals[i + 1 :]

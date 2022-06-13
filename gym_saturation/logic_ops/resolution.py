@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# noqa: D205, D400
 """
 Resolution
 ===========
@@ -32,9 +34,9 @@ def resolution(
     literal_two: Literal,
 ) -> Clause:
     r"""
-    .. _resolution:
+    Do inference accoring to the standard first-order resolution rule.
 
-    standard first-order resolution rule
+    .. _resolution:
 
     .. math:: {\frac{C_1\vee L_1,C_2\vee L_2}{\sigma\left(C_1\vee C_2\right)}}
 
@@ -45,8 +47,13 @@ def resolution(
     * :math:`\sigma` is a most general unifier of atoms from :math:`L_1` and :math:`L_2`
 
     >>> from tptp_lark_parser.grammar import Predicate, Variable, Function
-    >>> resolution(Clause((Literal(False, Predicate("q", (Variable("X"),))),)), Literal(False, Predicate("p", (Variable("X"),))), Clause((Literal(False, Predicate("r", (Variable("X"),))),)), Literal(True, Predicate("p", (Function("this_is_a_test_case", ()),)))).literals
-    (Literal(negated=False, atom=Predicate(name='q', arguments=(Function(name='this_is_a_test_case', arguments=()),))), Literal(negated=False, atom=Predicate(name='r', arguments=(Function(name='this_is_a_test_case', arguments=()),))))
+    >>> "this_is_a_test_case", resolution(
+    ...     Clause((Literal(False, Predicate(4, (Variable(0),))),)),
+    ...     Literal(False, Predicate(3, (Variable(0),))),
+    ...     Clause((Literal(False, Predicate(5, (Variable(0),))),)),
+    ...     Literal(True, Predicate(3, (Function(1, ()),)))
+    ... ).literals
+    ('this_is_a_test_case', (Literal(negated=False, atom=Predicate(name=4, arguments=(Function(name=1, arguments=()),))), Literal(negated=False, atom=Predicate(name=5, arguments=(Function(name=1, arguments=()),)))))
     >>> resolution(Clause(()), Literal(False, Predicate("f", ())), Clause(()), Literal(False, Predicate("this_is_a_test_case", ())))
     Traceback (most recent call last):
      ...
@@ -98,14 +105,17 @@ def all_possible_resolvents(
     given_clause: Clause,
 ) -> Tuple[Clause, ...]:
     """
-    one of the four basic building blocks of the Given Clause algorithm
+    One of the four basic building blocks of the Given Clause algorithm.
 
     >>> from tptp_lark_parser.tptp_parser import TPTPParser
     >>> parser = TPTPParser()
-    >>> one = parser.parse("cnf(one, axiom, q(X) | p(X)).", "")[0]
-    >>> two = parser.parse("cnf(two, axiom, ~p(c)).", "")[0]
-    >>> all_possible_resolvents((one,), two)  # doctest: +ELLIPSIS
-    (cnf(x..., lemma, q(c), inference(resolution, [], [one, two])).,)
+    >>> one = parser.parse("cnf(one, axiom, q(X) | p(X)).")[0]
+    >>> two = parser.parse("cnf(two, axiom, ~p(c)).")[0]
+    >>> tuple(map(
+    ...      parser.cnf_parser.pretty_print,
+    ...      all_possible_resolvents((one,), two)
+    ... ))
+    ('cnf(x..., lemma, q(c), inference(resolution, [], [one, two])).',)
 
     :param clauses: a list of (processed) clauses
     :param given_clause: a new clause which should be combined with all the

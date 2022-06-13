@@ -11,13 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# noqa: D205, D400
 """
 Paramodulation
 ===============
 """
 from typing import Tuple
 
-from tptp_lark_parser.grammar import Clause, Literal, Term
+from tptp_lark_parser.grammar import EQUALITY_SYMBOL_ID, Clause, Literal, Term
 
 from gym_saturation.logic_ops.unification import (
     NonUnifiableError,
@@ -39,9 +41,9 @@ def paramodulation(
     r_position: int,
 ) -> Clause:
     r"""
-    .. _paramodulation:
+    Apply the binary paramodulation rule.
 
-    binary paramodulation rule
+    .. _paramodulation:
 
     .. math:: {\frac{C_1\vee s\approx t,C_2\vee L\left[r\right]}{\sigma\left(L\left[t\right]\vee C_1\vee C_2\right)}}
 
@@ -133,8 +135,9 @@ def all_paramodulants_from_clause(
     literal_two: Literal,
 ) -> Tuple[Clause, ...]:
     r"""
-    applies ``paramodulation`` with varying ``r_position`` argument
-    also varies for equality symmetry
+    Apply ``paramodulation`` with varying ``r_position`` argument.
+
+    Also varies for equality symmetry
 
     :param clause_one: :math:`C_1`
     :param literal_one: :math:`s\approx t`
@@ -143,7 +146,7 @@ def all_paramodulants_from_clause(
     :returns: a list of paramodulants for all possible values of ``r_position``
     """
     if (
-        literal_one.atom.name != "="
+        literal_one.atom.name != EQUALITY_SYMBOL_ID
         or literal_one.negated
         or len(literal_one.atom.arguments) != 2
     ):
@@ -167,11 +170,17 @@ def _get_new_paramodulants(
         clause_two = Clause(
             given_clause.literals[:j] + given_clause.literals[j + 1 :]
         )
-        if not literal_one.negated and literal_one.atom.name == "=":
+        if (
+            not literal_one.negated
+            and literal_one.atom.name == EQUALITY_SYMBOL_ID
+        ):
             paramodulants = paramodulants + all_paramodulants_from_clause(
                 clause_one, literal_one, clause_two, literal_two
             )
-        if not literal_two.negated and literal_two.atom.name == "=":
+        if (
+            not literal_two.negated
+            and literal_two.atom.name == EQUALITY_SYMBOL_ID
+        ):
             # pylint: disable=arguments-out-of-order
             paramodulants = paramodulants + all_paramodulants_from_clause(
                 clause_two, literal_two, clause_one, literal_one
@@ -184,17 +193,26 @@ def all_paramodulants_from_list(
     given_clause: Clause,
 ) -> Tuple[Clause, ...]:
     """
-    one of the four basic building block of the Given Clause algorithm
+    One of the four basic building block of the Given Clause algorithm.
 
     >>> from tptp_lark_parser.grammar import Literal, Function, Predicate
-    >>> all_paramodulants_from_list((Clause((Literal(False, Predicate("=", (Function("this_is_a_test_case", ()),))),), "one"),), Clause((Literal(True, Predicate("p", ())),), "two"))
+    >>> all_paramodulants_from_list(
+    ...     (Clause(
+    ...         (Literal(
+    ...             False,
+    ...             Predicate(EQUALITY_SYMBOL_ID, (Function(1, ()),))),
+    ...         ),
+    ...         "one"
+    ...     ),),
+    ...     Clause((Literal(True, Predicate(3, ())),), "two")
+    ... )
     Traceback (most recent call last):
      ...
-    ValueError: expected equality, but got Literal(negated=False, atom=Predicate(name='=', arguments=(Function(name='this_is_a_test_case', arguments=()),)))
+    ValueError: expected equality, but got Literal(negated=False, ...)
     >>> from tptp_lark_parser.tptp_parser import TPTPParser
     >>> parser = TPTPParser()
-    >>> one = parser.parse("cnf(one, axiom, a=b | X=X).", "")[0]
-    >>> two = parser.parse("cnf(two, axiom, b=c).", "")[0]
+    >>> one = parser.parse("cnf(one, axiom, a=b | X=X).")[0]
+    >>> two = parser.parse("cnf(two, axiom, b=c).")[0]
     >>> res = all_paramodulants_from_list((one,), two)
     >>> print(len(res))
     6

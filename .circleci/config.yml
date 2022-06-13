@@ -46,6 +46,7 @@ jobs:
           name: run linters
           command: |
             . venv/bin/activate
+            pydocstyle gym_saturation
             flake8 gym_saturation
             pylint gym_saturation
       - run:

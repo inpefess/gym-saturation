@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# noqa: D205, D400
 """
 Clause Space
 =============
@@ -20,9 +22,9 @@ from gym import spaces
 
 class ClauseSpace(spaces.Space):
     """
-    .. _clause_space:
+    An OpenAI Gym space for a list of dictionaries.
 
-    an OpenAI Gym space for a list of dictionaries
+    .. _clause_space:
 
     >>> space = ClauseSpace()
     >>> space.sample() in space
@@ -33,16 +35,16 @@ class ClauseSpace(spaces.Space):
     False
     """
 
-    def __init__(self):
+    def __init__(self):  # noqa: D107
         super().__init__(shape=(0,))
 
-    def contains(self, x):
+    def contains(self, x):  # noqa: D102
         if isinstance(x, list):
             for clause in x:
                 return isinstance(clause, dict)
         return False
 
-    def sample(self):
+    def sample(self):  # noqa: D102
         return [
             {
                 "literals": (),

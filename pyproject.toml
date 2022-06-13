@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "0.3.10"
+version = "0.3.11"
 description = "An OpenAI Gym environment for saturation provers"
 authors = ["Boris Shminke <boris@shminke.ml>"]
 license = "Apache-2.0"
@@ -41,6 +41,7 @@ types-dataclasses = "*"
 sphinx-rtd-theme = "*"
 sphinx-autodoc-typehints = "*"
 flake8 = "*"
+pydocstyle = "*"
 
 [tool.black]
 line-length=79
@@ -55,9 +56,9 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--doctest-modules --cov gym_saturation --cov-report xml --cov-fail-under=99 --junit-xml test-results/saturation_gym.xml"
+addopts = "--doctest-modules --cov gym_saturation --cov-report xml --cov-fail-under=100 --junit-xml test-results/gym-saturation.xml"
 testpaths = ["gym_saturation"]
-doctest_optionflags = "NORMALIZE_WHITESPACE"
+doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
 
 [tool.pylint.master]
 disable = "bad-continuation"

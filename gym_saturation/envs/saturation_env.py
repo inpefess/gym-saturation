@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# noqa: D205, D400
 """
 Saturation Environment
 =======================
@@ -47,7 +49,7 @@ MAX_CLAUSES = 100000
 
 class SaturationEnv(Env):
     """
-    saturation algorithm defined in a Reiforcement Learning friendly way
+    Saturation algorithm defined in a Reiforcement Learning friendly way.
 
     >>> import sys
     >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
@@ -70,16 +72,16 @@ class SaturationEnv(Env):
     one can look at the current state in TPTP format
 
     >>> print(env.render())
-    cnf(this_is_a_test_case_1, hypothesis, this_is_a_test_case(test_constant)).
-    cnf(this_is_a_test_case_2, hypothesis, ~this_is_a_test_case(test_constant)).
-    cnf(test_axiom, axiom, test_constant = test_constant_2).
-    cnf(test_axiom_2, axiom, ~test_constant = 0).
+    cnf(this_is_a_test_case_1, hypothesis, p(c)).
+    cnf(this_is_a_test_case_2, hypothesis, ~p(c)).
+    cnf(test_axiom, axiom, c = d).
+    cnf(test_axiom_2, axiom, ~c = e).
 
     ``ansi`` mode returns a JSON representation of the state
     it should be more easily parsable than TPTP, although less human-friendly
 
-    >>> env.render("ansi") # doctest: +ELLIPSIS
-    '...{"literals":[{"negated":false,"atom":{"name":"this_is_a_test_case","arguments":[{"name":...
+    >>> env.render("ansi")
+    [...{"literals":[{"negated":false,"atom":{"name":298,"arguments":[{"name...
 
     other modes are not implemented yet
 
@@ -118,7 +120,9 @@ class SaturationEnv(Env):
     TSTP proof is now available (one can add ``include`` directive before it
     for validation purposes)
 
-    >>> print(TPTPParser().parse(env.tstp_proof, "")[0])  # doctest: +ELLIPSIS
+    >>> print(env._tptp_parser.cnf_parser.pretty_print(
+    ...     env._tptp_parser.parse(env.tstp_proof)[0])
+    ... )
     cnf(..., lemma, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
 
     the relevant actions are filtered too
@@ -147,6 +151,12 @@ class SaturationEnv(Env):
         problem_list: List[str],
         max_clauses: int = MAX_CLAUSES,
     ):
+        """
+        Initialize spaces et al.
+
+        :param problem_list: a list of the names of TPTP problem files
+        :param max_clauses: maximal number of clauses to store in proof state
+        """
         super().__init__()
         self.problem_list = problem_list
         self._state: Dict[str, Clause] = {}
@@ -159,14 +169,16 @@ class SaturationEnv(Env):
             }
         )
         self.problem: Optional[str] = None
-        self._tptp_parser = TPTPParser()
+        tptp_folder = os.path.join(
+            os.path.dirname(problem_list[0]), "..", ".."
+        )
+        self._tptp_parser = TPTPParser(tptp_folder)
 
     def _init_clauses(self) -> Dict[str, Clause]:
         self.problem = random.choice(self.problem_list)
-        tptp_folder = os.path.join(os.path.dirname(self.problem), "..", "..")
         with open(self.problem, "r", encoding="utf-8") as problem_file:
             problem_text = problem_file.read()
-        parsed_clauses = self._tptp_parser.parse(problem_text, tptp_folder)
+        parsed_clauses = self._tptp_parser.parse(problem_text)
         return {
             clause.label: dataclasses.replace(
                 clause,
@@ -178,8 +190,8 @@ class SaturationEnv(Env):
             for clause in parsed_clauses
         }
 
-    def reset(self) -> dict:
-        self._state = reindex_variables(self._init_clauses(), "X")
+    def reset(self) -> dict:  # noqa: D102
+        self._state = reindex_variables(self._init_clauses())
         self._state_set = set(
             map(
                 lambda clause: tuple(
@@ -260,6 +272,23 @@ class SaturationEnv(Env):
         return done, info
 
     def step(self, action: int) -> Tuple[dict, float, bool, Dict[str, Any]]:
+        # noqa: D301
+        """
+        Run one timestep of the environment's dynamics.
+
+        When end of episode is reached, you are responsible for calling
+        ``reset()`` to reset this environment's state.
+        Accepts an action and returns a tuple (observation, reward, done, info)
+
+        :param action: an action provided by the agent
+        :returns: a tuple of four values:\n
+            * observation: agent's observation of the current environment
+            * reward: amount of reward returned after previous action
+            * done: whether the episode has ended, in which case further
+              ``step()`` calls will return undefined results
+            * info: contains auxiliary diagnostic information (helpful for
+              debugging, and sometimes learning)
+        """
         if list(self._state.values())[action].processed:
             raise ValueError(f"action {action} is not valid")
         updated = self._do_deductions(action)
@@ -277,26 +306,27 @@ class SaturationEnv(Env):
 
     @property
     def last_birth_step(self) -> int:
-        """
-        :returns: the last birth step number of the clauses in the proof state
-        """
+        """Return the last birth step number of clauses in the proof state."""
         return max(
             [getattr(clause, "birth_step", 0) for clause in self._state]
         )
 
     # pylint: disable=inconsistent-return-statements
-    def render(self, mode="human"):
+    def render(self, mode="human"):  # noqa: D102
         if mode == "ansi":
-            return str(self.state["real_obs"])
+            return self.state["real_obs"]
         if mode == "human":
-            return "\n".join(map(str, self._state.values()))
+            return "\n".join(
+                map(
+                    self._tptp_parser.cnf_parser.pretty_print,
+                    self._state.values(),
+                )
+            )
         super().render(mode=mode)
 
     @property
     def state(self) -> dict:
-        """
-        :returns: environment state in Python ``dict`` format
-        """
+        """Return environment state in Python ``dict`` format."""
         return {
             "real_obs": [
                 orjson.dumps(clause) for clause in self._state.values()
@@ -313,19 +343,17 @@ class SaturationEnv(Env):
             )[: self.action_space.n],
         }
 
-    def seed(self, seed=None):
+    def seed(self, seed=None):  # noqa: D102
         random.seed(seed)
         return seed
 
     @property
     def tstp_proof(self) -> str:
-        """
-        :returns: TSTP proof (if found; raises an error otherwise)
-        """
+        """Return TSTP proof (if found; raises an error otherwise)."""
         return "\n".join(
             reversed(
                 [
-                    str(clause)
+                    self._tptp_parser.cnf_parser.pretty_print(clause)
                     for clause in reduce_to_proof(self._state)
                     if clause.inference_rule is not None
                 ]
@@ -335,8 +363,9 @@ class SaturationEnv(Env):
     @property
     def positive_actions(self) -> Tuple[int, ...]:
         """
-        :returns: a sequence of actions which contributed to the proof found
-            (if found; raises an error otherwise)
+        Return a sequence of actions which contributed to the proof found.
+
+        If there is no proof yet, raises an error.
         """
         proof = reduce_to_proof(self._state)
         return tuple(

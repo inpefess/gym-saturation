@@ -58,7 +58,7 @@ One can also run it in a Docker container:
 .. code:: sh
 
    docker build -t gym-saturation https://github.com/inpefess/gym-saturation.git
-   docker run -it --rm -p 8888:8888 gym-saturation jupyter-lab --ip=0.0.0.0 --port=8888 --no-browser
+   docker run -it --rm -p 8888:8888 gym-saturation jupyter-lab --ip=0.0.0.0 --port=8888
 
 How to use
 ==========

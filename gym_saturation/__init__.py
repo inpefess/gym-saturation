@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-There is only one environment in this module.
-It's registered using a limit for steps in an episode
+There are two environments in this module.
+
+They are registered using a limit for the number of steps in an episode and the
+maximal possible reward is set to ``1.0`` (proof is found).
 """
 from gym.envs.registration import register
 
@@ -29,4 +31,4 @@ register(
     max_episode_steps=1000,
     reward_threshold=1.0,
 )
-__version__ = "0.3.10"
+__version__ = "0.3.11"

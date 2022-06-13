@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# noqa: D205, D400
 """
 Factoring
 ==========
@@ -31,9 +33,9 @@ def factoring(
     literal_two: gram.Literal,
 ) -> gram.Clause:
     r"""
-    .. _factoring:
+    Apply positive factoring rule.
 
-    positive factoring rule
+    .. _factoring:
 
     .. math:: {\frac{C\vee A_1\vee A_2}{\sigma\left(C\vee L_1\right)}}
 
@@ -72,13 +74,16 @@ def all_possible_factors(
     given_clause: gram.Clause,
 ) -> Tuple[gram.Clause, ...]:
     """
-    one of the four basic building blocks of the Given Clause algorithm
+    One of the four basic building blocks of the Given Clause algorithm.
 
     >>> from tptp_lark_parser.tptp_parser import TPTPParser
     >>> parser = TPTPParser()
-    >>> clause = parser.parse("cnf(one, axiom, p(c) | p(X) | q).", "")[0]
-    >>> all_possible_factors(clause)  # doctest: +ELLIPSIS
-    (cnf(x..., lemma, q() | p(c), inference(factoring, [], [one])).,)
+    >>> clause = parser.parse("cnf(one, axiom, p(c) | p(X) | q).")[0]
+    >>> tuple(map(
+    ...     parser.cnf_parser.pretty_print,
+    ...     all_possible_factors(clause)
+    ... ))
+    ('cnf(x..., lemma, q() | p(c), inference(factoring, [], [one])).',)
 
     :param given_clause: a new clause which should be combined with all the
         processed ones
