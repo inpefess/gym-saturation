@@ -66,10 +66,13 @@ def all_possible_reflexivity_resolvents(
     One of the four basic building blocks of the Given Clause algorithm.
 
     >>> from tptp_lark_parser.tptp_parser import TPTPParser
-    >>> parser = TPTPParser(extendable=True)
-    >>> clause = parser.parse("cnf(this_is_a_test_case, axiom, p3(X) | ~ X=f1 | f2 != f1).")[0]
-    >>> all_possible_reflexivity_resolvents(clause)
-    (cnf(x..., lemma, p3(f1) | ~f2 = f1, inference(reflexivity_resolution, [], [this_is_a_test_case])).,)
+    >>> parser = TPTPParser()
+    >>> clause = parser.parse("cnf(this_is_a_test_case, axiom, p(X) | ~ X=a | b != a).")[0]
+    >>> tuple(map(
+    ...     parser.cnf_parser.pretty_print,
+    ...     all_possible_reflexivity_resolvents(clause)
+    ... ))
+    ('cnf(x..., lemma, p(a) | ~b = a, inference(reflexivity_resolution, [], [this_is_a_test_case])).',)
 
     :param given_clause: a new clause which should be combined with all the
         processed ones

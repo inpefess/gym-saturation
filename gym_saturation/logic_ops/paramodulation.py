@@ -210,7 +210,7 @@ def all_paramodulants_from_list(
      ...
     ValueError: expected equality, but got Literal(negated=False, ...)
     >>> from tptp_lark_parser.tptp_parser import TPTPParser
-    >>> parser = TPTPParser(extendable=True)
+    >>> parser = TPTPParser()
     >>> one = parser.parse("cnf(one, axiom, a=b | X=X).")[0]
     >>> two = parser.parse("cnf(two, axiom, b=c).")[0]
     >>> res = all_paramodulants_from_list((one,), two)

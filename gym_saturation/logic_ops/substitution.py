@@ -39,9 +39,9 @@ class Substitution:
     ...                 3,
     ...                 (grammar.Function(1, (grammar.Variable(0),)),))
     ...             ),
-    ...     ))
+    ...     ), label="this_is_a_test_case")
     ... )
-    cnf(..., lemma, p3(f1(f2))).
+    Clause(literals=(Literal(negated=False, atom=Predicate(name=3, arguments=(Function(name=1, arguments=(Function(name=2, arguments=()),)),))),), label='this_is_a_test_case', role='lemma', inference_parents=None, inference_rule=None, processed=None, birth_step=None)
     >>> substitution(grammar.Variable(0))
     Function(name=2, arguments=())
     """

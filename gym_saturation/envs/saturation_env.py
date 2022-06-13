@@ -72,16 +72,16 @@ class SaturationEnv(Env):
     one can look at the current state in TPTP format
 
     >>> print(env.render())
-    cnf(this_is_a_test_case_1, hypothesis, p3(f1)).
-    cnf(this_is_a_test_case_2, hypothesis, ~p3(f1)).
-    cnf(test_axiom, axiom, f1 = f2).
-    cnf(test_axiom_2, axiom, ~f1 = f3).
+    cnf(this_is_a_test_case_1, hypothesis, p(c)).
+    cnf(this_is_a_test_case_2, hypothesis, ~p(c)).
+    cnf(test_axiom, axiom, c = d).
+    cnf(test_axiom_2, axiom, ~c = e).
 
     ``ansi`` mode returns a JSON representation of the state
     it should be more easily parsable than TPTP, although less human-friendly
 
     >>> env.render("ansi")
-    '...{"literals":[{"negated":false,"atom":{"name":1,"arguments":[{"name":...
+    [...{"literals":[{"negated":false,"atom":{"name":298,"arguments":[{"name...
 
     other modes are not implemented yet
 
@@ -120,7 +120,9 @@ class SaturationEnv(Env):
     TSTP proof is now available (one can add ``include`` directive before it
     for validation purposes)
 
-    >>> print(TPTPParser().parse(env.tstp_proof)[0])
+    >>> print(env._tptp_parser.cnf_parser.pretty_print(
+    ...     env._tptp_parser.parse(env.tstp_proof)[0])
+    ... )
     cnf(..., lemma, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
 
     the relevant actions are filtered too
@@ -170,7 +172,7 @@ class SaturationEnv(Env):
         tptp_folder = os.path.join(
             os.path.dirname(problem_list[0]), "..", ".."
         )
-        self._tptp_parser = TPTPParser(tptp_folder, True)
+        self._tptp_parser = TPTPParser(tptp_folder)
 
     def _init_clauses(self) -> Dict[str, Clause]:
         self.problem = random.choice(self.problem_list)
@@ -297,9 +299,14 @@ class SaturationEnv(Env):
     # pylint: disable=inconsistent-return-statements
     def render(self, mode="human"):  # noqa: D102
         if mode == "ansi":
-            return str(self.state["real_obs"])
+            return self.state["real_obs"]
         if mode == "human":
-            return "\n".join(map(str, self._state.values()))
+            return "\n".join(
+                map(
+                    self._tptp_parser.cnf_parser.pretty_print,
+                    self._state.values(),
+                )
+            )
         super().render(mode=mode)
 
     @property
@@ -331,7 +338,7 @@ class SaturationEnv(Env):
         return "\n".join(
             reversed(
                 [
-                    str(clause)
+                    self._tptp_parser.cnf_parser.pretty_print(clause)
                     for clause in reduce_to_proof(self._state)
                     if clause.inference_rule is not None
                 ]

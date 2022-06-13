@@ -77,10 +77,13 @@ def all_possible_factors(
     One of the four basic building blocks of the Given Clause algorithm.
 
     >>> from tptp_lark_parser.tptp_parser import TPTPParser
-    >>> parser = TPTPParser(extendable=True)
-    >>> clause = parser.parse("cnf(one, axiom, p3(f1) | p3(X) | p4).")[0]
-    >>> all_possible_factors(clause)
-    (cnf(x..., lemma, p4() | p3(f1), inference(factoring, [], [one])).,)
+    >>> parser = TPTPParser()
+    >>> clause = parser.parse("cnf(one, axiom, p(c) | p(X) | q).")[0]
+    >>> tuple(map(
+    ...     parser.cnf_parser.pretty_print,
+    ...     all_possible_factors(clause)
+    ... ))
+    ('cnf(x..., lemma, q() | p(c), inference(factoring, [], [one])).',)
 
     :param given_clause: a new clause which should be combined with all the
         processed ones

@@ -47,7 +47,7 @@ class VampireWrapper:
     ValueError: start solving a problem first!
     >>> old_result = vampire.start(tptp_problem, tptp_folder)
     >>> print(old_result)
-    (('input', '1', 'mortal(X0) | ~man(X0) [input]'),...
+    (('input', '1', 'animal(X0) | ~carnivore(X0) [input]'),...
     >>> new_result = vampire.start(tptp_problem, tptp_folder)
     >>> old_result == new_result
     True

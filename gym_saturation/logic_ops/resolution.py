@@ -47,13 +47,13 @@ def resolution(
     * :math:`\sigma` is a most general unifier of atoms from :math:`L_1` and :math:`L_2`
 
     >>> from tptp_lark_parser.grammar import Predicate, Variable, Function
-    >>> resolution(
+    >>> "this_is_a_test_case", resolution(
     ...     Clause((Literal(False, Predicate(4, (Variable(0),))),)),
     ...     Literal(False, Predicate(3, (Variable(0),))),
     ...     Clause((Literal(False, Predicate(5, (Variable(0),))),)),
     ...     Literal(True, Predicate(3, (Function(1, ()),)))
-    ... )
-    cnf(x..., lemma, p4(f1) | p5(f1)).
+    ... ).literals
+    ('this_is_a_test_case', (Literal(negated=False, atom=Predicate(name=4, arguments=(Function(name=1, arguments=()),))), Literal(negated=False, atom=Predicate(name=5, arguments=(Function(name=1, arguments=()),)))))
     >>> resolution(Clause(()), Literal(False, Predicate("f", ())), Clause(()), Literal(False, Predicate("this_is_a_test_case", ())))
     Traceback (most recent call last):
      ...
@@ -108,11 +108,14 @@ def all_possible_resolvents(
     One of the four basic building blocks of the Given Clause algorithm.
 
     >>> from tptp_lark_parser.tptp_parser import TPTPParser
-    >>> parser = TPTPParser(extendable=True)
-    >>> one = parser.parse("cnf(one, axiom, p3(X) | p2(X)).")[0]
-    >>> two = parser.parse("cnf(two, axiom, ~p2(f1)).")[0]
-    >>> all_possible_resolvents((one,), two)
-    (cnf(x..., lemma, p3(f1), inference(resolution, [], [one, two])).,)
+    >>> parser = TPTPParser()
+    >>> one = parser.parse("cnf(one, axiom, q(X) | p(X)).")[0]
+    >>> two = parser.parse("cnf(two, axiom, ~p(c)).")[0]
+    >>> tuple(map(
+    ...      parser.cnf_parser.pretty_print,
+    ...      all_possible_resolvents((one,), two)
+    ... ))
+    ('cnf(x..., lemma, q(c), inference(resolution, [], [one, two])).',)
 
     :param clauses: a list of (processed) clauses
     :param given_clause: a new clause which should be combined with all the
