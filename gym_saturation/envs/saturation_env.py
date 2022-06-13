@@ -271,9 +271,24 @@ class SaturationEnv(Env):
                 return True, info
         return done, info
 
-    def step(
-        self, action: int
-    ) -> Tuple[dict, float, bool, Dict[str, Any]]:  # noqa: D102
+    def step(self, action: int) -> Tuple[dict, float, bool, Dict[str, Any]]:
+        # noqa: D301
+        """
+        Run one timestep of the environment's dynamics.
+
+        When end of episode is reached, you are responsible for calling
+        ``reset()`` to reset this environment's state.
+        Accepts an action and returns a tuple (observation, reward, done, info)
+
+        :param action: an action provided by the agent
+        :returns: a tuple of four values:\n
+            * observation: agent's observation of the current environment
+            * reward: amount of reward returned after previous action
+            * done: whether the episode has ended, in which case further
+              ``step()`` calls will return undefined results
+            * info: contains auxiliary diagnostic information (helpful for
+              debugging, and sometimes learning)
+        """
         if list(self._state.values())[action].processed:
             raise ValueError(f"action {action} is not valid")
         updated = self._do_deductions(action)
