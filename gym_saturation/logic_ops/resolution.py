@@ -53,11 +53,14 @@ def resolution(
     ...     Clause((Literal(False, Predicate(5, (Variable(0),))),)),
     ...     Literal(True, Predicate(3, (Function(1, ()),)))
     ... ).literals
-    ('this_is_a_test_case', (Literal(negated=False, atom=Predicate(name=4, arguments=(Function(name=1, arguments=()),))), Literal(negated=False, atom=Predicate(name=5, arguments=(Function(name=1, arguments=()),)))))
-    >>> resolution(Clause(()), Literal(False, Predicate("f", ())), Clause(()), Literal(False, Predicate("this_is_a_test_case", ())))
+    ('this_is_a_test_case', (Literal(negated=False, atom=Predicate(index=4, arguments=(Function(index=1, arguments=()),))), Literal(negated=False, atom=Predicate(index=5, arguments=(Function(index=1, arguments=()),)))))
+    >>> resolution(
+    ...     Clause(()), Literal(False, Predicate(8, ())),
+    ...     Clause(()), Literal(False, Predicate(7, ()))
+    ... )
     Traceback (most recent call last):
      ...
-    ValueError: resolution is not possible for Literal(negated=False, atom=Predicate(name='f', arguments=())) and Literal(negated=False, atom=Predicate(name='this_is_a_test_case', arguments=()))
+    ValueError: resolution is not possible for Literal(negated=False, atom=...
 
     :param clause_one: :math:`C_1`
     :param literal_one: :math:`L_1`

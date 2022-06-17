@@ -46,12 +46,15 @@ def factoring(
     * :math:`\sigma` is a most general unifier of :math:`A_1` and :math:`A_2`
 
     >>> from tptp_lark_parser.grammar import Predicate, Variable, Function
-    >>> factoring(gram.Clause((gram.Literal(True, Predicate("q", (Variable("X"),))),)), gram.Literal(False, Predicate("p", (Variable("X"),))), gram.Literal(False, Predicate("p", (Function("this_is_a_test_case", ()),)))).literals
-    (Literal(negated=True, atom=Predicate(name='q', arguments=(Function(name='this_is_a_test_case', arguments=()),))), Literal(negated=False, atom=Predicate(name='p', arguments=(Function(name='this_is_a_test_case', arguments=()),))))
-    >>> factoring(gram.Clause(()), gram.Literal(False, Predicate("f", ())), gram.Literal(True, Predicate("this_is_a_test_case", ())))
+    >>> "this_is_a_test_case", factoring(gram.Clause((gram.Literal(True, Predicate(8, (Variable(0),))),)), gram.Literal(False, Predicate(9, (Variable(0),))), gram.Literal(False, Predicate(9, (Function(0, ()),)))).literals
+    ('this_is_a_test_case', (Literal(negated=True, atom=Predicate(index=8, arguments=(Function(index=0, arguments=()),))), Literal(negated=False, atom=Predicate(index=9, arguments=(Function(index=0, arguments=()),)))))
+    >>> factoring(
+    ...     gram.Clause(()), gram.Literal(False, Predicate(8, ())),
+    ...     gram.Literal(True, Predicate(7, ()))
+    ... )
     Traceback (most recent call last):
      ...
-    ValueError: factoring is not possible for Literal(negated=False, atom=Predicate(name='f', arguments=())) and Literal(negated=True, atom=Predicate(name='this_is_a_test_case', arguments=()))
+    ValueError: factoring is not possible for Literal(negated=False, atom=P...
 
     :param given_clause: :math:`C`
     :param literal_one: :math:`A_1`

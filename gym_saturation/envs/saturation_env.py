@@ -81,7 +81,7 @@ class SaturationEnv(Env):
     it should be more easily parsable than TPTP, although less human-friendly
 
     >>> env.render("ansi")
-    [...{"literals":[{"negated":false,"atom":{"name":298,"arguments":[{"name...
+    [...{"literals":[{"negated":false,"atom":{"index":298,"arguments":[{"ind...
 
     other modes are not implemented yet
 

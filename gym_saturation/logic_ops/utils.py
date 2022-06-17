@@ -22,6 +22,7 @@ from itertools import chain
 from typing import Dict, Tuple, Union
 
 from tptp_lark_parser.grammar import (
+    EQUALITY_SYMBOL_ID,
     Clause,
     Function,
     Predicate,
@@ -61,8 +62,10 @@ def get_variable_list(
     Find all variables present in a clause.
 
     >>> from tptp_lark_parser.grammar import Literal
-    >>> get_variable_list(Clause((Literal(False, Predicate("this_is_a_test_case", (Function("f", (Variable("X"), Variable("X"))),))),)))
-    (Variable(name='X'), Variable(name='X'))
+    >>> get_variable_list(Clause((Literal(False,
+    ...     Predicate(0, (Function(0, (Variable(0), Variable(0))),))
+    ... ),)))
+    (Variable(index=0), Variable(index=0))
 
     :param clause: a clause
     :returns: a list (with repetitions) of variables from there clause
@@ -107,11 +110,15 @@ def is_tautology(clause: Clause) -> bool:
     Check whether there are two literals (negated and not) with the same atom.
 
     >>> from tptp_lark_parser.grammar import Literal
-    >>> is_tautology(Clause((Literal(False, Predicate("this_is_a_test_case", ())),)))
+    >>> is_tautology(Clause((Literal(False, Predicate(7, ())),)))
     False
-    >>> is_tautology(Clause((Literal(False, Predicate("this_is_a_test_case", ())), Literal(True, Predicate("this_is_a_test_case", ())))))
+    >>> is_tautology(Clause(
+    ...     (Literal(False, Predicate(7, ())), Literal(True, Predicate(7, ())))
+    ... ))
     True
-    >>> is_tautology(Clause((Literal(False, Predicate("=", (Variable("X"), Variable("X")))),), label="this_is_a_test_case"))
+    >>> is_tautology(Clause(
+    ...     (Literal(False, Predicate(1, (Variable(0), Variable(0)))),)
+    ... ))
     True
 
     :param clause: a clause to check
@@ -125,7 +132,7 @@ def is_tautology(clause: Clause) -> bool:
                 and literal.atom == another_literal.atom
             ):
                 return True
-        if literal.atom.name == "=" and (
+        if literal.atom.index == EQUALITY_SYMBOL_ID and (
             literal.atom.arguments[0] == literal.atom.arguments[1]
         ):
             return True
@@ -151,7 +158,7 @@ def clause_length(clause: dict) -> int:
     length = 0
     if isinstance(clause, dict):
         for key, value in clause.items():
-            if key in {"negated", "name"}:
+            if key in {"negated", "index"}:
                 length += 1
             if isinstance(value, dict):
                 length += clause_length(value)
@@ -168,7 +175,7 @@ def proposition_length(proposition: Proposition) -> int:
     :param proposition: a function, a predicate or a variable
     :return: sctructural length of a proposition
 
-    >>> proposition_length(Predicate("p", (Function("f", (Variable("X"),)),)))
+    >>> proposition_length(Predicate(7, (Function(0, (Variable(0),)),)))
     3
     """
     length = 0
@@ -202,11 +209,13 @@ def subterm_by_index(atom: Proposition, index: int) -> Term:
     """
     Extract a subterm using depth-first search.
 
-    >>> atom = Predicate("this_is_a_test_case", (Function("f", (Variable("X"),)), Function("g", (Variable("Y"),))))
+    >>> atom = Predicate(7, (
+    ...     Function(0, (Variable(0),)), Function(1, (Variable(1),))
+    ... ))
     >>> subterm_by_index(atom, 0)
     Traceback (most recent call last):
      ...
-    ValueError: subterm with index 0 exists only for terms, but got: Predicate(name='this_is_a_test_case', arguments=(Function(name='f', arguments=(Variable(name='X'),)), Function(name='g', arguments=(Variable(name='Y'),))))
+    ValueError: subterm with index 0 exists only for terms, but got: Predica...
     >>> subterm_by_index(atom, 1) == atom.arguments[0]
     True
     >>> subterm_by_index(atom, 2) == atom.arguments[0].arguments[0]
@@ -254,14 +263,16 @@ def replace_subterm_by_index(
     """
     Replace a subterm with a given index (depth-first search) by a new term.
 
-    >>> atom = Predicate("this_is_a_test_case", (Function("f", (Variable("X"),)), Function("g", (Variable("Y"),))))
-    >>> replace_subterm_by_index(atom, 0, Variable("Z"))
+    >>> atom = Predicate(7, (
+    ...     Function(0, (Variable(0),)), Function(1, (Variable(2),))
+    ... ))
+    >>> replace_subterm_by_index(atom, 0, Variable(3))
     Traceback (most recent call last):
      ...
     gym_saturation.logic_ops.utils.NoSubtermFound: 5
-    >>> replace_subterm_by_index(atom, 4, Function("h", (Variable("Z"),)))
-    Predicate(name='this_is_a_test_case', arguments=(Function(name='f', arguments=(Variable(name='X'),)), Function(name='g', arguments=(Function(name='h', arguments=(Variable(name='Z'),)),))))
-    >>> replace_subterm_by_index(Predicate("this_is_a_test_case", (Variable("X"),)), 1, Variable("X"))
+    >>> "this_is_a_test_case", replace_subterm_by_index(atom, 4, Function(2, (Variable(3),)))
+    ('this_is_a_test_case', Predicate(index=7, arguments=(Function(index=0, arguments=(Variable(index=0),)), Function(index=1, arguments=(Function(index=2, arguments=(Variable(index=3),)),)))))
+    >>> replace_subterm_by_index(Predicate(7, (Variable(0),)), 1, Variable(0))
     Traceback (most recent call last):
      ...
     gym_saturation.logic_ops.utils.TermSelfReplace

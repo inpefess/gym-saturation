@@ -41,9 +41,9 @@ class Substitution:
     ...             ),
     ...     ), label="this_is_a_test_case")
     ... )
-    Clause(literals=(Literal(negated=False, atom=Predicate(name=3, arguments=(Function(name=1, arguments=(Function(name=2, arguments=()),)),))),), label='this_is_a_test_case', role='lemma', inference_parents=None, inference_rule=None, processed=None, birth_step=None)
+    Clause(literals=(Literal(negated=False, atom=Predicate(index=3, arguments=(Function(index=1, arguments=(Function(index=2, arguments=()),)),))),), label='this_is_a_test_case', role='lemma', inference_parents=None, inference_rule=None, processed=None, birth_step=None)
     >>> substitution(grammar.Variable(0))
-    Function(name=2, arguments=())
+    Function(index=2, arguments=())
     """
 
     variable: grammar.Variable
@@ -66,13 +66,13 @@ class Substitution:
     def _substitute_in_term(self, term: grammar.Term) -> grammar.Term:
         if isinstance(term, grammar.Function):
             return grammar.Function(
-                term.name,
+                term.index,
                 tuple(
                     self._substitute_in_term(argument)
                     for argument in term.arguments
                 ),
             )
-        if term.name == self.variable.name:
+        if term.index == self.variable.index:
             return self.term
         return term
 
@@ -80,7 +80,7 @@ class Substitution:
         self, predicate: grammar.Predicate
     ) -> grammar.Predicate:
         return grammar.Predicate(
-            predicate.name,
+            predicate.index,
             tuple(
                 self._substitute_in_term(argument)
                 for argument in predicate.arguments
