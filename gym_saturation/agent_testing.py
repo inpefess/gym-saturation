@@ -218,6 +218,15 @@ def _proof_found_before_the_start(env: SaturationEnv) -> Tuple[float, bool]:
         return 0.0, False
 
 
+def _reset_with_options(env: gym.Env) -> dict:
+    res = env.reset()
+    if isinstance(res, tuple):
+        obs, _ = res  # pragma: nocover
+    else:
+        obs = res
+    return obs
+
+
 def episode(env: SaturationEnv, agent: BaseAgent) -> float:
     """
     Try to solve the problem and logs the clauses.
@@ -246,7 +255,8 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> float:
     ...     env = gym.make(
     ...         "GymSaturation-v0",
     ...         problem_list=[problem_list[i]],
-    ...         max_clauses=max_clauses[i]
+    ...         max_clauses=max_clauses[i],
+    ...         disable_env_checker=True,
     ...     )
     ...     env._max_episode_steps = 5
     ...     agent_testing_report(env, agents[i])
@@ -260,7 +270,7 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> float:
     :param problem_filename: the name of a problem file
     :returns: total reward
     """
-    obs = env.reset()
+    obs = _reset_with_options(env)
     info: Dict[str, Any] = {STATE_DIFF_UPDATED: obs["real_obs"]}
     reward, done = _proof_found_before_the_start(env)
     total_reward = reward
@@ -368,15 +378,17 @@ def test_agent(args: Optional[List[str]] = None) -> None:
             "GymVampire-v0",
             problem_list=[arguments.problem_filename],
             vampire_binary_path=arguments.vampire_binary_path,
+            disable_env_checker=True,
         )
     else:
         env = gym.make(
             "GymSaturation-v0",
             problem_list=[arguments.problem_filename],
+            disable_env_checker=True,
         )
     environment = TimeLimit(env, arguments.step_limit)
     print(f"Problem file: {arguments.problem_filename}")
-    agent_testing_report(environment, SizeAgeAgent(5, 1))
+    agent_testing_report(environment, SizeAgeAgent(5, 1))  # type: ignore
 
 
 if __name__ == "__main__":

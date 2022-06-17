@@ -20,7 +20,7 @@ Saturation Environment
 import dataclasses
 import os
 import random
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import orjson
@@ -146,6 +146,12 @@ class SaturationEnv(Env):
     (True, 0.0)
     """
 
+    metadata = {"render_modes": ["ansi", "human"]}
+    reward_range = (0, 1)
+
+    action_space: spaces.Discrete
+    observation_space: spaces.Dict
+
     def __init__(
         self,
         problem_list: List[str],
@@ -190,7 +196,14 @@ class SaturationEnv(Env):
             for clause in parsed_clauses
         }
 
-    def reset(self) -> dict:  # noqa: D102
+    def reset(
+        self,
+        *,
+        seed: Optional[int] = None,
+        return_info: bool = False,
+        options: Optional[dict] = None,
+    ) -> Union[dict, Tuple[dict, dict]]:  # noqa: D102
+        super().reset(seed=seed)
         self._state = reindex_variables(self._init_clauses())
         self._state_set = set(
             map(
@@ -200,6 +213,8 @@ class SaturationEnv(Env):
                 self._state.values(),
             )
         )
+        if return_info:
+            return self.state, {}  # pragma: nocover
         return self.state
 
     def _add_to_state(self, new_clauses: Tuple[Clause, ...]) -> None:

@@ -17,12 +17,13 @@
 Clause Space
 =============
 """
+import orjson
 from gym import spaces
 
 
 class ClauseSpace(spaces.Space):
     """
-    An OpenAI Gym space for a list of dictionaries.
+    An OpenAI Gym space for a list of bytes.
 
     .. _clause_space:
 
@@ -40,19 +41,21 @@ class ClauseSpace(spaces.Space):
 
     def contains(self, x):  # noqa: D102
         if isinstance(x, list):
-            for clause in x:
-                return isinstance(clause, dict)
+            for byte_sequence in x:
+                return isinstance(byte_sequence, bytes)
         return False
 
     def sample(self):  # noqa: D102
         return [
-            {
-                "literals": (),
-                "label": "test",
-                "role": "lemma",
-                "birth_step": 0,
-                "processed": False,
-                "inference_parents": (),
-                "inference_rule": "",
-            }
+            orjson.dumps(
+                {
+                    "literals": (),
+                    "label": "test",
+                    "role": "lemma",
+                    "birth_step": 0,
+                    "processed": False,
+                    "inference_parents": (),
+                    "inference_rule": "",
+                }
+            )
         ]

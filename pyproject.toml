@@ -76,11 +76,7 @@ incremental = false
 disable_error_code = "no-redef"
 
 [[tool.mypy.overrides]]
-module = [
-    "gym.*",
-    "pexpect",
-    "importlib_resources"
-]
+module = ["pexpect", "importlib_resources"]
 ignore_missing_imports = true
 
 [tool.tox]
