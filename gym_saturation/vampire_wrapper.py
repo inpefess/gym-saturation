@@ -119,7 +119,11 @@ class VampireWrapper:
 
     @property
     def proc(self) -> pexpect.spawn:
-        """Vampire process."""
+        """
+        Vampire process.
+
+        :raises ValueError: when called before ``reset``
+        """
         if self._proc is None:
             raise ValueError("start solving a problem first!")
         return self._proc

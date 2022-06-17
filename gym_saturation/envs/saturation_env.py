@@ -303,6 +303,8 @@ class SaturationEnv(Env):
               ``step()`` calls will return undefined results
             * info: contains auxiliary diagnostic information (helpful for
               debugging, and sometimes learning)
+        :raises ValueError: if the ``action`` identifies an already processed
+            clause
         """
         if list(self._state.values())[action].processed:
             raise ValueError(f"action {action} is not valid")

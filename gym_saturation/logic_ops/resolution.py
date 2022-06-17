@@ -67,6 +67,8 @@ def resolution(
     :param clause_two: :math:`C_2`
     :param literal_two: :math:`L_2`
     :returns: a new clause --- the resolution result
+    :raises ValueError: if both ``literal_one`` and ``literal_two`` are negated
+        or non-negated
     """
     if literal_one.negated == literal_two.negated:
         raise ValueError(

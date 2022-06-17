@@ -150,6 +150,7 @@ def all_paramodulants_from_clause(
     :param clause_two: :math:`C_2`
     :param literal_two: :math:`L\left[r\right]`
     :returns: a list of paramodulants for all possible values of ``r_position``
+    :raises ValueError: if ``literal_one`` is not an equality
     """
     if (
         literal_one.atom.index != EQUALITY_SYMBOL_ID
@@ -226,9 +227,6 @@ def all_paramodulants_from_list(
     :param clauses: a list of (processed) clauses
     :param given_clause: a new clause which should be combined with all the
         processed ones
-    :param label_prefix: generated clauses will be labeled with this prefix
-    :param label_index_base: generated clauses will be indexed starting
-        with this number
     :returns: results of all possible paramodulants with each one from
         ``clauses`` and the ``given_clause``
     """

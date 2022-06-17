@@ -112,6 +112,7 @@ class VampireEnv(SaturationEnv):
                 raise ValueError("Unexpected reposnse type: ", response_type)
         return updated
 
+    # pylint: disable=duplicate-code
     def reset(
         self,
         *,

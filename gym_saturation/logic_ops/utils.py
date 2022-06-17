@@ -251,6 +251,8 @@ def subterm_by_index(atom: Proposition, index: int) -> Term:
     :param atom: a predicate or a term
     :param index: an index of a desired subterm
     :returns: a subterm
+    :raises ValueError: when trying to get a term with index 0 of a predicate
+    :raises NoSubtermFound: if subterm with a given index doesn't exist
     """
     if index == 0:
         if isinstance(atom, (Function, Variable)):
@@ -306,6 +308,7 @@ def replace_subterm_by_index(
     :param index: an index of a subterm to replace, must be greater than 0
     :param term: replacement term for a given index
     :returns:
+    :raises NoSubtermFound: if subterm with a given index doesn't exist
     """
     subterm_length = 1
     if not isinstance(atom, Variable):
@@ -353,6 +356,8 @@ def reduce_to_proof(clauses: Dict[str, Clause]) -> Tuple[Clause, ...]:
 
     :param clauses: a map of clause labels to clauses
     :returns: the reduced list of clauses
+    :raises WrongRefutationProofError: if there is no complete refutation proof
+        in a given proof state
     """
     empty_clauses = tuple(
         clause for clause in clauses.values() if clause.literals == tuple()

@@ -60,6 +60,7 @@ def factoring(
     :param literal_one: :math:`A_1`
     :param literal_two: :math:`A_2`
     :returns: a new clause --- the factoring result
+    :raises ValueError: if ``literal_one`` or ``literal_two`` is negated
     """
     if literal_one.negated or literal_two.negated:
         raise ValueError(

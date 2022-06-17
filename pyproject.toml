@@ -59,6 +59,20 @@ addopts = "--doctest-modules --cov gym_saturation --cov-report xml --cov-fail-un
 testpaths = ["gym_saturation"]
 doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
 
+[tool.pylint.MASTER]
+load-plugins = [
+    "pylint.extensions.consider_ternary_expression",
+    "pylint.extensions.docparams",
+    "pylint.extensions.mccabe",
+]
+
+[tool.pylint.parameter_documentation]
+accept-no-param-doc = false
+accept-no-raise-doc = false
+accept-no-return-doc = true
+accept-no-yields-doc = false
+default-docstring-type = "default"
+
 [tool.pylint.format]
 ignore-long-lines = "(::=|:==|this_is_a_test_case|gym_saturation.saturation_prover.saturation_algorithm|:math:|.. math::|https://)"
 max-line-length = 79
