@@ -68,7 +68,9 @@ How to use
    import gym
    import os
 
-   env = gym.make("GymSaturation-v0", problem_list=["..."])
+   env = gym.make(
+       "GymSaturation-v0", problem_list=["..."], disable_env_checker=True
+   )
    observation = env.reset()
    observation, reward, done, info = env.step(action)
 

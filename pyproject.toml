@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "0.3.11"
+version = "0.4.0"
 description = "An OpenAI Gym environment for saturation provers"
 authors = ["Boris Shminke <boris@shminke.ml>"]
 license = "Apache-2.0"
@@ -40,7 +40,6 @@ pre-commit = "*"
 types-dataclasses = "*"
 sphinx-rtd-theme = "*"
 sphinx-autodoc-typehints = "*"
-flake8 = "*"
 pydocstyle = "*"
 
 [tool.black]
@@ -60,8 +59,20 @@ addopts = "--doctest-modules --cov gym_saturation --cov-report xml --cov-fail-un
 testpaths = ["gym_saturation"]
 doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
 
-[tool.pylint.master]
-disable = "bad-continuation"
+[tool.pylint.MASTER]
+load-plugins = [
+    "pylint.extensions.consider_ternary_expression",
+    "pylint.extensions.docparams",
+    "pylint.extensions.mccabe",
+    "pylint.extensions.set_membership",
+]
+
+[tool.pylint.parameter_documentation]
+accept-no-param-doc = false
+accept-no-raise-doc = false
+accept-no-return-doc = true
+accept-no-yields-doc = false
+default-docstring-type = "sphinx"
 
 [tool.pylint.format]
 ignore-long-lines = "(::=|:==|this_is_a_test_case|gym_saturation.saturation_prover.saturation_algorithm|:math:|.. math::|https://)"
@@ -79,9 +90,25 @@ incremental = false
 disable_error_code = "no-redef"
 
 [[tool.mypy.overrides]]
-module = [
-    "gym.*",
-    "pexpect",
-    "importlib_resources"
-]
+module = ["pexpect", "importlib_resources"]
 ignore_missing_imports = true
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = True
+envlist = py37,py38,py39,py310
+
+[testenv]
+deps =
+    pytest-cov
+    pydocstyle
+    pylint
+    mypy
+    toml
+commands =
+    pydocstyle gym_saturation
+    pylint gym_saturation
+    mypy gym_saturation
+    pytest
+"""

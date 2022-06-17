@@ -20,7 +20,7 @@ Saturation Environment with Vampire backend
 import dataclasses
 import os
 import random
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import orjson
 from tptp_lark_parser.grammar import Clause
@@ -89,17 +89,17 @@ class VampireEnv(SaturationEnv):
     ) -> Dict[str, Clause]:
         updated: Dict[str, Clause] = {}
         for response_type, clause_label, clause_text in vampire_response:
-            if response_type in ("new", "final", "input", "fn def discovered"):
+            if response_type in {"new", "final", "input", "fn def discovered"}:
                 updated[clause_label] = self._parse_vampire_clause(
                     clause_label, clause_text
                 )
-            elif response_type in (
+            elif response_type in {
                 "active",
                 "forward reduce",
                 "passive",
                 "backward reduce",
                 "new propositional",
-            ):
+            }:
                 changed_clause = dataclasses.replace(
                     self._state[clause_label]
                     if clause_label in self._state
@@ -112,7 +112,16 @@ class VampireEnv(SaturationEnv):
                 raise ValueError("Unexpected reposnse type: ", response_type)
         return updated
 
-    def reset(self) -> dict:  # noqa: D102
+    # pylint: disable=duplicate-code
+    def reset(
+        self,
+        *,
+        seed: Optional[int] = None,
+        return_info: bool = False,
+        options: Optional[dict] = None,
+    ) -> Union[dict, Tuple[dict, dict]]:  # noqa: D102
+        # pylint: disable=bad-super-call
+        super(SaturationEnv, self).reset(seed=seed)
         self.problem = random.choice(self.problem_list)
         tptp_folder = os.path.join(os.path.dirname(self.problem), "..", "..")
         vampire_response = self._vampire.start(self.problem, tptp_folder)
@@ -122,6 +131,8 @@ class VampireEnv(SaturationEnv):
             clause.label: dataclasses.replace(clause, birth_step=0)
             for clause in updated.values()
         }
+        if return_info:
+            return self.state, {}  # pragma: nocover
         return self.state
 
     def _do_deductions(self, action: int) -> Tuple[bytes, ...]:

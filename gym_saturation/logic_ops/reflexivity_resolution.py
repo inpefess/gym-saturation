@@ -44,8 +44,8 @@ def reflexivity_resolution(
     * :math:`\sigma` is a most general unifier of :math:`s` and :math:`t`
 
     >>> from tptp_lark_parser.grammar import Predicate, Variable, Function
-    >>> reflexivity_resolution(grammar.Clause((grammar.Literal(True, Predicate("this_is_a_test_case", (Variable("X"),))),)), (Variable("X"), Function("f", ()))).literals
-    (Literal(negated=True, atom=Predicate(name='this_is_a_test_case', arguments=(Function(name='f', arguments=()),))),)
+    >>> "this_is_a_test_case", reflexivity_resolution(grammar.Clause((grammar.Literal(True, Predicate(7, (Variable(0),))),)), (Variable(0), Function(0, ()))).literals
+    ('this_is_a_test_case', (Literal(negated=True, atom=Predicate(index=7, arguments=(Function(index=0, arguments=()),))),))
 
     :param given_clause: :math:`C`
     :param a_literal: :math:`s\not\approx t`
@@ -83,9 +83,9 @@ def all_possible_reflexivity_resolvents(
     for i, a_literal in enumerate(given_clause.literals):
         if (
             a_literal.negated
-            and a_literal.atom.name == grammar.EQUALITY_SYMBOL_ID
+            and a_literal.atom.index == grammar.EQUALITY_SYMBOL_ID
             or not a_literal.negated
-            and a_literal.atom.name == grammar.INEQUALITY_SYMBOL_ID
+            and a_literal.atom.index == grammar.INEQUALITY_SYMBOL_ID
         ) and len(a_literal.atom.arguments) == 2:
             a_clause = grammar.Clause(
                 given_clause.literals[:i] + given_clause.literals[i + 1 :]

@@ -101,7 +101,6 @@ class SizeAgent(BaseAgent):
         Update the state of the agent according with the transition.
 
         :param info: an info dict (parm of environment response)
-        :returns:
         """
         parsed_state_diff = tuple(map(orjson.loads, info[STATE_DIFF_UPDATED]))
         self._state.update(
@@ -142,13 +141,11 @@ class AgeAgent(BaseAgent):
         info: Dict[str, Any],
     ) -> int:  # noqa: D102
         return min(
-            [
-                i
-                for i, clause in enumerate(
-                    map(orjson.loads, observation["real_obs"])
-                )
-                if not clause["processed"]
-            ]
+            i
+            for i, clause in enumerate(
+                map(orjson.loads, observation["real_obs"])
+            )
+            if not clause["processed"]
         )
 
 
@@ -220,6 +217,15 @@ def _proof_found_before_the_start(env: SaturationEnv) -> Tuple[float, bool]:
         return 0.0, False
 
 
+def _reset_with_options(env: gym.Env) -> dict:
+    res = env.reset()
+    if isinstance(res, tuple):
+        obs, _ = res  # pragma: nocover
+    else:
+        obs = res
+    return obs
+
+
 def episode(env: SaturationEnv, agent: BaseAgent) -> float:
     """
     Try to solve the problem and logs the clauses.
@@ -248,7 +254,8 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> float:
     ...     env = gym.make(
     ...         "GymSaturation-v0",
     ...         problem_list=[problem_list[i]],
-    ...         max_clauses=max_clauses[i]
+    ...         max_clauses=max_clauses[i],
+    ...         disable_env_checker=True,
     ...     )
     ...     env._max_episode_steps = 5
     ...     agent_testing_report(env, agents[i])
@@ -259,10 +266,9 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> float:
 
     :param env: a `gym_saturation` environment
     :param agent: an initialized agent. Must have `get_action` method
-    :param problem_filename: the name of a problem file
     :returns: total reward
     """
-    obs = env.reset()
+    obs = _reset_with_options(env)
     info: Dict[str, Any] = {STATE_DIFF_UPDATED: obs["real_obs"]}
     reward, done = _proof_found_before_the_start(env)
     total_reward = reward
@@ -303,7 +309,6 @@ def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
 
     :param env: an environment
     :param agent: an agent
-    :returns:
     """
     total_reward = episode(env, agent)
     step_count = getattr(env, "_elapsed_steps")
@@ -362,23 +367,28 @@ def test_agent(args: Optional[List[str]] = None) -> None:
     Proof of length 5 found in 3 steps:
     ...
     cnf(5, hyp..., $false, inference(subsumption_resolution, [], [4, 3])).
+
+    :param args: parameters from the command line or explicitly set
     """
     sys.setrecursionlimit(10000)
     arguments = parse_args(args)
-    if arguments.vampire_binary_path is not None:
-        env = gym.make(
+    env = (
+        gym.make(
             "GymVampire-v0",
             problem_list=[arguments.problem_filename],
             vampire_binary_path=arguments.vampire_binary_path,
+            disable_env_checker=True,
         )
-    else:
-        env = gym.make(
+        if arguments.vampire_binary_path is not None
+        else gym.make(
             "GymSaturation-v0",
             problem_list=[arguments.problem_filename],
+            disable_env_checker=True,
         )
+    )
     environment = TimeLimit(env, arguments.step_limit)
     print(f"Problem file: {arguments.problem_filename}")
-    agent_testing_report(environment, SizeAgeAgent(5, 1))
+    agent_testing_report(environment, SizeAgeAgent(5, 1))  # type: ignore
 
 
 if __name__ == "__main__":

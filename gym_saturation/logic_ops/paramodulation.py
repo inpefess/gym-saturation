@@ -56,9 +56,15 @@ def paramodulation(
     * :math:`\sigma` is a most general unifier of :math:`s` and :math:`r`
 
     >>> from tptp_lark_parser.grammar import Predicate, Variable, Function
-    >>> res = paramodulation(Clause((Literal(False, Predicate("q", (Variable("X"),))),)), (Variable("X"), Function("this_is_a_test_case", ())), Clause((Literal(False, Predicate("r", (Variable("X"),))),)), Literal(True, Predicate("p", (Function("f", ()),))), 1).literals
-    >>> list(sorted(map(str, res)))
-    ["Literal(negated=False, atom=Predicate(name='q', arguments=(Function(name='f', arguments=()),)))", "Literal(negated=False, atom=Predicate(name='r', arguments=(Function(name='f', arguments=()),)))", "Literal(negated=True, atom=Predicate(name='p', arguments=(Function(name='this_is_a_test_case', arguments=()),)))"]
+    >>> res = paramodulation(
+    ...     Clause((Literal(False, Predicate(8, (Variable(0),))),)),
+    ...     (Variable(0), Function(7, ())),
+    ...     Clause((Literal(False, Predicate(9, (Variable(0),))),)),
+    ...     Literal(True, Predicate(10, (Function(0, ()),))),
+    ...     1
+    ... ).literals
+    >>> "this_is_a_test_case", list(sorted(map(str, res)))
+    ('this_is_a_test_case', ['Literal(negated=False, atom=Predicate(index=8, arguments=(Function(index=0, arguments=()),)))', 'Literal(negated=False, atom=Predicate(index=9, arguments=(Function(index=0, arguments=()),)))', 'Literal(negated=True, atom=Predicate(index=10, arguments=(Function(index=7, arguments=()),)))'])
 
     :param clause_one: :math:`C_1`
     :param literal_one: :math:`s\approx t`
@@ -144,9 +150,10 @@ def all_paramodulants_from_clause(
     :param clause_two: :math:`C_2`
     :param literal_two: :math:`L\left[r\right]`
     :returns: a list of paramodulants for all possible values of ``r_position``
+    :raises ValueError: if ``literal_one`` is not an equality
     """
     if (
-        literal_one.atom.name != EQUALITY_SYMBOL_ID
+        literal_one.atom.index != EQUALITY_SYMBOL_ID
         or literal_one.negated
         or len(literal_one.atom.arguments) != 2
     ):
@@ -172,14 +179,14 @@ def _get_new_paramodulants(
         )
         if (
             not literal_one.negated
-            and literal_one.atom.name == EQUALITY_SYMBOL_ID
+            and literal_one.atom.index == EQUALITY_SYMBOL_ID
         ):
             paramodulants = paramodulants + all_paramodulants_from_clause(
                 clause_one, literal_one, clause_two, literal_two
             )
         if (
             not literal_two.negated
-            and literal_two.atom.name == EQUALITY_SYMBOL_ID
+            and literal_two.atom.index == EQUALITY_SYMBOL_ID
         ):
             # pylint: disable=arguments-out-of-order
             paramodulants = paramodulants + all_paramodulants_from_clause(
@@ -220,9 +227,6 @@ def all_paramodulants_from_list(
     :param clauses: a list of (processed) clauses
     :param given_clause: a new clause which should be combined with all the
         processed ones
-    :param label_prefix: generated clauses will be labeled with this prefix
-    :param label_index_base: generated clauses will be indexed starting
-        with this number
     :returns: results of all possible paramodulants with each one from
         ``clauses`` and the ``given_clause``
     """

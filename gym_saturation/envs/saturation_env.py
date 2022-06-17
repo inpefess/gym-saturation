@@ -20,7 +20,7 @@ Saturation Environment
 import dataclasses
 import os
 import random
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import orjson
@@ -81,7 +81,7 @@ class SaturationEnv(Env):
     it should be more easily parsable than TPTP, although less human-friendly
 
     >>> env.render("ansi")
-    [...{"literals":[{"negated":false,"atom":{"name":298,"arguments":[{"name...
+    [...{"literals":[{"negated":false,"atom":{"index":298,"arguments":[{"ind...
 
     other modes are not implemented yet
 
@@ -146,6 +146,12 @@ class SaturationEnv(Env):
     (True, 0.0)
     """
 
+    metadata = {"render_modes": ["ansi", "human"]}
+    reward_range = (0, 1)
+
+    action_space: spaces.Discrete
+    observation_space: spaces.Dict
+
     def __init__(
         self,
         problem_list: List[str],
@@ -190,7 +196,14 @@ class SaturationEnv(Env):
             for clause in parsed_clauses
         }
 
-    def reset(self) -> dict:  # noqa: D102
+    def reset(
+        self,
+        *,
+        seed: Optional[int] = None,
+        return_info: bool = False,
+        options: Optional[dict] = None,
+    ) -> Union[dict, Tuple[dict, dict]]:  # noqa: D102
+        super().reset(seed=seed)
         self._state = reindex_variables(self._init_clauses())
         self._state_set = set(
             map(
@@ -200,6 +213,8 @@ class SaturationEnv(Env):
                 self._state.values(),
             )
         )
+        if return_info:
+            return self.state, {}  # pragma: nocover
         return self.state
 
     def _add_to_state(self, new_clauses: Tuple[Clause, ...]) -> None:
@@ -288,6 +303,8 @@ class SaturationEnv(Env):
               ``step()`` calls will return undefined results
             * info: contains auxiliary diagnostic information (helpful for
               debugging, and sometimes learning)
+        :raises ValueError: if the ``action`` identifies an already processed
+            clause
         """
         if list(self._state.values())[action].processed:
             raise ValueError(f"action {action} is not valid")
@@ -296,10 +313,8 @@ class SaturationEnv(Env):
         info = {STATE_DIFF_UPDATED: updated, PROBLEM_FILENAME: self.problem}
         reward, done, info = self._proof_found_result(reward, info)
         done |= min(
-            [
-                False if clause.processed is None else clause.processed
-                for clause in self._state.values()
-            ]
+            False if clause.processed is None else clause.processed
+            for clause in self._state.values()
         )
         done, info = self._max_clauses_result(done, info)
         return self.state, reward, done, info
@@ -307,9 +322,7 @@ class SaturationEnv(Env):
     @property
     def last_birth_step(self) -> int:
         """Return the last birth step number of clauses in the proof state."""
-        return max(
-            [getattr(clause, "birth_step", 0) for clause in self._state]
-        )
+        return max(getattr(clause, "birth_step", 0) for clause in self._state)
 
     # pylint: disable=inconsistent-return-statements
     def render(self, mode="human"):  # noqa: D102

@@ -41,7 +41,7 @@ def _get_disagreement(
         first subterms which disagree
     """
     if isinstance(one, Variable) and isinstance(two, Variable):
-        if one.name != two.name:
+        if one.index != two.index:
             return (one, two)
         return ()
     if (
@@ -50,7 +50,7 @@ def _get_disagreement(
         or isinstance(one, Function)
         and isinstance(two, Function)
     ):
-        if one.name != two.name or len(one.arguments) != len(two.arguments):
+        if one.index != two.index or len(one.arguments) != len(two.arguments):
             return (one, two)
         for argument_one, argument_two in zip(one.arguments, two.arguments):
             disagreement = _get_disagreement(argument_one, argument_two)
@@ -87,14 +87,14 @@ def most_general_unifier(
     """
     Follow the Robinson's 1965 unification algorithm.
 
-    >>> most_general_unifier((Variable("X"), Variable("X")))
+    >>> most_general_unifier((Variable(0), Variable(0)))
     ()
-    >>> most_general_unifier((Variable("X"), Function("this_is_a_test_case", (Variable("X"),))))
+    >>> most_general_unifier((Variable(0), Function(7, (Variable(0),))))
     Traceback (most recent call last):
      ...
-    gym_saturation.logic_ops.unification.NonUnifiableError: (Variable(name='X'), Function(name='this_is_a_test_case', arguments=(Variable(name='X'),)))
-    >>> most_general_unifier((Predicate("s", (Variable("X"), Variable("Y"), Function("f", (Variable("Z"),)))), Predicate("s", (Variable("U"), Function("this_is_a_test_case", (Variable("V"), Variable("V"))), Variable("V")))))
-    (Substitution(variable=Variable(name='X'), term=Variable(name='U')), Substitution(variable=Variable(name='Y'), term=Function(name='this_is_a_test_case', arguments=(Variable(name='V'), Variable(name='V')))), Substitution(variable=Variable(name='V'), term=Function(name='f', arguments=(Variable(name='Z'),))))
+    gym_saturation.logic_ops.unification.NonUnifiableError: (Variable(index=...
+    >>> "this_is_a_test_case", most_general_unifier((Predicate(8, (Variable(0), Variable(1), Function(0, (Variable(2),)))), Predicate(8, (Variable(4), Function(7, (Variable(5), Variable(5))), Variable(5)))))
+    ('this_is_a_test_case', (Substitution(variable=Variable(index=0), term=Variable(index=4)), Substitution(variable=Variable(index=1), term=Function(index=7, arguments=(Variable(index=5), Variable(index=5)))), Substitution(variable=Variable(index=5), term=Function(index=0, arguments=(Variable(index=2),)))))
 
     :param propositions: a set of propositions to unify
     :param substitutions: this function is recursive and uses this param to
