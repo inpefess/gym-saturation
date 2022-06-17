@@ -19,7 +19,8 @@ Logic Operations Utils
 """
 import dataclasses
 from itertools import chain
-from typing import Dict, Tuple, Union
+from operator import attrgetter
+from typing import Any, Dict, Tuple, Union
 
 from tptp_lark_parser.grammar import (
     EQUALITY_SYMBOL_ID,
@@ -83,25 +84,49 @@ def get_variable_list(
     return variable_list
 
 
+def _shift_variables(
+    clauses: Dict[str, Clause], variable_list: Tuple[Variable, ...], shift: int
+) -> Dict[str, Clause]:
+    new_clauses: Dict[str, Clause] = {}
+    for label, clause in clauses.items():
+        new_clause = clause
+        for i, variable in enumerate(variable_list):
+            new_clause = Substitution(
+                variable, Variable(shift + i)
+            ).substitute_in_clause(new_clause)
+        new_clauses[label] = new_clause
+    return new_clauses
+
+
 def reindex_variables(clauses: Dict[str, Clause]) -> Dict[str, Clause]:
     """
     Rename variables so that each clause has its unique set of variables.
 
+    >>> from tptp_lark_parser.grammar import Literal
+    >>> clause = Clause((Literal(False,
+    ...     Predicate(0, (Variable(2), Variable(1), Variable(0)))
+    ... ),))
+    >>> reindex_variables({"this_is_a_test_case": clause})["this_is_a_test_case"].literals[0].atom.arguments
+    (Variable(index=2), Variable(index=1), Variable(index=0))
+    >>> clause = Clause((Literal(False,
+    ...     Predicate(0, (Variable(5), Variable(10), Variable(5)))
+    ... ),))
+    >>> reindex_variables({"this_is_a_test_case": clause})["this_is_a_test_case"].literals[0].atom.arguments
+    (Variable(index=1), Variable(index=0), Variable(index=1))
+
     :param clauses: a map of clause labels to clauses
     :returns: the list of clauses with renamed variables
     """
-    variable_count = 0
-    new_clauses: Dict[str, Clause] = {}
-    for label, clause in clauses.items():
-        new_clause = clause
-        variable_list = tuple(set(get_variable_list(clause)))
-        new_variables_count = len(variable_list)
-        for i in range(new_variables_count):
-            new_clause = Substitution(
-                variable_list[i], Variable(i)
-            ).substitute_in_clause(new_clause)
-        variable_count += new_variables_count
-        new_clauses[label] = new_clause
+    variable_list = _flat_list(tuple(map(get_variable_list, clauses.values())))
+    shift = max(
+        len(variable_list),
+        1 + max(map(attrgetter("index"), variable_list), default=-1),
+    )
+    new_clauses = _shift_variables(clauses, variable_list, shift)
+    variable_list = _flat_list(
+        tuple(map(get_variable_list, new_clauses.values()))
+    )
+    new_clauses = _shift_variables(new_clauses, variable_list, 0)
     return new_clauses
 
 
@@ -308,8 +333,8 @@ def replace_subterm_by_index(
     raise NoSubtermFound(subterm_length)
 
 
-def _flat_list(list_of_lists: Tuple[Tuple[str, ...], ...]) -> Tuple[str, ...]:
-    return tuple(reversed(sorted(tuple(set(chain(*list_of_lists))))))
+def _flat_list(list_of_lists: Tuple[Tuple[Any, ...], ...]) -> Tuple[Any, ...]:
+    return tuple(set(chain(*list_of_lists)))
 
 
 def reduce_to_proof(clauses: Dict[str, Clause]) -> Tuple[Clause, ...]:
@@ -341,14 +366,20 @@ def reduce_to_proof(clauses: Dict[str, Clause]) -> Tuple[Clause, ...]:
             )
             new_reduced = tuple(
                 clauses[label]
-                for label in _flat_list(
-                    tuple(
-                        (
-                            ()
-                            if clause.inference_parents is None
-                            else clause.inference_parents
+                for label in tuple(
+                    reversed(
+                        sorted(
+                            _flat_list(
+                                tuple(
+                                    (
+                                        ()
+                                        if clause.inference_parents is None
+                                        else clause.inference_parents
+                                    )
+                                    for clause in new_reduced
+                                )
+                            )
                         )
-                        for clause in new_reduced
                     )
                 )
             )
