@@ -142,13 +142,11 @@ class AgeAgent(BaseAgent):
         info: Dict[str, Any],
     ) -> int:  # noqa: D102
         return min(
-            [
-                i
-                for i, clause in enumerate(
-                    map(orjson.loads, observation["real_obs"])
-                )
-                if not clause["processed"]
-            ]
+            i
+            for i, clause in enumerate(
+                map(orjson.loads, observation["real_obs"])
+            )
+            if not clause["processed"]
         )
 
 

@@ -296,10 +296,8 @@ class SaturationEnv(Env):
         info = {STATE_DIFF_UPDATED: updated, PROBLEM_FILENAME: self.problem}
         reward, done, info = self._proof_found_result(reward, info)
         done |= min(
-            [
-                False if clause.processed is None else clause.processed
-                for clause in self._state.values()
-            ]
+            False if clause.processed is None else clause.processed
+            for clause in self._state.values()
         )
         done, info = self._max_clauses_result(done, info)
         return self.state, reward, done, info
@@ -307,9 +305,7 @@ class SaturationEnv(Env):
     @property
     def last_birth_step(self) -> int:
         """Return the last birth step number of clauses in the proof state."""
-        return max(
-            [getattr(clause, "birth_step", 0) for clause in self._state]
-        )
+        return max(getattr(clause, "birth_step", 0) for clause in self._state)
 
     # pylint: disable=inconsistent-return-statements
     def render(self, mode="human"):  # noqa: D102
