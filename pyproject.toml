@@ -85,3 +85,25 @@ module = [
     "importlib_resources"
 ]
 ignore_missing_imports = true
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = True
+envlist = py37,py38,py39,py310
+
+[testenv]
+deps =
+    pytest-cov
+    pydocstyle
+    flake8
+    pylint
+    mypy
+    toml
+commands =
+    pydocstyle gym_saturation
+    flake8 gym_saturation
+    pylint gym_saturation
+    mypy gym_saturation
+    pytest
+"""
