@@ -40,7 +40,6 @@ pre-commit = "*"
 types-dataclasses = "*"
 sphinx-rtd-theme = "*"
 sphinx-autodoc-typehints = "*"
-flake8 = "*"
 pydocstyle = "*"
 
 [tool.black]
@@ -89,13 +88,11 @@ envlist = py37,py38,py39,py310
 deps =
     pytest-cov
     pydocstyle
-    flake8
     pylint
     mypy
     toml
 commands =
     pydocstyle gym_saturation
-    flake8 gym_saturation
     pylint gym_saturation
     mypy gym_saturation
     pytest
