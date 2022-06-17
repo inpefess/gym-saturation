@@ -64,6 +64,7 @@ load-plugins = [
     "pylint.extensions.consider_ternary_expression",
     "pylint.extensions.docparams",
     "pylint.extensions.mccabe",
+    "pylint.extensions.set_membership",
 ]
 
 [tool.pylint.parameter_documentation]
@@ -71,7 +72,7 @@ accept-no-param-doc = false
 accept-no-raise-doc = false
 accept-no-return-doc = true
 accept-no-yields-doc = false
-default-docstring-type = "default"
+default-docstring-type = "sphinx"
 
 [tool.pylint.format]
 ignore-long-lines = "(::=|:==|this_is_a_test_case|gym_saturation.saturation_prover.saturation_algorithm|:math:|.. math::|https://)"

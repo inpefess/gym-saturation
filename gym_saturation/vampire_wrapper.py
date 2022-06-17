@@ -74,7 +74,7 @@ class VampireWrapper:
         for line in self.proc.before.decode("utf-8").split("\r\n"):
             if (
                 line[:5] == "[SA] "
-                or line[:12] in ("[PP] final: ", "[PP] input: ")
+                or line[:12] in {"[PP] final: ", "[PP] input: "}
                 or "[PP] fn def discovered: " in line
             ):
                 result_type, result_body = line[5:].split(": ")

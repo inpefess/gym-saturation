@@ -89,17 +89,17 @@ class VampireEnv(SaturationEnv):
     ) -> Dict[str, Clause]:
         updated: Dict[str, Clause] = {}
         for response_type, clause_label, clause_text in vampire_response:
-            if response_type in ("new", "final", "input", "fn def discovered"):
+            if response_type in {"new", "final", "input", "fn def discovered"}:
                 updated[clause_label] = self._parse_vampire_clause(
                     clause_label, clause_text
                 )
-            elif response_type in (
+            elif response_type in {
                 "active",
                 "forward reduce",
                 "passive",
                 "backward reduce",
                 "new propositional",
-            ):
+            }:
                 changed_clause = dataclasses.replace(
                     self._state[clause_label]
                     if clause_label in self._state
