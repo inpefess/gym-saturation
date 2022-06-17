@@ -106,13 +106,23 @@ def reindex_variables(clauses: Dict[str, Clause]) -> Dict[str, Clause]:
     >>> clause = Clause((Literal(False,
     ...     Predicate(0, (Variable(2), Variable(1), Variable(0)))
     ... ),))
-    >>> reindex_variables({"this_is_a_test_case": clause})["this_is_a_test_case"].literals[0].atom.arguments
-    (Variable(index=2), Variable(index=1), Variable(index=0))
+    >>> sorted(map(
+    ...     attrgetter("index"),
+    ...     reindex_variables(
+    ...         {"this_is_a_test_case": clause}
+    ...     )["this_is_a_test_case"].literals[0].atom.arguments
+    ... ))
+    [0, 1, 2]
     >>> clause = Clause((Literal(False,
     ...     Predicate(0, (Variable(5), Variable(10), Variable(5)))
     ... ),))
-    >>> reindex_variables({"this_is_a_test_case": clause})["this_is_a_test_case"].literals[0].atom.arguments
-    (Variable(index=1), Variable(index=0), Variable(index=1))
+    >>> sorted(map(
+    ...     attrgetter("index"),
+    ...     reindex_variables(
+    ...         {"this_is_a_test_case": clause}
+    ...     )["this_is_a_test_case"].literals[0].atom.arguments
+    ... ))
+    [0, 1, 1]
 
     :param clauses: a map of clause labels to clauses
     :returns: the list of clauses with renamed variables
