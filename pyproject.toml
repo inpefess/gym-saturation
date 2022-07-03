@@ -41,6 +41,7 @@ types-dataclasses = "*"
 sphinx-rtd-theme = "*"
 sphinx-autodoc-typehints = "*"
 pydocstyle = "*"
+tbump = "*"
 
 [tool.black]
 line-length=79
@@ -112,3 +113,29 @@ commands =
     mypy gym_saturation
     pytest
 """
+
+[tool.tbump]
+github_url = "https://github.com/inpfess/gym-saturation/"
+
+[tool.tbump.version]
+current = "0.4.0"
+regex = '''
+  (?P<major>\d+)
+  \.
+  (?P<minor>\d+)
+  \.
+  (?P<patch>\d+)
+  '''
+
+[tool.tbump.git]
+message_template = "Bump to {new_version}"
+tag_template = "v{new_version}"
+
+[[tool.tbump.file]]
+src = "gym_saturation/__init__.py"
+
+[[tool.tbump.file]]
+src = "pyproject.toml"
+
+[[tool.tbump.file]]
+src = "doc/source/conf.py"
