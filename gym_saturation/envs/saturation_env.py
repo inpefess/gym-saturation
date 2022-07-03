@@ -196,14 +196,7 @@ class SaturationEnv(Env):
             for clause in parsed_clauses
         }
 
-    def reset(
-        self,
-        *,
-        seed: Optional[int] = None,
-        return_info: bool = False,
-        options: Optional[dict] = None,
-    ) -> Union[dict, Tuple[dict, dict]]:  # noqa: D102
-        super().reset(seed=seed)
+    def reset(self) -> Union[dict, Tuple[dict, dict]]:  # noqa: D102
         self._state = reindex_variables(self._init_clauses())
         self._state_set = set(
             map(
@@ -213,8 +206,6 @@ class SaturationEnv(Env):
                 self._state.values(),
             )
         )
-        if return_info:
-            return self.state, {}  # pragma: nocover
         return self.state
 
     def _add_to_state(self, new_clauses: Tuple[Clause, ...]) -> None:
