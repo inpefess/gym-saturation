@@ -255,7 +255,6 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> float:
     ...         "GymSaturation-v0",
     ...         problem_list=[problem_list[i]],
     ...         max_clauses=max_clauses[i],
-    ...         disable_env_checker=True,
     ...     )
     ...     env._max_episode_steps = 5
     ...     agent_testing_report(env, agents[i])
@@ -377,13 +376,11 @@ def test_agent(args: Optional[List[str]] = None) -> None:
             "GymVampire-v0",
             problem_list=[arguments.problem_filename],
             vampire_binary_path=arguments.vampire_binary_path,
-            disable_env_checker=True,
         )
         if arguments.vampire_binary_path is not None
         else gym.make(
             "GymSaturation-v0",
             problem_list=[arguments.problem_filename],
-            disable_env_checker=True,
         )
     )
     environment = TimeLimit(env, arguments.step_limit)
