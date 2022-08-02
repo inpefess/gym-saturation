@@ -178,7 +178,7 @@ class SaturationEnv(Env):
         tptp_folder = os.path.join(
             os.path.dirname(problem_list[0]), "..", ".."
         )
-        self._tptp_parser = TPTPParser(tptp_folder)
+        self._tptp_parser = TPTPParser(tptp_folder, extendable=True)
 
     def _init_clauses(self) -> Dict[str, Clause]:
         self.problem = random.choice(self.problem_list)
