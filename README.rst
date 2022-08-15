@@ -18,20 +18,27 @@
 gym-saturation
 ==============
 
-``gym-saturation`` is an `OpenAI Gym <https://gym.openai.com/>`__
-environment for reinforcement learning (RL) agents capable of proving
-theorems. Currently, only theorems written in `TPTP
-library <http://tptp.org>`__ formal language in clausal normal form
-(CNF) are supported. ``gym-saturation`` implements the ‘given clause’
-algorithm (similar to one used in
-`Vampire <https://github.com/vprover/vampire>`__ and `E
-Prover <https://github.com/eprover/eprover>`__). Being written in
-Python, ``gym-saturation`` was inspired by
-`PyRes <https://github.com/eprover/PyRes>`__. In contrast to monolithic
-architecture of a typical Automated Theorem Prover (ATP),
-``gym-saturation`` gives different agents opportunities to select
-clauses themselves and train from their experience. Combined with a
-particular agent, ``gym-saturation`` can work as an ATP.
+``gym-saturation`` is a collection of `OpenAI Gym
+<https://gym.openai.com/>`__ environments for reinforcement learning
+(RL) agents striving to prove theorems. Currently, only theorems
+written in `TPTP library <http://tptp.org>`__ formal language in
+clausal normal form (CNF) are supported. ``gym-saturation``
+implements the ‘given clause’ algorithm (similar to one used in
+`Vampire <https://github.com/vprover/vampire>`__ and `E Prover
+<https://github.com/eprover/eprover>`__).
+
+There are two environments in ``gym-saturation``: ``SaturationEnv``
+and ``VampireEnv``. ``SaturationEnv`` is a saturation prover written
+in Python and was inspired by `PyRes
+<https://github.com/eprover/PyRes>`__. ``VampireEnv`` is a Python
+wrapper around a recent ``vampire`` binary and can be used to guide
+``vampire`` using RL.
+
+In contrast to monolithic architecture of a typical Automated Theorem
+Prover (ATP), ``gym-saturation`` gives different agents opportunities
+to select clauses themselves and train from their experience.
+Combined with a particular agent, ``gym-saturation`` can work as an
+ATP.
 
 ``gym-saturation`` can be interesting for RL practitioners willing to
 apply their experience to theorem proving without coding all the
@@ -40,6 +47,10 @@ deduction researchers who want to create an RL-empowered ATP.
 
 How to Install
 ==============
+
+.. attention::
+   If you want to use ``VampireEnv`` you should have a ``vampire``
+   binary on your machine.
 
 The best way to install this package is to use ``pip``:
 
@@ -53,7 +64,8 @@ Another option is to use ``conda``:
 
    conda install -c conda-forge gym-saturation
    
-One can also run it in a Docker container:
+One can also run it in a Docker container (with a pre-packed
+``vampire`` binary):
 
 .. code:: sh
 
@@ -97,6 +109,10 @@ welcome. To start:
    poetry install
    # recommended but not necessary
    pre-commit install
+   # install vampire binary
+   wget https://github.com/vprover/vampire/releases/download/v4.7/vampire4.7.zip -O vampire.zip
+   unzip vampire.zip
+   # then use vampire_z3_rel_static_HEAD_6295 as an argument or put in $PATH
 
 All the tests in this package are
 `doctests <https://docs.python.org/3/library/doctest.html>`__. One can

@@ -13,22 +13,24 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-#################  
-What is going on
-#################
+################################
+Saturation Prover as an RL task
+################################
 
 One can write theorems in a machine-readable form. This package uses the `CNF`_ sublanguage of `TPTP`_. Before using the environment, you will need to download a recent TPTP archive (ca 600MB).
 
 A statement of a theorem becomes a list of clauses. In a given clause algorithm, one divides the clauses in processed and not processed yet. Then at each step, one selects a not processed yet clause as a given clause. If it's empty (we arrived at a contradiction, i.e. found a refutation proof), the algorithm stops with success. If not, one applies all possible deduction rules to the given clause and all processed clauses. Then we add deduction results to the unprocessed set, and the given clause goes into the processed. The algorithm iterates if we didn't run out of time and unprocessed clauses.
 
-The deduction rules are the following (this deductive system is known to be refutation complete):
+The deduction rules applied depend on a backend. For example, for a :ref:`pure Python backend <saturation_env>`, they are the following (this deductive system is known to be refutation complete):
 
 * :ref:`resolution <resolution>`
 * :ref:`factoring <factoring>`
 * :ref:`paramodulation <paramodulation>`
 * :ref:`reflexivity resolution <reflexivity_resolution>`
 
-For the choice of a given clause, one usually employs a clever combination of heuristics. Of course, we can reformulate the same process as a reinforcement learning task.
+For a deduction rules used by a Vampire Python wrapper backend, refer to `Vampire documentation <https://github.com/vprover/vampire>`__.
+
+In an automated theorem prover (ATP) like Vampire, for the choice of a given clause, one usually employs a clever combination of heuristics. Of course, we can imagine a learning agent in charge of chosing a given clause instead, which will help us to formulate a reinforcement learning task with the following description.
 
 What is a State
 ****************
@@ -68,6 +70,3 @@ Usually, saturation provers use a timeout in seconds since they work in real-tim
 .. _CNF: https://en.wikipedia.org/wiki/Clausal_normal_form
 .. _TPTP: http://www.tptp.org/
 .. _ProofState class of PyRes: https://github.com/eprover/PyRes/blob/master/saturation.py
-.. _resolution: https://en.wikipedia.org/wiki/Resolution_(logic)#Resolution_in_first_order_logic
-.. _factoring: https://en.wikipedia.org/wiki/Resolution_(logic)#Factoring
-.. _paramodulation: https://en.wikipedia.org/wiki/Resolution_(logic)#Paramodulation
