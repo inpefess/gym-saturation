@@ -17,30 +17,17 @@
 Package Documentation
 ######################
 
-Environment and Agent Testing
-******************************
+Environments
+*************
 .. automodule:: gym_saturation.envs.saturation_env
    :members:
    :special-members: __init__, __call__
 .. automodule:: gym_saturation.envs.vampire_env
    :members:
    :special-members: __init__, __call__
-.. automodule:: gym_saturation.agent_testing
-   :members:
-   :special-members: __init__, __call__
-.. automodule:: gym_saturation.clause_space
-   :members:
-   :special-members: __init__, __call__
 
-Common modules
-***************
-
-.. automodule:: gym_saturation.vampire_wrapper
-   :members:
-   :special-members: __init__, __call__
-
-Logical Operations
-*******************
+Python Prover Backend
+**********************
 
 .. automodule:: gym_saturation.logic_ops.factoring
    :members:
@@ -61,5 +48,21 @@ Logical Operations
    :members:
    :special-members: __init__, __call__
 .. automodule:: gym_saturation.logic_ops.utils
+   :members:
+   :special-members: __init__, __call__
+
+Vampire Wrapper Backend
+************************
+
+.. automodule:: gym_saturation.vampire_wrapper
+   :members:
+   :special-members: __init__, __call__
+
+Agent Testing Tools
+********************
+.. automodule:: gym_saturation.agent_testing
+   :members:
+   :special-members: __init__, __call__
+.. automodule:: gym_saturation.clause_space
    :members:
    :special-members: __init__, __call__

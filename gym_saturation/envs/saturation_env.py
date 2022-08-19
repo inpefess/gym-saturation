@@ -51,6 +51,8 @@ class SaturationEnv(Env):
     """
     Saturation algorithm defined in a Reiforcement Learning friendly way.
 
+    .. _saturation_env:
+
     >>> import sys
     >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
     ...     from importlib.resources import files

@@ -31,6 +31,7 @@ import orjson
 from gym.wrappers import TimeLimit
 
 from gym_saturation.envs.saturation_env import (
+    MAX_CLAUSES,
     STATE_DIFF_UPDATED,
     SaturationEnv,
 )
@@ -283,16 +284,19 @@ def parse_args(args: Optional[List[str]] = None) -> Namespace:
     Parse script arguments.
 
     >>> parse_args([
-    ...     "--problem_filename", "test",
-    ...     "--step_limit", "1"
+    ...     "--problem_filename", "this_is_a_test_case",
+    ...     "--step_limit", "1",
     ... ])
-    Namespace(problem_filename='test', step_limit=1, vampire_binary_path=None)
+    Namespace(max_clauses=100000, problem_filename='this_is_a_test_case', step_limit=1, vampire_binary_path=None)
 
     :param args: a list of string arguments
         (for testing and use in a non script scenario)
     :returns: arguments namespace for the script
     """
     argument_parser = ArgumentParser()
+    argument_parser.add_argument(
+        "--max_clauses", type=int, required=False, default=MAX_CLAUSES
+    )
     argument_parser.add_argument("--problem_filename", type=str, required=True)
     argument_parser.add_argument("--step_limit", type=int, required=True)
     argument_parser.add_argument(
@@ -376,6 +380,7 @@ def test_agent(args: Optional[List[str]] = None) -> None:
             "GymVampire-v0",
             problem_list=[arguments.problem_filename],
             vampire_binary_path=arguments.vampire_binary_path,
+            max_clauses=arguments.max_clauses,
         )
         if arguments.vampire_binary_path is not None
         else gym.make(
