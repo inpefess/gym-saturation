@@ -18,3 +18,4 @@ RUN chmod u+x ${HOME}/.local/bin/vampire
 ENV PATH ${HOME}/.local/bin:${PATH}
 RUN pip install poetry
 RUN poetry install
+ENTRYPOINT ["jupyter-lab", "--ip=0.0.0.0", "--port=8888", "--ServerApp.token=passwd007"]
