@@ -47,7 +47,7 @@ PROBLEM_FILENAME = "problem_filename"
 MAX_CLAUSES = 100000
 
 
-class SaturationEnv(Env):
+class SaturationEnv(Env[dict, int]):
     """
     Saturation algorithm defined in a Reiforcement Learning friendly way.
 
@@ -198,7 +198,13 @@ class SaturationEnv(Env):
             for clause in parsed_clauses
         }
 
-    def reset(self) -> Union[dict, Tuple[dict, dict]]:  # noqa: D102
+    def reset(
+        self,
+        *,
+        seed: Optional[int] = None,
+        return_info: bool = False,
+        options: Optional[dict] = None,
+    ) -> Union[dict, tuple[dict, dict]]:  # noqa: D102
         self._state = reindex_variables(self._init_clauses())
         self._state_set = set(
             map(

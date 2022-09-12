@@ -24,7 +24,7 @@ include = ["gym_saturation/py.typed"]
 
 [tool.poetry.dependencies]
 python = ">= 3.7.1, < 3.11"
-gym = "<0.22"
+gym = ">=0.21.0,<0.24.0"
 importlib_resources = {version = "*", markers = "python_version < \"3.9\""}
 orjson = "*"
 pexpect = "*"
@@ -74,6 +74,13 @@ accept-no-raise-doc = false
 accept-no-return-doc = true
 accept-no-yields-doc = false
 default-docstring-type = "sphinx"
+
+[tool.pylint.similarities]
+ignore-comments = true
+ignore-docstrings = true
+ignore-imports = true
+ignore-signatures = true
+min-similarity-lines = 4
 
 [tool.pylint.format]
 ignore-long-lines = "(::=|:==|this_is_a_test_case|gym_saturation.saturation_prover.saturation_algorithm|:math:|.. math::|https://)"
