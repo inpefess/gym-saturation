@@ -42,6 +42,7 @@ sphinx-rtd-theme = "*"
 sphinx-autodoc-typehints = "*"
 pydocstyle = "*"
 tbump = "*"
+pyenchant = "*"
 
 [tool.black]
 line-length=79
@@ -92,6 +93,10 @@ max-statements = 10
 [tool.pylint.typecheck]
 generated-members = ["orjson"]
 
+[tool.pylint.spelling]
+spelling-dict = "en_GB"
+spelling-private-dict-file = "spelling.dict"
+
 [tool.mypy]
 show_error_codes = true
 incremental = false
@@ -114,6 +119,7 @@ deps =
     pylint
     mypy
     toml
+    pyenchant
 commands =
     pydocstyle gym_saturation
     pylint gym_saturation

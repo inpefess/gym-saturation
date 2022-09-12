@@ -49,7 +49,7 @@ MAX_CLAUSES = 100000
 
 class SaturationEnv(Env[dict, int]):
     """
-    Saturation algorithm defined in a Reiforcement Learning friendly way.
+    Saturation algorithm defined in a Reinforcement Learning friendly way.
 
     .. _saturation_env:
 
@@ -160,7 +160,7 @@ class SaturationEnv(Env[dict, int]):
         max_clauses: int = MAX_CLAUSES,
     ):
         """
-        Initialize spaces et al.
+        Initialise spaces et al.
 
         :param problem_list: a list of the names of TPTP problem files
         :param max_clauses: maximal number of clauses to store in proof state
@@ -288,7 +288,7 @@ class SaturationEnv(Env[dict, int]):
     def step(self, action: int) -> Tuple[dict, float, bool, Dict[str, Any]]:
         # noqa: D301
         """
-        Run one timestep of the environment's dynamics.
+        Run one time-step of the environment's dynamics.
 
         When end of episode is reached, you are responsible for calling
         ``reset()`` to reset this environment's state.

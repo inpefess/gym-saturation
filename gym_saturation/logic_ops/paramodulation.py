@@ -50,7 +50,7 @@ def paramodulation(
     where
 
     * :math:`C_1` and :math:`C_2` are clauses with no common variables
-    * :math:`L\left[r\right]` is a literal with a subterm :math:`r`
+    * :math:`L\left[r\right]` is a literal with a sub-term :math:`r`
     * only one instance of :math:`r` in :math:`L\left[r\right]` is considered, even if there are many of them
     * :math:`s` and :math:`t` are terms, :math:`\approx` is a syntactic equality symbol
     * :math:`\sigma` is a most general unifier of :math:`s` and :math:`r`
@@ -70,7 +70,7 @@ def paramodulation(
     :param literal_one: :math:`s\approx t`
     :param clause_two: :math:`C_2`
     :param literal_two: :math:`L\left[r\right]`
-    :param r_position: index of :math:`r` in the tree of subterms of :math:`L\left[r\right]`
+    :param r_position: index of :math:`r` in the tree of sub-terms of :math:`L\left[r\right]`
     :returns: a new clause --- the paramodulation result
     """
     substitutions = most_general_unifier(

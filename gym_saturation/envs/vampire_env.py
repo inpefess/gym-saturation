@@ -14,7 +14,7 @@
 
 # noqa: D205, D400
 """
-Saturation Environment with Vampire backend
+Saturation Environment with Vampire back-end
 ============================================
 """
 import dataclasses
@@ -33,7 +33,7 @@ class VampireEnv(SaturationEnv):
     """
     An RL environment around a Vampire prover.
 
-    This class has the same API as SaturationEnv but uses another backend.
+    This class has the same API as SaturationEnv but uses another back-end.
     Here we have only a simple smoke test.
     For rigorous testing, see ``gym_saturation.agent_testing`` module.
 
@@ -49,7 +49,7 @@ class VampireEnv(SaturationEnv):
     >>> vampire_env.reset()
     Traceback (most recent call last):
      ...
-    ValueError: ('Unexpected reposnse type: ', 'who could expect that?')
+    ValueError: ('Unexpected response type: ', 'who could expect that?')
     """
 
     def __init__(
@@ -59,7 +59,7 @@ class VampireEnv(SaturationEnv):
         max_clauses: int = MAX_CLAUSES,
     ):
         """
-        Initialize a :ref:`VampireWrapper <vampire-wrapper>`.
+        Initialise a :ref:`VampireWrapper <vampire-wrapper>`.
 
         :param vampire_binary_path: a path to Vampire binary
         :param problem_list: a list of names of TPTP problem files
@@ -84,7 +84,7 @@ class VampireEnv(SaturationEnv):
         )[0]
         return dataclasses.replace(parsed_clause, processed=True)
 
-    def _parse_vampire_reponse(
+    def _parse_vampire_response(
         self, vampire_response: Tuple[Tuple[str, str, str], ...]
     ) -> Dict[str, Clause]:
         updated: Dict[str, Clause] = {}
@@ -109,7 +109,7 @@ class VampireEnv(SaturationEnv):
                 )
                 updated[clause_label] = changed_clause
             else:
-                raise ValueError("Unexpected reposnse type: ", response_type)
+                raise ValueError("Unexpected response type: ", response_type)
         return updated
 
     def reset(
@@ -123,7 +123,7 @@ class VampireEnv(SaturationEnv):
         tptp_folder = os.path.join(os.path.dirname(self.problem), "..", "..")
         vampire_response = self._vampire.start(self.problem, tptp_folder)
         self._state = {}
-        updated = self._parse_vampire_reponse(vampire_response)
+        updated = self._parse_vampire_response(vampire_response)
         self._state = {
             clause.label: dataclasses.replace(clause, birth_step=0)
             for clause in updated.values()
@@ -132,7 +132,7 @@ class VampireEnv(SaturationEnv):
 
     def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
         given_clause = list(self._state.values())[action]
-        updated = self._parse_vampire_reponse(
+        updated = self._parse_vampire_response(
             self._vampire.pick_a_clause(given_clause.label)
         )
         self._state.update(updated)
