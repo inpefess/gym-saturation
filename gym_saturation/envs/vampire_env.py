@@ -118,7 +118,7 @@ class VampireEnv(SaturationEnv):
         seed: Optional[int] = None,
         return_info: bool = False,
         options: Optional[dict] = None,
-    ) -> Union[Dict, tuple[dict, dict]]:  # noqa: D102
+    ) -> Union[Dict, Tuple[dict, dict]]:  # noqa: D102
         self.problem = random.choice(self.problem_list)
         tptp_folder = os.path.join(os.path.dirname(self.problem), "..", "..")
         vampire_response = self._vampire.start(self.problem, tptp_folder)

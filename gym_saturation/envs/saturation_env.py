@@ -204,7 +204,7 @@ class SaturationEnv(Env[dict, int]):
         seed: Optional[int] = None,
         return_info: bool = False,
         options: Optional[dict] = None,
-    ) -> Union[dict, tuple[dict, dict]]:  # noqa: D102
+    ) -> Union[dict, Tuple[dict, dict]]:  # noqa: D102
         self._state = reindex_variables(self._init_clauses())
         self._state_set = set(
             map(
