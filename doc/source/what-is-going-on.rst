@@ -17,11 +17,11 @@
 Saturation Prover as an RL task
 ################################
 
-One can write theorems in a machine-readable form. This package uses the `CNF`_ sublanguage of `TPTP`_. Before using the environment, you will need to download a recent TPTP archive (ca 600MB).
+One can write theorems in a machine-readable form. This package uses the `CNF`_ sub-language of `TPTP`_. Before using the environment, you will need to download a recent TPTP archive (ca 600MB).
 
 A statement of a theorem becomes a list of clauses. In a given clause algorithm, one divides the clauses in processed and not processed yet. Then at each step, one selects a not processed yet clause as a given clause. If it's empty (we arrived at a contradiction, i.e. found a refutation proof), the algorithm stops with success. If not, one applies all possible deduction rules to the given clause and all processed clauses. Then we add deduction results to the unprocessed set, and the given clause goes into the processed. The algorithm iterates if we didn't run out of time and unprocessed clauses.
 
-The deduction rules applied depend on a back-end. For example, for a :ref:`pure Python backend <saturation_env>`, they are the following (this deductive system is known to be refutation complete):
+The deduction rules applied depend on a back-end. For example, for a :ref:`pure Python back-end <saturation_env>`, they are the following (this deductive system is known to be refutation complete):
 
 * :ref:`resolution <resolution>`
 * :ref:`factoring <factoring>`
@@ -30,7 +30,7 @@ The deduction rules applied depend on a back-end. For example, for a :ref:`pure 
 
 For a deduction rules used by a Vampire Python wrapper back-end, refer to `Vampire documentation <https://github.com/vprover/vampire>`__.
 
-In an automated theorem prover (ATP) like Vampire, for the choice of a given clause, one usually employs a clever combination of heuristics. Of course, we can imagine a learning agent in charge of chosing a given clause instead, which will help us to formulate a reinforcement learning task with the following description.
+In an automated theorem prover (ATP) like Vampire, for the choice of a given clause, one usually employs a clever combination of heuristics. Of course, we can imagine a learning agent in charge of choosing a given clause instead, which will help us to formulate a reinforcement learning task with the following description.
 
 What is a State
 ****************
@@ -48,7 +48,7 @@ What is an Observation
 
 An observation visible by an agent is a Python dictionary having two keys: `action_mask` and `real_obs`. Action mask is a `numpy` array of zeros and ones of some fixed length. A user can change a default value (100000) for this length by passing a `max_clauses` argument to the environment constructor. If at some step there are more than `max_clauses` clauses in the state, the environment returns ``done == True``. For any index in `action_mask`, if there is no clause with such an index in the state, the mask value is zero. It's also zero if the clause is marked as processed. For the indices of the clauses available to become a so-called 'given clause', the mask equals one.
 
-`real_obs` is the state (a list of clauses). Since in OpenAI Gym observations have to live in some pre-defined space, there is a OpenAI compatible :ref:`space class<clause_space>` for a list of clauses.
+`real_obs` is the state (a list of clauses). Since in OpenAI Gym observations have to live in some predefined space, there is a OpenAI compatible :ref:`space class<clause_space>` for a list of clauses.
 
 What is an Action
 ******************
