@@ -68,5 +68,5 @@ Important notice
 Usually, saturation provers use a timeout in seconds since they work in real-time mode. Here, we live in a discrete time, so we limit a prover by the number of saturation algorithm steps taken, not wall-clock time.
 
 .. _CNF: https://en.wikipedia.org/wiki/Clausal_normal_form
-.. _TPTP: http://www.tptp.org/
+.. _TPTP: https://www.tptp.org/
 .. _ProofState class of PyRes: https://github.com/eprover/PyRes/blob/master/saturation.py
