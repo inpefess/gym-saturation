@@ -31,4 +31,4 @@ register(
     max_episode_steps=1000,
     reward_threshold=1.0,
 )
-__version__ = "0.4.3"
+__version__ = "0.4.4"
