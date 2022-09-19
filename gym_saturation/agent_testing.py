@@ -101,7 +101,7 @@ class SizeAgent(BaseAgent):
         """
         Update the state of the agent according with the transition.
 
-        :param info: an info dict (parm of environment response)
+        :param info: an info dict (part of environment response)
         """
         parsed_state_diff = tuple(map(orjson.loads, info[STATE_DIFF_UPDATED]))
         self._state.update(
@@ -159,7 +159,7 @@ class SizeAgeAgent(BaseAgent):
 
     def __init__(self, size_steps: int, age_steps: int):
         """
-        Initialize two sub-agents.
+        Initialise two sub-agents.
 
         :param size_steps: how many times to select the shortest clause
         :param age_steps: how many times to select the oldest clause
@@ -265,7 +265,7 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> float:
     Proof state size limit reached
 
     :param env: a `gym_saturation` environment
-    :param agent: an initialized agent. Must have `get_action` method
+    :param agent: an initialised agent. Must have `get_action` method
     :returns: total reward
     """
     obs = _reset_with_options(env)

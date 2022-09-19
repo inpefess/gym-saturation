@@ -21,7 +21,7 @@ gym-saturation
 ``gym-saturation`` is a collection of `OpenAI Gym
 <https://gym.openai.com/>`__ environments for reinforcement learning
 (RL) agents striving to prove theorems. Currently, only theorems
-written in `TPTP library <http://tptp.org>`__ formal language in
+written in `TPTP library <https://tptp.org>`__ formal language in
 clausal normal form (CNF) are supported. ``gym-saturation``
 implements the ‘given clause’ algorithm (similar to one used in
 `Vampire <https://github.com/vprover/vampire>`__ and `E Prover

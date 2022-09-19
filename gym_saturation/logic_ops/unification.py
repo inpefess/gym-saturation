@@ -38,7 +38,7 @@ def _get_disagreement(
     :param one: some proposition
     :param two: some (other but might be the same) proposition
     :returns: either an empty list (if there is no disagreement) or a pair of
-        first subterms which disagree
+        first sub-terms which disagree
     """
     if isinstance(one, Variable) and isinstance(two, Variable):
         if one.index != two.index:

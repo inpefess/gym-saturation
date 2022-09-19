@@ -47,9 +47,9 @@ PROBLEM_FILENAME = "problem_filename"
 MAX_CLAUSES = 100000
 
 
-class SaturationEnv(Env):
+class SaturationEnv(Env[dict, int]):
     """
-    Saturation algorithm defined in a Reiforcement Learning friendly way.
+    Saturation algorithm defined in a Reinforcement Learning friendly way.
 
     .. _saturation_env:
 
@@ -160,7 +160,7 @@ class SaturationEnv(Env):
         max_clauses: int = MAX_CLAUSES,
     ):
         """
-        Initialize spaces et al.
+        Initialise spaces et al.
 
         :param problem_list: a list of the names of TPTP problem files
         :param max_clauses: maximal number of clauses to store in proof state
@@ -198,7 +198,13 @@ class SaturationEnv(Env):
             for clause in parsed_clauses
         }
 
-    def reset(self) -> Union[dict, Tuple[dict, dict]]:  # noqa: D102
+    def reset(
+        self,
+        *,
+        seed: Optional[int] = None,
+        return_info: bool = False,
+        options: Optional[dict] = None,
+    ) -> Union[dict, Tuple[dict, dict]]:  # noqa: D102
         self._state = reindex_variables(self._init_clauses())
         self._state_set = set(
             map(
@@ -282,7 +288,7 @@ class SaturationEnv(Env):
     def step(self, action: int) -> Tuple[dict, float, bool, Dict[str, Any]]:
         # noqa: D301
         """
-        Run one timestep of the environment's dynamics.
+        Run one time-step of the environment's dynamics.
 
         When end of episode is reached, you are responsible for calling
         ``reset()`` to reset this environment's state.

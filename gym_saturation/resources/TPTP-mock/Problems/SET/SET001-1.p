@@ -1,5 +1,5 @@
 %--------------------------------------------------------------------------
-% This file is a part of TPTP. For more information see http://www.tptp.org/
+% This file is a part of TPTP. For more information see https://www.tptp.org/
 
 % Copyright
 % ---------

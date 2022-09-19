@@ -34,7 +34,7 @@ def resolution(
     literal_two: Literal,
 ) -> Clause:
     r"""
-    Do inference accoring to the standard first-order resolution rule.
+    Do inference according to the standard first-order resolution rule.
 
     .. _resolution:
 

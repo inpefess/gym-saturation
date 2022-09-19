@@ -26,7 +26,7 @@ Environments
    :members:
    :special-members: __init__, __call__
 
-Python Prover Backend
+Python Prover Back-end
 **********************
 
 .. automodule:: gym_saturation.logic_ops.factoring
@@ -51,7 +51,7 @@ Python Prover Backend
    :members:
    :special-members: __init__, __call__
 
-Vampire Wrapper Backend
+Vampire Wrapper Back-end
 ************************
 
 .. automodule:: gym_saturation.vampire_wrapper

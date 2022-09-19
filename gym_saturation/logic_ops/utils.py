@@ -14,8 +14,8 @@
 
 # noqa: D205, D400
 """
-Logic Operations Utils
-=======================
+Logic Operations Utility Functions
+===================================
 """
 import dataclasses
 from itertools import chain
@@ -181,7 +181,7 @@ def clause_length(clause: dict) -> int:
     Negation adds one to each literal.
 
     :param clause: a clause in JSON representation
-    :return: sctructural length of a clause
+    :return: structural length of a clause
 
     >>> from tptp_lark_parser.grammar import Literal
     >>> import orjson
@@ -208,7 +208,7 @@ def proposition_length(proposition: Proposition) -> int:
     Find the number of functional, predicate and variable symbols.
 
     :param proposition: a function, a predicate or a variable
-    :return: sctructural length of a proposition
+    :return: structural length of a proposition
 
     >>> proposition_length(Predicate(7, (Function(0, (Variable(0),)),)))
     3
@@ -237,12 +237,12 @@ def clause_in_a_list(clause: Clause, clauses: Tuple[Clause, ...]) -> bool:
 
 
 class NoSubtermFound(Exception):
-    """Sometimes a subterm index is larger than term length."""
+    """Sometimes a sub-term index is larger than term length."""
 
 
 def subterm_by_index(atom: Proposition, index: int) -> Term:
     """
-    Extract a subterm using depth-first search.
+    Extract a sub-term using depth-first search.
 
     >>> atom = Predicate(7, (
     ...     Function(0, (Variable(0),)), Function(1, (Variable(1),))
@@ -250,7 +250,7 @@ def subterm_by_index(atom: Proposition, index: int) -> Term:
     >>> subterm_by_index(atom, 0)
     Traceback (most recent call last):
      ...
-    ValueError: subterm with index 0 exists only for terms, but got: Predica...
+    ValueError: sub-term with index 0 exists only for terms, but got: ...
     >>> subterm_by_index(atom, 1) == atom.arguments[0]
     True
     >>> subterm_by_index(atom, 2) == atom.arguments[0].arguments[0]
@@ -259,16 +259,16 @@ def subterm_by_index(atom: Proposition, index: int) -> Term:
     True
 
     :param atom: a predicate or a term
-    :param index: an index of a desired subterm
-    :returns: a subterm
+    :param index: an index of a desired sub-term
+    :returns: a sub-term
     :raises ValueError: when trying to get a term with index 0 of a predicate
-    :raises NoSubtermFound: if subterm with a given index doesn't exist
+    :raises NoSubtermFound: if sub-term with a given index doesn't exist
     """
     if index == 0:
         if isinstance(atom, (Function, Variable)):
             return atom
         raise ValueError(
-            f"subterm with index 0 exists only for terms, but got: {atom}"
+            f"sub-term with index 0 exists only for terms, but got: {atom}"
         )
     subterm_length = 1
     if not isinstance(atom, Variable):
@@ -281,11 +281,11 @@ def subterm_by_index(atom: Proposition, index: int) -> Term:
 
 
 class CantReplaceTheWholeTerm(Exception):
-    """An exception raised when trying to replace a subterm with index 0."""
+    """An exception raised when trying to replace a sub-term with index 0."""
 
 
 class TermSelfReplace(Exception):
-    """An exception raised when trying to replace a subterm with itself."""
+    """An exception raised when trying to replace a sub-term with itself."""
 
 
 def _replace_if_not_the_same(old_term: Term, new_term: Term) -> Term:
@@ -298,7 +298,7 @@ def replace_subterm_by_index(
     atom: Proposition, index: int, term: Term
 ) -> Proposition:
     """
-    Replace a subterm with a given index (depth-first search) by a new term.
+    Replace a sub-term with a given index (depth-first search) by a new term.
 
     >>> atom = Predicate(7, (
     ...     Function(0, (Variable(0),)), Function(1, (Variable(2),))
@@ -315,10 +315,10 @@ def replace_subterm_by_index(
     gym_saturation.logic_ops.utils.TermSelfReplace
 
     :param atom: a predicate or a term
-    :param index: an index of a subterm to replace, must be greater than 0
+    :param index: an index of a sub-term to replace, must be greater than 0
     :param term: replacement term for a given index
     :returns:
-    :raises NoSubtermFound: if subterm with a given index doesn't exist
+    :raises NoSubtermFound: if sub-term with a given index doesn't exist
     """
     subterm_length = 1
     if not isinstance(atom, Variable):
@@ -352,7 +352,7 @@ def _flat_list(list_of_lists: Tuple[Tuple[Any, ...], ...]) -> Tuple[Any, ...]:
 
 def reduce_to_proof(clauses: Dict[str, Clause]) -> Tuple[Clause, ...]:
     """
-    Leave only clauses belonging to the refutational proof.
+    Leave only clauses belonging to the refutation proof.
 
     >>> reduce_to_proof({
     ...     "one": Clause((), label="one"), "two": Clause((), label="two")

@@ -6,6 +6,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: install libenchant
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y libenchant-2-2
+      - run:
           name: use tox
           command: |
             pip install tox
