@@ -210,10 +210,9 @@ class SaturationEnv(Env[dict, int]):
     def _proof_found_result(
         self, reward: float, info: Dict[str, Any]
     ) -> Tuple[float, bool, Dict[str, Any]]:
-        if tuple(
-            True
+        if any(
+            clause.literals == FALSEHOOD_SYMBOL
             for clause in self._state.values()
-            if clause.literals == FALSEHOOD_SYMBOL
         ):
             info[POSITIVE_ACTIONS] = self.positive_actions
             return 1.0, True, info

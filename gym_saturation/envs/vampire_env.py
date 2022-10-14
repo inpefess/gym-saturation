@@ -38,7 +38,7 @@ def _parse_vampire_clause(clause_label: str, clause_text: str) -> Clause:
     else:
         inference_parents, inference_rule = (), pre_inference[0]
     return Clause(
-        literals=formula,
+        literals=formula.strip(),
         label=clause_label,
         inference_rule=inference_rule,
         inference_parents=inference_parents,
