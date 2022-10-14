@@ -17,28 +17,20 @@
 Saturation Environment
 =======================
 """
-import dataclasses
-import os
 import random
+from abc import abstractmethod
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import orjson
 from gym import Env, spaces
-from tptp_lark_parser.grammar import Clause
-from tptp_lark_parser.tptp_parser import TPTPParser
 
 from gym_saturation.clause_space import ClauseSpace
-from gym_saturation.logic_ops.factoring import all_possible_factors
-from gym_saturation.logic_ops.paramodulation import all_paramodulants_from_list
-from gym_saturation.logic_ops.reflexivity_resolution import (
-    all_possible_reflexivity_resolvents,
-)
-from gym_saturation.logic_ops.resolution import all_possible_resolvents
 from gym_saturation.logic_ops.utils import (
-    is_tautology,
+    FALSEHOOD_SYMBOL,
+    Clause,
+    pretty_print,
     reduce_to_proof,
-    reindex_variables,
 )
 
 STATE_DIFF_UPDATED = "state_diff_updated"
@@ -53,6 +45,7 @@ class SaturationEnv(Env[dict, int]):
 
     .. _saturation_env:
 
+    >>> import os
     >>> import sys
     >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
     ...     from importlib.resources import files
@@ -65,7 +58,36 @@ class SaturationEnv(Env[dict, int]):
     >>> problem_list = sorted(glob(
     ...     os.path.join(tptp_folder, "Problems", "*", "*1-1.p")
     ... ))
-    >>> env = SaturationEnv(problem_list)
+    >>> import dataclasses
+    >>> class MySaturationEnv(SaturationEnv):
+    ...     def reset(
+    ...         self,
+    ...         *,
+    ...         seed: Optional[int] = None,
+    ...         return_info: bool = False,
+    ...         options: Optional[dict] = None,
+    ...     ) -> Union[dict, Tuple[dict, dict]]:
+    ...         self._state = {
+    ...             "one": Clause(literals="p(X)", label="one"),
+    ...             "two": Clause(literals="p(Y)", label="two"),
+    ...             "three": Clause(literals="p(Z)", label="three"),
+    ...             "four": Clause(literals="~p(X)", label="four")
+    ...         }
+    ...         return self.state
+    ...
+    ...     def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
+    ...         given_clause = list(self._state.values())[action]
+    ...         self._state[given_clause.label] = dataclasses.replace(
+    ...             given_clause, processed=True)
+    ...         if action == 3:
+    ...             self._state["falsehood"] = Clause(
+    ...                 literals=FALSEHOOD_SYMBOL, label="falsehood",
+    ...                 inference_rule="dummy",
+    ...                 inference_parents=("four",)
+    ...             )
+    ...         return ()
+    ...
+    >>> env = MySaturationEnv(problem_list)
     >>> env.seed(0)
     0
     >>> len(env.reset()["real_obs"])
@@ -74,16 +96,16 @@ class SaturationEnv(Env[dict, int]):
     one can look at the current state in TPTP format
 
     >>> print(env.render())
-    cnf(this_is_a_test_case_1, hypothesis, p(c)).
-    cnf(this_is_a_test_case_2, hypothesis, ~p(c)).
-    cnf(test_axiom, axiom, c = d).
-    cnf(test_axiom_2, axiom, ~c = e).
+    cnf(one, lemma, p(X)).
+    cnf(two, lemma, p(Y)).
+    cnf(three, lemma, p(Z)).
+    cnf(four, lemma, ~p(X)).
 
     ``ansi`` mode returns a JSON representation of the state
     it should be more easily parsable than TPTP, although less human-friendly
 
     >>> env.render("ansi")
-    [...{"literals":[{"negated":false,"atom":{"index":298,"arguments":[{"ind...
+    [...{"literals":"p(X)","label":"one","role":"lemma","inference_parents"...
 
     other modes are not implemented yet
 
@@ -98,9 +120,8 @@ class SaturationEnv(Env[dict, int]):
 
     ``info`` dict contains the state diff, for example
 
-    >>> import json
-    >>> json.loads(info["state_diff_updated"][0])["processed"]
-    True
+    >>> info["state_diff_updated"]
+    ()
 
     repeating actions is not allowed
 
@@ -116,27 +137,25 @@ class SaturationEnv(Env[dict, int]):
 
     if a proof is found, then reward is ``+1``
 
-    >>> env.step(1)[1:3]
+    >>> env.step(3)[1:3]
     (1.0, True)
 
     TSTP proof is now available (one can add ``include`` directive before it
     for validation purposes)
 
-    >>> print(env._tptp_parser.cnf_parser.pretty_print(
-    ...     env._tptp_parser.parse(env.tstp_proof)[0])
-    ... )
-    cnf(..., lemma, $false, inference(resolution, [], [this_is_a_test_case_1, this_is_a_test_case_2])).
+    >>> print(env.tstp_proof)
+    cnf(falsehood, lemma, $false, inference(dummy, [], [four])).
 
     the relevant actions are filtered too
 
     >>> env.positive_actions
-    (0, 1, 4)
+    (3, 4)
 
     the total number of clauses in the state is limited by the ``max_clauses``
     parameter. Let's try setting it and repeating the same solution of the same
     problem:
 
-    >>> env = SaturationEnv(problem_list, max_clauses=3)
+    >>> env = MySaturationEnv(problem_list, max_clauses=3)
     >>> _ = env.seed(0)
     >>> old_obs = env.reset()
 
@@ -177,27 +196,8 @@ class SaturationEnv(Env[dict, int]):
             }
         )
         self.problem: Optional[str] = None
-        tptp_folder = os.path.join(
-            os.path.dirname(problem_list[0]), "..", ".."
-        )
-        self._tptp_parser = TPTPParser(tptp_folder, extendable=True)
 
-    def _init_clauses(self) -> Dict[str, Clause]:
-        self.problem = random.choice(self.problem_list)
-        with open(self.problem, "r", encoding="utf-8") as problem_file:
-            problem_text = problem_file.read()
-        parsed_clauses = self._tptp_parser.parse(problem_text)
-        return {
-            clause.label: dataclasses.replace(
-                clause,
-                birth_step=0,
-                inference_parents=(),
-                inference_rule=None,
-                processed=False,
-            )
-            for clause in parsed_clauses
-        }
-
+    @abstractmethod
     def reset(
         self,
         *,
@@ -205,70 +205,15 @@ class SaturationEnv(Env[dict, int]):
         return_info: bool = False,
         options: Optional[dict] = None,
     ) -> Union[dict, Tuple[dict, dict]]:  # noqa: D102
-        self._state = reindex_variables(self._init_clauses())
-        self._state_set = set(
-            map(
-                lambda clause: tuple(
-                    sorted(map(orjson.dumps, clause.literals))
-                ),
-                self._state.values(),
-            )
-        )
-        return self.state
-
-    def _add_to_state(self, new_clauses: Tuple[Clause, ...]) -> None:
-        birth_step = 1 + self.last_birth_step
-        for clause in new_clauses:
-            if not is_tautology(clause):
-                sorted_literals = tuple(
-                    sorted(map(orjson.dumps, clause.literals))
-                )
-                if sorted_literals not in self._state_set:
-                    self._state[clause.label] = dataclasses.replace(
-                        clause, birth_step=birth_step, processed=False
-                    )
-                    self._state_set.add(sorted_literals)
-
-    def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
-        state_len_before = len(self._state)
-        given_clause_label, given_clause = list(self._state.items())[action]
-        unprocessed_clauses = tuple(
-            clause for clause in self._state.values() if clause.processed
-        )
-        self._add_to_state(
-            all_possible_resolvents(
-                unprocessed_clauses,
-                given_clause,
-            )
-        )
-        self._add_to_state(
-            all_paramodulants_from_list(
-                unprocessed_clauses,
-                given_clause,
-            )
-        )
-        self._add_to_state(
-            all_possible_factors(
-                given_clause,
-            )
-        )
-        self._add_to_state(
-            all_possible_reflexivity_resolvents(
-                given_clause,
-            )
-        )
-        self._state[given_clause_label] = dataclasses.replace(
-            given_clause, processed=True
-        )
-        return tuple(
-            map(orjson.dumps, list(self._state.values())[state_len_before:])
-        ) + (orjson.dumps(list(self._state.values())[action]),)
+        raise NotImplementedError
 
     def _proof_found_result(
         self, reward: float, info: Dict[str, Any]
     ) -> Tuple[float, bool, Dict[str, Any]]:
         if tuple(
-            True for clause in self._state.values() if clause.literals == ()
+            True
+            for clause in self._state.values()
+            if clause.literals == FALSEHOOD_SYMBOL
         ):
             info[POSITIVE_ACTIONS] = self.positive_actions
             return 1.0, True, info
@@ -284,6 +229,10 @@ class SaturationEnv(Env[dict, int]):
                 info.pop(STATE_DIFF_UPDATED)
                 return True, info
         return done, info
+
+    @abstractmethod
+    def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
+        raise NotImplementedError
 
     def step(self, action: int) -> Tuple[dict, float, bool, Dict[str, Any]]:
         # noqa: D301
@@ -330,7 +279,7 @@ class SaturationEnv(Env[dict, int]):
         if mode == "human":
             return "\n".join(
                 map(
-                    self._tptp_parser.cnf_parser.pretty_print,
+                    pretty_print,
                     self._state.values(),
                 )
             )
@@ -365,7 +314,7 @@ class SaturationEnv(Env[dict, int]):
         return "\n".join(
             reversed(
                 [
-                    self._tptp_parser.cnf_parser.pretty_print(clause)
+                    pretty_print(clause)
                     for clause in reduce_to_proof(self._state)
                     if clause.inference_rule is not None
                 ]

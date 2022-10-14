@@ -23,10 +23,27 @@ import random
 from typing import Dict, List, Optional, Tuple, Union
 
 import orjson
-from tptp_lark_parser.grammar import Clause
 
 from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
+from gym_saturation.logic_ops.utils import Clause
 from gym_saturation.vampire_wrapper import VampireWrapper
+
+
+def _parse_vampire_clause(clause_label: str, clause_text: str) -> Clause:
+    formula, inference_info = clause_text.split("[")
+    pre_inference = inference_info.split("]")[0].split(" ")
+    if len(pre_inference) > 1:
+        inference_parents = tuple(pre_inference[-1].split(","))
+        inference_rule = "_".join(pre_inference[:-1])
+    else:
+        inference_parents, inference_rule = (), pre_inference[0]
+    return Clause(
+        literals=formula,
+        label=clause_label,
+        inference_rule=inference_rule,
+        inference_parents=inference_parents,
+        processed=True,
+    )
 
 
 class VampireEnv(SaturationEnv):
@@ -68,29 +85,13 @@ class VampireEnv(SaturationEnv):
         super().__init__(problem_list, max_clauses)
         self._vampire = VampireWrapper(vampire_binary_path)
 
-    def _parse_vampire_clause(
-        self, clause_label: str, clause_text: str
-    ) -> Clause:
-        formula, inference_info = clause_text.split("[")
-        pre_inference = inference_info.split("]")[0].split(" ")
-        if len(pre_inference) > 1:
-            inference_parents = ",".join(pre_inference[-1].split(","))
-            inference_rule = "_".join(pre_inference[:-1])
-        else:
-            inference_parents, inference_rule = "", pre_inference[0]
-        parsed_clause = self._tptp_parser.parse(
-            f"cnf({clause_label}, hypothesis, ({formula}), "
-            + f"inference({inference_rule}, [], [{inference_parents}]))."
-        )[0]
-        return dataclasses.replace(parsed_clause, processed=True)
-
     def _parse_vampire_response(
         self, vampire_response: Tuple[Tuple[str, str, str], ...]
     ) -> Dict[str, Clause]:
         updated: Dict[str, Clause] = {}
         for response_type, clause_label, clause_text in vampire_response:
             if response_type in {"new", "final", "input", "fn def discovered"}:
-                updated[clause_label] = self._parse_vampire_clause(
+                updated[clause_label] = _parse_vampire_clause(
                     clause_label, clause_text
                 )
             elif response_type in {

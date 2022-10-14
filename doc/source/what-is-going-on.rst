@@ -21,14 +21,7 @@ One can write theorems in a machine-readable form. This package uses the `CNF`_ 
 
 A statement of a theorem becomes a list of clauses. In a given clause algorithm, one divides the clauses in processed and not processed yet. Then at each step, one selects a not processed yet clause as a given clause. If it's empty (we arrived at a contradiction, i.e. found a refutation proof), the algorithm stops with success. If not, one applies all possible deduction rules to the given clause and all processed clauses. Then we add deduction results to the unprocessed set, and the given clause goes into the processed. The algorithm iterates if we didn't run out of time and unprocessed clauses.
 
-The deduction rules applied depend on a back-end. For example, for a :ref:`pure Python back-end <saturation_env>`, they are the following (this deductive system is known to be refutation complete):
-
-* :ref:`resolution <resolution>`
-* :ref:`factoring <factoring>`
-* :ref:`paramodulation <paramodulation>`
-* :ref:`reflexivity resolution <reflexivity_resolution>`
-
-For a deduction rules used by a Vampire Python wrapper back-end, refer to `Vampire documentation <https://github.com/vprover/vampire>`__.
+The deduction rules applied depend on a back-end. For a deduction rules used by a Vampire Python wrapper back-end, refer to `Vampire documentation <https://github.com/vprover/vampire>`__.
 
 In an automated theorem prover (ATP) like Vampire, for the choice of a given clause, one usually employs a clever combination of heuristics. Of course, we can imagine a learning agent in charge of choosing a given clause instead, which will help us to formulate a reinforcement learning task with the following description.
 
