@@ -90,7 +90,7 @@ max-line-length = 79
 max-statements = 10
 
 [tool.pylint.typecheck]
-generated-members = ["orjson"]
+generated-members = ["orjson", "asyncio"]
 
 [tool.pylint.spelling]
 spelling-dict = "en_GB"
