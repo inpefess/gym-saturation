@@ -17,6 +17,13 @@
 Package Documentation
 ######################
 
+Clause Space
+*************
+.. automodule:: gym_saturation.clause_space
+   :members:
+   :special-members: __init__, __call__
+
+		     
 Environments
 *************
 .. automodule:: gym_saturation.envs.saturation_env
@@ -26,30 +33,6 @@ Environments
    :members:
    :special-members: __init__, __call__
 
-Python Prover Back-end
-**********************
-
-.. automodule:: gym_saturation.logic_ops.factoring
-   :members:
-   :special-members: __init__, __call__
-.. automodule:: gym_saturation.logic_ops.paramodulation
-   :members:
-   :special-members: __init__, __call__
-.. automodule:: gym_saturation.logic_ops.reflexivity_resolution
-   :members:
-   :special-members: __init__, __call__
-.. automodule:: gym_saturation.logic_ops.resolution
-   :members:
-   :special-members: __init__, __call__
-.. automodule:: gym_saturation.logic_ops.substitution
-   :members:
-   :special-members: __init__, __call__
-.. automodule:: gym_saturation.logic_ops.unification
-   :members:
-   :special-members: __init__, __call__
-.. automodule:: gym_saturation.logic_ops.utils
-   :members:
-   :special-members: __init__, __call__
 
 Vampire Wrapper Back-end
 ************************
@@ -57,12 +40,4 @@ Vampire Wrapper Back-end
 .. automodule:: gym_saturation.vampire_wrapper
    :members:
    :special-members: __init__, __call__
-
-Agent Testing Tools
-********************
-.. automodule:: gym_saturation.agent_testing
-   :members:
-   :special-members: __init__, __call__
-.. automodule:: gym_saturation.clause_space
-   :members:
-   :special-members: __init__, __call__
+		     

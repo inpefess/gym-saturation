@@ -27,12 +27,9 @@ implements the ‘given clause’ algorithm (similar to one used in
 `Vampire <https://github.com/vprover/vampire>`__ and `E Prover
 <https://github.com/eprover/eprover>`__).
 
-There are two environments in ``gym-saturation``: ``SaturationEnv``
-and ``VampireEnv``. ``SaturationEnv`` is a saturation prover written
-in Python and was inspired by `PyRes
-<https://github.com/eprover/PyRes>`__. ``VampireEnv`` is a Python
-wrapper around a recent ``vampire`` binary and can be used to guide
-``vampire`` using RL.
+There is one environment in ``gym-saturation``: ``VampireEnv``.
+``VampireEnv`` is a Python wrapper around a recent ``vampire`` binary
+and can be used to guide ``vampire`` using RL.
 
 In contrast to monolithic architecture of a typical Automated Theorem
 Prover (ATP), ``gym-saturation`` gives different agents opportunities
@@ -82,9 +79,12 @@ How to use
    import os
 
    env = gym.make(
-       "GymSaturation-v0", problem_list=["..."]
+       "VampireGym-v0",
+       problem_list=["..."],
+       vampire_binary_path="..."
    )
    observation = env.reset()
+   action = ...
    observation, reward, done, info = env.step(action)
 
 See `the
