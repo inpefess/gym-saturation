@@ -201,7 +201,7 @@ class SaturationEnv(Env[dict, int]):
         return_info: bool = False,
         options: Optional[dict] = None,
     ) -> Union[dict, Tuple[dict, dict]]:  # noqa: D102
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def _proof_found_result(
         self, reward: float, info: Dict[str, Any]
@@ -226,7 +226,7 @@ class SaturationEnv(Env[dict, int]):
 
     @abstractmethod
     def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def step(self, action: int) -> Tuple[dict, float, bool, Dict[str, Any]]:
         # noqa: D301

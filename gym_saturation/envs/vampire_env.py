@@ -52,7 +52,6 @@ class VampireEnv(SaturationEnv):
 
     This class has the same API as SaturationEnv but uses another back-end.
     Here we have only a simple smoke test.
-    For rigorous testing, see ``gym_saturation.agent_testing`` module.
 
     >>> import sys
     >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
@@ -67,6 +66,16 @@ class VampireEnv(SaturationEnv):
     Traceback (most recent call last):
      ...
     ValueError: ('Unexpected response type: ', 'who could expect that?')
+    >>> from glob import glob
+    >>> problems = sorted(glob(os.path.join(files("gym_saturation").joinpath(
+    ...     os.path.join("resources", "TPTP-mock", "Problems")
+    ... ), "SET", "*-*.p")))
+    >>> vampire_env = VampireEnv("vampire", problems)
+    >>> observation = vampire_env.reset()
+    >>> for action in [0, 3, 6, 7, 8, 9, 10]:
+    ...     observation, reward, done, info = vampire_env.step(action)
+    >>> print(reward, done)
+    1.0 True
     """
 
     def __init__(
