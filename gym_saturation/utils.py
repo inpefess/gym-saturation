@@ -140,3 +140,35 @@ def reduce_to_proof(clauses: Dict[str, Clause]) -> Tuple[Clause, ...]:
             )
         return reduced
     raise WrongRefutationProofError
+
+
+def tstp_proof(state: Dict[str, Clause]) -> str:
+    """
+    Return TSTP proof (if found; raises an error otherwise).
+
+    :param state: map of clause labels to clauses
+    """
+    return "\n".join(
+        reversed(
+            [
+                pretty_print(clause)
+                for clause in reduce_to_proof(state)
+                if clause.inference_rule is not None
+            ]
+        )
+    )
+
+
+def positive_actions(state: Dict[str, Clause]) -> Tuple[int, ...]:
+    """
+    Return a sequence of actions which contributed to the proof found.
+
+    If there is no proof yet, raises an error.
+    :param state: map of clause labels to clauses
+    """
+    proof = reduce_to_proof(state)
+    return tuple(
+        action
+        for action, clause in enumerate(state.values())
+        if clause in proof
+    )
