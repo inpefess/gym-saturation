@@ -266,11 +266,6 @@ class SaturationEnv(Env[dict, int]):
         done, info = self._max_clauses_result(done, info)
         return self.state, reward, done, info
 
-    @property
-    def last_birth_step(self) -> int:
-        """Return the last birth step number of clauses in the proof state."""
-        return max(getattr(clause, "birth_step", 0) for clause in self._state)
-
     # pylint: disable=inconsistent-return-statements
     def render(self, mode="human"):  # noqa: D102
         if mode == "ansi":
