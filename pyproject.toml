@@ -83,7 +83,7 @@ ignore-signatures = true
 min-similarity-lines = 4
 
 [tool.pylint.format]
-ignore-long-lines = "(::=|:==|this_is_a_test_case|gym_saturation.saturation_prover.saturation_algorithm|:math:|.. math::|https://)"
+ignore-long-lines = "(::=|:==|this_is_a_test_case|:math:|.. math::|https://)"
 max-line-length = 79
 
 [tool.pylint.design]
