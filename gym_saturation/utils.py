@@ -87,7 +87,9 @@ def _flat_list(list_of_lists: Tuple[Tuple[Any, ...], ...]) -> Tuple[Any, ...]:
     return tuple(set(chain(*list_of_lists)))
 
 
-def reduce_to_proof(clauses: Dict[str, Clause]) -> Tuple[Clause, ...]:
+def reduce_to_proof(
+    clauses: Dict[str, Clause], goal: str = FALSEHOOD_SYMBOL
+) -> Tuple[Clause, ...]:
     """
     Leave only clauses belonging to the refutation proof.
 
@@ -103,14 +105,13 @@ def reduce_to_proof(clauses: Dict[str, Clause]) -> Tuple[Clause, ...]:
     True
 
     :param clauses: a map of clause labels to clauses
+    :param goal: literals of a goal clause (``$false`` by default)
     :returns: the reduced list of clauses
     :raises NoProofFoundError: if there is no complete refutation proof
         in a given proof state
     """
     empty_clauses = tuple(
-        clause
-        for clause in clauses.values()
-        if clause.literals == FALSEHOOD_SYMBOL
+        clause for clause in clauses.values() if clause.literals == goal
     )
     if len(empty_clauses) == 1:
         reduced: Tuple[Clause, ...] = ()
@@ -159,14 +160,18 @@ def tstp_proof(state: Dict[str, Clause]) -> str:
     )
 
 
-def positive_actions(state: Dict[str, Clause]) -> Tuple[int, ...]:
+def positive_actions(
+    state: Dict[str, Clause], goal: str = FALSEHOOD_SYMBOL
+) -> Tuple[int, ...]:
     """
     Return a sequence of actions which contributed to the proof found.
 
     If there is no proof yet, raises an error.
+
     :param state: map of clause labels to clauses
+    :param goal: literals of the goal clause (``$false`` by default)
     """
-    proof = reduce_to_proof(state)
+    proof = reduce_to_proof(state, goal)
     return tuple(
         action
         for action, clause in enumerate(state.values())
