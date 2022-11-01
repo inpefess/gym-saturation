@@ -79,7 +79,7 @@ def pretty_print(clause: Clause) -> str:
     return res + ")."
 
 
-class WrongRefutationProofError(Exception):
+class NoProofFoundError(Exception):
     """Exception raised when proof is requested but not found yet."""
 
 
@@ -97,14 +97,14 @@ def reduce_to_proof(clauses: Dict[str, Clause]) -> Tuple[Clause, ...]:
     ... })
     Traceback (most recent call last):
      ...
-    gym_saturation.utils.WrongRefutationProofError
+    gym_saturation.utils.NoProofFoundError
     >>> state = {"one": Clause(FALSEHOOD_SYMBOL, label="one")}
     >>> reduce_to_proof(state) == (Clause(FALSEHOOD_SYMBOL, label="one"), )
     True
 
     :param clauses: a map of clause labels to clauses
     :returns: the reduced list of clauses
-    :raises WrongRefutationProofError: if there is no complete refutation proof
+    :raises NoProofFoundError: if there is no complete refutation proof
         in a given proof state
     """
     empty_clauses = tuple(
@@ -139,7 +139,7 @@ def reduce_to_proof(clauses: Dict[str, Clause]) -> Tuple[Clause, ...]:
                 )
             )
         return reduced
-    raise WrongRefutationProofError
+    raise NoProofFoundError
 
 
 def tstp_proof(state: Dict[str, Clause]) -> str:
