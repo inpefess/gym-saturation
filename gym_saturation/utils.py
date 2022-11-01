@@ -97,7 +97,7 @@ def reduce_to_proof(clauses: Dict[str, Clause]) -> Tuple[Clause, ...]:
     ... })
     Traceback (most recent call last):
      ...
-    gym_saturation.logic_ops.utils.WrongRefutationProofError
+    gym_saturation.utils.WrongRefutationProofError
     >>> state = {"one": Clause(FALSEHOOD_SYMBOL, label="one")}
     >>> reduce_to_proof(state) == (Clause(FALSEHOOD_SYMBOL, label="one"), )
     True

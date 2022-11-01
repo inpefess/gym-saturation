@@ -26,7 +26,7 @@ import orjson
 from gym import Env, spaces
 
 from gym_saturation.clause_space import ClauseSpace
-from gym_saturation.logic_ops.utils import (
+from gym_saturation.utils import (
     FALSEHOOD_SYMBOL,
     Clause,
     pretty_print,

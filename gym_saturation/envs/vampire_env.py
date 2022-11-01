@@ -25,7 +25,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import orjson
 
 from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
-from gym_saturation.logic_ops.utils import Clause
+from gym_saturation.utils import Clause
 from gym_saturation.vampire_wrapper import VampireWrapper
 
 
