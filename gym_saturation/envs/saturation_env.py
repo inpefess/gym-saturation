@@ -137,14 +137,14 @@ class SaturationEnv(Env[dict, int]):
     TSTP proof is now available (one can add ``include`` directive before it
     for validation purposes)
 
-    >>> from gym_saturation.utils import tstp_proof
-    >>> print(tstp_proof(env._state))
+    >>> from gym_saturation.utils import get_tstp_proof
+    >>> print(get_tstp_proof(env._state))
     cnf(falsehood, lemma, $false, inference(dummy, [], [four])).
 
     One can also filter actions relevant to a particular goal:
 
-    >>> from gym_saturation.utils import positive_actions
-    >>> positive_actions(env._state)
+    >>> from gym_saturation.utils import get_positive_actions
+    >>> get_positive_actions(env._state)
     (3, 4)
 
     the total number of clauses in the state is limited by the ``max_clauses``

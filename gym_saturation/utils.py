@@ -143,7 +143,7 @@ def reduce_to_proof(
     raise NoProofFoundError
 
 
-def tstp_proof(state: Dict[str, Clause]) -> str:
+def get_tstp_proof(state: Dict[str, Clause]) -> str:
     """
     Return TSTP proof (if found; raises an error otherwise).
 
@@ -160,7 +160,7 @@ def tstp_proof(state: Dict[str, Clause]) -> str:
     )
 
 
-def positive_actions(
+def get_positive_actions(
     state: Dict[str, Clause], goal: str = FALSEHOOD_SYMBOL
 ) -> Tuple[int, ...]:
     """
