@@ -25,9 +25,14 @@ def _send_data_from_one_connection_to_another(
 ) -> bytes:
     while True:
         data = source_connection.recv(4096)
-        if data:
+        if data and data != b"OK":
             target_connection.sendall(data)
-        if not data or data[-2:] == b"\x00\n" or data[-1] == b"\x00":
+        if (
+            not data
+            or data[-2:] == b"\x00\n"
+            or data[-1] == b"\x00"
+            or data == b"OK"
+        ):
             break
     return data
 

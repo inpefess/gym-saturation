@@ -53,10 +53,12 @@ async def _iprover_start(
         "true",
         "--sup_iter_deepening",
         "0",
-        "--sup_passive_queues",
-        "[[+enigma_score]]",
-        "--sup_passive_queues_freq",
-        "[1]",
+        "--interactive_mode",
+        "true",
+        "--sup_passive_queue_type",
+        "external_agent",
+        "--dbg_backtrace",
+        "true",
         "--include_path",
         tptp_folder,
         problem_filename,
@@ -107,13 +109,20 @@ def _parse_szs_status(szs_status: str) -> Dict[str, Clause]:
     raise ValueError(f"unexpected status: {status_code}")
 
 
-def _parse_iprover_response(iprover_response: bytes) -> Dict[str, Clause]:
-    json_payload = orjson.loads(
-        iprover_response.decode("utf8").replace("\x00", "").replace("\n", "")
-    )
-    if "batch_clauses" in json_payload:
-        return _parse_batch_clauses(json_payload["batch_clauses"])
-    return _parse_szs_status(json_payload["szs_status"])
+def _parse_iprover_requests(
+    iprover_requests: List[Dict[str, Any]]
+) -> Dict[str, Clause]:
+    state_update = {}
+    for iprover_request in iprover_requests:
+        if "clauses" in iprover_request:
+            state_update.update(
+                _parse_batch_clauses(iprover_request["clauses"])
+            )
+        if "szs_status" in iprover_request:
+            state_update.update(
+                _parse_szs_status(iprover_request["szs_status"])
+            )
+    return state_update
 
 
 class IProverEnv(SaturationEnv):
@@ -138,7 +147,6 @@ class IProverEnv(SaturationEnv):
         super().__init__(problem_list, max_clauses)
         self.iprover_port, self.agent_port = port_pair
         self.iprover_binary_path = iprover_binary_path
-        self._scores_number = 0
         self._tcp_socket: Optional[socket.socket] = None
 
     def reset(
@@ -152,19 +160,18 @@ class IProverEnv(SaturationEnv):
         asyncio.run(
             _await_start_relay_server(self.iprover_port, self.agent_port)
         )
-        time.sleep(1)
+        time.sleep(2)
         asyncio.run(
             _iprover_start(
                 self.iprover_port, self.problem, self.iprover_binary_path
             )
         )
-        time.sleep(1)
+        time.sleep(2)
         self._tcp_socket = socket.create_connection(
             ("localhost", self.agent_port)
         )
-        data = self._get_data()
-        self._state = _parse_iprover_response(data)
-        self._scores_number = len(self._state)
+        data = self._get_json_data()
+        self._state = _parse_iprover_requests(data)
         return self.state
 
     @property
@@ -178,33 +185,42 @@ class IProverEnv(SaturationEnv):
             return self._tcp_socket
         raise ValueError("open tcp_socket before using it!")
 
-    def _get_data(self) -> bytes:
-        data = b"\x00\n"
-        while data == b"\x00\n":
-            while True:
-                raw_data = self.tcp_socket.recv(4096)
-                if raw_data:
-                    data += raw_data
-                else:
-                    data = raw_data
-                if (
-                    not raw_data
-                    or raw_data[-2:] == b"\x00\n"
-                    or raw_data[-1] == b"\x00"
-                ):
-                    break
-        return data
+    def _get_json_data(self) -> List[Dict[str, Any]]:
+        json_data = [{"query": "None"}]
+        while json_data[-1]["query"] not in {
+            "given_clause_request",
+            "szs_status",
+            "proof_out",
+        }:
+            raw_data = self.tcp_socket.recv(4096)
+            raw_jsons = [
+                request.replace("\n", "")
+                for request in raw_data.decode("utf8").split("\x00")
+            ]
+            for raw_json in raw_jsons:
+                if raw_json:
+                    parsed_json = orjson.loads(
+                        raw_json.replace("\n", "").replace("\x00", "")
+                    )
+                    json_data.append(parsed_json)
+            if json_data[-1]["query"] not in {
+                "given_clause_request",
+                "szs_status",
+                "proof_out",
+                "None",
+            }:
+                self.tcp_socket.sendall(b"OK")
+        return json_data[1:]
 
     def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
+        given_clause_label = list(self._state.values())[action].label[2:]
         scores = (
-            '{"scores":['
-            + (self._scores_number * f"{1 / (action + 1)},")[:-1]
-            + "]}\n\x00\n"
+            f"""{{"given_clause": {given_clause_label},"""
+            + """"passive_is_empty": false}\n\x00\n"""
         )
         self.tcp_socket.sendall(scores.encode("utf8"))
-        data = self._get_data()
+        data = self._get_json_data()
         if data:
-            updated = _parse_iprover_response(data)
-        self._scores_number = len(updated)
+            updated = _parse_iprover_requests(data)
         self._state.update(updated)
         return tuple(map(orjson.dumps, updated.values()))
