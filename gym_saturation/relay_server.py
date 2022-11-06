@@ -19,7 +19,7 @@ Relay Server between Two Sockets
 """
 import socket
 from socketserver import BaseRequestHandler, TCPServer
-from typing import Tuple, Type
+from typing import Optional, Tuple, Type
 
 
 class RelayServer(TCPServer):
@@ -27,28 +27,33 @@ class RelayServer(TCPServer):
     A TCP server to read and write data from another opened TCP socket.
 
     >>> from threading import Thread
-    >>> from time import sleep
-    >>> data_port = 10000
-    >>> control_port = 10001
-    >>> thread = Thread(
-    ...     target=start_relay_server,
-    ...     args=(data_port, control_port)
-    ... )
-    >>> thread.daemon = True
-    >>> thread.start()
-    >>> sleep(1)
-    >>> data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    >>> data_socket.connect(("localhost", data_port))
-    >>> data_socket.sendall(b"test\x00")
-    >>> def send_command(command: bytes) -> bytes:
-    ...     control_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    ...     control_socket.connect(("localhost", control_port))
-    ...     control_socket.sendall(command)
-    ...     return control_socket.recv(4096)
-    >>> print(send_command(b"anything but READ").decode("utf8"))
-    OK
-    >>> print(send_command(b"READ"))
+    >>> import random
+    >>> data_port = random.randint(10000, 20000)
+    >>> control_port = random.randint(10000, 20000)
+    >>> with RelayServer(
+    ...     data_port, ("localhost", control_port), RelayTCPHandler
+    ... ) as relay_server:
+    ...     thread = Thread(target=relay_server.serve_forever)
+    ...     thread.daemon = True
+    ...     thread.start()
+    ...     with socket.create_connection(
+    ...         ("localhost", data_port)
+    ...     ) as data_connection:
+    ...         data_connection.sendall(b"test\x00")
+    ...         with socket.create_connection(
+    ...             ("localhost", control_port)
+    ...         ) as control_connection:
+    ...             control_connection.sendall(b"READ")
+    ...             print(control_connection.recv(4096))
+    ...         with socket.create_connection(
+    ...             ("localhost", control_port)
+    ...         ) as control_connection:
+    ...             control_connection.sendall(b"anything but READ")
+    ...             print(control_connection.recv(4096).decode("utf8"))
+    ...     relay_server.shutdown()
+    ...     thread.join()
     b'test\x00'
+    OK
     """
 
     def __init__(
@@ -62,10 +67,17 @@ class RelayServer(TCPServer):
         super().__init__(
             server_address, request_handler_class, bind_and_activate
         )
-        data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        data_socket.bind(("localhost", data_port))
-        data_socket.listen()
-        self.data_connection = data_socket.accept()[0]
+        self.data_socket = socket.create_server(
+            address=("localhost", data_port), family=socket.AF_INET
+        )
+        self._data_connection: Optional[socket.socket] = None
+
+    @property
+    def data_connection(self) -> socket.socket:
+        """Get the connection to read from and write to."""
+        if self._data_connection is None:
+            self._data_connection = self.data_socket.accept()[0]
+        return self._data_connection
 
 
 class RelayTCPHandler(BaseRequestHandler):
@@ -82,16 +94,3 @@ class RelayTCPHandler(BaseRequestHandler):
         else:
             self.server.data_connection.sendall(command)
             self.request.sendall(b"OK")
-
-
-def start_relay_server(data_port: int, control_port: int) -> None:
-    """
-    Start a relay server.
-
-    :param data_port: a port to read and write data (no commands)
-    :param control_port: a port to listen for commands
-    """
-    with RelayServer(
-        data_port, ("localhost", control_port), RelayTCPHandler
-    ) as server:
-        server.serve_forever()

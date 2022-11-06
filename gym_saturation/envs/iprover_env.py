@@ -22,13 +22,14 @@ import os
 import random
 import re
 import socket
-import sys
 import time
+from threading import Thread
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import orjson
 
 from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
+from gym_saturation.relay_server import RelayServer, RelayTCPHandler
 from gym_saturation.utils import FALSEHOOD_SYMBOL, Clause
 
 
@@ -65,15 +66,6 @@ async def _iprover_start(
     ]
     return await asyncio.create_subprocess_exec(
         iprover_binary_path, *arguments
-    )
-
-
-async def _await_start_relay_server(iprover_port: int, agent_port: int):
-    return await asyncio.create_subprocess_exec(
-        sys.executable,
-        "-c",
-        "from gym_saturation.relay_server import start_relay_server; "
-        + f"start_relay_server({iprover_port}, {agent_port})",
     )
 
 
@@ -158,6 +150,14 @@ class IProverEnv(SaturationEnv):
         super().__init__(problem_list, max_clauses)
         self.iprover_port, self.agent_port = port_pair
         self.iprover_binary_path = iprover_binary_path
+        self.relay_server = RelayServer(
+            self.iprover_port, ("localhost", self.agent_port), RelayTCPHandler
+        )
+        self.relay_server_thread = Thread(
+            target=self.relay_server.serve_forever
+        )
+        self.relay_server_thread.daemon = True
+        self.relay_server_thread.start()
 
     def reset(
         self,
@@ -167,10 +167,6 @@ class IProverEnv(SaturationEnv):
         options: Optional[dict] = None,
     ) -> Union[Dict, Tuple[dict, dict]]:  # noqa: D102
         self.problem = random.choice(self.problem_list)
-        asyncio.run(
-            _await_start_relay_server(self.iprover_port, self.agent_port)
-        )
-        time.sleep(2)
         asyncio.run(
             _iprover_start(
                 self.iprover_port, self.problem, self.iprover_binary_path
@@ -226,3 +222,10 @@ class IProverEnv(SaturationEnv):
             updated = _parse_iprover_requests(data)
         self._state.update(updated)
         return tuple(map(orjson.dumps, updated.values()))
+
+    def close(self) -> None:
+        """Stop relay server."""
+        self.relay_server.data_connection.close()
+        self.relay_server.shutdown()
+        self.relay_server.server_close()
+        self.relay_server_thread.join()
