@@ -57,8 +57,8 @@ async def _iprover_start(
         "true",
         "--sup_passive_queue_type",
         "external_agent",
-        "--dbg_backtrace",
-        "true",
+        "--preprocessing_flag",
+        "false",
         "--include_path",
         tptp_folder,
         problem_filename,
@@ -82,15 +82,26 @@ def _parse_batch_clauses(
 ) -> Dict[str, Clause]:
     updated: Dict[str, Clause] = {}
     for dict_clause in batch_clauses:
-        label, literals, inference_rule = re.findall(
-            r"cnf\((\w+),\w+,([^,]*),(.*)\)\.",
-            dict_clause["clause"].replace("\n", "").replace(" ", ""),
-        )[0]
+        raw_clause = dict_clause["clause"].replace("\n", "").replace(" ", "")
+        try:
+            label, literals, inference_rule, inference_parents = re.findall(
+                r"cnf\((\w+),\w+,(.*),inference\((.*),.*,\[(.*)\]\)\)\.",
+                raw_clause,
+            )[0]
+        except IndexError:
+            label, literals = re.findall(
+                r"cnf\((\w+),\w+,(.*),file\(.*\)\)\.",
+                raw_clause,
+            )[0]
+            inference_rule, inference_parents = "input", None
         changed_clause = Clause(
             literals=literals,
             label=label,
             birth_step=dict_clause["clause_features"]["born"] - 1,
             inference_rule=inference_rule,
+            inference_parents=tuple(inference_parents.split(","))
+            if inference_parents is not None
+            else None,
         )
         updated[label] = changed_clause
     return updated
@@ -147,7 +158,6 @@ class IProverEnv(SaturationEnv):
         super().__init__(problem_list, max_clauses)
         self.iprover_port, self.agent_port = port_pair
         self.iprover_binary_path = iprover_binary_path
-        self._tcp_socket: Optional[socket.socket] = None
 
     def reset(
         self,
@@ -167,23 +177,19 @@ class IProverEnv(SaturationEnv):
             )
         )
         time.sleep(2)
-        self._tcp_socket = socket.create_connection(
-            ("localhost", self.agent_port)
-        )
         data = self._get_json_data()
         self._state = _parse_iprover_requests(data)
         return self.state
 
-    @property
-    def tcp_socket(self) -> socket.socket:
-        """
-        Get a TCP socket for communicating actions.
-
-        :raises ValueError: is the TCP socket is not initialised
-        """
-        if self._tcp_socket:
-            return self._tcp_socket
-        raise ValueError("open tcp_socket before using it!")
+    def _get_raw_data(self) -> bytes:
+        with socket.create_connection(
+            ("localhost", self.agent_port)
+        ) as tcp_socket:
+            tcp_socket.sendall(b"READ")
+            raw_data = tcp_socket.recv(4096)
+            while b"\x00" not in raw_data[-3:]:
+                raw_data += tcp_socket.recv(4096)
+        return raw_data
 
     def _get_json_data(self) -> List[Dict[str, Any]]:
         json_data = [{"query": "None"}]
@@ -192,7 +198,7 @@ class IProverEnv(SaturationEnv):
             "szs_status",
             "proof_out",
         }:
-            raw_data = self.tcp_socket.recv(4096)
+            raw_data = self._get_raw_data()
             raw_jsons = [
                 request.replace("\n", "")
                 for request in raw_data.decode("utf8").split("\x00")
@@ -203,13 +209,6 @@ class IProverEnv(SaturationEnv):
                         raw_json.replace("\n", "").replace("\x00", "")
                     )
                     json_data.append(parsed_json)
-            if json_data[-1]["query"] not in {
-                "given_clause_request",
-                "szs_status",
-                "proof_out",
-                "None",
-            }:
-                self.tcp_socket.sendall(b"OK")
         return json_data[1:]
 
     def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
@@ -218,7 +217,10 @@ class IProverEnv(SaturationEnv):
             f"""{{"given_clause": {given_clause_label},"""
             + """"passive_is_empty": false}\n\x00\n"""
         )
-        self.tcp_socket.sendall(scores.encode("utf8"))
+        with socket.create_connection(
+            ("localhost", self.agent_port)
+        ) as tcp_socket:
+            tcp_socket.sendall(scores.encode("utf8"))
         data = self._get_json_data()
         if data:
             updated = _parse_iprover_requests(data)

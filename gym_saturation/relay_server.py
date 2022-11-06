@@ -18,63 +18,54 @@ Relay Server between Two Sockets
 ================================
 """
 import socket
+from socketserver import BaseRequestHandler, TCPServer
+from typing import Tuple, Type
 
 
-def _send_data_from_one_connection_to_another(
-    source_connection: socket.socket, target_connection: socket.socket
-) -> bytes:
-    while True:
-        data = source_connection.recv(4096)
-        if data and data != b"OK":
-            target_connection.sendall(data)
-        if (
-            not data
-            or data[-2:] == b"\x00\n"
-            or data[-1] == b"\x00"
-            or data == b"OK"
-        ):
-            break
-    return data
+class RelayServer(TCPServer):
+    """A TCP server to read and write data from another opened TCP socket."""
 
-
-def _bind_and_listen_to_two_ports(
-    socket_one: socket.socket,
-    port_one: int,
-    socket_two: socket.socket,
-    port_two: int,
-) -> None:
-    socket_one.bind(("localhost", port_one))
-    socket_one.listen()
-    socket_two.bind(("localhost", port_two))
-    socket_two.listen()
-
-
-def start_relay_server(port_one: int, port_two: int) -> None:
-    """
-    Start a server sending data as is from one port to another and vice versa.
-
-    :param port_one: port from which we read first
-    :param port_two: port to which we write first
-    """
-    with socket.socket(
-        socket.AF_INET, socket.SOCK_STREAM
-    ) as socket_one, socket.socket(
-        socket.AF_INET, socket.SOCK_STREAM
-    ) as socket_two:
-        _bind_and_listen_to_two_ports(
-            socket_one, port_one, socket_two, port_two
+    def __init__(
+        self,
+        data_port: int,
+        server_address: Tuple[str, int],
+        request_handler_class: Type[BaseRequestHandler],
+        bind_and_activate: bool = True,
+    ):
+        """Accept a data connection."""
+        super().__init__(
+            server_address, request_handler_class, bind_and_activate
         )
-        with socket_one.accept()[0] as connection_one, socket_two.accept()[
-            0
-        ] as connection_two:
-            while True:
-                data_one = _send_data_from_one_connection_to_another(
-                    connection_one, connection_two
-                )
-                if not data_one:
-                    break
-                data_two = _send_data_from_one_connection_to_another(
-                    connection_two, connection_one
-                )
-                if not data_two:
-                    break
+        data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        data_socket.bind(("localhost", data_port))
+        data_socket.listen()
+        self.data_connection = data_socket.accept()[0]
+
+
+class RelayTCPHandler(BaseRequestHandler):
+    """The request handler class for relay server."""
+
+    def handle(self):
+        """Read data from another TCP socket or send data to it."""
+        data = self.request.recv(4096)
+        if data == b"READ":
+            input_data = self.server.data_connection.recv(4096)
+            while b"\x00" not in input_data[-3:]:
+                input_data += self.server.data_connection.recv(4096)
+            self.request.sendall(input_data)
+        else:
+            self.server.data_connection.sendall(data)
+            self.request.sendall(b"OK\n")
+
+
+def start_relay_server(data_port: int, control_port: int) -> None:
+    """
+    Start a relay server.
+
+    :param data_port: a port to read and write data (no commands)
+    :param control_port: a port to listen for commands
+    """
+    with RelayServer(
+        data_port, ("localhost", control_port), RelayTCPHandler
+    ) as server:
+        server.serve_forever()
