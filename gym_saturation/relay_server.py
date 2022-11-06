@@ -23,7 +23,33 @@ from typing import Tuple, Type
 
 
 class RelayServer(TCPServer):
-    """A TCP server to read and write data from another opened TCP socket."""
+    r"""
+    A TCP server to read and write data from another opened TCP socket.
+
+    >>> from threading import Thread
+    >>> from time import sleep
+    >>> data_port = 10000
+    >>> control_port = 10001
+    >>> thread = Thread(
+    ...     target=start_relay_server,
+    ...     args=(data_port, control_port)
+    ... )
+    >>> thread.daemon = True
+    >>> thread.start()
+    >>> sleep(1)
+    >>> data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    >>> data_socket.connect(("localhost", data_port))
+    >>> data_socket.sendall(b"test\x00")
+    >>> def send_command(command: bytes) -> bytes:
+    ...     control_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    ...     control_socket.connect(("localhost", control_port))
+    ...     control_socket.sendall(command)
+    ...     return control_socket.recv(4096)
+    >>> print(send_command(b"anything but READ").decode("utf8"))
+    OK
+    >>> print(send_command(b"READ"))
+    b'test\x00'
+    """
 
     def __init__(
         self,
@@ -47,15 +73,15 @@ class RelayTCPHandler(BaseRequestHandler):
 
     def handle(self):
         """Read data from another TCP socket or send data to it."""
-        data = self.request.recv(4096)
-        if data == b"READ":
-            input_data = self.server.data_connection.recv(4096)
+        command = self.request.recv(4096)
+        if command == b"READ":
+            input_data = b""
             while b"\x00" not in input_data[-3:]:
                 input_data += self.server.data_connection.recv(4096)
             self.request.sendall(input_data)
         else:
-            self.server.data_connection.sendall(data)
-            self.request.sendall(b"OK\n")
+            self.server.data_connection.sendall(command)
+            self.request.sendall(b"OK")
 
 
 def start_relay_server(data_port: int, control_port: int) -> None:
