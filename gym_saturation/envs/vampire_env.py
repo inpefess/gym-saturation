@@ -58,10 +58,10 @@ class VampireEnv(SaturationEnv):
     ...     from importlib.resources import files
     ... else:
     ...     from importlib_resources import files
-    >>> vampire_binary_path = files("gym_saturation").joinpath(
+    >>> vampire_binary = files("gym_saturation").joinpath(
     ...     os.path.join("resources", "vampire-mock")
     ... )
-    >>> vampire_env = VampireEnv(vampire_binary_path, ["test"])
+    >>> vampire_env = VampireEnv(["test"], vampire_binary_path=vampire_binary)
     >>> vampire_env.reset()
     Traceback (most recent call last):
      ...
@@ -70,7 +70,7 @@ class VampireEnv(SaturationEnv):
     >>> problems = sorted(glob(os.path.join(files("gym_saturation").joinpath(
     ...     os.path.join("resources", "TPTP-mock", "Problems")
     ... ), "SET", "*-*.p")))
-    >>> vampire_env = VampireEnv("vampire", problems)
+    >>> vampire_env = VampireEnv(problems)
     >>> observation = vampire_env.reset()
     >>> for action in [0, 3, 6, 7, 8, 9, 10]:
     ...     observation, reward, done, info = vampire_env.step(action)
@@ -80,16 +80,17 @@ class VampireEnv(SaturationEnv):
 
     def __init__(
         self,
-        vampire_binary_path: str,
         problem_list: List[str],
         max_clauses: int = MAX_CLAUSES,
+        vampire_binary_path: str = "vampire",
     ):
         """
         Initialise a :ref:`VampireWrapper <vampire-wrapper>`.
 
-        :param vampire_binary_path: a path to Vampire binary
         :param problem_list: a list of names of TPTP problem files
         :param max_clauses: maximal number of clauses in proof state
+        :param vampire_binary_path: a path to Vampire binary;
+            by default we expect it to be in the $PATH
         """
         super().__init__(problem_list, max_clauses)
         self._vampire = VampireWrapper(vampire_binary_path)

@@ -133,19 +133,20 @@ class IProverEnv(SaturationEnv):
 
     def __init__(
         self,
-        iprover_binary_path: str,
         port_pair: Tuple[int, int],
         problem_list: List[str],
         max_clauses: int = MAX_CLAUSES,
+        iprover_binary_path: str = "iproveropt",
     ):
         """
         Initialise the environment.
 
-        :param iprover_binary_path: a path to iProver binary
         :param port_pair: iProver will connect to the first port,
             a port to listen for agent's connection is the second one
         :param problem_list: a list of names of TPTP problem files
         :param max_clauses: maximal number of clauses in proof state
+        :param iprover_binary_path: a path to iProver binary;
+            by default, we assume it to be ``iproveropt`` and in the $PATH
         """
         super().__init__(problem_list, max_clauses)
         self.iprover_port, self.agent_port = port_pair
