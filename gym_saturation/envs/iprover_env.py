@@ -22,14 +22,15 @@ import os
 import random
 import re
 import socket
-import sys
 import time
+from threading import Thread
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import orjson
 
 from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
-from gym_saturation.logic_ops.utils import FALSEHOOD_SYMBOL, Clause
+from gym_saturation.relay_server import RelayServer, RelayTCPHandler
+from gym_saturation.utils import FALSEHOOD_SYMBOL, Clause
 
 
 async def _iprover_start(
@@ -53,10 +54,12 @@ async def _iprover_start(
         "true",
         "--sup_iter_deepening",
         "0",
-        "--sup_passive_queues",
-        "[[+enigma_score]]",
-        "--sup_passive_queues_freq",
-        "[1]",
+        "--interactive_mode",
+        "true",
+        "--sup_passive_queue_type",
+        "external_agent",
+        "--preprocessing_flag",
+        "false",
         "--include_path",
         tptp_folder,
         problem_filename,
@@ -66,29 +69,31 @@ async def _iprover_start(
     )
 
 
-async def _await_start_relay_server(iprover_port: int, agent_port: int):
-    return await asyncio.create_subprocess_exec(
-        sys.executable,
-        "-c",
-        "from gym_saturation.relay_server import start_relay_server; "
-        + f"start_relay_server({iprover_port}, {agent_port})",
-    )
-
-
 def _parse_batch_clauses(
     batch_clauses: List[Dict[str, Any]]
 ) -> Dict[str, Clause]:
     updated: Dict[str, Clause] = {}
     for dict_clause in batch_clauses:
-        label, literals, inference_rule = re.findall(
-            r"cnf\((\w+),\w+,([^,]*),(.*)\)\.",
-            dict_clause["clause"].replace("\n", "").replace(" ", ""),
-        )[0]
+        raw_clause = dict_clause["clause"].replace("\n", "").replace(" ", "")
+        try:
+            label, literals, inference_rule, inference_parents = re.findall(
+                r"cnf\((\w+),\w+,(.*),inference\((.*),.*,\[(.*)\]\)\)\.",
+                raw_clause,
+            )[0]
+        except IndexError:
+            label, literals = re.findall(
+                r"cnf\((\w+),\w+,(.*),file\(.*\)\)\.",
+                raw_clause,
+            )[0]
+            inference_rule, inference_parents = "input", None
         changed_clause = Clause(
             literals=literals,
             label=label,
             birth_step=dict_clause["clause_features"]["born"] - 1,
             inference_rule=inference_rule,
+            inference_parents=tuple(inference_parents.split(","))
+            if inference_parents is not None
+            else None,
         )
         updated[label] = changed_clause
     return updated
@@ -107,13 +112,20 @@ def _parse_szs_status(szs_status: str) -> Dict[str, Clause]:
     raise ValueError(f"unexpected status: {status_code}")
 
 
-def _parse_iprover_response(iprover_response: bytes) -> Dict[str, Clause]:
-    json_payload = orjson.loads(
-        iprover_response.decode("utf8").replace("\x00", "").replace("\n", "")
-    )
-    if "batch_clauses" in json_payload:
-        return _parse_batch_clauses(json_payload["batch_clauses"])
-    return _parse_szs_status(json_payload["szs_status"])
+def _parse_iprover_requests(
+    iprover_requests: List[Dict[str, Any]]
+) -> Dict[str, Clause]:
+    state_update = {}
+    for iprover_request in iprover_requests:
+        if "clauses" in iprover_request:
+            state_update.update(
+                _parse_batch_clauses(iprover_request["clauses"])
+            )
+        if "szs_status" in iprover_request:
+            state_update.update(
+                _parse_szs_status(iprover_request["szs_status"])
+            )
+    return state_update
 
 
 class IProverEnv(SaturationEnv):
@@ -138,8 +150,14 @@ class IProverEnv(SaturationEnv):
         super().__init__(problem_list, max_clauses)
         self.iprover_port, self.agent_port = port_pair
         self.iprover_binary_path = iprover_binary_path
-        self._scores_number = 0
-        self._tcp_socket: Optional[socket.socket] = None
+        self.relay_server = RelayServer(
+            self.iprover_port, ("localhost", self.agent_port), RelayTCPHandler
+        )
+        self.relay_server_thread = Thread(
+            target=self.relay_server.serve_forever
+        )
+        self.relay_server_thread.daemon = True
+        self.relay_server_thread.start()
 
     def reset(
         self,
@@ -150,61 +168,64 @@ class IProverEnv(SaturationEnv):
     ) -> Union[Dict, Tuple[dict, dict]]:  # noqa: D102
         self.problem = random.choice(self.problem_list)
         asyncio.run(
-            _await_start_relay_server(self.iprover_port, self.agent_port)
-        )
-        time.sleep(1)
-        asyncio.run(
             _iprover_start(
                 self.iprover_port, self.problem, self.iprover_binary_path
             )
         )
-        time.sleep(1)
-        self._tcp_socket = socket.create_connection(
-            ("localhost", self.agent_port)
-        )
-        data = self._get_data()
-        self._state = _parse_iprover_response(data)
-        self._scores_number = len(self._state)
+        time.sleep(2)
+        data = self._get_json_data()
+        self._state = _parse_iprover_requests(data)
         return self.state
 
-    @property
-    def tcp_socket(self) -> socket.socket:
-        """
-        Get a TCP socket for communicating actions.
+    def _get_raw_data(self) -> bytes:
+        with socket.create_connection(
+            ("localhost", self.agent_port)
+        ) as tcp_socket:
+            tcp_socket.sendall(b"READ")
+            raw_data = tcp_socket.recv(4096)
+            while b"\x00" not in raw_data[-3:]:
+                raw_data += tcp_socket.recv(4096)
+        return raw_data
 
-        :raises ValueError: is the TCP socket is not initialised
-        """
-        if self._tcp_socket:
-            return self._tcp_socket
-        raise ValueError("open tcp_socket before using it!")
-
-    def _get_data(self) -> bytes:
-        data = b"\x00\n"
-        while data == b"\x00\n":
-            while True:
-                raw_data = self.tcp_socket.recv(4096)
-                if raw_data:
-                    data += raw_data
-                else:
-                    data = raw_data
-                if (
-                    not raw_data
-                    or raw_data[-2:] == b"\x00\n"
-                    or raw_data[-1] == b"\x00"
-                ):
-                    break
-        return data
+    def _get_json_data(self) -> List[Dict[str, Any]]:
+        json_data = [{"query": "None"}]
+        while json_data[-1]["query"] not in {
+            "given_clause_request",
+            "szs_status",
+            "proof_out",
+        }:
+            raw_data = self._get_raw_data()
+            raw_jsons = [
+                request.replace("\n", "")
+                for request in raw_data.decode("utf8").split("\x00")
+            ]
+            for raw_json in raw_jsons:
+                if raw_json:
+                    parsed_json = orjson.loads(
+                        raw_json.replace("\n", "").replace("\x00", "")
+                    )
+                    json_data.append(parsed_json)
+        return json_data[1:]
 
     def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
+        given_clause_label = list(self._state.values())[action].label[2:]
         scores = (
-            '{"scores":['
-            + (self._scores_number * f"{1 / (action + 1)},")[:-1]
-            + "]}\n\x00\n"
+            f"""{{"given_clause": {given_clause_label},"""
+            + """"passive_is_empty": false}\n\x00\n"""
         )
-        self.tcp_socket.sendall(scores.encode("utf8"))
-        data = self._get_data()
+        with socket.create_connection(
+            ("localhost", self.agent_port)
+        ) as tcp_socket:
+            tcp_socket.sendall(scores.encode("utf8"))
+        data = self._get_json_data()
         if data:
-            updated = _parse_iprover_response(data)
-        self._scores_number = len(updated)
+            updated = _parse_iprover_requests(data)
         self._state.update(updated)
         return tuple(map(orjson.dumps, updated.values()))
+
+    def close(self) -> None:
+        """Stop relay server."""
+        self.relay_server.data_connection.close()
+        self.relay_server.shutdown()
+        self.relay_server.server_close()
+        self.relay_server_thread.join()

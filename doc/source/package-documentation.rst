@@ -17,27 +17,29 @@
 Package Documentation
 ######################
 
-Clause Space
-*************
+General modules
+****************
 .. automodule:: gym_saturation.clause_space
    :members:
-   :special-members: __init__, __call__
+   :special-members: __init__
+.. automodule:: gym_saturation.vampire_wrapper
+   :members:
+   :special-members: __init__
+.. automodule:: gym_saturation.utils
+   :members:
+.. automodule:: gym_saturation.relay_server
+   :members:
+   :special-members: __init__
 
 		     
 Environments
 *************
 .. automodule:: gym_saturation.envs.saturation_env
    :members:
-   :special-members: __init__, __call__
+   :special-members: __init__
 .. automodule:: gym_saturation.envs.vampire_env
    :members:
-   :special-members: __init__, __call__
-
-
-Vampire Wrapper Back-end
-************************
-
-.. automodule:: gym_saturation.vampire_wrapper
+   :special-members: __init__
+.. automodule:: gym_saturation.envs.iprover_env
    :members:
-   :special-members: __init__, __call__
-		     
+   :special-members: __init__

@@ -26,15 +26,9 @@ import orjson
 from gym import Env, spaces
 
 from gym_saturation.clause_space import ClauseSpace
-from gym_saturation.logic_ops.utils import (
-    FALSEHOOD_SYMBOL,
-    Clause,
-    pretty_print,
-    reduce_to_proof,
-)
+from gym_saturation.utils import FALSEHOOD_SYMBOL, Clause, pretty_print
 
 STATE_DIFF_UPDATED = "state_diff_updated"
-POSITIVE_ACTIONS = "positive_actions"
 PROBLEM_FILENAME = "problem_filename"
 MAX_CLAUSES = 100000
 
@@ -143,12 +137,14 @@ class SaturationEnv(Env[dict, int]):
     TSTP proof is now available (one can add ``include`` directive before it
     for validation purposes)
 
-    >>> print(env.tstp_proof)
+    >>> from gym_saturation.utils import get_tstp_proof
+    >>> print(get_tstp_proof(env._state))
     cnf(falsehood, lemma, $false, inference(dummy, [], [four])).
 
-    the relevant actions are filtered too
+    One can also filter actions relevant to a particular goal:
 
-    >>> env.positive_actions
+    >>> from gym_saturation.utils import get_positive_actions
+    >>> get_positive_actions(env._state)
     (3, 4)
 
     the total number of clauses in the state is limited by the ``max_clauses``
@@ -205,7 +201,7 @@ class SaturationEnv(Env[dict, int]):
         return_info: bool = False,
         options: Optional[dict] = None,
     ) -> Union[dict, Tuple[dict, dict]]:  # noqa: D102
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def _proof_found_result(
         self, reward: float, info: Dict[str, Any]
@@ -214,7 +210,6 @@ class SaturationEnv(Env[dict, int]):
             clause.literals == FALSEHOOD_SYMBOL
             for clause in self._state.values()
         ):
-            info[POSITIVE_ACTIONS] = self.positive_actions
             return 1.0, True, info
         return reward, False, info
 
@@ -231,7 +226,7 @@ class SaturationEnv(Env[dict, int]):
 
     @abstractmethod
     def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def step(self, action: int) -> Tuple[dict, float, bool, Dict[str, Any]]:
         # noqa: D301
@@ -265,11 +260,6 @@ class SaturationEnv(Env[dict, int]):
         )
         done, info = self._max_clauses_result(done, info)
         return self.state, reward, done, info
-
-    @property
-    def last_birth_step(self) -> int:
-        """Return the last birth step number of clauses in the proof state."""
-        return max(getattr(clause, "birth_step", 0) for clause in self._state)
 
     # pylint: disable=inconsistent-return-statements
     def render(self, mode="human"):  # noqa: D102
@@ -306,30 +296,3 @@ class SaturationEnv(Env[dict, int]):
     def seed(self, seed=None):  # noqa: D102
         random.seed(seed)
         return seed
-
-    @property
-    def tstp_proof(self) -> str:
-        """Return TSTP proof (if found; raises an error otherwise)."""
-        return "\n".join(
-            reversed(
-                [
-                    pretty_print(clause)
-                    for clause in reduce_to_proof(self._state)
-                    if clause.inference_rule is not None
-                ]
-            )
-        )
-
-    @property
-    def positive_actions(self) -> Tuple[int, ...]:
-        """
-        Return a sequence of actions which contributed to the proof found.
-
-        If there is no proof yet, raises an error.
-        """
-        proof = reduce_to_proof(self._state)
-        return tuple(
-            action
-            for action, clause in enumerate(self._state.values())
-            if clause in proof
-        )

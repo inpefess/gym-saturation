@@ -76,3 +76,4 @@ disjunction
 dataclasses
 bool
 TCP
+localhost

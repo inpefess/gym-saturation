@@ -2,19 +2,14 @@ version: 2.1
 jobs:
   build-and-test:
     docker:
-      - image: inpefess/vampire_testing
+      - image: inpefess/testing_vampire
     steps:
       - checkout
-      - run:
-          name: install libenchant
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y libenchant-2-2
       - run:
           name: use tox
           command: |
             pip install tox
-            pyenv local 3.7.13 3.8.13 3.9.13 3.10.4
+            pyenv local 3.8.15 3.9.15 3.10.7 3.11.0
             tox
       - run:
           name: upload data to codecov
