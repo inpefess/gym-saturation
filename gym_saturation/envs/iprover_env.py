@@ -129,7 +129,26 @@ def _parse_iprover_requests(
 
 
 class IProverEnv(SaturationEnv):
-    """An RL environment around iProver."""
+    """
+    An RL environment around iProver.
+
+    >>> import sys
+    >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
+    ...     from importlib.resources import files
+    ... else:
+    ...     from importlib_resources import files
+    >>> from glob import glob
+    >>> problems = sorted(glob(os.path.join(files("gym_saturation").joinpath(
+    ...     os.path.join("resources", "TPTP-mock", "Problems")
+    ... ), "SET", "*-*.p")))
+    >>> iprover_env = IProverEnv((10000, 10001), problems)
+    >>> observation = iprover_env.reset()
+    >>> for action in [0, 1, 2, 4, 8, 9, 10]:
+    ...     observation, reward, done, info = iprover_env.step(action)
+    >>> print(reward, done)
+    1.0 True
+    >>> iprover_env.close()
+    """
 
     def __init__(
         self,
