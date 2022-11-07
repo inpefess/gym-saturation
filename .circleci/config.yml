@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   build-and-test:
     docker:
-      - image: inpefess/testing_vampire
+      - image: inpefess/python_with_provers
     steps:
       - checkout
       - run:
