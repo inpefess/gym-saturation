@@ -28,8 +28,8 @@ class RelayServer(TCPServer):
 
     >>> from threading import Thread
     >>> import random
-    >>> data_port = random.randint(10000, 20000)
-    >>> control_port = random.randint(10000, 20000)
+    >>> data_port = random.randint(10000, 2 ** 16 - 1)
+    >>> control_port = random.randint(10000, 2 ** 16 - 1)
     >>> with RelayServer(
     ...     data_port, ("localhost", control_port), RelayTCPHandler
     ... ) as relay_server:

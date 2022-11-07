@@ -20,15 +20,15 @@ maximal possible reward is set to ``1.0`` (proof is found).
 from gym.envs.registration import register
 
 register(
-    id="GymSaturation-v0",
-    entry_point="gym_saturation.envs:SaturationEnv",
-    max_episode_steps=1000,
+    id="Vampire-v0",
+    entry_point="gym_saturation.envs:VampireEnv",
+    max_episode_steps=100,
     reward_threshold=1.0,
 )
 register(
-    id="GymVampire-v0",
-    entry_point="gym_saturation.envs:VampireEnv",
-    max_episode_steps=1000,
+    id="iProver-v0",
+    entry_point="gym_saturation.envs:IProverEnv",
+    max_episode_steps=100,
     reward_threshold=1.0,
 )
 __version__ = "0.5.1"

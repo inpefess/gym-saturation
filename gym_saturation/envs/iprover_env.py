@@ -138,13 +138,10 @@ class IProverEnv(SaturationEnv):
     ... else:
     ...     from importlib_resources import files
     >>> from glob import glob
-    >>> import random
     >>> problems = sorted(glob(os.path.join(files("gym_saturation").joinpath(
     ...     os.path.join("resources", "TPTP-mock", "Problems")
     ... ), "SET", "*-*.p")))
-    >>> iprover_port = random.randint(10000, 20000)
-    >>> agent_port = random.randint(10000, 20000)
-    >>> iprover_env = IProverEnv((iprover_port, agent_port), problems)
+    >>> iprover_env = IProverEnv(problems)
     >>> observation = iprover_env.reset()
     >>> for action in [0, 1, 2, 4, 8, 9, 10]:
     ...     observation, reward, done, info = iprover_env.step(action)
@@ -155,23 +152,33 @@ class IProverEnv(SaturationEnv):
 
     def __init__(
         self,
-        port_pair: Tuple[int, int],
         problem_list: List[str],
         max_clauses: int = MAX_CLAUSES,
+        port_pair: Optional[Tuple[int, int]] = None,
         iprover_binary_path: str = "iproveropt",
     ):
         """
         Initialise the environment.
 
-        :param port_pair: iProver will connect to the first port,
-            a port to listen for agent's connection is the second one
         :param problem_list: a list of names of TPTP problem files
         :param max_clauses: maximal number of clauses in proof state
+        :param port_pair: iProver will connect to the first port,
+            a port to listen for agent's connection is the second one
         :param iprover_binary_path: a path to iProver binary;
             by default, we assume it to be ``iproveropt`` and in the $PATH
         """
         super().__init__(problem_list, max_clauses)
-        self.iprover_port, self.agent_port = port_pair
+        (
+            self.iprover_port,
+            self.agent_port,
+        ) = (  # pylint: disable=unbalanced-tuple-unpacking
+            (
+                random.randint(10000, 2**16 - 1),
+                random.randint(10000, 2**16 - 1),
+            )
+            if port_pair is None
+            else port_pair
+        )
         self.iprover_binary_path = iprover_binary_path
         self.relay_server = RelayServer(
             self.iprover_port, ("localhost", self.agent_port), RelayTCPHandler
