@@ -138,10 +138,13 @@ class IProverEnv(SaturationEnv):
     ... else:
     ...     from importlib_resources import files
     >>> from glob import glob
+    >>> import random
     >>> problems = sorted(glob(os.path.join(files("gym_saturation").joinpath(
     ...     os.path.join("resources", "TPTP-mock", "Problems")
     ... ), "SET", "*-*.p")))
-    >>> iprover_env = IProverEnv((10000, 10001), problems)
+    >>> iprover_port = random.randint(10000, 20000)
+    >>> agent_port = random.randint(10000, 20000)
+    >>> iprover_env = IProverEnv((iprover_port, agent_port), problems)
     >>> observation = iprover_env.reset()
     >>> for action in [0, 1, 2, 4, 8, 9, 10]:
     ...     observation, reward, done, info = iprover_env.step(action)
