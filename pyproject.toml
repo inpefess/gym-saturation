@@ -10,6 +10,7 @@ classifiers=[
 	"Programming Language :: Python :: 3.8",
 	"Programming Language :: Python :: 3.9",
 	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: 3.11",
 	"License :: OSI Approved :: Apache Software License",
 	"Operating System :: OS Independent",
 	"Intended Audience :: Science/Research",
@@ -22,7 +23,7 @@ classifiers=[
 include = ["gym_saturation/py.typed"]
 
 [tool.poetry.dependencies]
-python = "> 3.8, < 3.11"
+python = "> 3.8, < 3.12"
 gym = ">=0.21.0,<0.24.0"
 importlib_resources = {version = "*", markers = "python_version < \"3.9\""}
 orjson = "*"
@@ -108,7 +109,7 @@ ignore_missing_imports = true
 legacy_tox_ini = """
 [tox]
 isolated_build = True
-envlist = py38,py39,py310
+envlist = py38,py39,py310,py311
 
 [testenv]
 deps =
