@@ -99,7 +99,7 @@ class SaturationEnv(Env[dict, int]):
     it should be more easily parsable than TPTP, although less human-friendly
 
     >>> env.render("ansi")
-    [...{"literals":"p(X)","label":"one","role":"lemma","inference_parents"...
+    b'{"one":{"literals":"p(X)","label":"one","role":"lemma","inference_pare...
 
     other modes are not implemented yet
 
@@ -264,7 +264,7 @@ class SaturationEnv(Env[dict, int]):
     # pylint: disable=inconsistent-return-statements
     def render(self, mode="human"):  # noqa: D102
         if mode == "ansi":
-            return self.state["real_obs"]
+            return orjson.dumps(self._state)
         if mode == "human":
             return "\n".join(
                 map(
@@ -278,9 +278,7 @@ class SaturationEnv(Env[dict, int]):
     def state(self) -> dict:
         """Return environment state in Python ``dict`` format."""
         return {
-            "real_obs": [
-                orjson.dumps(clause) for clause in self._state.values()
-            ],
+            "real_obs": self._state,
             "action_mask": (
                 np.array(
                     [
