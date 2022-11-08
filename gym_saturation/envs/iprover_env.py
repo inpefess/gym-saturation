@@ -22,6 +22,7 @@ import os
 import random
 import re
 import socket
+import subprocess
 import time
 from threading import Thread
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -65,7 +66,7 @@ async def _iprover_start(
         problem_filename,
     ]
     return await asyncio.create_subprocess_exec(
-        iprover_binary_path, *arguments
+        iprover_binary_path, *arguments, stdout=subprocess.DEVNULL
     )
 
 
