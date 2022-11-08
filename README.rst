@@ -82,11 +82,7 @@ How to use
    import gym
    import os
 
-   env = gym.make(
-       "VampireGym-v0",
-       problem_list=["..."],
-       vampire_binary_path="..."
-   )
+   env = gym.make("Vampire-v0", problem_list=["..."])
    observation = env.reset()
    action = ...
    observation, reward, done, info = env.step(action)
