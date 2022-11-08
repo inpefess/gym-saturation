@@ -22,6 +22,7 @@ import os
 import random
 import re
 import socket
+import subprocess
 import time
 from threading import Thread
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -65,7 +66,7 @@ async def _iprover_start(
         problem_filename,
     ]
     return await asyncio.create_subprocess_exec(
-        iprover_binary_path, *arguments
+        iprover_binary_path, *arguments, stdout=subprocess.DEVNULL
     )
 
 
@@ -129,26 +130,56 @@ def _parse_iprover_requests(
 
 
 class IProverEnv(SaturationEnv):
-    """An RL environment around iProver."""
+    """
+    An RL environment around iProver.
+
+    >>> import sys
+    >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
+    ...     from importlib.resources import files
+    ... else:
+    ...     from importlib_resources import files
+    >>> from glob import glob
+    >>> problems = sorted(glob(os.path.join(files("gym_saturation").joinpath(
+    ...     os.path.join("resources", "TPTP-mock", "Problems")
+    ... ), "SET", "*-*.p")))
+    >>> iprover_env = IProverEnv(problems)
+    >>> observation = iprover_env.reset()
+    >>> for action in [0, 1, 2, 4, 8, 9, 10]:
+    ...     observation, reward, done, info = iprover_env.step(action)
+    >>> print(reward, done)
+    1.0 True
+    >>> iprover_env.close()
+    """
 
     def __init__(
         self,
-        iprover_binary_path: str,
-        port_pair: Tuple[int, int],
         problem_list: List[str],
         max_clauses: int = MAX_CLAUSES,
+        port_pair: Optional[Tuple[int, int]] = None,
+        iprover_binary_path: str = "iproveropt",
     ):
         """
         Initialise the environment.
 
-        :param iprover_binary_path: a path to iProver binary
-        :param port_pair: iProver will connect to the first port,
-            a port to listen for agent's connection is the second one
         :param problem_list: a list of names of TPTP problem files
         :param max_clauses: maximal number of clauses in proof state
+        :param port_pair: iProver will connect to the first port,
+            a port to listen for agent's connection is the second one
+        :param iprover_binary_path: a path to iProver binary;
+            by default, we assume it to be ``iproveropt`` and in the $PATH
         """
         super().__init__(problem_list, max_clauses)
-        self.iprover_port, self.agent_port = port_pair
+        (
+            self.iprover_port,
+            self.agent_port,
+        ) = (  # pylint: disable=unbalanced-tuple-unpacking
+            (
+                random.randint(10000, 2**16 - 1),
+                random.randint(10000, 2**16 - 1),
+            )
+            if port_pair is None
+            else port_pair
+        )
         self.iprover_binary_path = iprover_binary_path
         self.relay_server = RelayServer(
             self.iprover_port, ("localhost", self.agent_port), RelayTCPHandler

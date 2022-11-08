@@ -21,15 +21,16 @@ gym-saturation
 ``gym-saturation`` is a collection of `OpenAI Gym
 <https://gym.openai.com/>`__ environments for reinforcement learning
 (RL) agents striving to prove theorems. Currently, only theorems
-written in `TPTP library <https://tptp.org>`__ formal language in
-clausal normal form (CNF) are supported. ``gym-saturation``
-implements the ‘given clause’ algorithm (similar to one used in
-`Vampire <https://github.com/vprover/vampire>`__ and `E Prover
+written in `TPTP library <https://tptp.org>`__ formal language are
+supported. ``gym-saturation`` implements the ‘given clause’ algorithm
+(similar to one used in `Vampire
+<https://github.com/vprover/vampire>`__ and `E Prover
 <https://github.com/eprover/eprover>`__).
 
-There is one environment in ``gym-saturation``: ``VampireEnv``.
-``VampireEnv`` is a Python wrapper around a recent ``vampire`` binary
-and can be used to guide ``vampire`` using RL.
+There is one environment in ``gym-saturation``: ``VampireEnv`` and
+``IProverEnv``. ``VampireEnv`` is a wrapper around a recent
+``Vampire`` prover, and ``IProverEnv`` relies on an experimental
+version of `iProver <http://www.cs.man.ac.uk/~korovink/iprover/>`__.
 
 In contrast to monolithic architecture of a typical Automated Theorem
 Prover (ATP), ``gym-saturation`` gives different agents opportunities
@@ -45,9 +46,12 @@ deduction researchers who want to create an RL-empowered ATP.
 How to Install
 ==============
 
-.. attention::
-   If you want to use ``VampireEnv`` you should have a ``vampire``
-   binary on your machine.
+.. attention:: If you want to use ``VampireEnv`` you should have a
+   Vampire binary on your machine. For example, download the
+   latest `release
+   <https://github.com/vprover/vampire/releases/tag/v4.7>`__.
+
+   To use ``IProverEnv``, please build iProver from source using `this <https://gitlab.com/korovin/iprover/-/tree/2022_sockets>`__.
 
 The best way to install this package is to use ``pip``:
 
@@ -78,11 +82,7 @@ How to use
    import gym
    import os
 
-   env = gym.make(
-       "VampireGym-v0",
-       problem_list=["..."],
-       vampire_binary_path="..."
-   )
+   env = gym.make("Vampire-v0", problem_list=["..."])
    observation = env.reset()
    action = ...
    observation, reward, done, info = env.step(action)
@@ -103,7 +103,7 @@ welcome. To start:
 
    git clone https://github.com/inpefess/gym-saturation
    cd gym-saturation
-   # activate python virtual environment with Python 3.7+
+   # activate python virtual environment with Python 3.8+
    pip install -U pip
    pip install -U setuptools wheel poetry
    poetry install
