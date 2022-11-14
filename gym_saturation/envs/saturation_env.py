@@ -161,6 +161,12 @@ class SaturationEnv(Env[dict, int]):
     >>> obs, reward, done, _ = env.step(0)
     >>> done, reward
     (True, 0.0)
+    >>> env.get_task()
+    Traceback (most recent call last):
+     ...
+    ValueError: Task is not set! Call reset or set_task first.
+    >>> env.sample_tasks(1)
+    ['.../resources/TPTP-mock/Problems/TST/TST001-1.p']
     """
 
     metadata = {"render_modes": ["ansi", "human"]}
@@ -191,7 +197,7 @@ class SaturationEnv(Env[dict, int]):
                 "real_obs": ClauseSpace(),
             }
         )
-        self.problem: Optional[str] = None
+        self.task: Optional[str] = None
 
     @abstractmethod
     def reset(
@@ -252,7 +258,7 @@ class SaturationEnv(Env[dict, int]):
             raise ValueError(f"action {action} is not valid")
         updated = self._do_deductions(action)
         reward = 0.0
-        info = {STATE_DIFF_UPDATED: updated, PROBLEM_FILENAME: self.problem}
+        info = {STATE_DIFF_UPDATED: updated, PROBLEM_FILENAME: self.task}
         reward, done, info = self._proof_found_result(reward, info)
         done |= min(
             False if clause.processed is None else clause.processed
@@ -294,3 +300,31 @@ class SaturationEnv(Env[dict, int]):
     def seed(self, seed=None):  # noqa: D102
         random.seed(seed)
         return seed
+
+    def sample_tasks(self, n_tasks: int) -> List[str]:
+        """
+        Sample task of the meta-environment.
+
+        :param n_tasks: number of different TPTP problems needed
+        :returns: a list of TPTP problem names
+        """
+        return random.sample(self.problem_list, n_tasks)
+
+    def set_task(self, task: str) -> None:
+        """
+        Set the specified task to the current environment.
+
+        :param task: a TPTP problem file name
+        """
+        self.task = task
+
+    def get_task(self) -> str:
+        """
+        Get the task that the agent is performing in the current environment.
+
+        :returns: a TPTP problem file name
+        :raises ValueError: is task is not set
+        """
+        if self.task:
+            return self.task
+        raise ValueError("Task is not set! Call reset or set_task first.")

@@ -197,10 +197,11 @@ class IProverEnv(SaturationEnv):
         return_info: bool = False,
         options: Optional[dict] = None,
     ) -> Union[Dict, Tuple[dict, dict]]:  # noqa: D102
-        self.problem = random.choice(self.problem_list)
+        if not self.task:
+            self.set_task(self.problem_list[0])
         asyncio.run(
             _iprover_start(
-                self.iprover_port, self.problem, self.iprover_binary_path
+                self.iprover_port, self.get_task(), self.iprover_binary_path
             )
         )
         time.sleep(2)

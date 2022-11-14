@@ -19,7 +19,6 @@ Saturation Environment with Vampire back-end
 """
 import dataclasses
 import os
-import random
 from typing import Dict, List, Optional, Tuple, Union
 
 import orjson
@@ -130,9 +129,12 @@ class VampireEnv(SaturationEnv):
         return_info: bool = False,
         options: Optional[dict] = None,
     ) -> Union[Dict, Tuple[dict, dict]]:  # noqa: D102
-        self.problem = random.choice(self.problem_list)
-        tptp_folder = os.path.join(os.path.dirname(self.problem), "..", "..")
-        vampire_response = self._vampire.start(self.problem, tptp_folder)
+        if not self.task:
+            self.set_task(self.problem_list[0])
+        tptp_folder = os.path.join(
+            os.path.dirname(self.get_task()), "..", ".."
+        )
+        vampire_response = self._vampire.start(self.get_task(), tptp_folder)
         self._state = {}
         updated = self._parse_vampire_response(vampire_response)
         self._state = {
