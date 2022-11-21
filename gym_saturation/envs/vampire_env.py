@@ -132,11 +132,13 @@ class VampireEnv(SaturationEnv):
     ) -> Union[Dict, Tuple[dict, dict]]:  # noqa: D102
         if not self.task:
             self.set_task([self.problem_list[0]])
-        problem_filename = random.choice(self.get_task())
+        self.problem_filename = random.choice(self.get_task())
         tptp_folder = os.path.join(
-            os.path.dirname(problem_filename), "..", ".."
+            os.path.dirname(self.problem_filename), "..", ".."
         )
-        vampire_response = self._vampire.start(problem_filename, tptp_folder)
+        vampire_response = self._vampire.start(
+            self.problem_filename, tptp_folder
+        )
         self._state = {}
         updated = self._parse_vampire_response(vampire_response)
         self._state = {

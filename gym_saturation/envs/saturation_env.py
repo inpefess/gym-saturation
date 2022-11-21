@@ -197,6 +197,7 @@ class SaturationEnv(Env[dict, int]):
             }
         )
         self.task: Optional[List[str]] = None
+        self.problem_filename: Optional[str] = None
 
     @abstractmethod
     def reset(
@@ -257,7 +258,10 @@ class SaturationEnv(Env[dict, int]):
             raise ValueError(f"action {action} is not valid")
         updated = self._do_deductions(action)
         reward = 0.0
-        info = {STATE_DIFF_UPDATED: updated, PROBLEM_FILENAME: self.task}
+        info = {
+            STATE_DIFF_UPDATED: updated,
+            PROBLEM_FILENAME: self.problem_filename,
+        }
         reward, done, info = self._proof_found_result(reward, info)
         done |= min(
             False if clause.processed is None else clause.processed
