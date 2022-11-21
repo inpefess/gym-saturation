@@ -209,16 +209,6 @@ class SaturationEnv(Env[dict, int]):
     ) -> Union[dict, Tuple[dict, dict]]:  # noqa: D102
         raise NotImplementedError  # pragma: no cover
 
-    def _proof_found_result(
-        self, reward: float, info: Dict[str, Any]
-    ) -> Tuple[float, bool, Dict[str, Any]]:
-        if any(
-            clause.literals == FALSEHOOD_SYMBOL
-            for clause in self._state.values()
-        ):
-            return 1.0, True, info
-        return reward, False, info
-
     def _max_clauses_result(
         self,
         done: bool,
@@ -257,12 +247,18 @@ class SaturationEnv(Env[dict, int]):
         if list(self._state.values())[action].processed:
             raise ValueError(f"action {action} is not valid")
         updated = self._do_deductions(action)
-        reward = 0.0
         info = {
             STATE_DIFF_UPDATED: updated,
             PROBLEM_FILENAME: self.problem_filename,
         }
-        reward, done, info = self._proof_found_result(reward, info)
+        reward, done = (
+            (1.0, True)
+            if any(
+                clause.literals == FALSEHOOD_SYMBOL
+                for clause in self._state.values()
+            )
+            else (0.0, False)
+        )
         done |= min(
             False if clause.processed is None else clause.processed
             for clause in self._state.values()
