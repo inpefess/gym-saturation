@@ -166,7 +166,7 @@ class SaturationEnv(Env[dict, int]):
      ...
     ValueError: Task is not set! Call reset or set_task first.
     >>> env.sample_tasks(1)
-    ['.../resources/TPTP-mock/Problems/TST/TST001-1.p']
+    [['.../resources/TPTP-mock/Problems/TST/TST001-1.p']]
     """
 
     metadata = {"render_modes": ["ansi", "human"]}
@@ -196,7 +196,7 @@ class SaturationEnv(Env[dict, int]):
                 "real_obs": ClauseSpace(),
             }
         )
-        self.task: Optional[str] = None
+        self.task: Optional[List[str]] = None
 
     @abstractmethod
     def reset(
@@ -300,28 +300,31 @@ class SaturationEnv(Env[dict, int]):
         random.seed(seed)
         return seed
 
-    def sample_tasks(self, n_tasks: int) -> List[str]:
+    def sample_tasks(self, n_tasks: int) -> List[List[str]]:
         """
         Sample task of the meta-environment.
 
         :param n_tasks: number of different TPTP problems needed
-        :returns: a list of TPTP problem names
+        :returns: a list tasks (lists of absolute paths of TPTP problems)
         """
-        return random.sample(self.problem_list, n_tasks)
+        return [
+            [filename]
+            for filename in random.sample(self.problem_list, n_tasks)
+        ]
 
-    def set_task(self, task: str) -> None:
+    def set_task(self, task: List[str]) -> None:
         """
         Set the specified task to the current environment.
 
-        :param task: a TPTP problem file name
+        :param task: a list of absolute paths of TPTP problems
         """
         self.task = task
 
-    def get_task(self) -> str:
+    def get_task(self) -> List[str]:
         """
         Get the task that the agent is performing in the current environment.
 
-        :returns: a TPTP problem file name
+        :returns: a list of absolute paths of TPTP problems
         :raises ValueError: is task is not set
         """
         if self.task:
