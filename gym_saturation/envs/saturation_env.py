@@ -19,7 +19,7 @@ Saturation Environment
 """
 import random
 from abc import abstractmethod
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import orjson
@@ -189,7 +189,6 @@ class SaturationEnv(Env[dict, int]):
         super().__init__()
         self.problem_list = problem_list
         self._state: Dict[str, Clause] = {}
-        self._state_set: Set[Tuple[bytes, ...]] = set()
         self.action_space = spaces.Discrete(max_clauses)
         self.observation_space = spaces.Dict(
             {
