@@ -221,7 +221,7 @@ class SaturationEnv(Env[dict, int]):
         return done, info
 
     @abstractmethod
-    def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
+    def _do_deductions(self, action: int) -> Tuple[Clause, ...]:
         raise NotImplementedError  # pragma: no cover
 
     def step(self, action: int) -> Tuple[dict, float, bool, Dict[str, Any]]:

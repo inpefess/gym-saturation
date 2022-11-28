@@ -22,8 +22,6 @@ import os
 import random
 from typing import Dict, List, Optional, Tuple, Union
 
-import orjson
-
 from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
 from gym_saturation.utils import FALSEHOOD_SYMBOL, Clause
 from gym_saturation.vampire_wrapper import VampireWrapper
@@ -156,7 +154,7 @@ class VampireEnv(SaturationEnv):
         }
         return self.state
 
-    def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
+    def _do_deductions(self, action: int) -> Tuple[Clause, ...]:
         if any(
             clause.literals == FALSEHOOD_SYMBOL
             for clause in self._state.values()
@@ -167,4 +165,4 @@ class VampireEnv(SaturationEnv):
             self._vampire.pick_a_clause(given_clause.label)
         )
         self._state.update(updated)
-        return tuple(map(orjson.dumps, updated.values()))
+        return tuple(updated.values())
