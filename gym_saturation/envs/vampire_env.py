@@ -25,7 +25,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import orjson
 
 from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
-from gym_saturation.utils import Clause
+from gym_saturation.utils import FALSEHOOD_SYMBOL, Clause
 from gym_saturation.vampire_wrapper import VampireWrapper
 
 
@@ -74,6 +74,15 @@ class VampireEnv(SaturationEnv):
     >>> observation = vampire_env.reset()
     >>> for action in [0, 3, 6, 7, 8, 9, 10]:
     ...     observation, reward, done, info = vampire_env.step(action)
+    >>> print(reward, done)
+    1.0 True
+    >>> # test of a problem which is solver immediately after `reset`
+    >>> problems = sorted(glob(os.path.join(files("gym_saturation").joinpath(
+    ...     os.path.join("resources", "TPTP-mock", "Problems")
+    ... ), "TST", "TST004-1.p")))
+    >>> vampire_env = VampireEnv(problems)
+    >>> observation = vampire_env.reset()
+    >>> observation, reward, done, info = vampire_env.step(0)
     >>> print(reward, done)
     1.0 True
     """
@@ -148,6 +157,11 @@ class VampireEnv(SaturationEnv):
         return self.state
 
     def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
+        if any(
+            clause.literals == FALSEHOOD_SYMBOL
+            for clause in self._state.values()
+        ):
+            return ()
         given_clause = list(self._state.values())[action]
         updated = self._parse_vampire_response(
             self._vampire.pick_a_clause(given_clause.label)
