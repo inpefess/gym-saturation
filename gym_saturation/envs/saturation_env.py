@@ -160,7 +160,7 @@ class SaturationEnv(Env[dict, int]):
 
     >>> obs, reward, done, _ = env.step(0)
     >>> done, reward
-    (True, 0.0)
+    (True, -1.0)
     >>> env.get_task()
     Traceback (most recent call last):
      ...
@@ -210,15 +210,13 @@ class SaturationEnv(Env[dict, int]):
         raise NotImplementedError  # pragma: no cover
 
     def _max_clauses_result(
-        self,
-        done: bool,
-        info: Dict[str, Any],
-    ) -> Tuple[bool, Dict[str, Any]]:
+        self, done: bool, info: Dict[str, Any], reward: float
+    ) -> Tuple[bool, Dict[str, Any], float]:
         if not done:
             if len(self._state) > self.action_space.n:
                 info.pop(STATE_DIFF_UPDATED)
-                return True, info
-        return done, info
+                return True, info, -1.0
+        return done, info, reward
 
     @abstractmethod
     def _do_deductions(self, action: int) -> Tuple[Clause, ...]:
@@ -263,7 +261,7 @@ class SaturationEnv(Env[dict, int]):
             False if clause.processed is None else clause.processed
             for clause in self._state.values()
         )
-        done, info = self._max_clauses_result(done, info)
+        done, info, reward = self._max_clauses_result(done, info, reward)
         return self.state, reward, done, info
 
     # pylint: disable=inconsistent-return-statements
