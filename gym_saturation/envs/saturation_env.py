@@ -160,7 +160,7 @@ class SaturationEnv(Env[dict, int]):
 
     >>> obs, reward, done, _ = env.step(0)
     >>> done, reward
-    (True, -1.0)
+    (True, 0.0)
     >>> env.get_task()
     Traceback (most recent call last):
      ...
@@ -210,13 +210,13 @@ class SaturationEnv(Env[dict, int]):
         raise NotImplementedError  # pragma: no cover
 
     def _max_clauses_result(
-        self, done: bool, info: Dict[str, Any], reward: float
-    ) -> Tuple[bool, Dict[str, Any], float]:
+        self, done: bool, info: Dict[str, Any]
+    ) -> Tuple[bool, Dict[str, Any]]:
         if not done:
             if len(self._state) > self.action_space.n:
                 info.pop(STATE_DIFF_UPDATED)
-                return True, info, -1.0
-        return done, info, reward
+                return True, info
+        return done, info
 
     @abstractmethod
     def _do_deductions(self, action: int) -> Tuple[Clause, ...]:
@@ -244,6 +244,7 @@ class SaturationEnv(Env[dict, int]):
         """
         if list(self._state.values())[action].processed:
             raise ValueError(f"action {action} is not valid")
+        old_state_size = len(self._state)
         updated = self._do_deductions(action)
         info = {
             STATE_DIFF_UPDATED: updated,
@@ -255,13 +256,16 @@ class SaturationEnv(Env[dict, int]):
                 clause.literals == FALSEHOOD_SYMBOL
                 for clause in self._state.values()
             )
-            else (0.0, False)
+            else (
+                (old_state_size - len(self._state)) / self.action_space.n,
+                False,
+            )
         )
         done |= min(
             False if clause.processed is None else clause.processed
             for clause in self._state.values()
         )
-        done, info, reward = self._max_clauses_result(done, info, reward)
+        done, info = self._max_clauses_result(done, info)
         return self.state, reward, done, info
 
     # pylint: disable=inconsistent-return-statements
