@@ -138,7 +138,7 @@ class VampireEnv(SaturationEnv):
         options: Optional[dict] = None,
     ) -> Union[Dict, Tuple[dict, dict]]:  # noqa: D102
         if not self.task:
-            self.set_task([self.problem_list[0]])
+            self.set_task(self.problem_list)
         self.problem_filename = random.choice(self.get_task())
         tptp_folder = os.path.join(
             os.path.dirname(self.problem_filename), "..", ".."
