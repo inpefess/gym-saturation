@@ -21,4 +21,4 @@ from gym.envs.registration import register
 
 register(id="Vampire-v0", entry_point="gym_saturation.envs:VampireEnv")
 register(id="iProver-v0", entry_point="gym_saturation.envs:IProverEnv")
-__version__ = "0.5.2"
+__version__ = "0.6.0"
