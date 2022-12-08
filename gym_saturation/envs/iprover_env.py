@@ -197,10 +197,11 @@ class IProverEnv(SaturationEnv):
         return_info: bool = False,
         options: Optional[dict] = None,
     ) -> Union[Dict, Tuple[dict, dict]]:  # noqa: D102
-        self.problem = random.choice(self.problem_list)
+        if not self.task:
+            self.set_task(self.problem_list)
         asyncio.run(
             _iprover_start(
-                self.iprover_port, self.problem, self.iprover_binary_path
+                self.iprover_port, self.get_task()[0], self.iprover_binary_path
             )
         )
         time.sleep(2)
@@ -238,7 +239,7 @@ class IProverEnv(SaturationEnv):
                     json_data.append(parsed_json)
         return json_data[1:]
 
-    def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
+    def _do_deductions(self, action: int) -> Tuple[Clause, ...]:
         given_clause_label = list(self._state.values())[action].label[2:]
         scores = (
             f"""{{"given_clause": {given_clause_label},"""
@@ -252,7 +253,7 @@ class IProverEnv(SaturationEnv):
         if data:
             updated = _parse_iprover_requests(data)
         self._state.update(updated)
-        return tuple(map(orjson.dumps, updated.values()))
+        return tuple(updated.values())
 
     def close(self) -> None:
         """Stop relay server."""

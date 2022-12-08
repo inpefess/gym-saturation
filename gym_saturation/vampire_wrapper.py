@@ -17,7 +17,7 @@
 Vampire Wrapper
 ================
 """
-from typing import Tuple
+from typing import Optional, Tuple
 
 import pexpect
 
@@ -54,8 +54,7 @@ class VampireWrapper:
     >>> vampire.pick_a_clause("wrong")
     Traceback (most recent call last):
      ...
-    ValueError:
-    wrong
+    ValueError: (...TST003-1.p...wrong...
     ...
     """
 
@@ -67,6 +66,7 @@ class VampireWrapper:
         """
         self.binary_path = binary_path
         self._proc = None
+        self.problem_filename: Optional[str] = None
 
     def _get_stdout(self) -> Tuple[Tuple[str, str, str], ...]:
         result: Tuple[Tuple[str, str, str], ...] = ()
@@ -82,7 +82,9 @@ class VampireWrapper:
                 result += ((result_type, clause_label, clause),)
         if result:
             return result
-        raise ValueError(self.proc.before.decode("utf-8"))
+        raise ValueError(
+            self.problem_filename, self.proc.before.decode("utf-8")
+        )
 
     def start(
         self, problem_filename: str, tptp_folder: str
@@ -96,6 +98,7 @@ class VampireWrapper:
         :param tptp_folder: the root folder for TPTP library
         :returns: a sequence of action type, clause number and clause
         """
+        self.problem_filename = problem_filename
         if self._proc is not None:
             self._proc.close()
         self._proc = pexpect.spawn(

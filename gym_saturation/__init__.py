@@ -19,16 +19,6 @@ maximal possible reward is set to ``1.0`` (proof is found).
 """
 from gym.envs.registration import register
 
-register(
-    id="Vampire-v0",
-    entry_point="gym_saturation.envs:VampireEnv",
-    max_episode_steps=100,
-    reward_threshold=1.0,
-)
-register(
-    id="iProver-v0",
-    entry_point="gym_saturation.envs:IProverEnv",
-    max_episode_steps=100,
-    reward_threshold=1.0,
-)
-__version__ = "0.5.2"
+register(id="Vampire-v0", entry_point="gym_saturation.envs:VampireEnv")
+register(id="iProver-v0", entry_point="gym_saturation.envs:IProverEnv")
+__version__ = "0.6.0"

@@ -19,7 +19,7 @@ Saturation Environment
 """
 import random
 from abc import abstractmethod
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import orjson
@@ -161,6 +161,12 @@ class SaturationEnv(Env[dict, int]):
     >>> obs, reward, done, _ = env.step(0)
     >>> done, reward
     (True, 0.0)
+    >>> env.get_task()
+    Traceback (most recent call last):
+     ...
+    ValueError: Task is not set! Call reset or set_task first.
+    >>> env.sample_tasks(1)
+    [['.../resources/TPTP-mock/Problems/TST/TST001-1.p']]
     """
 
     metadata = {"render_modes": ["ansi", "human"]}
@@ -183,7 +189,6 @@ class SaturationEnv(Env[dict, int]):
         super().__init__()
         self.problem_list = problem_list
         self._state: Dict[str, Clause] = {}
-        self._state_set: Set[Tuple[bytes, ...]] = set()
         self.action_space = spaces.Discrete(max_clauses)
         self.observation_space = spaces.Dict(
             {
@@ -191,7 +196,8 @@ class SaturationEnv(Env[dict, int]):
                 "real_obs": ClauseSpace(),
             }
         )
-        self.problem: Optional[str] = None
+        self.task: Optional[List[str]] = None
+        self.problem_filename: Optional[str] = None
 
     @abstractmethod
     def reset(
@@ -203,20 +209,8 @@ class SaturationEnv(Env[dict, int]):
     ) -> Union[dict, Tuple[dict, dict]]:  # noqa: D102
         raise NotImplementedError  # pragma: no cover
 
-    def _proof_found_result(
-        self, reward: float, info: Dict[str, Any]
-    ) -> Tuple[float, bool, Dict[str, Any]]:
-        if any(
-            clause.literals == FALSEHOOD_SYMBOL
-            for clause in self._state.values()
-        ):
-            return 1.0, True, info
-        return reward, False, info
-
     def _max_clauses_result(
-        self,
-        done: bool,
-        info: Dict[str, Any],
+        self, done: bool, info: Dict[str, Any]
     ) -> Tuple[bool, Dict[str, Any]]:
         if not done:
             if len(self._state) > self.action_space.n:
@@ -225,7 +219,7 @@ class SaturationEnv(Env[dict, int]):
         return done, info
 
     @abstractmethod
-    def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
+    def _do_deductions(self, action: int) -> Tuple[Clause, ...]:
         raise NotImplementedError  # pragma: no cover
 
     def step(self, action: int) -> Tuple[dict, float, bool, Dict[str, Any]]:
@@ -250,10 +244,23 @@ class SaturationEnv(Env[dict, int]):
         """
         if list(self._state.values())[action].processed:
             raise ValueError(f"action {action} is not valid")
+        old_state_size = len(self._state)
         updated = self._do_deductions(action)
-        reward = 0.0
-        info = {STATE_DIFF_UPDATED: updated, PROBLEM_FILENAME: self.problem}
-        reward, done, info = self._proof_found_result(reward, info)
+        info = {
+            STATE_DIFF_UPDATED: updated,
+            PROBLEM_FILENAME: self.problem_filename,
+        }
+        reward, done = (
+            (1.0, True)
+            if any(
+                clause.literals == FALSEHOOD_SYMBOL
+                for clause in self._state.values()
+            )
+            else (
+                (old_state_size - len(self._state)) / self.action_space.n,
+                False,
+            )
+        )
         done |= min(
             False if clause.processed is None else clause.processed
             for clause in self._state.values()
@@ -294,3 +301,34 @@ class SaturationEnv(Env[dict, int]):
     def seed(self, seed=None):  # noqa: D102
         random.seed(seed)
         return seed
+
+    def sample_tasks(self, n_tasks: int) -> List[List[str]]:
+        """
+        Sample task of the meta-environment.
+
+        :param n_tasks: number of different TPTP problems needed
+        :returns: a list tasks (lists of absolute paths of TPTP problems)
+        """
+        return [
+            [filename]
+            for filename in random.sample(self.problem_list, n_tasks)
+        ]
+
+    def set_task(self, task: List[str]) -> None:
+        """
+        Set the specified task to the current environment.
+
+        :param task: a list of absolute paths of TPTP problems
+        """
+        self.task = task
+
+    def get_task(self) -> List[str]:
+        """
+        Get the task that the agent is performing in the current environment.
+
+        :returns: a list of absolute paths of TPTP problems
+        :raises ValueError: is task is not set
+        """
+        if self.task:
+            return self.task
+        raise ValueError("Task is not set! Call reset or set_task first.")

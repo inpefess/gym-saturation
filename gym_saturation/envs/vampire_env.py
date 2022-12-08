@@ -22,10 +22,8 @@ import os
 import random
 from typing import Dict, List, Optional, Tuple, Union
 
-import orjson
-
 from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
-from gym_saturation.utils import Clause
+from gym_saturation.utils import FALSEHOOD_SYMBOL, Clause
 from gym_saturation.vampire_wrapper import VampireWrapper
 
 
@@ -74,6 +72,15 @@ class VampireEnv(SaturationEnv):
     >>> observation = vampire_env.reset()
     >>> for action in [0, 3, 6, 7, 8, 9, 10]:
     ...     observation, reward, done, info = vampire_env.step(action)
+    >>> print(reward, done)
+    1.0 True
+    >>> # test of a problem which is solver immediately after `reset`
+    >>> problems = sorted(glob(os.path.join(files("gym_saturation").joinpath(
+    ...     os.path.join("resources", "TPTP-mock", "Problems")
+    ... ), "TST", "TST004-1.p")))
+    >>> vampire_env = VampireEnv(problems)
+    >>> observation = vampire_env.reset()
+    >>> observation, reward, done, info = vampire_env.step(0)
     >>> print(reward, done)
     1.0 True
     """
@@ -130,9 +137,15 @@ class VampireEnv(SaturationEnv):
         return_info: bool = False,
         options: Optional[dict] = None,
     ) -> Union[Dict, Tuple[dict, dict]]:  # noqa: D102
-        self.problem = random.choice(self.problem_list)
-        tptp_folder = os.path.join(os.path.dirname(self.problem), "..", "..")
-        vampire_response = self._vampire.start(self.problem, tptp_folder)
+        if not self.task:
+            self.set_task(self.problem_list)
+        self.problem_filename = random.choice(self.get_task())
+        tptp_folder = os.path.join(
+            os.path.dirname(self.problem_filename), "..", ".."
+        )
+        vampire_response = self._vampire.start(
+            self.problem_filename, tptp_folder
+        )
         self._state = {}
         updated = self._parse_vampire_response(vampire_response)
         self._state = {
@@ -141,10 +154,15 @@ class VampireEnv(SaturationEnv):
         }
         return self.state
 
-    def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
+    def _do_deductions(self, action: int) -> Tuple[Clause, ...]:
+        if any(
+            clause.literals == FALSEHOOD_SYMBOL
+            for clause in self._state.values()
+        ):
+            return ()
         given_clause = list(self._state.values())[action]
         updated = self._parse_vampire_response(
             self._vampire.pick_a_clause(given_clause.label)
         )
         self._state.update(updated)
-        return tuple(map(orjson.dumps, updated.values()))
+        return tuple(updated.values())

@@ -51,7 +51,9 @@ How to Install
    latest `release
    <https://github.com/vprover/vampire/releases/tag/v4.7>`__.
 
-   To use ``IProverEnv``, please build iProver from source using `this <https://gitlab.com/korovin/iprover/-/tree/2022_sockets>`__.
+   To use ``IProverEnv``, please build iProver from source using
+   `this branch
+   <https://gitlab.com/korovin/iprover/-/tree/2022_sockets>`__.
 
 The best way to install this package is to use ``pip``:
 
@@ -82,8 +84,10 @@ How to use
    import gym
    import os
 
+   # get a TPTP problem file or create one yourself
    env = gym.make("Vampire-v0", problem_list=["..."])
    observation = env.reset()
+   # an order number of a 'given clause'
    action = ...
    observation, reward, done, info = env.step(action)
 
@@ -112,7 +116,7 @@ welcome. To start:
    # install vampire binary
    wget https://github.com/vprover/vampire/releases/download/v4.7/vampire4.7.zip -O vampire.zip
    unzip vampire.zip
-   # then use vampire_z3_rel_static_HEAD_6295 as an argument or put in $PATH
+   # then use vampire_z3_rel_static_HEAD_6295 as an argument or add it to $PATH
 
 All the tests in this package are
 `doctests <https://docs.python.org/3/library/doctest.html>`__. One can
