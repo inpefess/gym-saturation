@@ -101,6 +101,7 @@ class VampireEnv(SaturationEnv):
         """
         super().__init__(problem_list, max_clauses)
         self._vampire = VampireWrapper(vampire_binary_path)
+        self._step = 0
 
     def _parse_vampire_response(
         self, vampire_response: Tuple[Tuple[str, str, str], ...]
@@ -152,6 +153,7 @@ class VampireEnv(SaturationEnv):
             clause.label: dataclasses.replace(clause, birth_step=0)
             for clause in updated.values()
         }
+        self._step = 0
         return self.state
 
     def _do_deductions(self, action: int) -> Tuple[Clause, ...]:
@@ -164,5 +166,15 @@ class VampireEnv(SaturationEnv):
         updated = self._parse_vampire_response(
             self._vampire.pick_a_clause(given_clause.label)
         )
+        self._step += 1
+        updated = {
+            label: dataclasses.replace(
+                clause,
+                birth_step=self._step
+                if clause.birth_step is None
+                else clause.birth_step,
+            )
+            for label, clause in updated.items()
+        }
         self._state.update(updated)
         return tuple(updated.values())
