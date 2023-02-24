@@ -83,14 +83,15 @@ class RelayServer(TCPServer):
 class RelayTCPHandler(BaseRequestHandler):
     """The request handler class for relay server."""
 
-    def handle(self):
+    def handle(self) -> None:
         """Read data from another TCP socket or send data to it."""
-        command = self.request.recv(4096)
-        if command == b"READ":
-            input_data = b""
-            while b"\x00" not in input_data[-3:]:
-                input_data += self.server.data_connection.recv(4096)
-            self.request.sendall(input_data)
-        else:
-            self.server.data_connection.sendall(command)
-            self.request.sendall(b"OK")
+        if isinstance(self.server, RelayServer):
+            command = self.request.recv(4096)
+            if command == b"READ":
+                input_data = b""
+                while b"\x00" not in input_data[-3:]:
+                    input_data += self.server.data_connection.recv(4096)
+                self.request.sendall(input_data)
+            else:
+                self.server.data_connection.sendall(command)
+                self.request.sendall(b"OK")

@@ -100,6 +100,7 @@ spelling-private-dict-file = "spelling.dict"
 show_error_codes = true
 incremental = false
 disable_error_code = "no-redef"
+check_untyped_defs = true
 
 [[tool.mypy.overrides]]
 module = ["pexpect", "importlib_resources", "gym.*", "enchant.*"]
