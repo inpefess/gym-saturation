@@ -114,7 +114,7 @@ class SaturationEnv(Env[dict, int]):
 
     ``info`` dict contains the state diff, for example
 
-    >>> info["state_diff_updated"]
+    >>> info[STATE_DIFF_UPDATED]
     ()
 
     repeating actions is not allowed
@@ -219,7 +219,7 @@ class SaturationEnv(Env[dict, int]):
         return done, info
 
     @abstractmethod
-    def _do_deductions(self, action: int) -> Tuple[Clause, ...]:
+    def _do_deductions(self, action: int) -> Dict[str, Clause]:
         raise NotImplementedError  # pragma: no cover
 
     def step(self, action: int) -> Tuple[dict, float, bool, Dict[str, Any]]:

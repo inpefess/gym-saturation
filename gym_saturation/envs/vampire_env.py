@@ -156,12 +156,12 @@ class VampireEnv(SaturationEnv):
         self._step = 0
         return self.state
 
-    def _do_deductions(self, action: int) -> Tuple[Clause, ...]:
+    def _do_deductions(self, action: int) -> Dict[str, Clause]:
         if any(
             clause.literals == FALSEHOOD_SYMBOL
             for clause in self._state.values()
         ):
-            return ()
+            return {}
         given_clause = list(self._state.values())[action]
         updated = self._parse_vampire_response(
             self._vampire.pick_a_clause(given_clause.label)
@@ -177,4 +177,4 @@ class VampireEnv(SaturationEnv):
             for label, clause in updated.items()
         }
         self._state.update(updated)
-        return tuple(updated.values())
+        return updated

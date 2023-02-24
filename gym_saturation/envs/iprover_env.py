@@ -239,7 +239,7 @@ class IProverEnv(SaturationEnv):
                     json_data.append(parsed_json)
         return json_data[1:]
 
-    def _do_deductions(self, action: int) -> Tuple[Clause, ...]:
+    def _do_deductions(self, action: int) -> Dict[str, Clause]:
         given_clause_label = list(self._state.values())[action].label[2:]
         scores = (
             f"""{{"given_clause": {given_clause_label},"""
@@ -253,7 +253,7 @@ class IProverEnv(SaturationEnv):
         if data:
             updated = _parse_iprover_requests(data)
         self._state.update(updated)
-        return tuple(updated.values())
+        return updated
 
     def close(self) -> None:
         """Stop relay server."""
