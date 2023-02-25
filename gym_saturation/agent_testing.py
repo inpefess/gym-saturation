@@ -50,7 +50,7 @@ class BaseAgent(ABC):
         observation: dict,
         reward: float,
         info: Dict[str, Any],
-    ) -> int:
+    ) -> str:
         """
         Get an action given observations and other inputs.
 
@@ -72,7 +72,7 @@ class SizeAgent(BaseAgent):
 
     def __init__(self):
         """Don't compute the formulae lengths twice."""
-        self._state: Dict[str, Tuple[float, bool]] = {}
+        self._state: Dict[str, Tuple[float, int]] = {}
 
     def update_state(self, info: Dict[str, Any]) -> None:
         """
@@ -82,7 +82,7 @@ class SizeAgent(BaseAgent):
         """
         self._state.update(
             {
-                label: (len(clause.literals), clause.processed)
+                label: (len(clause["literals"]), clause["processed"])
                 for label, clause in info[STATE_DIFF_UPDATED].items()
             }
         )
@@ -92,13 +92,13 @@ class SizeAgent(BaseAgent):
         observation: dict,
         reward: float,
         info: Dict[str, Any],
-    ) -> int:  # noqa: D102
+    ) -> str:  # noqa: D102
         self.update_state(info)
         return min(
             (
                 (key, value[0])
-                for key, value in enumerate(self.state.values())
-                if not value[1]
+                for key, value in self.state.items()
+                if value[1] == 0
             ),
             key=itemgetter(1),
         )[0]
@@ -116,12 +116,12 @@ class AgeAgent(BaseAgent):
         observation: dict,
         reward: float,
         info: Dict[str, Any],
-    ) -> int:  # noqa: D102
+    ) -> str:  # noqa: D102
         return min(
-            i
-            for i, clause in enumerate(observation["real_obs"].values())
-            if not clause.processed
-        )
+            (i, clause)
+            for i, clause in enumerate(observation.values())
+            if clause["processed"] == 0
+        )[1]["label"]
 
 
 class SizeAgeAgent(BaseAgent):
@@ -150,7 +150,7 @@ class SizeAgeAgent(BaseAgent):
         observation: dict,
         reward: float,
         info: Dict[str, Any],
-    ) -> int:  # noqa: D102
+    ) -> str:  # noqa: D102
         self._step_count += 1
         if self._use_size:
             if self._step_count >= self.size_steps:
@@ -172,14 +172,14 @@ class RandomAgent(BaseAgent):
         observation: dict,
         reward: float,
         info: Dict[str, Any],
-    ) -> int:  # noqa: D102
+    ) -> str:  # noqa: D102
         return random.choice(
             [
-                i
-                for i, clause in enumerate(observation["real_obs"].values())
-                if not clause.processed
+                clause
+                for clause in observation.values()
+                if clause["processed"] == 0
             ]
-        )
+        )["label"]
 
 
 def _proof_found_before_the_start(
@@ -187,8 +187,8 @@ def _proof_found_before_the_start(
 ) -> Tuple[float, bool, bool]:
     if tuple(
         1
-        for clause in env.state["real_obs"].values()
-        if clause.literals == FALSEHOOD_SYMBOL
+        for clause in env.state.values()
+        if clause["literals"] == FALSEHOOD_SYMBOL
     ):
         return 1.0, True, False
     return 0.0, False, False
@@ -270,7 +270,7 @@ def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
     """
     _, truncated, step_count = episode(env, agent)
     if not truncated:
-        a_proof = get_tstp_proof(env.state["real_obs"])
+        a_proof = get_tstp_proof(env.state)
         proof_length = len(a_proof.split("\n"))
         print(
             f"Proof of length {proof_length} found "

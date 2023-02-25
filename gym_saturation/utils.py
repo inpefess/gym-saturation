@@ -17,65 +17,26 @@
 Logic Operations Utility Functions
 ===================================
 """
-from dataclasses import dataclass, field
 from itertools import chain
-from typing import Any, Dict, Optional, Tuple
-from uuid import uuid1
+from typing import Any, Dict, Tuple
 
 FALSEHOOD_SYMBOL = "$false"
 
 
-@dataclass(frozen=True)
-class Clause:
-    """
-    Clause is a disjunction of literals.
-
-    .. _Clause:
-
-
-    :param literals: a list of literals, forming the clause
-    :param label: comes from the problem file or starts with ``inferred_`` if
-         inferred during the episode
-    :param role: formula role: axiom, hypothesis, ...
-    :param inference_parents: a list of labels from which the clause was
-         inferred. For clauses from the problem statement, this list is empty
-    :param inference_rule: the rule according to which the clause was got from
-         the ``inference_parents``
-    :param processed: Boolean value splitting clauses into unprocessed and
-         processed ones; in the beginning, everything is not processed
-    :param birth_step: a number of the step when the clause appeared in the
-         unprocessed set; clauses from the problem have ``birth_step`` zero
-    """
-
-    literals: str
-    label: str = field(
-        default_factory=lambda: "x" + str(uuid1()).replace("-", "_")
-    )
-    role: str = "lemma"
-    inference_parents: Optional[Tuple[str, ...]] = None
-    inference_rule: Optional[str] = None
-    processed: Optional[bool] = None
-    birth_step: Optional[int] = None
-
-
-def pretty_print(clause: Clause) -> str:
+def pretty_print(clause: Dict[str, Any]) -> str:
     """
     Print a logical formula back to TPTP language.
 
     :param clause: a logical clause to print
     :returns: a TPTP string
     """
-    res = f"cnf({clause.label}, {clause.role}, "
-    res += clause.literals
-    if (
-        clause.inference_parents is not None
-        and clause.inference_rule is not None
-    ):
-        res += (
-            f", inference({clause.inference_rule}, [], ["
-            + ", ".join(clause.inference_parents)
-            + "])"
-        )
+    res = f"cnf({clause['label']}, {clause['role']}, "
+    res += clause["literals"]
+    res += (
+        f", inference({clause['inference_rule']}, [], ["
+        + ", ".join(clause["inference_parents"])
+        + "])"
+    )
     return res + ")."
 
 
@@ -88,20 +49,24 @@ def _flat_list(list_of_lists: Tuple[Tuple[Any, ...], ...]) -> Tuple[Any, ...]:
 
 
 def reduce_to_proof(
-    clauses: Dict[str, Clause], goal: str = FALSEHOOD_SYMBOL
-) -> Tuple[Clause, ...]:
+    clauses: Dict[str, Dict[str, Any]], goal: str = FALSEHOOD_SYMBOL
+) -> Tuple[Dict[str, Any], ...]:
     """
     Leave only clauses belonging to the refutation proof.
 
+    >>> one = {
+    ...     "literals": FALSEHOOD_SYMBOL, "label": "one",
+    ...     "inference_parents": ()
+    ... }
     >>> reduce_to_proof({
-    ...     "one": Clause(FALSEHOOD_SYMBOL, label="one"),
-    ...     "two": Clause(FALSEHOOD_SYMBOL, label="two")
+    ...     "one": one,
+    ...     "two": {"literals": FALSEHOOD_SYMBOL, "label": "two"}
     ... })
     Traceback (most recent call last):
      ...
     gym_saturation.utils.NoProofFoundError
-    >>> state = {"one": Clause(FALSEHOOD_SYMBOL, label="one")}
-    >>> reduce_to_proof(state) == (Clause(FALSEHOOD_SYMBOL, label="one"), )
+    >>> state = {"one": one}
+    >>> reduce_to_proof(state) == (one,)
     True
 
     :param clauses: a map of clause labels to clauses
@@ -111,27 +76,25 @@ def reduce_to_proof(
         in a given proof state
     """
     empty_clauses = tuple(
-        clause for clause in clauses.values() if clause.literals == goal
+        clause for clause in clauses.values() if clause["literals"] == goal
     )
     if len(empty_clauses) == 1:
-        reduced: Tuple[Clause, ...] = ()
-        new_reduced: Tuple[Clause, ...] = (empty_clauses[0],)
+        reduced: Tuple[Dict[str, Any], ...] = ()
+        new_reduced: Tuple[Dict[str, Any], ...] = (empty_clauses[0],)
         while len(new_reduced) > 0:
             reduced += tuple(
                 clause for clause in new_reduced if clause not in reduced
             )
             new_reduced = tuple(
-                clauses[label]
-                for label in tuple(
+                clause
+                for clause in clauses.values()
+                if clause["label"]
+                in tuple(
                     reversed(
                         sorted(
                             _flat_list(
                                 tuple(
-                                    (
-                                        ()
-                                        if clause.inference_parents is None
-                                        else clause.inference_parents
-                                    )
+                                    clause["inference_parents"]
                                     for clause in new_reduced
                                 )
                             )
@@ -143,25 +106,20 @@ def reduce_to_proof(
     raise NoProofFoundError
 
 
-def get_tstp_proof(state: Dict[str, Clause]) -> str:
+def get_tstp_proof(state: Dict[str, Dict[str, Any]]) -> str:
     """
     Return TSTP proof (if found; raises an error otherwise).
 
-    :param state: map of clause labels to clauses
+    :param state: tuple of clauses
+    :return: a TSTP formatted string
     """
     return "\n".join(
-        reversed(
-            [
-                pretty_print(clause)
-                for clause in reduce_to_proof(state)
-                if clause.inference_rule is not None
-            ]
-        )
+        reversed([pretty_print(clause) for clause in reduce_to_proof(state)])
     )
 
 
 def get_positive_actions(
-    state: Dict[str, Clause], goal: str = FALSEHOOD_SYMBOL
+    state: Dict[str, Dict[str, Any]], goal: str = FALSEHOOD_SYMBOL
 ) -> Tuple[int, ...]:
     """
     Return a sequence of actions which contributed to the proof found.

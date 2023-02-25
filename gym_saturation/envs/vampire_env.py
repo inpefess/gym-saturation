@@ -17,7 +17,6 @@
 Saturation Environment with Vampire back-end
 ============================================
 """
-import dataclasses
 import os
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -26,25 +25,8 @@ from gym_saturation.envs.saturation_env import (
     STATE_DIFF_UPDATED,
     SaturationEnv,
 )
-from gym_saturation.utils import FALSEHOOD_SYMBOL, Clause
+from gym_saturation.utils import FALSEHOOD_SYMBOL
 from gym_saturation.vampire_wrapper import VampireWrapper
-
-
-def _parse_vampire_clause(clause_label: str, clause_text: str) -> Clause:
-    formula, inference_info = clause_text.split("[")
-    pre_inference = inference_info.split("]")[0].split(" ")
-    if len(pre_inference) > 1:
-        inference_parents = tuple(pre_inference[-1].split(","))
-        inference_rule = "_".join(pre_inference[:-1])
-    else:
-        inference_parents, inference_rule = (), pre_inference[0]
-    return Clause(
-        literals=formula.strip(),
-        label=clause_label,
-        inference_rule=inference_rule,
-        inference_parents=inference_parents,
-        processed=True,
-    )
 
 
 class VampireEnv(SaturationEnv):
@@ -75,7 +57,7 @@ class VampireEnv(SaturationEnv):
     >>> observation, info = vampire_env.reset()
     >>> for action in [0, 3, 6, 7, 8, 9, 10]:
     ...     observation, reward, terminated, truncated, info = (vampire_env.
-    ...     step(action))
+    ...     step(str(action + 1)))
     >>> print(reward, terminated, truncated)
     1.0 True False
     >>> # test of a problem which is solver immediately after `reset`
@@ -84,7 +66,7 @@ class VampireEnv(SaturationEnv):
     ... ), "TST", "TST004-1.p")))
     >>> vampire_env = VampireEnv(problems)
     >>> observation, info = vampire_env.reset()
-    >>> observation, reward, terminated, truncated, info = vampire_env.step(0)
+    >>> obs, reward, terminated, truncated, info = vampire_env.step("1")
     >>> print(reward, terminated, truncated)
     1.0 True False
     """
@@ -108,31 +90,31 @@ class VampireEnv(SaturationEnv):
         self._vampire = VampireWrapper(vampire_binary_path)
         self._step = 0
 
+    def _update_processed(
+        self, clause_label: str, updated: Dict[str, Dict[str, Any]]
+    ) -> None:
+        if clause_label in updated:
+            updated[clause_label].update({"processed": 1})
+        else:
+            self.state[clause_label].update({"processed": 1})
+            updated.update({clause_label: self.state[clause_label]})
+
     def _parse_vampire_response(
         self, vampire_response: Tuple[Tuple[str, str, str], ...]
-    ) -> Dict[str, Clause]:
-        updated: Dict[str, Clause] = {}
+    ) -> Dict[str, Dict[str, Any]]:
+        updated: Dict[str, Dict[str, Any]] = {}
         for response_type, clause_label, clause_text in vampire_response:
             if response_type in {"new", "final", "input", "fn def discovered"}:
-                updated[clause_label] = _parse_vampire_clause(
+                updated[clause_label] = self._parse_vampire_clause(
                     clause_label, clause_text
                 )
             elif response_type in {
                 "active",
                 "forward reduce",
-                "passive",
                 "backward reduce",
-                "new propositional",
             }:
-                changed_clause = dataclasses.replace(
-                    self._state[clause_label]
-                    if clause_label in self._state
-                    else updated[clause_label],
-                    processed=response_type
-                    not in ("passive", "new propositional"),
-                )
-                updated[clause_label] = changed_clause
-            else:
+                self._update_processed(clause_label, updated)
+            elif response_type not in {"passive", "new propositional"}:
                 raise ValueError("Unexpected response type: ", response_type)
         return updated
 
@@ -149,34 +131,42 @@ class VampireEnv(SaturationEnv):
         vampire_response = self._vampire.start(
             self.problem_filename, tptp_folder
         )
-        self._state = {}
-        updated = self._parse_vampire_response(vampire_response)
-        self._state = {
-            clause.label: dataclasses.replace(clause, birth_step=0)
-            for clause in updated.values()
-        }
+        self.state = {}
         self._step = 0
-        return self.state, {STATE_DIFF_UPDATED: self._state}
+        updated = self._parse_vampire_response(vampire_response)
+        self.state = updated
+        return self.state, {STATE_DIFF_UPDATED: self.state}
 
-    def _do_deductions(self, action: int) -> Dict[str, Clause]:
+    def _do_deductions(self, action: str) -> Dict[str, Dict[str, Any]]:
         if any(
-            clause.literals == FALSEHOOD_SYMBOL
-            for clause in self._state.values()
+            clause["literals"] == FALSEHOOD_SYMBOL
+            for clause in self.state.values()
         ):
             return {}
-        given_clause = list(self._state.values())[action]
+        given_clause = self.state[action]
         updated = self._parse_vampire_response(
-            self._vampire.pick_a_clause(given_clause.label)
+            self._vampire.pick_a_clause(given_clause["label"])
         )
         self._step += 1
-        updated = {
-            label: dataclasses.replace(
-                clause,
-                birth_step=self._step
-                if clause.birth_step is None
-                else clause.birth_step,
-            )
-            for label, clause in updated.items()
-        }
-        self._state.update(updated)
+        self.state.update(updated)
         return updated
+
+    def _parse_vampire_clause(
+        self, clause_label: str, clause_text: str
+    ) -> Dict[str, Any]:
+        formula, inference_info = clause_text.split("[")
+        pre_inference = inference_info.split("]")[0].split(" ")
+        if len(pre_inference) > 1:
+            inference_parents = tuple(pre_inference[-1].split(","))
+            inference_rule = "_".join(pre_inference[:-1])
+        else:
+            inference_parents, inference_rule = (), pre_inference[0]
+        return {
+            "literals": formula.strip(),
+            "label": clause_label,
+            "role": "lemma",
+            "inference_rule": inference_rule,
+            "inference_parents": inference_parents,
+            "processed": 0,
+            "birth_step": self._step,
+        }

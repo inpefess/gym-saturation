@@ -35,7 +35,7 @@ from gym_saturation.envs.saturation_env import (
     SaturationEnv,
 )
 from gym_saturation.relay_server import RelayServer, RelayTCPHandler
-from gym_saturation.utils import FALSEHOOD_SYMBOL, Clause
+from gym_saturation.utils import FALSEHOOD_SYMBOL
 
 
 async def _iprover_start(
@@ -76,8 +76,8 @@ async def _iprover_start(
 
 def _parse_batch_clauses(
     batch_clauses: List[Dict[str, Any]]
-) -> Dict[str, Clause]:
-    updated: Dict[str, Clause] = {}
+) -> Dict[str, Dict[str, Any]]:
+    updated: Dict[str, Dict[str, Any]] = {}
     for dict_clause in batch_clauses:
         raw_clause = dict_clause["clause"].replace("\n", "").replace(" ", "")
         try:
@@ -91,36 +91,43 @@ def _parse_batch_clauses(
                 raw_clause,
             )[0]
             inference_rule, inference_parents = "input", None
-        changed_clause = Clause(
-            literals=literals,
-            label=label,
-            birth_step=dict_clause["clause_features"]["born"] - 1,
-            inference_rule=inference_rule,
-            inference_parents=tuple(inference_parents.split(","))
+        changed_clause = {
+            "literals": literals,
+            "label": label,
+            "role": "lemma",
+            "birth_step": dict_clause["clause_features"]["born"] - 1,
+            "inference_rule": inference_rule,
+            "inference_parents": tuple(inference_parents.split(","))
             if inference_parents is not None
-            else None,
-        )
+            else (),
+            "processed": 0,
+        }
         updated[label] = changed_clause
     return updated
 
 
-def _parse_szs_status(szs_status: str) -> Dict[str, Clause]:
+def _parse_szs_status(szs_status: str) -> Dict[str, Dict[str, Any]]:
     status_code = re.findall(
         r"\% SZS status (\w+) for .+\.p",
         szs_status.replace("\n", ""),
     )[0]
     if status_code == "Unsatisfiable":
-        dummy_clause = Clause(
-            literals=FALSEHOOD_SYMBOL, inference_rule="dummy"
-        )
-        return {dummy_clause.label: dummy_clause}
+        dummy_clause = {
+            "label": "dummy",
+            "literals": FALSEHOOD_SYMBOL,
+            "inference_rule": "dummy",
+            "inference_parents": (),
+            "role": "lemma",
+            "processed": 0,
+        }
+        return {"dummy": dummy_clause}
     raise ValueError(f"unexpected status: {status_code}")
 
 
 def _parse_iprover_requests(
     iprover_requests: List[Dict[str, Any]]
-) -> Dict[str, Clause]:
-    state_update = {}
+) -> Dict[str, Dict[str, Any]]:
+    state_update: Dict[str, Dict[str, Any]] = {}
     for iprover_request in iprover_requests:
         if "clauses" in iprover_request:
             state_update.update(
@@ -148,7 +155,7 @@ class IProverEnv(SaturationEnv):
     ... ), "SET", "*-*.p")))
     >>> iprover_env = IProverEnv(problems)
     >>> observation, info = iprover_env.reset()
-    >>> for action in [0, 1, 2, 4, 8, 9, 10]:
+    >>> for action in ["c_50", "c_49", "c_51", "c_55", "c_52", "c_64", "c_71"]:
     ...     observation, reward, terminated, truncated, info = (iprover_env.
     ...     step(action))
     >>> print(reward, terminated, truncated)
@@ -156,6 +163,7 @@ class IProverEnv(SaturationEnv):
     >>> iprover_env.close()
     """
 
+    # [0, 1, 2, 4, 8, 9, 10]:
     def __init__(
         self,
         problem_list: List[str],
@@ -209,8 +217,8 @@ class IProverEnv(SaturationEnv):
         )
         time.sleep(2)
         data = self._get_json_data()
-        self._state = _parse_iprover_requests(data)
-        return self.state, {STATE_DIFF_UPDATED: self._state}
+        self.state = _parse_iprover_requests(data)
+        return self.state, {STATE_DIFF_UPDATED: self.state}
 
     def _get_raw_data(self) -> bytes:
         with socket.create_connection(
@@ -242,8 +250,8 @@ class IProverEnv(SaturationEnv):
                     json_data.append(parsed_json)
         return json_data[1:]
 
-    def _do_deductions(self, action: int) -> Dict[str, Clause]:
-        given_clause_label = list(self._state.values())[action].label[2:]
+    def _do_deductions(self, action: str) -> Dict[str, Dict[str, Any]]:
+        given_clause_label = action[2:]
         scores = (
             f"""{{"given_clause": {given_clause_label},"""
             + """"passive_is_empty": false}\n\x00\n"""
@@ -255,7 +263,7 @@ class IProverEnv(SaturationEnv):
         data = self._get_json_data()
         if data:
             updated = _parse_iprover_requests(data)
-        self._state.update(updated)
+        self.state.update(updated)
         return updated
 
     def close(self) -> None:

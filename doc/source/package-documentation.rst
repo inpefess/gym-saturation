@@ -19,9 +19,6 @@ Package Documentation
 
 General modules
 ****************
-.. automodule:: gym_saturation.clause_space
-   :members:
-   :special-members: __init__
 .. automodule:: gym_saturation.vampire_wrapper
    :members:
    :special-members: __init__
