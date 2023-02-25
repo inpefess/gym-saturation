@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "0.6.2"
-description = "An OpenAI Gym environment for saturation provers"
+version = "0.7.0"
+description = "Gymnasium environments for saturation provers"
 authors = ["Boris Shminke <boris@shminke.ml>"]
 license = "Apache-2.0"
 repository = "https://github.com/inpefess/gym-saturation"
@@ -24,10 +24,9 @@ include = ["gym_saturation/py.typed"]
 
 [tool.poetry.dependencies]
 python = "> 3.8, < 3.12"
-gym = ">=0.21.0,<0.24.0"
 importlib_resources = {version = "*", markers = "python_version < \"3.9\""}
-orjson = "*"
 pexpect = "*"
+gymnasium = "*"
 
 [tool.poetry.dev-dependencies]
 black = "*"
@@ -90,7 +89,7 @@ max-line-length = 79
 max-statements = 10
 
 [tool.pylint.typecheck]
-generated-members = ["orjson", "asyncio"]
+generated-members = ["asyncio"]
 
 [tool.pylint.spelling]
 spelling-dict = "en_GB"
@@ -100,9 +99,10 @@ spelling-private-dict-file = "spelling.dict"
 show_error_codes = true
 incremental = false
 disable_error_code = "no-redef"
+check_untyped_defs = true
 
 [[tool.mypy.overrides]]
-module = ["pexpect", "importlib_resources", "gym.*", "enchant.*"]
+module = ["pexpect", "importlib_resources", "enchant.*"]
 ignore_missing_imports = true
 
 [tool.tox]
@@ -130,7 +130,7 @@ commands =
 github_url = "https://github.com/inpfess/gym-saturation/"
 
 [tool.tbump.version]
-current = "0.6.2"
+current = "0.7.0"
 regex = '''
   (?P<major>\d+)
   \.

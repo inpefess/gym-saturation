@@ -19,9 +19,6 @@ Package Documentation
 
 General modules
 ****************
-.. automodule:: gym_saturation.clause_space
-   :members:
-   :special-members: __init__
 .. automodule:: gym_saturation.vampire_wrapper
    :members:
    :special-members: __init__
@@ -43,3 +40,9 @@ Environments
 .. automodule:: gym_saturation.envs.iprover_env
    :members:
    :special-members: __init__
+
+Agent Testing Tools
+********************
+.. automodule:: gym_saturation.agent_testing
+   :members:
+   :special-members: __init__, __call__

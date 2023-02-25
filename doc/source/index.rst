@@ -20,6 +20,7 @@
    :caption: Contents:
 	     
    what-is-going-on
+   testing-an-agent
    package-documentation
 
 Indices and tables

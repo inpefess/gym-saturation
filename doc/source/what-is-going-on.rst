@@ -30,18 +30,18 @@ What is a State
 
 (More or less resembles `ProofState class of PyRes`_)
 
-The environment's state is a list of logical clauses. Each clause is a list of literals and also has several `properties <https://tptp-lark-parser.readthedocs.io/en/latest/package-documentation.html#tptp_lark_parser.grammar.Clause>`__.
+The environment's state is a list of logical clauses. Each clause is a list of literals and also has several properties.
 
 Literal is a predicate, negated or not. A predicate can have arguments, which can be functions or variables. Functions can have arguments, which in turn can be functions or variables.
 
-Grammar is encoded in Python objects in a self-explanatory way (see `tptp-lark-parser <https://tptp-lark-parser.readthedocs.io>`__ for more information).
+Grammar is encoded in Python objects in a self-explanatory way.
 
 What is an Observation
 ***********************
 
-An observation visible by an agent is a Python dictionary having two keys: `action_mask` and `real_obs`. Action mask is a `numpy` array of zeros and ones of some fixed length. A user can change a default value (100000) for this length by passing a `max_clauses` argument to the environment constructor. If at some step there are more than `max_clauses` clauses in the state, the environment returns ``done == True``. For any index in `action_mask`, if there is no clause with such an index in the state, the mask value is zero. It's also zero if the clause is marked as processed. For the indices of the clauses available to become a so-called 'given clause', the mask equals one.
+An observation visible by an agent is a Python dictionary having two keys: `action_mask` and `real_obs`. Action mask is a `numpy` array of zeros and ones of some fixed length. A user can change a default value (100000) for this length by passing a `max_clauses` argument to the environment constructor. If at some step there are more than `max_clauses` clauses in the state, the environment returns ``truncated == True``. For any index in `action_mask`, if there is no clause with such an index in the state, the mask value is zero. It's also zero if the clause is marked as processed. For the indices of the clauses available to become a so-called 'given clause', the mask equals one.
 
-`real_obs` is the state (a list of clauses). Since in OpenAI Gym observations have to live in some predefined space, there is a OpenAI compatible :ref:`space class<clause_space>` for a list of clauses.
+`real_obs` is the state (a tuple of clauses).
 
 What is an Action
 ******************

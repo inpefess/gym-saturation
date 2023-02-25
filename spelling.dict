@@ -17,7 +17,6 @@ nocover
 prover
 ansi
 json
-orjson
 attrgetter
 frac
 str
@@ -57,7 +56,6 @@ environ
 setrecursionlimit
 provers
 PyRes
-OpenAI
 github
 slurm
 Slurm
@@ -77,3 +75,5 @@ dataclasses
 bool
 TCP
 localhost
+iprover
+profiler

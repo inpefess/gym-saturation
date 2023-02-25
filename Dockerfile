@@ -26,4 +26,5 @@ RUN mkdir -p ${HOME}/.local/bin/
 RUN mv vampire_z3_rel_static_HEAD_6295 ${HOME}/.local/bin/vampire
 RUN chmod u+x ${HOME}/.local/bin/vampire
 ENV PATH ${PYENV_ROOT}/versions/3.10.7/bin:${HOME}/.local/bin:${PATH}
-ENTRYPOINT ["jupyter-lab", "--ip=0.0.0.0", "--port=8888", "--ServerApp.token=passwd007"]
+ENTRYPOINT ["jupyter-lab", "--ip=0.0.0.0", "--port=8888", \
+    "--ServerApp.token=passwd007", "--no-browser"]

@@ -1,6 +1,4 @@
-gym
-tptp_lark_parser
-orjson
+gymnasium
 pexpect
 sphinx-autodoc-typehints
 importlib_resources
