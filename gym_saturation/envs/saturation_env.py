@@ -302,7 +302,7 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         }
         reward, terminated = (
             (1.0, True)
-            if any(
+            if max(
                 clause["literals"] == FALSEHOOD_SYMBOL
                 for clause in self.state.values()
             )

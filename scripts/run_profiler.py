@@ -38,7 +38,7 @@ def run_profiler() -> None:
         "GRP001-1.p",
     )
     for _ in range(10):
-        test_agent(["--problem_filename", filename])
+        test_agent(["--problem_filename", filename, "--max_clauses", "1000"])
     profiler.disable()
     profiler_report = io.StringIO()
     profiler_statistics = pstats.Stats(

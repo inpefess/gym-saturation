@@ -54,7 +54,7 @@ class VampireWrapper:
     >>> vampire.pick_a_clause("wrong")
     Traceback (most recent call last):
      ...
-    ValueError: (...TST003-1.p...wrong...
+    ValueError: (...TST003-1.p...invalid_argument...
     ...
     """
 
@@ -104,8 +104,11 @@ class VampireWrapper:
         self._proc = pexpect.spawn(
             f"{self.binary_path} --manual_cs on --show_everything on "
             + "--time_limit 1D --avatar off "
-            + f"--include {tptp_folder} {problem_filename}"
+            + f"--include {tptp_folder} {problem_filename}",
+            echo=False,
         )
+        # https://pexpect.readthedocs.io/en/stable/commonissues.html#timing-issue-with-send-and-sendline
+        self._proc.delaybeforesend = None  # type: ignore
         return self._get_stdout()
 
     def pick_a_clause(
