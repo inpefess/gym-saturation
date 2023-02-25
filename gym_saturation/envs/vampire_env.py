@@ -20,6 +20,8 @@ Saturation Environment with Vampire back-end
 import os
 from typing import Any, Dict, List, Optional, Tuple
 
+import numpy as np
+
 from gym_saturation.envs.saturation_env import (
     MAX_CLAUSES,
     STATE_DIFF_UPDATED,
@@ -50,25 +52,41 @@ class VampireEnv(SaturationEnv):
      ...
     ValueError: ('Unexpected response type: ', 'who could expect that?')
     >>> from glob import glob
-    >>> problems = sorted(glob(os.path.join(files("gym_saturation").joinpath(
-    ...     os.path.join("resources", "TPTP-mock", "Problems")
-    ... ), "SET", "*-*.p")))
-    >>> vampire_env = VampireEnv(problems)
+    >>> set_problems = sorted(glob(os.path.join(files("gym_saturation")
+    ...     .joinpath(os.path.join("resources", "TPTP-mock", "Problems")),
+    ... "SET", "*-*.p")))
+    >>> vampire_env = VampireEnv(set_problems)
     >>> observation, info = vampire_env.reset()
     >>> for action in [0, 3, 6, 7, 8, 9, 10]:
-    ...     observation, reward, terminated, truncated, info = (vampire_env.
-    ...     step(str(action + 1)))
+    ...     observation, reward, terminated, truncated, info = (
+    ...         vampire_env.step(action))
     >>> print(reward, terminated, truncated)
     1.0 True False
-    >>> # test of a problem which is solver immediately after `reset`
+
+    test of a problem which is solver immediately after `reset`
+
     >>> problems = sorted(glob(os.path.join(files("gym_saturation").joinpath(
     ...     os.path.join("resources", "TPTP-mock", "Problems")
     ... ), "TST", "TST004-1.p")))
     >>> vampire_env = VampireEnv(problems)
     >>> observation, info = vampire_env.reset()
-    >>> obs, reward, terminated, truncated, info = vampire_env.step("1")
+    >>> obs, reward, terminated, truncated, info = vampire_env.step(0)
     >>> print(reward, terminated, truncated)
     1.0 True False
+
+    we can also run a full Gymnasium environment check
+
+    >>> from gymnasium.utils.env_checker import check_env
+    >>> import gymnasium as gym
+    >>> env = gym.make(
+    ...     "Vampire-v0",
+    ...     problem_list=set_problems,
+    ...     max_clauses=9
+    ... )
+    >>> check_env(env.unwrapped)
+    cnf(1, ...).
+    ...
+    cnf(9, ...).
     """
 
     def __init__(
@@ -123,7 +141,7 @@ class VampireEnv(SaturationEnv):
         *,
         seed: Optional[int] = None,
         options: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Dict[Any, Any], Dict[str, Any]]:  # noqa: D102
+    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
         tptp_folder = os.path.join(
             os.path.dirname(self.problem_filename), "..", ".."
@@ -135,15 +153,15 @@ class VampireEnv(SaturationEnv):
         self._step = 0
         updated = self._parse_vampire_response(vampire_response)
         self.state = updated
-        return self.state, {STATE_DIFF_UPDATED: self.state}
+        return tuple(self.state.values()), {STATE_DIFF_UPDATED: self.state}
 
-    def _do_deductions(self, action: str) -> Dict[str, Dict[str, Any]]:
+    def _do_deductions(self, action: np.int64) -> Dict[str, Dict[str, Any]]:
         if any(
             clause["literals"] == FALSEHOOD_SYMBOL
             for clause in self.state.values()
         ):
             return {}
-        given_clause = self.state[action]
+        given_clause = list(self.state.values())[action]
         updated = self._parse_vampire_response(
             self._vampire.pick_a_clause(given_clause["label"])
         )

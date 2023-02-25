@@ -25,7 +25,6 @@ include = ["gym_saturation/py.typed"]
 [tool.poetry.dependencies]
 python = "> 3.8, < 3.12"
 importlib_resources = {version = "*", markers = "python_version < \"3.9\""}
-orjson = "*"
 pexpect = "*"
 gymnasium = "*"
 
@@ -90,7 +89,7 @@ max-line-length = 79
 max-statements = 10
 
 [tool.pylint.typecheck]
-generated-members = ["orjson", "asyncio"]
+generated-members = ["asyncio"]
 
 [tool.pylint.spelling]
 spelling-dict = "en_GB"

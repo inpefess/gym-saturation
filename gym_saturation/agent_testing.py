@@ -25,6 +25,7 @@ from operator import itemgetter
 from typing import Any, Dict, List, Optional, Tuple
 
 import gymnasium as gym
+import numpy as np
 
 from gym_saturation.envs.saturation_env import (
     MAX_CLAUSES,
@@ -47,10 +48,10 @@ class BaseAgent(ABC):
     @abstractmethod
     def get_action(
         self,
-        observation: dict,
+        observation: Tuple[Dict[str, Any], ...],
         reward: float,
         info: Dict[str, Any],
-    ) -> str:
+    ) -> int:
         """
         Get an action given observations and other inputs.
 
@@ -89,15 +90,15 @@ class SizeAgent(BaseAgent):
 
     def get_action(
         self,
-        observation: dict,
+        observation: Tuple[Dict[str, Any], ...],
         reward: float,
         info: Dict[str, Any],
-    ) -> str:  # noqa: D102
+    ) -> int:  # noqa: D102
         self.update_state(info)
         return min(
             (
                 (key, value[0])
-                for key, value in self.state.items()
+                for key, value in enumerate(self.state.values())
                 if value[1] == 0
             ),
             key=itemgetter(1),
@@ -113,15 +114,15 @@ class AgeAgent(BaseAgent):
 
     def get_action(
         self,
-        observation: dict,
+        observation: Tuple[Dict[str, Any], ...],
         reward: float,
         info: Dict[str, Any],
-    ) -> str:  # noqa: D102
+    ) -> int:  # noqa: D102
         return min(
             (i, clause)
-            for i, clause in enumerate(observation.values())
+            for i, clause in enumerate(observation)
             if clause["processed"] == 0
-        )[1]["label"]
+        )[0]
 
 
 class SizeAgeAgent(BaseAgent):
@@ -147,10 +148,10 @@ class SizeAgeAgent(BaseAgent):
 
     def get_action(
         self,
-        observation: dict,
+        observation: Tuple[Dict[str, Any], ...],
         reward: float,
         info: Dict[str, Any],
-    ) -> str:  # noqa: D102
+    ) -> int:  # noqa: D102
         self._step_count += 1
         if self._use_size:
             if self._step_count >= self.size_steps:
@@ -169,17 +170,17 @@ class RandomAgent(BaseAgent):
 
     def get_action(
         self,
-        observation: dict,
+        observation: Tuple[Dict[str, Any], ...],
         reward: float,
         info: Dict[str, Any],
-    ) -> str:  # noqa: D102
+    ) -> int:  # noqa: D102
         return random.choice(
             [
-                clause
-                for clause in observation.values()
+                key
+                for key, clause in enumerate(observation)
                 if clause["processed"] == 0
             ]
-        )["label"]
+        )
 
 
 def _proof_found_before_the_start(
@@ -233,7 +234,7 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> Tuple[float, bool, int]:
     step_count = 0
     while not terminated and not truncated:
         action = agent.get_action(obs, reward, info)
-        obs, reward, terminated, truncated, info = env.step(action)
+        obs, reward, terminated, truncated, info = env.step(np.int64(action))
         gain += reward
         step_count += 1
     return gain, truncated, step_count

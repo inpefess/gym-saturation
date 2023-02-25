@@ -21,17 +21,19 @@ import random
 from abc import abstractmethod
 from typing import Any, Dict, List, Optional, Tuple
 
-import orjson
+import numpy as np
 from gymnasium import Env, spaces
+from gymnasium.spaces.text import alphanumeric
 
 from gym_saturation.utils import FALSEHOOD_SYMBOL, pretty_print
 
 STATE_DIFF_UPDATED = "state_diff_updated"
 PROBLEM_FILENAME = "problem_filename"
 MAX_CLAUSES = 100000
+ALPHANUMERIC_WITH_UNDERSCORE = "".join(alphanumeric) + "_"
 
 
-class SaturationEnv(Env[Dict[str, Dict[str, Any]], str]):
+class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
     """
     Saturation algorithm defined in a Reinforcement Learning friendly way.
 
@@ -77,13 +79,12 @@ class SaturationEnv(Env[Dict[str, Dict[str, Any]], str]):
     ...         four.update({"literals": "~p(X)", "label": "four"})
     ...         self.state = {"one": one, "two": two, "three": three,
     ...             "four": four}
-    ...         return self.state, {}
+    ...         return tuple(self.state.values()), {}
     ...
     ...     def _do_deductions(
     ...             self, action: str
     ...     ) -> Dict[str, Dict[str, Any]]:
-    ...         given_clause = self.state[action]
-    ...         if action == "four":
+    ...         if action == 3:
     ...             self.state["falsehood"] = {
     ...                 "literals": FALSEHOOD_SYMBOL,
     ...                 "role": "lemma",
@@ -100,18 +101,20 @@ class SaturationEnv(Env[Dict[str, Dict[str, Any]], str]):
 
     one can look at the current state in TPTP format
 
-    >>> print(env.render())
+    >>> env.render()
     cnf(one, lemma, p(X), inference(dummy, [], [])).
     cnf(two, lemma, p(Y), inference(dummy, [], [])).
     cnf(three, lemma, p(Z), inference(dummy, [], [])).
     cnf(four, lemma, ~p(X), inference(dummy, [], [])).
 
-    ``ansi`` mode returns a JSON representation of the state
-    it should be more easily parsable than TPTP, although less human-friendly
+    ``ansi`` mode returns the same string instead of printing it
 
     >>> env.render_mode = "ansi"
-    >>> env.render()
-    b'{"one":{"label":"one","literals":"p(X)","role":"lemma","inference_rule...
+    >>> print(env.render())
+    cnf(one, lemma, p(X), inference(dummy, [], [])).
+    cnf(two, lemma, p(Y), inference(dummy, [], [])).
+    cnf(three, lemma, p(Z), inference(dummy, [], [])).
+    cnf(four, lemma, ~p(X), inference(dummy, [], [])).
 
     other modes are not implemented yet
 
@@ -123,7 +126,7 @@ class SaturationEnv(Env[Dict[str, Dict[str, Any]], str]):
 
     the test theorem can be proved in three steps
 
-    >>> next_state, reward, terminated, truncated, info = env.step("one")
+    >>> next_state, reward, terminated, truncated, info = env.step(0)
 
     ``info`` dict contains the state diff, for example
 
@@ -132,10 +135,10 @@ class SaturationEnv(Env[Dict[str, Dict[str, Any]], str]):
 
     repeating actions is not allowed
 
-    >>> env.step("one")
+    >>> env.step(0)
     Traceback (most recent call last):
      ...
-    ValueError: action one is not valid
+    ValueError: action 0 is not valid
 
     there is no reward until the end of an episode
 
@@ -144,7 +147,7 @@ class SaturationEnv(Env[Dict[str, Dict[str, Any]], str]):
 
     if a proof is found, then reward is ``+1``
 
-    >>> env.step("four")[1:3]
+    >>> env.step(3)[1:3]
     (1.0, True)
 
     TSTP proof is now available (one can add ``include`` directive before it
@@ -175,24 +178,32 @@ class SaturationEnv(Env[Dict[str, Dict[str, Any]], str]):
     after the first step we bypass ``max_clauses`` by one, so the episode
     finishes with failure:
 
-    >>> obs, reward, terminated, truncated, _ = env.step("one")
+    >>> obs, reward, terminated, truncated, _ = env.step(0)
     >>> terminated, truncated, reward
     (False, True, 0.0)
     >>> env.sample_tasks(1)
     [['.../resources/TPTP-mock/Problems/TST/TST001-1.p']]
     """
 
-    metadata = {"render_modes": ["ansi", "human"]}
+    metadata = {"render_modes": ["ansi", "human"], "render_fps": 1}
     reward_range = (0, 1)
-    action_space: spaces.Discrete  # type: ignore
-    observation_space = spaces.Sequence(  # type: ignore
+    action_space: spaces.Discrete
+    observation_space = spaces.Sequence(
         spaces.Dict(
             {
-                "label": spaces.Text(256),
-                "role": spaces.Text(256),
-                "literals": spaces.Text(4000),
-                "inference_rule": spaces.Text(256),
-                "inference_parents": spaces.Sequence(spaces.Text(256)),
+                "label": spaces.Text(
+                    256, charset=ALPHANUMERIC_WITH_UNDERSCORE
+                ),
+                "role": spaces.Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE),
+                "literals": spaces.Text(
+                    4000, charset=ALPHANUMERIC_WITH_UNDERSCORE + "(), |~=!$"
+                ),
+                "inference_rule": spaces.Text(
+                    256, charset=ALPHANUMERIC_WITH_UNDERSCORE
+                ),
+                "inference_parents": spaces.Sequence(
+                    spaces.Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE)
+                ),
                 "birth_step": spaces.Discrete(1000),
                 "processed": spaces.Discrete(2),
             }
@@ -233,13 +244,13 @@ class SaturationEnv(Env[Dict[str, Dict[str, Any]], str]):
         *,
         seed: Optional[int] = None,
         options: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:  # noqa: D102
+    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
         random.seed(seed)
         if not self.task:
             self.set_task(self.problem_list)
         self.problem_filename = random.choice(self.get_task())
-        return {}, {}
+        return (), {}
 
     def _max_clauses_result(
         self, info: Dict[str, Any]
@@ -250,12 +261,12 @@ class SaturationEnv(Env[Dict[str, Dict[str, Any]], str]):
         return False, info
 
     @abstractmethod
-    def _do_deductions(self, action: str) -> Dict[str, Dict[str, Any]]:
+    def _do_deductions(self, action: np.int64) -> Dict[str, Dict[str, Any]]:
         raise NotImplementedError  # pragma: no cover
 
     def step(
-        self, action: str
-    ) -> Tuple[Dict[str, Any], float, bool, bool, Dict[str, Any]]:
+        self, action: np.int64
+    ) -> Tuple[Tuple[Dict[str, Any], ...], float, bool, bool, Dict[str, Any]]:
         # noqa: D301
         """
         Run one time-step of the environment's dynamics.
@@ -277,7 +288,10 @@ class SaturationEnv(Env[Dict[str, Dict[str, Any]], str]):
         :raises ValueError: if the ``action`` identifies an already processed
             clause
         """
-        if action not in self.state or self.state[action]["processed"] == 1:
+        if (
+            action > len(self.state)
+            or list(self.state.values())[action]["processed"] == 1
+        ):
             raise ValueError(f"action {action} is not valid")
         old_state_size = len(self.state)
         updated = self._do_deductions(action)
@@ -298,25 +312,27 @@ class SaturationEnv(Env[Dict[str, Dict[str, Any]], str]):
                 False,
             )
         )
-        self.state[action]["processed"] = 1
+        self.state[list(self.state.keys())[action]]["processed"] = 1
         terminated |= 1 == min(
             clause["processed"] for clause in self.state.values()
         )
         truncated, info = self._max_clauses_result(info)
-        return self.state, reward, terminated, truncated, info
+        return tuple(self.state.values()), reward, terminated, truncated, info
 
     # pylint: disable=inconsistent-return-statements
     def render(self):  # noqa: D102
-        if self.render_mode == "ansi":
-            return orjson.dumps(self.state)
-        if self.render_mode == "human":
-            return "\n".join(
-                map(
-                    pretty_print,
-                    self.state.values(),
-                )
+        tptp_string = "\n".join(
+            map(
+                pretty_print,
+                self.state.values(),
             )
-        super().render()
+        )
+        if self.render_mode == "ansi":
+            return tptp_string
+        if self.render_mode == "human":
+            print(tptp_string)
+        else:
+            super().render()
 
     def sample_tasks(self, n_tasks: int) -> List[List[str]]:
         """

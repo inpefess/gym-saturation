@@ -18,6 +18,7 @@ Saturation Environment with iProver back-end
 ============================================
 """
 import asyncio
+import json
 import os
 import random
 import re
@@ -27,7 +28,7 @@ import time
 from threading import Thread
 from typing import Any, Dict, List, Optional, Tuple
 
-import orjson
+import numpy as np
 
 from gym_saturation.envs.saturation_env import (
     MAX_CLAUSES,
@@ -155,15 +156,14 @@ class IProverEnv(SaturationEnv):
     ... ), "SET", "*-*.p")))
     >>> iprover_env = IProverEnv(problems)
     >>> observation, info = iprover_env.reset()
-    >>> for action in ["c_50", "c_49", "c_51", "c_55", "c_52", "c_64", "c_71"]:
+    >>> for action in [0, 1, 2, 4, 8, 9, 10]:
     ...     observation, reward, terminated, truncated, info = (iprover_env.
-    ...     step(action))
+    ...         step(action))
     >>> print(reward, terminated, truncated)
     1.0 True False
     >>> iprover_env.close()
     """
 
-    # [0, 1, 2, 4, 8, 9, 10]:
     def __init__(
         self,
         problem_list: List[str],
@@ -208,7 +208,7 @@ class IProverEnv(SaturationEnv):
         *,
         seed: Optional[int] = None,
         options: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Dict[Any, Any], Dict[str, Any]]:  # noqa: D102
+    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
         asyncio.run(
             _iprover_start(
@@ -218,7 +218,7 @@ class IProverEnv(SaturationEnv):
         time.sleep(2)
         data = self._get_json_data()
         self.state = _parse_iprover_requests(data)
-        return self.state, {STATE_DIFF_UPDATED: self.state}
+        return tuple(self.state.values()), {STATE_DIFF_UPDATED: self.state}
 
     def _get_raw_data(self) -> bytes:
         with socket.create_connection(
@@ -244,14 +244,14 @@ class IProverEnv(SaturationEnv):
             ]
             for raw_json in raw_jsons:
                 if raw_json:
-                    parsed_json = orjson.loads(
+                    parsed_json = json.loads(
                         raw_json.replace("\n", "").replace("\x00", "")
                     )
                     json_data.append(parsed_json)
         return json_data[1:]
 
-    def _do_deductions(self, action: str) -> Dict[str, Dict[str, Any]]:
-        given_clause_label = action[2:]
+    def _do_deductions(self, action: np.int64) -> Dict[str, Dict[str, Any]]:
+        given_clause_label = list(self.state.keys())[action][2:]
         scores = (
             f"""{{"given_clause": {given_clause_label},"""
             + """"passive_is_empty": false}\n\x00\n"""
