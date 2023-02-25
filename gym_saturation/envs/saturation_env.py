@@ -147,21 +147,22 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
 
     if a proof is found, then reward is ``+1``
 
-    >>> env.step(3)[1:3]
-    (1.0, True)
+    >>> observation, reward, terminated, _, _ = env.step(3)
+    >>> print(reward, terminated)
+    1.0 True
 
     TSTP proof is now available (one can add ``include`` directive before it
     for validation purposes)
 
     >>> from gym_saturation.utils import get_tstp_proof
-    >>> print(get_tstp_proof(env.state))
+    >>> print(get_tstp_proof(observation))
     cnf(four, lemma, ~p(X), inference(dummy, [], [])).
     cnf(falsehood, lemma, $false, inference(dummy, [], [four])).
 
     One can also filter actions relevant to a particular goal:
 
     >>> from gym_saturation.utils import get_positive_actions
-    >>> get_positive_actions(env.state)
+    >>> get_positive_actions(observation)
     (3, 4)
 
     the total number of clauses in the state is limited by the ``max_clauses``

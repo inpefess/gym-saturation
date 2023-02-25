@@ -271,7 +271,7 @@ def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
     """
     _, truncated, step_count = episode(env, agent)
     if not truncated:
-        a_proof = get_tstp_proof(env.state)
+        a_proof = get_tstp_proof(tuple(env.state.values()))
         proof_length = len(a_proof.split("\n"))
         print(
             f"Proof of length {proof_length} found "

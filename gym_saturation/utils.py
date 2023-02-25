@@ -49,7 +49,7 @@ def _flat_list(list_of_lists: Tuple[Tuple[Any, ...], ...]) -> Tuple[Any, ...]:
 
 
 def reduce_to_proof(
-    clauses: Dict[str, Dict[str, Any]], goal: str = FALSEHOOD_SYMBOL
+    clauses: Tuple[Dict[str, Any], ...], goal: str = FALSEHOOD_SYMBOL
 ) -> Tuple[Dict[str, Any], ...]:
     """
     Leave only clauses belonging to the refutation proof.
@@ -58,15 +58,12 @@ def reduce_to_proof(
     ...     "literals": FALSEHOOD_SYMBOL, "label": "one",
     ...     "inference_parents": ()
     ... }
-    >>> reduce_to_proof({
-    ...     "one": one,
-    ...     "two": {"literals": FALSEHOOD_SYMBOL, "label": "two"}
-    ... })
+    >>> reduce_to_proof((one, {"literals": FALSEHOOD_SYMBOL, "label": "two"}))
     Traceback (most recent call last):
      ...
     gym_saturation.utils.NoProofFoundError
-    >>> state = {"one": one}
-    >>> reduce_to_proof(state) == (one,)
+    >>> state = (one, )
+    >>> reduce_to_proof(state) == state
     True
 
     :param clauses: a map of clause labels to clauses
@@ -76,7 +73,7 @@ def reduce_to_proof(
         in a given proof state
     """
     empty_clauses = tuple(
-        clause for clause in clauses.values() if clause["literals"] == goal
+        clause for clause in clauses if clause["literals"] == goal
     )
     if len(empty_clauses) == 1:
         reduced: Tuple[Dict[str, Any], ...] = ()
@@ -87,7 +84,7 @@ def reduce_to_proof(
             )
             new_reduced = tuple(
                 clause
-                for clause in clauses.values()
+                for clause in clauses
                 if clause["label"]
                 in tuple(
                     reversed(
@@ -106,7 +103,7 @@ def reduce_to_proof(
     raise NoProofFoundError
 
 
-def get_tstp_proof(state: Dict[str, Dict[str, Any]]) -> str:
+def get_tstp_proof(state: Tuple[Dict[str, Any], ...]) -> str:
     """
     Return TSTP proof (if found; raises an error otherwise).
 
@@ -119,7 +116,7 @@ def get_tstp_proof(state: Dict[str, Dict[str, Any]]) -> str:
 
 
 def get_positive_actions(
-    state: Dict[str, Dict[str, Any]], goal: str = FALSEHOOD_SYMBOL
+    state: Tuple[Dict[str, Any], ...], goal: str = FALSEHOOD_SYMBOL
 ) -> Tuple[int, ...]:
     """
     Return a sequence of actions which contributed to the proof found.
@@ -131,7 +128,5 @@ def get_positive_actions(
     """
     proof = reduce_to_proof(state, goal)
     return tuple(
-        action
-        for action, clause in enumerate(state.values())
-        if clause in proof
+        action for action, clause in enumerate(state) if clause in proof
     )
