@@ -1,4 +1,4 @@
-gym
+gymnasium
 pexpect
 sphinx-autodoc-typehints
 importlib_resources
