@@ -21,22 +21,17 @@ This module is an example of testing your own trained agent.
 import random
 from abc import ABC, abstractmethod
 from argparse import ArgumentParser, Namespace
-from dataclasses import dataclass
 from operator import itemgetter
 from typing import Any, Dict, List, Optional, Tuple
 
-import gym
+import gymnasium as gym
 
 from gym_saturation.envs.saturation_env import (
     MAX_CLAUSES,
     STATE_DIFF_UPDATED,
     SaturationEnv,
 )
-from gym_saturation.utils import (
-    FALSEHOOD_SYMBOL,
-    NoProofFoundError,
-    get_tstp_proof,
-)
+from gym_saturation.utils import FALSEHOOD_SYMBOL, get_tstp_proof
 
 
 class BaseAgent(ABC):
@@ -68,23 +63,6 @@ class BaseAgent(ABC):
         """
 
 
-@dataclass
-class Transition:
-    """
-    An object describing environment's and agent's states.
-
-    Before the agent's action, the action itself and its results
-    """
-
-    env_state: dict
-    agent_state: Any
-    action: int
-    observation: dict
-    reward: float
-    done: bool
-    info: Dict[str, Any]
-
-
 class SizeAgent(BaseAgent):
     """
     Agent which selects the shortest clause.
@@ -102,8 +80,6 @@ class SizeAgent(BaseAgent):
 
         :param info: an info dict (part of environment response)
         """
-        # if not isinstance(info[STATE_DIFF_UPDATED], dict):
-        #     raise ValueError(info)
         self._state.update(
             {
                 label: (len(clause.literals), clause.processed)
@@ -206,26 +182,19 @@ class RandomAgent(BaseAgent):
         )
 
 
-def _proof_found_before_the_start(env: SaturationEnv) -> Tuple[float, bool]:
+def _proof_found_before_the_start(
+    env: SaturationEnv,
+) -> Tuple[float, bool, bool]:
     if tuple(
         1
         for clause in env.state["real_obs"].values()
         if clause.literals == FALSEHOOD_SYMBOL
     ):
-        return 1.0, True
-    return 0.0, False
+        return 1.0, True, False
+    return 0.0, False, False
 
 
-def _reset_with_options(env: gym.Env) -> dict:
-    res = env.reset()
-    if isinstance(res, tuple):
-        obs, _ = res  # pragma: nocover
-    else:
-        obs = res
-    return obs
-
-
-def episode(env: SaturationEnv, agent: BaseAgent) -> Tuple[float, int]:
+def episode(env: SaturationEnv, agent: BaseAgent) -> Tuple[float, bool, int]:
     """
     Try to solve the problem and logs the clauses.
 
@@ -256,19 +225,18 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> Tuple[float, int]:
 
     :param env: a `gym_saturation` environment
     :param agent: an initialised agent. Must have `get_action` method
-    :returns: gain and the number of steps
+    :returns: gain, truncation, the number of steps
     """
-    obs = _reset_with_options(env)
-    info: Dict[str, Any] = {STATE_DIFF_UPDATED: obs["real_obs"]}
-    reward, done = _proof_found_before_the_start(env)
+    obs, info = env.reset()
+    reward, terminated, truncated = _proof_found_before_the_start(env)
     gain = reward
     step_count = 0
-    while not done:
+    while not terminated and not truncated:
         action = agent.get_action(obs, reward, info)
-        obs, reward, done, info = env.step(action)
+        obs, reward, terminated, truncated, info = env.step(action)
         gain += reward
         step_count += 1
-    return gain, step_count
+    return gain, truncated, step_count
 
 
 def parse_args(args: Optional[List[str]] = None) -> Namespace:
@@ -300,15 +268,15 @@ def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
     :param env: an environment
     :param agent: an agent
     """
-    _, step_count = episode(env, agent)
-    try:
+    _, truncated, step_count = episode(env, agent)
+    if not truncated:
         a_proof = get_tstp_proof(env.state["real_obs"])
         proof_length = len(a_proof.split("\n"))
         print(
             f"Proof of length {proof_length} found "
             f"in {step_count} step(s):\n{a_proof}"
         )
-    except NoProofFoundError:
+    else:
         print(f"Proof state size limit reached in {step_count} step(s).")
 
 
@@ -359,7 +327,7 @@ def test_agent(args: Optional[List[str]] = None) -> None:
         max_clauses=arguments.max_clauses,
     )
     print(f"Problem file: {arguments.problem_filename}")
-    agent_testing_report(env, SizeAgeAgent(5, 1))  # type: ignore
+    agent_testing_report(env, SizeAgeAgent(1, 1))  # type: ignore
 
 
 if __name__ == "__main__":

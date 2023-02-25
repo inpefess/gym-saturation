@@ -19,11 +19,11 @@ Saturation Environment
 """
 import random
 from abc import abstractmethod
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import orjson
-from gym import Env, spaces
+from gymnasium import Env, spaces
 
 from gym_saturation.clause_space import ClauseSpace
 from gym_saturation.utils import FALSEHOOD_SYMBOL, Clause, pretty_print
@@ -58,18 +58,18 @@ class SaturationEnv(Env[dict, int]):
     ...         self,
     ...         *,
     ...         seed: Optional[int] = None,
-    ...         return_info: bool = False,
-    ...         options: Optional[dict] = None,
-    ...     ) -> Union[dict, Tuple[dict, dict]]:
+    ...         options: Optional[Dict[str, Any]] = None
+    ...     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    ...         super().reset(seed=seed)
     ...         self._state = {
     ...             "one": Clause(literals="p(X)", label="one"),
     ...             "two": Clause(literals="p(Y)", label="two"),
     ...             "three": Clause(literals="p(Z)", label="three"),
     ...             "four": Clause(literals="~p(X)", label="four")
     ...         }
-    ...         return self.state
+    ...         return self.state, {}
     ...
-    ...     def _do_deductions(self, action: int) -> Tuple[bytes, ...]:
+    ...     def _do_deductions(self, action: int) -> Dict[str, Clause]:
     ...         given_clause = list(self._state.values())[action]
     ...         self._state[given_clause.label] = dataclasses.replace(
     ...             given_clause, processed=True)
@@ -79,12 +79,10 @@ class SaturationEnv(Env[dict, int]):
     ...                 inference_rule="dummy",
     ...                 inference_parents=("four",)
     ...             )
-    ...         return ()
+    ...         return {}
     ...
     >>> env = MySaturationEnv(problem_list)
-    >>> env.seed(0)
-    0
-    >>> len(env.reset()["real_obs"])
+    >>> len(env.reset()[0]["real_obs"])
     4
 
     one can look at the current state in TPTP format
@@ -98,24 +96,26 @@ class SaturationEnv(Env[dict, int]):
     ``ansi`` mode returns a JSON representation of the state
     it should be more easily parsable than TPTP, although less human-friendly
 
-    >>> env.render("ansi")
+    >>> env.render_mode = "ansi"
+    >>> env.render()
     b'{"one":{"literals":"p(X)","label":"one","role":"lemma","inference_pare...
 
     other modes are not implemented yet
 
-    >>> env.render(mode="rgb_array")
+    >>> env.render_mode = "rgb_array"
+    >>> env.render()
     Traceback (most recent call last):
      ...
     NotImplementedError
 
     the test theorem can be proved in three steps
 
-    >>> next_state, reward, done, info = env.step(0)
+    >>> next_state, reward, terminated, truncated, info = env.step(0)
 
     ``info`` dict contains the state diff, for example
 
     >>> info[STATE_DIFF_UPDATED]
-    ()
+    {}
 
     repeating actions is not allowed
 
@@ -126,8 +126,8 @@ class SaturationEnv(Env[dict, int]):
 
     there is no reward until the end of an episode
 
-    >>> (reward, done)
-    (0.0, False)
+    >>> (reward, terminated, truncated)
+    (0.0, False, False)
 
     if a proof is found, then reward is ``+1``
 
@@ -152,33 +152,31 @@ class SaturationEnv(Env[dict, int]):
     problem:
 
     >>> env = MySaturationEnv(problem_list, max_clauses=3)
-    >>> _ = env.seed(0)
-    >>> old_obs = env.reset()
-
-    after the first step we bypass ``max_clauses`` by one, so the episode
-    finishes with failure:
-
-    >>> obs, reward, done, _ = env.step(0)
-    >>> done, reward
-    (True, 0.0)
     >>> env.get_task()
     Traceback (most recent call last):
      ...
     ValueError: Task is not set! Call reset or set_task first.
+    >>> old_obs, _ = env.reset(seed=0)
+
+    after the first step we bypass ``max_clauses`` by one, so the episode
+    finishes with failure:
+
+    >>> obs, reward, terminated, truncated, _ = env.step(0)
+    >>> terminated, truncated, reward
+    (False, True, 0.0)
     >>> env.sample_tasks(1)
     [['.../resources/TPTP-mock/Problems/TST/TST001-1.p']]
     """
 
     metadata = {"render_modes": ["ansi", "human"]}
     reward_range = (0, 1)
-
-    action_space: spaces.Discrete
-    observation_space: spaces.Dict
+    action_space: spaces.Discrete  # type: ignore
 
     def __init__(
         self,
         problem_list: List[str],
         max_clauses: int = MAX_CLAUSES,
+        render_mode: str = "human",
     ):
         """
         Initialise spaces et al.
@@ -197,46 +195,61 @@ class SaturationEnv(Env[dict, int]):
             }
         )
         self.task: Optional[List[str]] = None
-        self.problem_filename: Optional[str] = None
+        self.problem_filename: str = "/dev/null"
+        self.render_mode = self._check_render_mode(render_mode)
+
+    def _check_render_mode(self, render_mode: str) -> str:
+        if render_mode in self.metadata["render_modes"]:
+            return render_mode
+        raise ValueError(
+            f"Expected a render mode among {self.metadata['render_modes']}"
+            f"but got {render_mode}"
+        )
 
     @abstractmethod
     def reset(
         self,
         *,
         seed: Optional[int] = None,
-        return_info: bool = False,
-        options: Optional[dict] = None,
-    ) -> Union[dict, Tuple[dict, dict]]:  # noqa: D102
-        raise NotImplementedError  # pragma: no cover
+        options: Optional[Dict[str, Any]] = None,
+    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:  # noqa: D102
+        random.seed(seed)
+        if not self.task:
+            self.set_task(self.problem_list)
+        self.problem_filename = random.choice(self.get_task())
+        return {}, {}
 
     def _max_clauses_result(
-        self, done: bool, info: Dict[str, Any]
+        self, info: Dict[str, Any]
     ) -> Tuple[bool, Dict[str, Any]]:
-        if not done:
-            if len(self._state) > self.action_space.n:
-                info.pop(STATE_DIFF_UPDATED)
-                return True, info
-        return done, info
+        if len(self._state) > self.action_space.n:
+            info.pop(STATE_DIFF_UPDATED)
+            return True, info
+        return False, info
 
     @abstractmethod
     def _do_deductions(self, action: int) -> Dict[str, Clause]:
         raise NotImplementedError  # pragma: no cover
 
-    def step(self, action: int) -> Tuple[dict, float, bool, Dict[str, Any]]:
+    def step(
+        self, action: int
+    ) -> Tuple[Dict[str, Any], float, bool, bool, Dict[str, Any]]:
         # noqa: D301
         """
         Run one time-step of the environment's dynamics.
 
         When end of episode is reached, you are responsible for calling
         ``reset()`` to reset this environment's state.
-        Accepts an action and returns a tuple (observation, reward, done, info)
+        Accepts an action and returns a tuple
+        (observation, reward, terminated, truncated, info)
 
         :param action: an action provided by the agent
         :returns: a tuple of four values:\n
             * observation: agent's observation of the current environment
             * reward: amount of reward returned after previous action
-            * done: whether the episode has ended, in which case further
-              ``step()`` calls will return undefined results
+            * terminated: Whether the proof was found
+            * truncated: Whether the maximal number of clauses in the proof
+              state were reached
             * info: contains auxiliary diagnostic information (helpful for
               debugging, and sometimes learning)
         :raises ValueError: if the ``action`` identifies an already processed
@@ -250,39 +263,41 @@ class SaturationEnv(Env[dict, int]):
             STATE_DIFF_UPDATED: updated,
             PROBLEM_FILENAME: self.problem_filename,
         }
-        reward, done = (
+        reward, terminated = (
             (1.0, True)
             if any(
                 clause.literals == FALSEHOOD_SYMBOL
                 for clause in self._state.values()
             )
             else (
-                (old_state_size - len(self._state)) / self.action_space.n,
+                float(
+                    (old_state_size - len(self._state)) / self.action_space.n
+                ),
                 False,
             )
         )
-        done |= min(
+        terminated |= min(
             False if clause.processed is None else clause.processed
             for clause in self._state.values()
         )
-        done, info = self._max_clauses_result(done, info)
-        return self.state, reward, done, info
+        truncated, info = self._max_clauses_result(info)
+        return self.state, reward, terminated, truncated, info
 
     # pylint: disable=inconsistent-return-statements
-    def render(self, mode="human"):  # noqa: D102
-        if mode == "ansi":
+    def render(self):  # noqa: D102
+        if self.render_mode == "ansi":
             return orjson.dumps(self._state)
-        if mode == "human":
+        if self.render_mode == "human":
             return "\n".join(
                 map(
                     pretty_print,
                     self._state.values(),
                 )
             )
-        super().render(mode=mode)
+        super().render()
 
     @property
-    def state(self) -> dict:
+    def state(self) -> Dict[str, Any]:
         """Return environment state in Python ``dict`` format."""
         return {
             "real_obs": self._state,
@@ -295,12 +310,8 @@ class SaturationEnv(Env[dict, int]):
                     + self.action_space.n * [0.0],
                     np.float32,
                 )
-            )[: self.action_space.n],
+            )[: int(self.action_space.n)],
         }
-
-    def seed(self, seed=None):  # noqa: D102
-        random.seed(seed)
-        return seed
 
     def sample_tasks(self, n_tasks: int) -> List[List[str]]:
         """

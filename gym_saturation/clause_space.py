@@ -17,14 +17,14 @@
 Clause Space
 =============
 """
-from gym import spaces
+from gymnasium import spaces
 
 from gym_saturation.utils import Clause
 
 
 class ClauseSpace(spaces.Space):
     """
-    An OpenAI Gym space for a dictionary of clauses.
+    An Gymnasium space for a dictionary of clauses.
 
     .. _clause_space:
 
@@ -50,5 +50,11 @@ class ClauseSpace(spaces.Space):
             return True
         return False
 
-    def sample(self):  # noqa: D102
+    # pylint: disable=unused-argument
+    def sample(self, mask=None):  # noqa: D102
         return {"one": Clause("$false", label="one")}
+
+    @property
+    def is_np_flattenable(self) -> bool:
+        """Check whether this space can be flattened to a Box."""
+        return False

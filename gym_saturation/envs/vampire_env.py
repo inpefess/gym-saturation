@@ -19,10 +19,13 @@ Saturation Environment with Vampire back-end
 """
 import dataclasses
 import os
-import random
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
-from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
+from gym_saturation.envs.saturation_env import (
+    MAX_CLAUSES,
+    STATE_DIFF_UPDATED,
+    SaturationEnv,
+)
 from gym_saturation.utils import FALSEHOOD_SYMBOL, Clause
 from gym_saturation.vampire_wrapper import VampireWrapper
 
@@ -69,26 +72,28 @@ class VampireEnv(SaturationEnv):
     ...     os.path.join("resources", "TPTP-mock", "Problems")
     ... ), "SET", "*-*.p")))
     >>> vampire_env = VampireEnv(problems)
-    >>> observation = vampire_env.reset()
+    >>> observation, info = vampire_env.reset()
     >>> for action in [0, 3, 6, 7, 8, 9, 10]:
-    ...     observation, reward, done, info = vampire_env.step(action)
-    >>> print(reward, done)
-    1.0 True
+    ...     observation, reward, terminated, truncated, info = (vampire_env.
+    ...     step(action))
+    >>> print(reward, terminated, truncated)
+    1.0 True False
     >>> # test of a problem which is solver immediately after `reset`
     >>> problems = sorted(glob(os.path.join(files("gym_saturation").joinpath(
     ...     os.path.join("resources", "TPTP-mock", "Problems")
     ... ), "TST", "TST004-1.p")))
     >>> vampire_env = VampireEnv(problems)
-    >>> observation = vampire_env.reset()
-    >>> observation, reward, done, info = vampire_env.step(0)
-    >>> print(reward, done)
-    1.0 True
+    >>> observation, info = vampire_env.reset()
+    >>> observation, reward, terminated, truncated, info = vampire_env.step(0)
+    >>> print(reward, terminated, truncated)
+    1.0 True False
     """
 
     def __init__(
         self,
         problem_list: List[str],
         max_clauses: int = MAX_CLAUSES,
+        render_mode: str = "human",
         vampire_binary_path: str = "vampire",
     ):
         """
@@ -99,7 +104,7 @@ class VampireEnv(SaturationEnv):
         :param vampire_binary_path: a path to Vampire binary;
             by default we expect it to be in the $PATH
         """
-        super().__init__(problem_list, max_clauses)
+        super().__init__(problem_list, max_clauses, render_mode)
         self._vampire = VampireWrapper(vampire_binary_path)
         self._step = 0
 
@@ -135,12 +140,9 @@ class VampireEnv(SaturationEnv):
         self,
         *,
         seed: Optional[int] = None,
-        return_info: bool = False,
-        options: Optional[dict] = None,
-    ) -> Union[Dict, Tuple[dict, dict]]:  # noqa: D102
-        if not self.task:
-            self.set_task(self.problem_list)
-        self.problem_filename = random.choice(self.get_task())
+        options: Optional[Dict[str, Any]] = None,
+    ) -> Tuple[Dict[Any, Any], Dict[str, Any]]:  # noqa: D102
+        super().reset(seed=seed)
         tptp_folder = os.path.join(
             os.path.dirname(self.problem_filename), "..", ".."
         )
@@ -154,7 +156,7 @@ class VampireEnv(SaturationEnv):
             for clause in updated.values()
         }
         self._step = 0
-        return self.state
+        return self.state, {STATE_DIFF_UPDATED: self._state}
 
     def _do_deductions(self, action: int) -> Dict[str, Clause]:
         if any(

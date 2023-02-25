@@ -18,8 +18,8 @@
 gym-saturation
 ==============
 
-``gym-saturation`` is a collection of `OpenAI Gym
-<https://gym.openai.com/>`__ environments for reinforcement learning
+``gym-saturation`` is a collection of `Gymnasium
+<https://gymnasium.farama.org/>`__ environments for reinforcement learning
 (RL) agents striving to prove theorems. Currently, only theorems
 written in `TPTP library <https://tptp.org>`__ formal language are
 supported. ``gym-saturation`` implements the ‘given clause’ algorithm
@@ -81,7 +81,7 @@ How to use
 .. code:: python
 
    import gym_saturation
-   import gym
+   import gymnasium as gym
    import os
 
    # get a TPTP problem file or create one yourself
@@ -89,7 +89,7 @@ How to use
    observation = env.reset()
    # an order number of a 'given clause'
    action = ...
-   observation, reward, done, info = env.step(action)
+   observation, reward, terminated, truncated, info = env.step(action)
 
 See `the
 notebook <https://github.com/inpefess/gym-saturation/blob/master/examples/example.ipynb>`__

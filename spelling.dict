@@ -57,7 +57,6 @@ environ
 setrecursionlimit
 provers
 PyRes
-OpenAI
 github
 slurm
 Slurm

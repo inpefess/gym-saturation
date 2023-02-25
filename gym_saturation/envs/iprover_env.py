@@ -25,11 +25,15 @@ import socket
 import subprocess
 import time
 from threading import Thread
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 import orjson
 
-from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
+from gym_saturation.envs.saturation_env import (
+    MAX_CLAUSES,
+    STATE_DIFF_UPDATED,
+    SaturationEnv,
+)
 from gym_saturation.relay_server import RelayServer, RelayTCPHandler
 from gym_saturation.utils import FALSEHOOD_SYMBOL, Clause
 
@@ -143,11 +147,12 @@ class IProverEnv(SaturationEnv):
     ...     os.path.join("resources", "TPTP-mock", "Problems")
     ... ), "SET", "*-*.p")))
     >>> iprover_env = IProverEnv(problems)
-    >>> observation = iprover_env.reset()
+    >>> observation, info = iprover_env.reset()
     >>> for action in [0, 1, 2, 4, 8, 9, 10]:
-    ...     observation, reward, done, info = iprover_env.step(action)
-    >>> print(reward, done)
-    1.0 True
+    ...     observation, reward, terminated, truncated, info = (iprover_env.
+    ...     step(action))
+    >>> print(reward, terminated, truncated)
+    1.0 True False
     >>> iprover_env.close()
     """
 
@@ -194,11 +199,9 @@ class IProverEnv(SaturationEnv):
         self,
         *,
         seed: Optional[int] = None,
-        return_info: bool = False,
-        options: Optional[dict] = None,
-    ) -> Union[Dict, Tuple[dict, dict]]:  # noqa: D102
-        if not self.task:
-            self.set_task(self.problem_list)
+        options: Optional[Dict[str, Any]] = None,
+    ) -> Tuple[Dict[Any, Any], Dict[str, Any]]:  # noqa: D102
+        super().reset(seed=seed)
         asyncio.run(
             _iprover_start(
                 self.iprover_port, self.get_task()[0], self.iprover_binary_path
@@ -207,7 +210,7 @@ class IProverEnv(SaturationEnv):
         time.sleep(2)
         data = self._get_json_data()
         self._state = _parse_iprover_requests(data)
-        return self.state
+        return self.state, {STATE_DIFF_UPDATED: self._state}
 
     def _get_raw_data(self) -> bytes:
         with socket.create_connection(
