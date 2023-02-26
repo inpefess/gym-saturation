@@ -27,7 +27,7 @@ supported. ``gym-saturation`` implements the ‘given clause’ algorithm
 <https://github.com/vprover/vampire>`__ and `E Prover
 <https://github.com/eprover/eprover>`__).
 
-There is one environment in ``gym-saturation``: ``VampireEnv`` and
+There are two environments in ``gym-saturation``: ``VampireEnv`` and
 ``IProverEnv``. ``VampireEnv`` is a wrapper around a recent
 ``Vampire`` prover, and ``IProverEnv`` relies on an experimental
 version of `iProver <http://www.cs.man.ac.uk/~korovink/iprover/>`__.
