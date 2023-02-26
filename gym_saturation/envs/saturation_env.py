@@ -27,7 +27,6 @@ from gymnasium.spaces.text import alphanumeric
 
 from gym_saturation.utils import FALSEHOOD_SYMBOL, pretty_print
 
-STATE_DIFF_UPDATED = "state_diff_updated"
 PROBLEM_FILENAME = "problem_filename"
 MAX_CLAUSES = 100000
 ALPHANUMERIC_WITH_UNDERSCORE = "".join(alphanumeric) + "_"
@@ -81,9 +80,7 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
     ...             "four": four}
     ...         return tuple(self.state.values()), {}
     ...
-    ...     def _do_deductions(
-    ...             self, action: str
-    ...     ) -> Dict[str, Dict[str, Any]]:
+    ...     def _do_deductions(self, action: str) -> None:
     ...         if action == 3:
     ...             self.state["falsehood"] = {
     ...                 "literals": FALSEHOOD_SYMBOL,
@@ -93,7 +90,6 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
     ...                 "inference_parents": ("four",),
     ...                 "processed": 0
     ...             }
-    ...         return ()
     ...
     >>> env = MySaturationEnv(problem_list)
     >>> len(env.reset()[0])
@@ -127,11 +123,6 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
     the test theorem can be proved in three steps
 
     >>> next_state, reward, terminated, truncated, info = env.step(0)
-
-    ``info`` dict contains the state diff, for example
-
-    >>> info[STATE_DIFF_UPDATED]
-    ()
 
     repeating actions is not allowed
 
@@ -253,16 +244,8 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         self.problem_filename = random.choice(self.get_task())
         return (), {}
 
-    def _max_clauses_result(
-        self, info: Dict[str, Any]
-    ) -> Tuple[bool, Dict[str, Any]]:
-        if len(self.state) > self.action_space.n:
-            info.pop(STATE_DIFF_UPDATED)
-            return True, info
-        return False, info
-
     @abstractmethod
-    def _do_deductions(self, action: np.int64) -> Dict[str, Dict[str, Any]]:
+    def _do_deductions(self, action: np.int64) -> None:
         raise NotImplementedError  # pragma: no cover
 
     def step(
@@ -295,11 +278,7 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         ):
             raise ValueError(f"action {action} is not valid")
         old_state_size = len(self.state)
-        updated = self._do_deductions(action)
-        info = {
-            STATE_DIFF_UPDATED: updated,
-            PROBLEM_FILENAME: self.problem_filename,
-        }
+        self._do_deductions(action)
         reward, terminated = (
             (1.0, True)
             if max(
@@ -317,8 +296,14 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         terminated |= 1 == min(
             clause["processed"] for clause in self.state.values()
         )
-        truncated, info = self._max_clauses_result(info)
-        return tuple(self.state.values()), reward, terminated, truncated, info
+        truncated = len(self.state) > int(self.action_space.n)
+        return (
+            tuple(self.state.values()),
+            reward,
+            terminated,
+            truncated,
+            {PROBLEM_FILENAME: self.problem_filename},
+        )
 
     # pylint: disable=inconsistent-return-statements
     def render(self):  # noqa: D102

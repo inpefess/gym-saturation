@@ -22,11 +22,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from gym_saturation.envs.saturation_env import (
-    MAX_CLAUSES,
-    STATE_DIFF_UPDATED,
-    SaturationEnv,
-)
+from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
 from gym_saturation.utils import FALSEHOOD_SYMBOL
 from gym_saturation.vampire_wrapper import VampireWrapper
 
@@ -153,21 +149,20 @@ class VampireEnv(SaturationEnv):
         self._step = 0
         updated = self._parse_vampire_response(vampire_response)
         self.state = updated
-        return tuple(self.state.values()), {STATE_DIFF_UPDATED: self.state}
+        return tuple(self.state.values()), {}
 
-    def _do_deductions(self, action: np.int64) -> Dict[str, Dict[str, Any]]:
+    def _do_deductions(self, action: np.int64) -> None:
         if any(
             clause["literals"] == FALSEHOOD_SYMBOL
             for clause in self.state.values()
         ):
-            return {}
+            return
         given_clause = list(self.state.values())[action]
         updated = self._parse_vampire_response(
             self._vampire.pick_a_clause(given_clause["label"])
         )
         self._step += 1
         self.state.update(updated)
-        return updated
 
     def _parse_vampire_clause(
         self, clause_label: str, clause_text: str

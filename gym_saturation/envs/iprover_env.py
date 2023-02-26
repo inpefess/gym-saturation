@@ -30,11 +30,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from gym_saturation.envs.saturation_env import (
-    MAX_CLAUSES,
-    STATE_DIFF_UPDATED,
-    SaturationEnv,
-)
+from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
 from gym_saturation.relay_server import RelayServer, RelayTCPHandler
 from gym_saturation.utils import FALSEHOOD_SYMBOL
 
@@ -218,7 +214,7 @@ class IProverEnv(SaturationEnv):
         time.sleep(2)
         data = self._get_json_data()
         self.state = _parse_iprover_requests(data)
-        return tuple(self.state.values()), {STATE_DIFF_UPDATED: self.state}
+        return tuple(self.state.values()), {}
 
     def _get_raw_data(self) -> bytes:
         with socket.create_connection(
@@ -250,7 +246,7 @@ class IProverEnv(SaturationEnv):
                     json_data.append(parsed_json)
         return json_data[1:]
 
-    def _do_deductions(self, action: np.int64) -> Dict[str, Dict[str, Any]]:
+    def _do_deductions(self, action: np.int64) -> None:
         given_clause_label = list(self.state.keys())[action][2:]
         scores = (
             f"""{{"given_clause": {given_clause_label},"""
@@ -264,7 +260,6 @@ class IProverEnv(SaturationEnv):
         if data:
             updated = _parse_iprover_requests(data)
         self.state.update(updated)
-        return updated
 
     def close(self) -> None:
         """Stop relay server."""

@@ -27,11 +27,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import gymnasium as gym
 import numpy as np
 
-from gym_saturation.envs.saturation_env import (
-    MAX_CLAUSES,
-    STATE_DIFF_UPDATED,
-    SaturationEnv,
-)
+from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
 from gym_saturation.utils import FALSEHOOD_SYMBOL, get_tstp_proof
 
 
@@ -75,16 +71,16 @@ class SizeAgent(BaseAgent):
         """Don't compute the formulae lengths twice."""
         self._state: Dict[str, Tuple[float, int]] = {}
 
-    def update_state(self, info: Dict[str, Any]) -> None:
+    def update_state(self, observation: Tuple[Dict[str, Any], ...]) -> None:
         """
         Update the state of the agent according with the transition.
 
-        :param info: an info dict (part of environment response)
+        :param observation: a tuple of clauses
         """
         self._state.update(
             {
-                label: (len(clause["literals"]), clause["processed"])
-                for label, clause in info[STATE_DIFF_UPDATED].items()
+                clause["label"]: (len(clause["literals"]), clause["processed"])
+                for clause in observation
             }
         )
 
@@ -94,7 +90,7 @@ class SizeAgent(BaseAgent):
         reward: float,
         info: Dict[str, Any],
     ) -> int:  # noqa: D102
-        self.update_state(info)
+        self.update_state(observation)
         return min(
             (
                 (key, value[0])
@@ -161,7 +157,7 @@ class SizeAgeAgent(BaseAgent):
         if self._step_count >= self.age_steps:
             self._step_count = 0
             self._use_size = True
-        self._size_agent.update_state(info)
+        self._size_agent.update_state(observation)
         return self._age_agent.get_action(observation, reward, info)
 
 
