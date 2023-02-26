@@ -1,0 +1,5 @@
+[flake8]
+doctests = True
+per-file-ignores =
+    gym_saturation/__init__.py:F401
+    gym_saturation/envs/__init__.py:F401
