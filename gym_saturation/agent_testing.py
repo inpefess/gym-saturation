@@ -59,11 +59,11 @@ class BaseAgent(ABC):
         """
 
 
-class SizeAgent(BaseAgent):
+class WeightAgent(BaseAgent):
     """
     Agent which selects the shortest clause.
 
-    .. _size_agent:
+    .. _weight_agent:
     """
 
     def __init__(self):
@@ -119,25 +119,25 @@ class AgeAgent(BaseAgent):
         return observation["action_mask"].argmax()
 
 
-class SizeAgeAgent(BaseAgent):
+class AgeWeightAgent(BaseAgent):
     """
     Agent taking several times the smallest clause and then the oldest.
 
-    .. _size_age_agent:
+    .. _age_weight_agent:
     """
 
-    def __init__(self, size_steps: int, age_steps: int):
+    def __init__(self, age_steps: int, weight_steps: int):
         """
         Initialise two sub-agents.
 
-        :param size_steps: how many times to select the shortest clause
         :param age_steps: how many times to select the oldest clause
+        :param weight_steps: how many times to select the shortest clause
         """
-        self.size_steps = size_steps
+        self.weight_steps = weight_steps
         self.age_steps = age_steps
         self._step_count = 0
-        self._use_size = True
-        self._size_agent = SizeAgent()
+        self._use_weight = False
+        self._weight_agent = WeightAgent()
         self._age_agent = AgeAgent()
 
     def get_action(
@@ -147,15 +147,15 @@ class SizeAgeAgent(BaseAgent):
         info: Dict[str, Any],
     ) -> int:  # noqa: D102
         self._step_count += 1
-        if self._use_size:
-            if self._step_count >= self.size_steps:
+        if self._use_weight:
+            if self._step_count >= self.weight_steps:
                 self._step_count = 0
-                self._use_size = False
-            return self._size_agent.get_action(observation, reward, info)
+                self._use_weight = False
+            return self._weight_agent.get_action(observation, reward, info)
         if self._step_count >= self.age_steps:
             self._step_count = 0
-            self._use_size = True
-        self._size_agent.update_state(observation)
+            self._use_weight = True
+        self._weight_agent.update_state(observation)
         return self._age_agent.get_action(observation, reward, info)
 
 
@@ -294,7 +294,7 @@ def test_agent(args: Optional[List[str]] = None) -> None:
         max_clauses=arguments.max_clauses,
     )
     print(f"Problem file: {arguments.problem_filename}")
-    agent_testing_report(env, SizeAgeAgent(1, 1))  # type: ignore
+    agent_testing_report(env, AgeWeightAgent(1, 1))  # type: ignore
 
 
 if __name__ == "__main__":
