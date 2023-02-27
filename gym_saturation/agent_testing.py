@@ -184,7 +184,7 @@ def _proof_found_before_the_start(
 ) -> Tuple[float, bool, bool]:
     if tuple(
         1
-        for clause in env.state.values()
+        for clause in env.state.clauses
         if clause["literals"] == FALSEHOOD_SYMBOL
     ):
         return 1.0, True, False
@@ -215,7 +215,7 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> Tuple[float, bool, int]:
     >>> env = gym.make(
     ...     "Vampire-v0",
     ...     problem_list=problem_list,
-    ...     max_clauses=5,
+    ...     max_clauses=7,
     ... )
     >>> agent_testing_report(env, RandomAgent())
     Proof state size limit reached in 1 step(s).
@@ -267,7 +267,7 @@ def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
     """
     _, truncated, step_count = episode(env, agent)
     if not truncated:
-        a_proof = get_tstp_proof(tuple(env.state.values()))
+        a_proof = get_tstp_proof(tuple(env.state.clauses))
         proof_length = len(a_proof.split("\n"))
         print(
             f"Proof of length {proof_length} found "
@@ -294,11 +294,6 @@ def test_agent(args: Optional[List[str]] = None) -> None:
     ...         "resources", "TPTP-mock", "Problems", "TST", "TST00*-1.p"
     ...     ))
     ... )))
-    >>> test_agent(["--problem_filename", problem_filenames[0]])
-    Problem file: ...TST001-1.p
-    Proof of length 6 found in 0 step(s):
-    ...
-    cnf(..., lemma, $false, inference(subsumption_resolution, [], [..., ...])).
     >>> for problem_filename in problem_filenames:
     ...     test_agent(["--problem_filename", problem_filename])
     Problem file: ...TST001-1.p

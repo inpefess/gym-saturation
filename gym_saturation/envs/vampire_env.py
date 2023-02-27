@@ -104,33 +104,24 @@ class VampireEnv(SaturationEnv):
         self._vampire = VampireWrapper(vampire_binary_path)
         self._step = 0
 
-    def _update_processed(
-        self, clause_label: str, updated: Dict[str, Dict[str, Any]]
-    ) -> None:
-        if clause_label in updated:
-            updated[clause_label].update({"processed": 1})
-        else:
-            self.state[clause_label].update({"processed": 1})
-            updated.update({clause_label: self.state[clause_label]})
-
     def _parse_vampire_response(
         self, vampire_response: Tuple[Tuple[str, str, str], ...]
-    ) -> Dict[str, Dict[str, Any]]:
-        updated: Dict[str, Dict[str, Any]] = {}
+    ) -> None:
         for response_type, clause_label, clause_text in vampire_response:
             if response_type in {"new", "final", "input", "fn def discovered"}:
-                updated[clause_label] = self._parse_vampire_clause(
-                    clause_label, clause_text
+                self.state.add_clause(
+                    self._parse_vampire_clause(clause_label, clause_text)
                 )
             elif response_type in {
                 "active",
                 "forward reduce",
                 "backward reduce",
             }:
-                self._update_processed(clause_label, updated)
-            elif response_type not in {"passive", "new propositional"}:
+                self.state.set_action_mask_by_label(clause_label, 0.0)
+            elif response_type == "passive":
+                self.state.set_action_mask_by_label(clause_label, 1.0)
+            elif response_type != "new propositional":
                 raise ValueError("Unexpected response type: ", response_type)
-        return updated
 
     def reset(
         self,
@@ -145,24 +136,20 @@ class VampireEnv(SaturationEnv):
         vampire_response = self._vampire.start(
             self.problem_filename, tptp_folder
         )
-        self.state = {}
         self._step = 0
-        updated = self._parse_vampire_response(vampire_response)
-        self.state = updated
-        return tuple(self.state.values()), {}
+        self._parse_vampire_response(vampire_response)
+        return tuple(self.state.clauses), {}
 
     def _do_deductions(self, action: np.int64) -> None:
         if any(
             clause["literals"] == FALSEHOOD_SYMBOL
-            for clause in self.state.values()
+            for clause in self.state.clauses
         ):
             return
-        given_clause = list(self.state.values())[action]
-        updated = self._parse_vampire_response(
-            self._vampire.pick_a_clause(given_clause["label"])
+        self._parse_vampire_response(
+            self._vampire.pick_a_clause(self.state.clause_labels[action])
         )
         self._step += 1
-        self.state.update(updated)
 
     def _parse_vampire_clause(
         self, clause_label: str, clause_text: str
@@ -180,6 +167,5 @@ class VampireEnv(SaturationEnv):
             "role": "lemma",
             "inference_rule": inference_rule,
             "inference_parents": inference_parents,
-            "processed": 0,
             "birth_step": self._step,
         }

@@ -25,6 +25,7 @@ import numpy as np
 from gymnasium import Env, spaces
 from gymnasium.spaces.text import alphanumeric
 
+from gym_saturation.proof_state import ProofState
 from gym_saturation.utils import FALSEHOOD_SYMBOL, pretty_print
 
 PROBLEM_FILENAME = "problem_filename"
@@ -58,7 +59,6 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
     ...     "inference_rule": "dummy",
     ...     "inference_parents": (),
     ...     "birth_step": 0,
-    ...     "processed": 0
     ... }
     >>> class MySaturationEnv(SaturationEnv):
     ...     def reset(
@@ -76,20 +76,23 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
     ...         three.update({"literals": "p(Z)", "label": "three"})
     ...         four = base_clause.copy()
     ...         four.update({"literals": "~p(X)", "label": "four"})
-    ...         self.state = {"one": one, "two": two, "three": three,
-    ...             "four": four}
-    ...         return tuple(self.state.values()), {}
+    ...         self.state.clauses = [one, two, three, four]
+    ...         self.state.clause_labels = ["one", "two", "three", "four"]
+    ...         self.state.action_mask = np.ones((5, 1))
+    ...         self.state.action_mask[4] = 0.0
+    ...         return tuple(self.state.clauses), {}
     ...
     ...     def _do_deductions(self, action: str) -> None:
     ...         if action == 3:
-    ...             self.state["falsehood"] = {
+    ...             self.state.clauses.append({
     ...                 "literals": FALSEHOOD_SYMBOL,
     ...                 "role": "lemma",
     ...                 "label": "falsehood",
     ...                 "inference_rule": "dummy",
     ...                 "inference_parents": ("four",),
-    ...                 "processed": 0
-    ...             }
+    ...             })
+    ...             self.state.clause_labels.append("falsehood")
+    ...             self.state.action_mask[4] = 1.0
     ...
     >>> env = MySaturationEnv(problem_list)
     >>> len(env.reset()[0])
@@ -197,7 +200,6 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
                     spaces.Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE)
                 ),
                 "birth_step": spaces.Discrete(1000),
-                "processed": spaces.Discrete(2),
             }
         )
     )
@@ -216,7 +218,7 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         """
         super().__init__()
         self.problem_list = problem_list
-        self.state: Dict[str, Dict[str, Any]] = {}
+        self.state = ProofState([], [], np.zeros((max_clauses, 1)))
         self.action_space = spaces.Discrete(max_clauses)
         self.task: Optional[List[str]] = None
         self.problem_filename: str = "/dev/null"
@@ -241,6 +243,7 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         random.seed(seed)
         if not self.task:
             self.set_task(self.problem_list)
+        self.state = ProofState([], [], np.zeros_like(self.state.action_mask))
         self.problem_filename = random.choice(self.get_task())
         return (), {}
 
@@ -272,33 +275,29 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         :raises ValueError: if the ``action`` identifies an already processed
             clause
         """
-        if (
-            action >= len(self.state)
-            or list(self.state.values())[action]["processed"] == 1
-        ):
+        if self.state.action_mask[action] == 0.0:
             raise ValueError(f"action {action} is not valid")
-        old_state_size = len(self.state)
+        old_state_size = len(self.state.clauses)
         self._do_deductions(action)
         reward, terminated = (
             (1.0, True)
             if max(
                 clause["literals"] == FALSEHOOD_SYMBOL
-                for clause in self.state.values()
+                for clause in self.state.clauses
             )
             else (
                 float(
-                    (old_state_size - len(self.state)) / self.action_space.n
+                    (old_state_size - len(self.state.clauses))
+                    / self.action_space.n
                 ),
                 False,
             )
         )
-        self.state[list(self.state.keys())[action]]["processed"] = 1
-        terminated |= 1 == min(
-            clause["processed"] for clause in self.state.values()
-        )
-        truncated = len(self.state) > int(self.action_space.n)
+        self.state.action_mask[action] = 0.0
+        terminated |= self.state.action_mask.max() == 0.0
+        truncated = len(self.state.clauses) > int(self.action_space.n)
         return (
-            tuple(self.state.values()),
+            tuple(self.state.clauses),
             reward,
             terminated,
             truncated,
@@ -310,7 +309,7 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         tptp_string = "\n".join(
             map(
                 pretty_print,
-                self.state.values(),
+                self.state.clauses,
             )
         )
         if self.render_mode == "ansi":

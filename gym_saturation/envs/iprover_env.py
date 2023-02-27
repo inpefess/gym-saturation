@@ -71,72 +71,6 @@ async def _iprover_start(
     )
 
 
-def _parse_batch_clauses(
-    batch_clauses: List[Dict[str, Any]]
-) -> Dict[str, Dict[str, Any]]:
-    updated: Dict[str, Dict[str, Any]] = {}
-    for dict_clause in batch_clauses:
-        raw_clause = dict_clause["clause"].replace("\n", "").replace(" ", "")
-        try:
-            label, literals, inference_rule, inference_parents = re.findall(
-                r"cnf\((\w+),\w+,(.*),inference\((.*),.*,\[(.*)\]\)\)\.",
-                raw_clause,
-            )[0]
-        except IndexError:
-            label, literals = re.findall(
-                r"cnf\((\w+),\w+,(.*),file\(.*\)\)\.",
-                raw_clause,
-            )[0]
-            inference_rule, inference_parents = "input", None
-        changed_clause = {
-            "literals": literals,
-            "label": label,
-            "role": "lemma",
-            "birth_step": dict_clause["clause_features"]["born"] - 1,
-            "inference_rule": inference_rule,
-            "inference_parents": tuple(inference_parents.split(","))
-            if inference_parents is not None
-            else (),
-            "processed": 0,
-        }
-        updated[label] = changed_clause
-    return updated
-
-
-def _parse_szs_status(szs_status: str) -> Dict[str, Dict[str, Any]]:
-    status_code = re.findall(
-        r"\% SZS status (\w+) for .+\.p",
-        szs_status.replace("\n", ""),
-    )[0]
-    if status_code == "Unsatisfiable":
-        dummy_clause = {
-            "label": "dummy",
-            "literals": FALSEHOOD_SYMBOL,
-            "inference_rule": "dummy",
-            "inference_parents": (),
-            "role": "lemma",
-            "processed": 0,
-        }
-        return {"dummy": dummy_clause}
-    raise ValueError(f"unexpected status: {status_code}")
-
-
-def _parse_iprover_requests(
-    iprover_requests: List[Dict[str, Any]]
-) -> Dict[str, Dict[str, Any]]:
-    state_update: Dict[str, Dict[str, Any]] = {}
-    for iprover_request in iprover_requests:
-        if "clauses" in iprover_request:
-            state_update.update(
-                _parse_batch_clauses(iprover_request["clauses"])
-            )
-        if "szs_status" in iprover_request:
-            state_update.update(
-                _parse_szs_status(iprover_request["szs_status"])
-            )
-    return state_update
-
-
 class IProverEnv(SaturationEnv):
     """
     An RL environment around iProver.
@@ -199,6 +133,63 @@ class IProverEnv(SaturationEnv):
         self.relay_server_thread.daemon = True
         self.relay_server_thread.start()
 
+    def _parse_batch_clauses(
+        self, batch_clauses: List[Dict[str, Any]]
+    ) -> None:
+        for dict_clause in batch_clauses:
+            raw_clause = (
+                dict_clause["clause"].replace("\n", "").replace(" ", "")
+            )
+            try:
+                (
+                    label,
+                    literals,
+                    inference_rule,
+                    inference_parents,
+                ) = re.findall(
+                    r"cnf\((\w+),\w+,(.*),inference\((.*),.*,\[(.*)\]\)\)\.",
+                    raw_clause,
+                )[
+                    0
+                ]
+            except IndexError:
+                label, literals = re.findall(
+                    r"cnf\((\w+),\w+,(.*),file\(.*\)\)\.",
+                    raw_clause,
+                )[0]
+                inference_rule, inference_parents = "input", None
+            self.state.add_clause(
+                {
+                    "literals": literals,
+                    "label": label,
+                    "role": "lemma",
+                    "birth_step": dict_clause["clause_features"]["born"] - 1,
+                    "inference_rule": inference_rule,
+                    "inference_parents": tuple(inference_parents.split(","))
+                    if inference_parents is not None
+                    else (),
+                }
+            )
+            self.state.set_action_mask_by_label(label, 1.0)
+
+    def _parse_szs_status(self, szs_status: str) -> None:
+        status_code = re.findall(
+            r"\% SZS status (\w+) for .+\.p",
+            szs_status.replace("\n", ""),
+        )[0]
+        if status_code == "Unsatisfiable":
+            self.state.add_clause(
+                {
+                    "label": "dummy",
+                    "literals": FALSEHOOD_SYMBOL,
+                    "inference_rule": "dummy",
+                    "inference_parents": (),
+                    "role": "lemma",
+                }
+            )
+        else:
+            raise ValueError(f"unexpected status: {status_code}")
+
     def reset(
         self,
         *,
@@ -213,8 +204,8 @@ class IProverEnv(SaturationEnv):
         )
         time.sleep(2)
         data = self._get_json_data()
-        self.state = _parse_iprover_requests(data)
-        return tuple(self.state.values()), {}
+        self._parse_iprover_requests(data)
+        return tuple(self.state.clauses), {}
 
     def _get_raw_data(self) -> bytes:
         with socket.create_connection(
@@ -246,8 +237,17 @@ class IProverEnv(SaturationEnv):
                     json_data.append(parsed_json)
         return json_data[1:]
 
+    def _parse_iprover_requests(
+        self, iprover_requests: List[Dict[str, Any]]
+    ) -> None:
+        for iprover_request in iprover_requests:
+            if "clauses" in iprover_request:
+                self._parse_batch_clauses(iprover_request["clauses"])
+            if "szs_status" in iprover_request:
+                self._parse_szs_status(iprover_request["szs_status"])
+
     def _do_deductions(self, action: np.int64) -> None:
-        given_clause_label = list(self.state.keys())[action][2:]
+        given_clause_label = self.state.clause_labels[action][2:]
         scores = (
             f"""{{"given_clause": {given_clause_label},"""
             + """"passive_is_empty": false}\n\x00\n"""
@@ -258,8 +258,7 @@ class IProverEnv(SaturationEnv):
             tcp_socket.sendall(scores.encode("utf8"))
         data = self._get_json_data()
         if data:
-            updated = _parse_iprover_requests(data)
-        self.state.update(updated)
+            self._parse_iprover_requests(data)
 
     def close(self) -> None:
         """Stop relay server."""
