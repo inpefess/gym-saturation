@@ -273,7 +273,7 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
             clause
         """
         if (
-            action > len(self.state)
+            action >= len(self.state)
             or list(self.state.values())[action]["processed"] == 1
         ):
             raise ValueError(f"action {action} is not valid")
