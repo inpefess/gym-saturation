@@ -77,3 +77,5 @@ TCP
 localhost
 iprover
 profiler
+np
+ndarray
