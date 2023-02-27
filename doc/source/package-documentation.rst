@@ -53,3 +53,5 @@ Environment Wrappers
 .. automodule:: gym_saturation.wrappers.ast2vec_wrapper
    :members:
    :special-members: __init__
+.. automodule:: gym_saturation.wrappers.age_weight_bandit
+   :members:
