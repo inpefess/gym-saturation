@@ -159,11 +159,11 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
         )
 
     @abstractmethod
-    def clause_embedder(self, clause: Dict[str, Any]) -> np.ndarray:
+    def clause_embedder(self, literals: str) -> np.ndarray:
         """
         Embed the clause.
 
-        :param clause: a clause to embed
+        :param literals: a TPTP clause literals to embed
         :returns: an embedding vector
         """
         raise NotImplementedError  # pragma: no cover
