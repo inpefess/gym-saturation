@@ -22,7 +22,9 @@ import os
 import pstats
 from pstats import SortKey
 
-from gym_saturation.agent_testing import test_agent
+import gymnasium as gym
+
+from gym_saturation.agent_testing import RandomAgent, agent_testing_report
 
 
 def run_profiler() -> None:
@@ -38,7 +40,12 @@ def run_profiler() -> None:
         "GRP001-1.p",
     )
     for _ in range(10):
-        test_agent(["--problem_filename", filename, "--max_clauses", "1000"])
+        agent_testing_report(
+            env=gym.make(
+                "Vampire-v0", max_clauses=1000, problem_list=[filename]
+            ),  # type: ignore
+            agent=RandomAgent(),
+        )
     profiler.disable()
     profiler_report = io.StringIO()
     profiler_statistics = pstats.Stats(
