@@ -202,7 +202,10 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         super().__init__()
         self.problem_list = problem_list
         self.state = ProofState(
-            [], [], np.zeros((max_clauses,), dtype=np.float32)
+            clauses=[],
+            clause_labels=[],
+            action_mask=np.zeros((max_clauses,), dtype=np.float32),
+            step_number=-1,
         )
         self.action_space = spaces.Discrete(max_clauses)
         self.observation_space = spaces.Dict(
@@ -259,7 +262,12 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         random.seed(seed)
         if not self.task:
             self.set_task(self.problem_list)
-        self.state = ProofState([], [], np.zeros_like(self.state.action_mask))
+        self.state = ProofState(
+            clauses=[],
+            clause_labels=[],
+            action_mask=np.zeros_like(self.state.action_mask),
+            step_number=0,
+        )
         self.problem_filename = random.choice(self.get_task())
         return {
             REAL_OBS: self.state.clauses,
@@ -297,6 +305,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         if self.state.action_mask[action] == 0.0:
             raise ValueError(f"action {action} is not valid")
         old_state_size = len(self.state.clauses)
+        self.state.step_number += 1
         self._do_deductions(action)
         reward, terminated = (
             (1.0, True)

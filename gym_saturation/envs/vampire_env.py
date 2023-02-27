@@ -108,7 +108,6 @@ class VampireEnv(SaturationEnv):
         """
         super().__init__(problem_list, max_clauses, render_mode)
         self._vampire = VampireWrapper(vampire_binary_path)
-        self._step = 0
 
     def _parse_vampire_response(
         self, vampire_response: Tuple[Tuple[str, str, str], ...]
@@ -142,7 +141,6 @@ class VampireEnv(SaturationEnv):
         vampire_response = self._vampire.start(
             self.problem_filename, tptp_folder
         )
-        self._step = 0
         self._parse_vampire_response(vampire_response)
         return {
             REAL_OBS: self.state.clauses,
@@ -158,7 +156,6 @@ class VampireEnv(SaturationEnv):
         self._parse_vampire_response(
             self._vampire.pick_a_clause(self.state.clause_labels[action])
         )
-        self._step += 1
 
     def _parse_vampire_clause(
         self, clause_label: str, clause_text: str
@@ -176,5 +173,5 @@ class VampireEnv(SaturationEnv):
             "role": "lemma",
             "inference_rule": inference_rule,
             "inference_parents": inference_parents,
-            "birth_step": self._step,
+            "birth_step": self.state.step_number,
         }

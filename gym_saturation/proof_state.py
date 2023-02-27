@@ -31,11 +31,13 @@ class ProofState:
     :param clauses: clauses (both processed and not) for access by index
     :param clause_labels: string labels (another way to address clauses)
     :param action_mask: a ``numpy`` array to separated processed from not
+    :param step_number: current step number. ``-1`` before reset, ``0`` after
     """
 
     clauses: List[Dict[str, Any]]
     clause_labels: List[str]
     action_mask: np.ndarray
+    step_number: int
 
     def add_clause(self, clause: Dict[str, Any]) -> None:
         """
