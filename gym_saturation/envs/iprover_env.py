@@ -30,7 +30,13 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
+from gym_saturation.envs.saturation_env import (
+    ACTION_MASK,
+    MAX_CLAUSES,
+    PROBLEM_FILENAME,
+    REAL_OBS,
+    SaturationEnv,
+)
 from gym_saturation.relay_server import RelayServer, RelayTCPHandler
 from gym_saturation.utils import FALSEHOOD_SYMBOL
 
@@ -195,7 +201,7 @@ class IProverEnv(SaturationEnv):
         *,
         seed: Optional[int] = None,
         options: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:  # noqa: D102
+    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
         asyncio.run(
             _iprover_start(
@@ -205,7 +211,10 @@ class IProverEnv(SaturationEnv):
         time.sleep(2)
         data = self._get_json_data()
         self._parse_iprover_requests(data)
-        return tuple(self.state.clauses), {}
+        return {
+            REAL_OBS: self.state.clauses,
+            ACTION_MASK: self.state.action_mask,
+        }, {PROBLEM_FILENAME: self.problem_filename}
 
     def _get_raw_data(self) -> bytes:
         with socket.create_connection(

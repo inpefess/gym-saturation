@@ -31,9 +31,11 @@ from gym_saturation.utils import FALSEHOOD_SYMBOL, pretty_print
 PROBLEM_FILENAME = "problem_filename"
 MAX_CLAUSES = 100000
 ALPHANUMERIC_WITH_UNDERSCORE = "".join(alphanumeric) + "_"
+REAL_OBS = "real_obs"
+ACTION_MASK = "action_mask"
 
 
-class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
+class SaturationEnv(Env[Dict[str, Any], np.int64]):
     """
     Saturation algorithm defined in a Reinforcement Learning friendly way.
 
@@ -78,7 +80,7 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
     ...         four.update({"literals": "~p(X)", "label": "four"})
     ...         self.state.clauses = [one, two, three, four]
     ...         self.state.clause_labels = ["one", "two", "three", "four"]
-    ...         self.state.action_mask = np.ones((5, 1))
+    ...         self.state.action_mask = np.ones((5,))
     ...         self.state.action_mask[4] = 0.0
     ...         return tuple(self.state.clauses), {}
     ...
@@ -149,14 +151,14 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
     for validation purposes)
 
     >>> from gym_saturation.utils import get_tstp_proof
-    >>> print(get_tstp_proof(observation))
+    >>> print(get_tstp_proof(observation["real_obs"]))
     cnf(four, lemma, ~p(X), inference(dummy, [], [])).
     cnf(falsehood, lemma, $false, inference(dummy, [], [four])).
 
     One can also filter actions relevant to a particular goal:
 
     >>> from gym_saturation.utils import get_positive_actions
-    >>> get_positive_actions(observation)
+    >>> get_positive_actions(observation["real_obs"])
     (3, 4)
 
     the total number of clauses in the state is limited by the ``max_clauses``
@@ -183,26 +185,7 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
     metadata = {"render_modes": ["ansi", "human"], "render_fps": 1}
     reward_range = (0, 1)
     action_space: spaces.Discrete
-    observation_space = spaces.Sequence(
-        spaces.Dict(
-            {
-                "label": spaces.Text(
-                    256, charset=ALPHANUMERIC_WITH_UNDERSCORE
-                ),
-                "role": spaces.Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE),
-                "literals": spaces.Text(
-                    4000, charset=ALPHANUMERIC_WITH_UNDERSCORE + "(), |~=!$"
-                ),
-                "inference_rule": spaces.Text(
-                    256, charset=ALPHANUMERIC_WITH_UNDERSCORE
-                ),
-                "inference_parents": spaces.Sequence(
-                    spaces.Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE)
-                ),
-                "birth_step": spaces.Discrete(1000),
-            }
-        )
-    )
+    observation_space: spaces.Dict
 
     def __init__(
         self,
@@ -218,8 +201,41 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         """
         super().__init__()
         self.problem_list = problem_list
-        self.state = ProofState([], [], np.zeros((max_clauses, 1)))
+        self.state = ProofState(
+            [], [], np.zeros((max_clauses,), dtype=np.float32)
+        )
         self.action_space = spaces.Discrete(max_clauses)
+        self.observation_space = spaces.Dict(
+            {
+                REAL_OBS: spaces.Sequence(
+                    spaces.Dict(
+                        {
+                            "label": spaces.Text(
+                                256, charset=ALPHANUMERIC_WITH_UNDERSCORE
+                            ),
+                            "role": spaces.Text(
+                                256, charset=ALPHANUMERIC_WITH_UNDERSCORE
+                            ),
+                            "literals": spaces.Text(
+                                4000,
+                                charset=ALPHANUMERIC_WITH_UNDERSCORE
+                                + "(), |~=!$",
+                            ),
+                            "inference_rule": spaces.Text(
+                                256, charset=ALPHANUMERIC_WITH_UNDERSCORE
+                            ),
+                            "inference_parents": spaces.Sequence(
+                                spaces.Text(
+                                    256, charset=ALPHANUMERIC_WITH_UNDERSCORE
+                                )
+                            ),
+                            "birth_step": spaces.Discrete(1000),
+                        }
+                    )
+                ),
+                ACTION_MASK: spaces.Box(0, 1, (max_clauses,)),
+            }
+        )
         self.task: Optional[List[str]] = None
         self.problem_filename: str = "/dev/null"
         self.render_mode = self._check_render_mode(render_mode)
@@ -238,14 +254,17 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         *,
         seed: Optional[int] = None,
         options: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:  # noqa: D102
+    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
         random.seed(seed)
         if not self.task:
             self.set_task(self.problem_list)
         self.state = ProofState([], [], np.zeros_like(self.state.action_mask))
         self.problem_filename = random.choice(self.get_task())
-        return (), {}
+        return {
+            REAL_OBS: self.state.clauses,
+            ACTION_MASK: self.state.action_mask,
+        }, {PROBLEM_FILENAME: self.problem_filename}
 
     @abstractmethod
     def _do_deductions(self, action: np.int64) -> None:
@@ -253,7 +272,7 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
 
     def step(
         self, action: np.int64
-    ) -> Tuple[Tuple[Dict[str, Any], ...], float, bool, bool, Dict[str, Any]]:
+    ) -> Tuple[Dict[str, Any], float, bool, bool, Dict[str, Any]]:
         # noqa: D301
         """
         Run one time-step of the environment's dynamics.
@@ -297,7 +316,10 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         terminated |= self.state.action_mask.max() == 0.0
         truncated = len(self.state.clauses) > int(self.action_space.n)
         return (
-            tuple(self.state.clauses),
+            {
+                REAL_OBS: self.state.clauses,
+                ACTION_MASK: self.state.action_mask,
+            },
             reward,
             terminated,
             truncated,

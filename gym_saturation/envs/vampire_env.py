@@ -22,7 +22,13 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
+from gym_saturation.envs.saturation_env import (
+    ACTION_MASK,
+    MAX_CLAUSES,
+    PROBLEM_FILENAME,
+    REAL_OBS,
+    SaturationEnv,
+)
 from gym_saturation.utils import FALSEHOOD_SYMBOL
 from gym_saturation.vampire_wrapper import VampireWrapper
 
@@ -128,7 +134,7 @@ class VampireEnv(SaturationEnv):
         *,
         seed: Optional[int] = None,
         options: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:  # noqa: D102
+    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
         tptp_folder = os.path.join(
             os.path.dirname(self.problem_filename), "..", ".."
@@ -138,7 +144,10 @@ class VampireEnv(SaturationEnv):
         )
         self._step = 0
         self._parse_vampire_response(vampire_response)
-        return tuple(self.state.clauses), {}
+        return {
+            REAL_OBS: self.state.clauses,
+            ACTION_MASK: self.state.action_mask,
+        }, {PROBLEM_FILENAME: self.problem_filename}
 
     def _do_deductions(self, action: np.int64) -> None:
         if any(

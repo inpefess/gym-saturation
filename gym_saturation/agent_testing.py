@@ -18,7 +18,6 @@ Agent Testing
 ==============
 This module is an example of testing your own trained agent.
 """
-import random
 from abc import ABC, abstractmethod
 from argparse import ArgumentParser, Namespace
 from operator import itemgetter
@@ -44,7 +43,7 @@ class BaseAgent(ABC):
     @abstractmethod
     def get_action(
         self,
-        observation: Tuple[Dict[str, Any], ...],
+        observation: Dict[str, Any],
         reward: float,
         info: Dict[str, Any],
     ) -> int:
@@ -71,22 +70,25 @@ class SizeAgent(BaseAgent):
         """Don't compute the formulae lengths twice."""
         self._state: Dict[str, Tuple[float, int]] = {}
 
-    def update_state(self, observation: Tuple[Dict[str, Any], ...]) -> None:
+    def update_state(self, observation: Dict[str, Any]) -> None:
         """
         Update the state of the agent according with the transition.
 
-        :param observation: a tuple of clauses
+        :param observation: observation returned by prover
         """
         self._state.update(
             {
-                clause["label"]: (len(clause["literals"]), clause["processed"])
-                for clause in observation
+                clause["label"]: (len(clause["literals"]), action_mask)
+                for clause, action_mask in zip(
+                    observation["real_obs"],
+                    observation["action_mask"].tolist(),
+                )
             }
         )
 
     def get_action(
         self,
-        observation: Tuple[Dict[str, Any], ...],
+        observation: Dict[str, Any],
         reward: float,
         info: Dict[str, Any],
     ) -> int:  # noqa: D102
@@ -95,7 +97,7 @@ class SizeAgent(BaseAgent):
             (
                 (key, value[0])
                 for key, value in enumerate(self.state.values())
-                if value[1] == 0
+                if value[1] == 1.0
             ),
             key=itemgetter(1),
         )[0]
@@ -110,15 +112,11 @@ class AgeAgent(BaseAgent):
 
     def get_action(
         self,
-        observation: Tuple[Dict[str, Any], ...],
+        observation: Dict[str, Any],
         reward: float,
         info: Dict[str, Any],
     ) -> int:  # noqa: D102
-        return min(
-            (i, clause)
-            for i, clause in enumerate(observation)
-            if clause["processed"] == 0
-        )[0]
+        return observation["action_mask"].argmax()
 
 
 class SizeAgeAgent(BaseAgent):
@@ -144,7 +142,7 @@ class SizeAgeAgent(BaseAgent):
 
     def get_action(
         self,
-        observation: Tuple[Dict[str, Any], ...],
+        observation: Dict[str, Any],
         reward: float,
         info: Dict[str, Any],
     ) -> int:  # noqa: D102
@@ -166,17 +164,11 @@ class RandomAgent(BaseAgent):
 
     def get_action(
         self,
-        observation: Tuple[Dict[str, Any], ...],
+        observation: Dict[str, Any],
         reward: float,
         info: Dict[str, Any],
     ) -> int:  # noqa: D102
-        return random.choice(
-            [
-                key
-                for key, clause in enumerate(observation)
-                if clause["processed"] == 0
-            ]
-        )
+        return np.random.choice(np.nonzero(observation["action_mask"])[0])
 
 
 def _proof_found_before_the_start(
@@ -211,7 +203,6 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> Tuple[float, bool, int]:
     ...     .joinpath(os.path.join(
     ...         "resources", "TPTP-mock", "Problems", "TST"
     ...     )), "TST002-1.p")))
-    >>> random.seed(0)
     >>> env = gym.make(
     ...     "Vampire-v0",
     ...     problem_list=problem_list,
