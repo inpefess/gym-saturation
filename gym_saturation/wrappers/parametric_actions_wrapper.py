@@ -126,7 +126,11 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
             for clause in observation[REAL_OBS][self.embedded_clauses_cnt :]
         ]
         new_clauses_count = len(new_clauses)
-        if new_clauses_count > 0:
+        if (
+            new_clauses_count > 0
+            and self.embedded_clauses_cnt + new_clauses_count
+            <= self.clause_embeddings.shape[0]
+        ):
             self.clause_embeddings[
                 self.embedded_clauses_cnt : self.embedded_clauses_cnt
                 + new_clauses_count,
