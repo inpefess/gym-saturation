@@ -40,23 +40,16 @@ class VampireEnv(SaturationEnv):
     This class has the same API as SaturationEnv but uses another back-end.
     Here we have only a simple smoke test.
 
-    >>> import sys
-    >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
-    ...     from importlib.resources import files
-    ... else:
-    ...     from importlib_resources import files
-    >>> vampire_binary = files("gym_saturation").joinpath(
-    ...     os.path.join("resources", "vampire-mock")
-    ... )
+    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
+    >>> vampire_binary = os.path.join(tptp_folder, "..", "vampire-mock")
     >>> vampire_env = VampireEnv(["test"], vampire_binary_path=vampire_binary)
     >>> vampire_env.reset()
     Traceback (most recent call last):
      ...
     ValueError: ('Unexpected response type: ', 'who could expect that?')
     >>> from glob import glob
-    >>> set_problems = sorted(glob(os.path.join(files("gym_saturation")
-    ...     .joinpath(os.path.join("resources", "TPTP-mock", "Problems")),
-    ... "SET", "*-*.p")))
+    >>> set_problems = sorted(glob(os.path.join(tptp_folder, "Problems",
+    ...     "SET", "*-*.p")))
     >>> vampire_env = VampireEnv(set_problems)
     >>> observation, info = vampire_env.reset()
     >>> for action in [0, 3, 6, 7, 8, 9, 10]:
@@ -67,9 +60,7 @@ class VampireEnv(SaturationEnv):
 
     test of a problem which is solver immediately after `reset`
 
-    >>> problems = sorted(glob(os.path.join(files("gym_saturation").joinpath(
-    ...     os.path.join("resources", "TPTP-mock", "Problems")
-    ... ), "TST", "TST004-1.p")))
+    >>> problems = [os.path.join(tptp_folder, "Problems", "TST", "TST004-1.p")]
     >>> vampire_env = VampireEnv(problems)
     >>> observation, info = vampire_env.reset()
     >>> obs, reward, terminated, truncated, info = vampire_env.step(0)

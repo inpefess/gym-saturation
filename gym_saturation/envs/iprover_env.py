@@ -81,15 +81,10 @@ class IProverEnv(SaturationEnv):
     """
     An RL environment around iProver.
 
-    >>> import sys
-    >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
-    ...     from importlib.resources import files
-    ... else:
-    ...     from importlib_resources import files
+    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
     >>> from glob import glob
-    >>> problems = sorted(glob(os.path.join(files("gym_saturation").joinpath(
-    ...     os.path.join("resources", "TPTP-mock", "Problems")
-    ... ), "SET", "*-*.p")))
+    >>> problems = sorted(glob(os.path.join(tptp_folder, "Problems", "SET",
+    ...     "*-*.p")))
     >>> iprover_env = IProverEnv(problems)
     >>> observation, info = iprover_env.reset()
     >>> for action in [0, 1, 2, 4, 8, 9, 10]:

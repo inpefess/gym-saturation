@@ -39,15 +39,10 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
     It defines the clauses as old if their order numbers are small than the
     previous step maximum.
 
-    >>> import sys
-    >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
-    ...     from importlib.resources import files
-    ... else:
-    ...     from importlib_resources import files
+    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
     >>> import os
-    >>> problem_list = [os.path.join(files("gym_saturation")
-    ...     .joinpath(os.path.join("resources", "TPTP-mock", "Problems")),
-    ... "TST", "TST003-1.p")]
+    >>> problem_list = [os.path.join(tptp_folder, "Problems", "TST",
+    ...     "TST003-1.p")]
     >>> class ConstantClauseWeight(ParamtericActionsWrapper):
     ...     def clause_embedder(self, clause: Dict[str, Any]) -> np.ndarray:
     ...         return np.ones(

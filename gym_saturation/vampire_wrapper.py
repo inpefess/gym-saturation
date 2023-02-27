@@ -28,15 +28,8 @@ class VampireWrapper:
 
     .. _vampire-wrapper :
 
-    >>> import sys
-    >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
-    ...     from importlib.resources import files
-    ... else:
-    ...     from importlib_resources import files
+    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
     >>> import os
-    >>> tptp_folder = files("gym_saturation").joinpath(
-    ...     os.path.join("resources", "TPTP-mock")
-    ... )
     >>> tptp_problem = os.path.join(
     ...     tptp_folder, "Problems", "TST", "TST003-1.p"
     ... )

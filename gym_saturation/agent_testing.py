@@ -192,17 +192,9 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> Tuple[float, bool, int]:
     >>> test_agent_output = "test_agent_output"
     >>> shutil.rmtree(test_agent_output, ignore_errors=True)
     >>> os.mkdir(test_agent_output)
-    >>> import sys
-    >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
-    ...     from importlib.resources import files
-    ... else:
-    ...     from importlib_resources import files
-    >>> from glob import glob
-    >>> problem_list = sorted(glob(os.path.join(
-    ...     files("gym_saturation")
-    ...     .joinpath(os.path.join(
-    ...         "resources", "TPTP-mock", "Problems", "TST"
-    ...     )), "TST002-1.p")))
+    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
+    >>> problem_list = [os.path.join(tptp_folder,
+    ...     "Problems", "TST", "TST002-1.p")]
     >>> env = gym.make(
     ...     "Vampire-v0",
     ...     problem_list=problem_list,
@@ -272,19 +264,11 @@ def test_agent(args: Optional[List[str]] = None) -> None:
     """
     The main function for this module.
 
-    >>> import sys
-    >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
-    ...     from importlib.resources import files
-    ... else:
-    ...     from importlib_resources import files
+    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
     >>> import os
     >>> from glob import glob
-    >>> problem_filenames = sorted(glob(os.path.join(
-    ...     files("gym_saturation")
-    ...     .joinpath(os.path.join(
-    ...         "resources", "TPTP-mock", "Problems", "TST", "TST00*-1.p"
-    ...     ))
-    ... )))
+    >>> problem_filenames = sorted(glob(os.path.join(tptp_folder, "Problems",
+    ...     "TST", "TST00*-1.p")))
     >>> for problem_filename in problem_filenames:
     ...     test_agent(["--problem_filename", problem_filename])
     Problem file: ...TST001-1.p
