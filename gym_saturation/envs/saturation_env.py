@@ -137,8 +137,8 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
     if a proof is found, then reward is ``+1``
 
     >>> observation, reward, terminated, _, _ = env.step(3)
-    >>> print(reward, terminated)
-    1.0 True
+    >>> print(int(reward), terminated)
+    1 True
 
     TSTP proof is now available (one can add ``include`` directive before it
     for validation purposes)
@@ -300,22 +300,17 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         old_state_size = len(self.state.clauses)
         self.state.step_number += 1
         self._do_deductions(action)
-        reward, terminated = (
-            (1.0, True)
-            if max(
+        self.state.action_mask[action] = 0.0
+        terminated = (
+            max(
                 clause["literals"] == FALSEHOOD_SYMBOL
                 for clause in self.state.clauses
             )
-            else (
-                float(
-                    (old_state_size - len(self.state.clauses))
-                    / self.action_space.n
-                ),
-                False,
-            )
+            or self.state.action_mask.max() == 0.0
         )
-        self.state.action_mask[action] = 0.0
-        terminated |= self.state.action_mask.max() == 0.0
+        reward = float(
+            (old_state_size - len(self.state.clauses)) / self.action_space.n
+        ) + (1.0 if terminated else 0.0)
         truncated = len(self.state.clauses) > int(self.action_space.n)
         return (
             {

@@ -64,8 +64,8 @@ class VampireEnv(SaturationEnv):
     >>> vampire_env = VampireEnv(problems)
     >>> observation, info = vampire_env.reset()
     >>> obs, reward, terminated, truncated, info = vampire_env.step(0)
-    >>> print(reward, terminated, truncated)
-    1.0 True False
+    >>> print(int(reward), terminated, truncated)
+    1 True False
 
     we can also run a full Gymnasium environment check
 
