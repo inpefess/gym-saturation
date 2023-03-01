@@ -86,7 +86,7 @@ How to use
 
    # get a TPTP problem file or create one yourself
    env = gym.make("Vampire-v0", problem_list=["..."])
-   observation = env.reset()
+   observation, info = env.reset()
    # an order number of a 'given clause'
    action = ...
    observation, reward, terminated, truncated, info = env.step(action)
