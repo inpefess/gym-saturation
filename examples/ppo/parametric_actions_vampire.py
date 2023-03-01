@@ -34,9 +34,9 @@ Working configurations are given below.
 import argparse
 import os
 
+import gymnasium as gym
 import ray
 from ray import air, tune
-from ray.rllib.examples.env.parametric_actions_cartpole import ParametricActionsCartPole
 from ray.rllib.examples.models.parametric_actions_model import (
     ParametricActionsModel,
     TorchParametricActionsModel,
@@ -45,9 +45,49 @@ from ray.rllib.models import ModelCatalog
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.tune.registry import register_env
 
+from gym_saturation.wrappers.ast2vec_wrapper import AST2VecWrapper
+
+
+class AddCart(gym.ObservationWrapper):
+    """
+    A wrapper adding a key 'cart' to the observations.
+
+    ``ParametricActionsModel`` expects a key 'cart' (probably, from the
+    CartPole environment) to be present in the observation dictionary.
+    We add such a key and use 'avail_actions' as its value, since in case of
+    the given clause algorithm, the clauses to choose from are both actions and
+    observations.
+    """
+
+    def __init__(self, env: gym.Env):
+        """Constructor for the observation wrapper."""
+        super().__init__(env)
+        self.env.observation_space = gym.spaces.Dict(
+            {
+                "avail_actions": self.env.observation_space["avail_actions"],
+                "action_mask": self.env.observation_space["action_mask"],
+                "cart": self.env.observation_space["avail_actions"],
+            }
+        )
+
+    def observation(self, observation: gym.core.ObsType) -> gym.core.ObsType:
+        """
+        Return a modified observation.
+
+        :param observation: the original observation
+        :returns: the modified observation
+        """
+        new_observation = observation.copy()
+        new_observation["cart"] = new_observation["avail_actions"]
+        return new_observation
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "--run", type=str, default="PPO", help="The RLlib-registered algorithm to use."
+    "--run",
+    type=str,
+    default="PPO",
+    help="The RLlib-registered algorithm to use.",
 )
 parser.add_argument(
     "--framework",
@@ -62,20 +102,60 @@ parser.add_argument(
     "be achieved within --stop-timesteps AND --stop-iters.",
 )
 parser.add_argument(
-    "--stop-iters", type=int, default=200, help="Number of iterations to train."
+    "--stop-iters",
+    type=int,
+    default=200,
+    help="Number of iterations to train.",
 )
 parser.add_argument(
-    "--stop-timesteps", type=int, default=100000, help="Number of timesteps to train."
+    "--stop-timesteps",
+    type=int,
+    default=100000,
+    help="Number of timesteps to train.",
 )
 parser.add_argument(
-    "--stop-reward", type=float, default=150.0, help="Reward at which we stop training."
+    "--stop-reward",
+    type=float,
+    default=150.0,
+    help="Reward at which we stop training.",
 )
 
 if __name__ == "__main__":
     args = parser.parse_args()
     ray.init()
-
-    register_env("pa_cartpole", lambda _: ParametricActionsCartPole(10))
+    problem_list = [
+        os.path.join(
+            os.environ["WORK"],
+            "data",
+            "TPTP-v8.1.2",
+            "Problems",
+            "SET",
+            "SET001-1.p",
+        )
+    ]
+    # it's a standard dimension returned by ast2vec
+    EMBEDDING_DIM = 256
+    # ``ParametricActionsModel`` uses a fully connected network on flattened
+    # observation. Since in our case observations are clauses embeddings, the
+    # input layer size will be ``EMBEDDING_DIM * MAX_CLAUSES``. We can't easily
+    # decrease ``EMBEDDING_DIM``, so we keep ``MAX_CLAUSES`` small. Of course,
+    # one can use a different model instead of the default one (
+    # ``ParametricActionsModel``).
+    MAX_CLAUSES = 20
+    register_env(
+        "pa_cartpole",
+        # and now we register our environment instead of CartPole
+        lambda _: AddCart(
+            AST2VecWrapper(
+                gym.make(
+                    "Vampire-v0",
+                    max_clauses=MAX_CLAUSES,
+                    problem_list=problem_list,
+                ),
+                features_num=EMBEDDING_DIM,
+            )
+        ),
+    )
     ModelCatalog.register_custom_model(
         "pa_model",
         TorchParametricActionsModel
@@ -100,11 +180,19 @@ if __name__ == "__main__":
             "env": "pa_cartpole",
             "model": {
                 "custom_model": "pa_model",
+                # we pass relevant parameters to ``ParametricActionsModel``
+                "custom_model_config": {
+                    "true_obs_shape": (EMBEDDING_DIM * MAX_CLAUSES,),
+                    "action_embed_size": EMBEDDING_DIM,
+                },
             },
             # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
             "num_gpus": int(os.environ.get("RLLIB_NUM_GPUS", "0")),
             "num_workers": 0,
             "framework": args.framework,
+            # standard Gymnasium env_check doesn't use action masks
+            # (even for standard spaces)
+            "disable_env_checking": True,
         },
         **cfg
     )
