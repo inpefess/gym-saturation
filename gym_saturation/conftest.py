@@ -26,8 +26,11 @@ from typing import Generator
 from pytest import fixture
 
 if sys.version_info.major == 3 and sys.version_info.minor >= 9:
-    from importlib.abc import Traversable
-    from importlib.resources import files
+    # pylint: disable=no-name-in-module
+    from importlib.abc import Traversable  # type: ignore
+
+    # pylint: disable=no-name-in-module
+    from importlib.resources import files  # type: ignore
 else:  # pragma: no cover
     from pathlib import PosixPath as Traversable  # noqa: F401
 
