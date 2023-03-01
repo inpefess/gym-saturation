@@ -50,6 +50,8 @@ class AgeWeightBandit(gym.ActionWrapper):
     ValueError: Impossible action: 2
     """
 
+    action_space = gym.spaces.Discrete(2)
+
     def action(self, action: int) -> np.int64:  # type: ignore
         """
         Modify action before ``step`` is called.
