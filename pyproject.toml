@@ -120,6 +120,7 @@ deps =
     mypy
     toml
     pyenchant
+    flake8
 commands =
     pydocstyle gym_saturation
     flake8 gym_saturation
