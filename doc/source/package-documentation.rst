@@ -55,3 +55,5 @@ Environment Wrappers
    :special-members: __init__
 .. automodule:: gym_saturation.wrappers.age_weight_bandit
    :members:
+.. automodule:: gym_saturation.wrappers.fake_box_observation
+   :members:

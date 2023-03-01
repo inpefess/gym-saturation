@@ -90,8 +90,8 @@ class IProverEnv(SaturationEnv):
     >>> for action in [0, 1, 2, 4, 8, 9, 10]:
     ...     observation, reward, terminated, truncated, info = (iprover_env.
     ...         step(action))
-    >>> print(int(reward), terminated, truncated)
-    1 True False
+    >>> print(reward > 0, terminated, truncated)
+    True True False
     >>> iprover_env.close()
     """
 

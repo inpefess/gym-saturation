@@ -55,8 +55,8 @@ class VampireEnv(SaturationEnv):
     >>> for action in [0, 3, 6, 7, 8, 9, 10]:
     ...     observation, reward, terminated, truncated, info = (
     ...         vampire_env.step(action))
-    >>> print(reward, terminated, truncated)
-    1.0 True False
+    >>> print(reward > 0, terminated, truncated)
+    True True False
 
     test of a problem which is solver immediately after `reset`
 

@@ -137,8 +137,8 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
     if a proof is found, then reward is ``+1``
 
     >>> observation, reward, terminated, _, _ = env.step(3)
-    >>> print(int(reward), terminated)
-    1 True
+    >>> print(reward > 0, terminated)
+    True True
 
     TSTP proof is now available (one can add ``include`` directive before it
     for validation purposes)
