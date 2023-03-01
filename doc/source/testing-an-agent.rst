@@ -31,16 +31,15 @@ After processing problems, you can get a report about its performance::
   from glob import glob
   import sys
 
-  sys.setrecursionlimit(10000)
   problem_list = sorted(glob(os.path.join(
       os.environ["TPTP_HOME"], "Problems", "*", "*-*.p")
   ))
   report = agent_testing_report(problem_list, "...")
 
-:ref:`Size agent<size_agent>` is an agent which always selects the shortest clause.
+:ref:`Weight agent<weight_agent>` is an agent which always selects the shortest clause.
 
 :ref:`Age agent<age_agent>` is an agent which always selects the clause which arrived first to the set of unprocessed clauses ('the oldest one').
 
-:ref:`Size&age agent<size_age_agent>` is an agent which selects the shortest clause five times in a row and then one time --- the oldest one.
+:ref:`Age&Weight agent<age_weight_agent>` is an agent which selects the oldest clause several times in a row and then several (probably a different number of) times --- the shotest one.
      
 .. _an agent testing script: https://github.com/inpefess/gym-saturation/tree/master/gym_saturation/agent_testing.py

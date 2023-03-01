@@ -17,17 +17,21 @@
 Package Documentation
 ######################
 
-General modules
-****************
+Common modules
+***************
+.. automodule:: gym_saturation.proof_state
+   :members:
+.. automodule:: gym_saturation.utils
+   :members:		     
 .. automodule:: gym_saturation.vampire_wrapper
    :members:
    :special-members: __init__
-.. automodule:: gym_saturation.utils
-   :members:
 .. automodule:: gym_saturation.relay_server
    :members:
    :special-members: __init__
-
+.. automodule:: gym_saturation.agent_testing
+   :members:
+   :special-members: __init__, __call__
 		     
 Environments
 *************
@@ -41,8 +45,15 @@ Environments
    :members:
    :special-members: __init__
 
-Agent Testing Tools
-********************
-.. automodule:: gym_saturation.agent_testing
+Environment Wrappers
+*********************
+.. automodule:: gym_saturation.wrappers.parametric_actions_wrapper
    :members:
-   :special-members: __init__, __call__
+   :special-members: __init__
+.. automodule:: gym_saturation.wrappers.ast2vec_wrapper
+   :members:
+   :special-members: __init__
+.. automodule:: gym_saturation.wrappers.age_weight_bandit
+   :members:
+.. automodule:: gym_saturation.wrappers.fake_box_observation
+   :members:

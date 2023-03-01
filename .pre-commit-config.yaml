@@ -6,9 +6,14 @@ repos:
         entry: black
         language: system
         types: [python]
-    -   id: mypy
-        name: mypy
-        entry: mypy
+    -   id: pydocstyle
+        name: pydocstyle
+        entry: pydocstyle
+        language: system
+        types: [python]
+    -   id: flake8
+        name: flake8
+        entry: flake8
         language: system
         types: [python]
     -   id: pylint
@@ -16,8 +21,8 @@ repos:
         entry: pylint
         language: system
         types: [python]
-    -   id: pydocstyle
-        name: pydocstyle
-        entry: pydocstyle
+    -   id: mypy
+        name: mypy
+        entry: mypy
         language: system
         types: [python]

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "0.7.0"
+version = "0.8.0"
 description = "Gymnasium environments for saturation provers"
 authors = ["Boris Shminke <boris@shminke.ml>"]
 license = "Apache-2.0"
@@ -23,12 +23,12 @@ classifiers=[
 include = ["gym_saturation/py.typed"]
 
 [tool.poetry.dependencies]
-python = "> 3.8, < 3.12"
+python = ">= 3.8.1, < 3.12"
 importlib_resources = {version = "*", markers = "python_version < \"3.9\""}
 pexpect = "*"
 gymnasium = "*"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 black = "*"
 jupyterlab = "*"
 mypy = "*"
@@ -41,6 +41,7 @@ sphinx-autodoc-typehints = "*"
 pydocstyle = "*"
 tbump = "*"
 pyenchant = "*"
+flake8 = "*"
 
 [tool.black]
 line-length=79
@@ -82,7 +83,7 @@ ignore-signatures = true
 min-similarity-lines = 4
 
 [tool.pylint.format]
-ignore-long-lines = "(::=|:==|:math:|.. math::|https://)"
+ignore-long-lines = "https://"
 max-line-length = 79
 
 [tool.pylint.design]
@@ -119,8 +120,10 @@ deps =
     mypy
     toml
     pyenchant
+    flake8
 commands =
     pydocstyle gym_saturation
+    flake8 gym_saturation
     pylint gym_saturation
     mypy gym_saturation
     pytest
@@ -130,7 +133,7 @@ commands =
 github_url = "https://github.com/inpfess/gym-saturation/"
 
 [tool.tbump.version]
-current = "0.7.0"
+current = "0.8.0"
 regex = '''
   (?P<major>\d+)
   \.

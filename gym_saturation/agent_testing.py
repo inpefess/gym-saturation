@@ -18,7 +18,6 @@ Agent Testing
 ==============
 This module is an example of testing your own trained agent.
 """
-import random
 from abc import ABC, abstractmethod
 from argparse import ArgumentParser, Namespace
 from operator import itemgetter
@@ -27,11 +26,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import gymnasium as gym
 import numpy as np
 
-from gym_saturation.envs.saturation_env import (
-    MAX_CLAUSES,
-    STATE_DIFF_UPDATED,
-    SaturationEnv,
-)
+from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
 from gym_saturation.utils import FALSEHOOD_SYMBOL, get_tstp_proof
 
 
@@ -48,7 +43,7 @@ class BaseAgent(ABC):
     @abstractmethod
     def get_action(
         self,
-        observation: Tuple[Dict[str, Any], ...],
+        observation: Dict[str, Any],
         reward: float,
         info: Dict[str, Any],
     ) -> int:
@@ -64,42 +59,45 @@ class BaseAgent(ABC):
         """
 
 
-class SizeAgent(BaseAgent):
+class WeightAgent(BaseAgent):
     """
     Agent which selects the shortest clause.
 
-    .. _size_agent:
+    .. _weight_agent:
     """
 
     def __init__(self):
         """Don't compute the formulae lengths twice."""
         self._state: Dict[str, Tuple[float, int]] = {}
 
-    def update_state(self, info: Dict[str, Any]) -> None:
+    def update_state(self, observation: Dict[str, Any]) -> None:
         """
         Update the state of the agent according with the transition.
 
-        :param info: an info dict (part of environment response)
+        :param observation: observation returned by prover
         """
         self._state.update(
             {
-                label: (len(clause["literals"]), clause["processed"])
-                for label, clause in info[STATE_DIFF_UPDATED].items()
+                clause["label"]: (len(clause["literals"]), action_mask)
+                for clause, action_mask in zip(
+                    observation["real_obs"],
+                    observation["action_mask"].tolist(),
+                )
             }
         )
 
     def get_action(
         self,
-        observation: Tuple[Dict[str, Any], ...],
+        observation: Dict[str, Any],
         reward: float,
         info: Dict[str, Any],
     ) -> int:  # noqa: D102
-        self.update_state(info)
+        self.update_state(observation)
         return min(
             (
                 (key, value[0])
                 for key, value in enumerate(self.state.values())
-                if value[1] == 0
+                if value[1] == 1.0
             ),
             key=itemgetter(1),
         )[0]
@@ -114,54 +112,50 @@ class AgeAgent(BaseAgent):
 
     def get_action(
         self,
-        observation: Tuple[Dict[str, Any], ...],
+        observation: Dict[str, Any],
         reward: float,
         info: Dict[str, Any],
     ) -> int:  # noqa: D102
-        return min(
-            (i, clause)
-            for i, clause in enumerate(observation)
-            if clause["processed"] == 0
-        )[0]
+        return observation["action_mask"].argmax()
 
 
-class SizeAgeAgent(BaseAgent):
+class AgeWeightAgent(BaseAgent):
     """
     Agent taking several times the smallest clause and then the oldest.
 
-    .. _size_age_agent:
+    .. _age_weight_agent:
     """
 
-    def __init__(self, size_steps: int, age_steps: int):
+    def __init__(self, age_steps: int, weight_steps: int):
         """
         Initialise two sub-agents.
 
-        :param size_steps: how many times to select the shortest clause
         :param age_steps: how many times to select the oldest clause
+        :param weight_steps: how many times to select the shortest clause
         """
-        self.size_steps = size_steps
+        self.weight_steps = weight_steps
         self.age_steps = age_steps
         self._step_count = 0
-        self._use_size = True
-        self._size_agent = SizeAgent()
+        self._use_weight = False
+        self._weight_agent = WeightAgent()
         self._age_agent = AgeAgent()
 
     def get_action(
         self,
-        observation: Tuple[Dict[str, Any], ...],
+        observation: Dict[str, Any],
         reward: float,
         info: Dict[str, Any],
     ) -> int:  # noqa: D102
         self._step_count += 1
-        if self._use_size:
-            if self._step_count >= self.size_steps:
+        if self._use_weight:
+            if self._step_count >= self.weight_steps:
                 self._step_count = 0
-                self._use_size = False
-            return self._size_agent.get_action(observation, reward, info)
+                self._use_weight = False
+            return self._weight_agent.get_action(observation, reward, info)
         if self._step_count >= self.age_steps:
             self._step_count = 0
-            self._use_size = True
-        self._size_agent.update_state(info)
+            self._use_weight = True
+        self._weight_agent.update_state(observation)
         return self._age_agent.get_action(observation, reward, info)
 
 
@@ -170,17 +164,11 @@ class RandomAgent(BaseAgent):
 
     def get_action(
         self,
-        observation: Tuple[Dict[str, Any], ...],
+        observation: Dict[str, Any],
         reward: float,
         info: Dict[str, Any],
     ) -> int:  # noqa: D102
-        return random.choice(
-            [
-                key
-                for key, clause in enumerate(observation)
-                if clause["processed"] == 0
-            ]
-        )
+        return np.random.choice(np.nonzero(observation["action_mask"])[0])
 
 
 def _proof_found_before_the_start(
@@ -188,7 +176,7 @@ def _proof_found_before_the_start(
 ) -> Tuple[float, bool, bool]:
     if tuple(
         1
-        for clause in env.state.values()
+        for clause in env.state.clauses
         if clause["literals"] == FALSEHOOD_SYMBOL
     ):
         return 1.0, True, False
@@ -204,22 +192,13 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> Tuple[float, bool, int]:
     >>> test_agent_output = "test_agent_output"
     >>> shutil.rmtree(test_agent_output, ignore_errors=True)
     >>> os.mkdir(test_agent_output)
-    >>> import sys
-    >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
-    ...     from importlib.resources import files
-    ... else:
-    ...     from importlib_resources import files
-    >>> from glob import glob
-    >>> problem_list = sorted(glob(os.path.join(
-    ...     files("gym_saturation")
-    ...     .joinpath(os.path.join(
-    ...         "resources", "TPTP-mock", "Problems", "TST"
-    ...     )), "TST002-1.p")))
-    >>> random.seed(0)
+    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
+    >>> problem_list = [os.path.join(tptp_folder,
+    ...     "Problems", "TST", "TST002-1.p")]
     >>> env = gym.make(
     ...     "Vampire-v0",
     ...     problem_list=problem_list,
-    ...     max_clauses=5,
+    ...     max_clauses=7,
     ... )
     >>> agent_testing_report(env, RandomAgent())
     Proof state size limit reached in 1 step(s).
@@ -271,7 +250,7 @@ def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
     """
     _, truncated, step_count = episode(env, agent)
     if not truncated:
-        a_proof = get_tstp_proof(tuple(env.state.values()))
+        a_proof = get_tstp_proof(tuple(env.state.clauses))
         proof_length = len(a_proof.split("\n"))
         print(
             f"Proof of length {proof_length} found "
@@ -285,24 +264,11 @@ def test_agent(args: Optional[List[str]] = None) -> None:
     """
     The main function for this module.
 
-    >>> import sys
-    >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
-    ...     from importlib.resources import files
-    ... else:
-    ...     from importlib_resources import files
+    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
     >>> import os
     >>> from glob import glob
-    >>> problem_filenames = sorted(glob(os.path.join(
-    ...     files("gym_saturation")
-    ...     .joinpath(os.path.join(
-    ...         "resources", "TPTP-mock", "Problems", "TST", "TST00*-1.p"
-    ...     ))
-    ... )))
-    >>> test_agent(["--problem_filename", problem_filenames[0]])
-    Problem file: ...TST001-1.p
-    Proof of length 6 found in 0 step(s):
-    ...
-    cnf(..., lemma, $false, inference(subsumption_resolution, [], [..., ...])).
+    >>> problem_filenames = sorted(glob(os.path.join(tptp_folder, "Problems",
+    ...     "TST", "TST00*-1.p")))
     >>> for problem_filename in problem_filenames:
     ...     test_agent(["--problem_filename", problem_filename])
     Problem file: ...TST001-1.p
@@ -328,7 +294,7 @@ def test_agent(args: Optional[List[str]] = None) -> None:
         max_clauses=arguments.max_clauses,
     )
     print(f"Problem file: {arguments.problem_filename}")
-    agent_testing_report(env, SizeAgeAgent(1, 1))  # type: ignore
+    agent_testing_report(env, AgeWeightAgent(1, 1))  # type: ignore
 
 
 if __name__ == "__main__":

@@ -22,24 +22,13 @@ import os
 import pstats
 from pstats import SortKey
 
-from gym_saturation.agent_testing import test_agent
+import gymnasium as gym
+
+from gym_saturation.agent_testing import RandomAgent, agent_testing_report
+from gym_saturation.wrappers.ast2vec_wrapper import AST2VecWrapper
 
 
-def run_profiler() -> None:
-    """Run profiler."""
-    profiler = cProfile.Profile()
-    profiler.enable()
-    filename = os.path.join(
-        os.environ["HOME"],
-        "data",
-        "TPTP-v8.1.2",
-        "Problems",
-        "GRP",
-        "GRP001-1.p",
-    )
-    for _ in range(10):
-        test_agent(["--problem_filename", filename, "--max_clauses", "1000"])
-    profiler.disable()
+def _print_report(profiler: cProfile.Profile) -> None:
     profiler_report = io.StringIO()
     profiler_statistics = pstats.Stats(
         profiler, stream=profiler_report
@@ -48,5 +37,42 @@ def run_profiler() -> None:
     print(profiler_report.getvalue())
 
 
+def run_profiler(use_ast2vec: bool = False) -> None:
+    """
+    Run profiler.
+
+    :param use_ast2vec: whether to embed clauses
+    """
+    profiler = cProfile.Profile()
+    profiler.enable()
+    env = gym.make(
+        "Vampire-v0",
+        max_clauses=1000,
+        problem_list=[
+            os.path.join(
+                os.environ["HOME"],
+                "data",
+                "TPTP-v8.1.2",
+                "Problems",
+                "GRP",
+                "GRP001-1.p",
+            )
+        ],
+    )
+    if use_ast2vec:
+        env = AST2VecWrapper(
+            env,
+            features_num=256,
+        )
+    iters = 1 if use_ast2vec else 10
+    for _ in range(iters):
+        agent_testing_report(
+            env=env,  # type: ignore
+            agent=RandomAgent(),
+        )
+    profiler.disable()
+    _print_report(profiler)
+
+
 if __name__ == "__main__":
-    run_profiler()
+    run_profiler(use_ast2vec=False)

@@ -25,29 +25,24 @@ import numpy as np
 from gymnasium import Env, spaces
 from gymnasium.spaces.text import alphanumeric
 
+from gym_saturation.proof_state import ProofState
 from gym_saturation.utils import FALSEHOOD_SYMBOL, pretty_print
 
-STATE_DIFF_UPDATED = "state_diff_updated"
 PROBLEM_FILENAME = "problem_filename"
 MAX_CLAUSES = 100000
 ALPHANUMERIC_WITH_UNDERSCORE = "".join(alphanumeric) + "_"
+REAL_OBS = "real_obs"
+ACTION_MASK = "action_mask"
 
 
-class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
+class SaturationEnv(Env[Dict[str, Any], np.int64]):
     """
     Saturation algorithm defined in a Reinforcement Learning friendly way.
 
     .. _saturation_env:
 
     >>> import os
-    >>> import sys
-    >>> if sys.version_info.major == 3 and sys.version_info.minor >= 9:
-    ...     from importlib.resources import files
-    ... else:
-    ...     from importlib_resources import files
-    >>> tptp_folder = files("gym_saturation").joinpath(
-    ...     os.path.join("resources", "TPTP-mock")
-    ... )
+    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
     >>> from glob import glob
     >>> problem_list = sorted(glob(
     ...     os.path.join(tptp_folder, "Problems", "*", "*1-1.p")
@@ -59,7 +54,6 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
     ...     "inference_rule": "dummy",
     ...     "inference_parents": (),
     ...     "birth_step": 0,
-    ...     "processed": 0
     ... }
     >>> class MySaturationEnv(SaturationEnv):
     ...     def reset(
@@ -77,23 +71,23 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
     ...         three.update({"literals": "p(Z)", "label": "three"})
     ...         four = base_clause.copy()
     ...         four.update({"literals": "~p(X)", "label": "four"})
-    ...         self.state = {"one": one, "two": two, "three": three,
-    ...             "four": four}
-    ...         return tuple(self.state.values()), {}
+    ...         self.state.clauses = [one, two, three, four]
+    ...         self.state.clause_labels = ["one", "two", "three", "four"]
+    ...         self.state.action_mask = np.ones((5,))
+    ...         self.state.action_mask[4] = 0.0
+    ...         return tuple(self.state.clauses), {}
     ...
-    ...     def _do_deductions(
-    ...             self, action: str
-    ...     ) -> Dict[str, Dict[str, Any]]:
+    ...     def _do_deductions(self, action: str) -> None:
     ...         if action == 3:
-    ...             self.state["falsehood"] = {
+    ...             self.state.clauses.append({
     ...                 "literals": FALSEHOOD_SYMBOL,
     ...                 "role": "lemma",
     ...                 "label": "falsehood",
     ...                 "inference_rule": "dummy",
     ...                 "inference_parents": ("four",),
-    ...                 "processed": 0
-    ...             }
-    ...         return ()
+    ...             })
+    ...             self.state.clause_labels.append("falsehood")
+    ...             self.state.action_mask[4] = 1.0
     ...
     >>> env = MySaturationEnv(problem_list)
     >>> len(env.reset()[0])
@@ -128,11 +122,6 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
 
     >>> next_state, reward, terminated, truncated, info = env.step(0)
 
-    ``info`` dict contains the state diff, for example
-
-    >>> info[STATE_DIFF_UPDATED]
-    ()
-
     repeating actions is not allowed
 
     >>> env.step(0)
@@ -148,21 +137,21 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
     if a proof is found, then reward is ``+1``
 
     >>> observation, reward, terminated, _, _ = env.step(3)
-    >>> print(reward, terminated)
-    1.0 True
+    >>> print(reward > 0, terminated)
+    True True
 
     TSTP proof is now available (one can add ``include`` directive before it
     for validation purposes)
 
     >>> from gym_saturation.utils import get_tstp_proof
-    >>> print(get_tstp_proof(observation))
+    >>> print(get_tstp_proof(observation["real_obs"]))
     cnf(four, lemma, ~p(X), inference(dummy, [], [])).
     cnf(falsehood, lemma, $false, inference(dummy, [], [four])).
 
     One can also filter actions relevant to a particular goal:
 
     >>> from gym_saturation.utils import get_positive_actions
-    >>> get_positive_actions(observation)
+    >>> get_positive_actions(observation["real_obs"])
     (3, 4)
 
     the total number of clauses in the state is limited by the ``max_clauses``
@@ -189,27 +178,7 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
     metadata = {"render_modes": ["ansi", "human"], "render_fps": 1}
     reward_range = (0, 1)
     action_space: spaces.Discrete
-    observation_space = spaces.Sequence(
-        spaces.Dict(
-            {
-                "label": spaces.Text(
-                    256, charset=ALPHANUMERIC_WITH_UNDERSCORE
-                ),
-                "role": spaces.Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE),
-                "literals": spaces.Text(
-                    4000, charset=ALPHANUMERIC_WITH_UNDERSCORE + "(), |~=!$"
-                ),
-                "inference_rule": spaces.Text(
-                    256, charset=ALPHANUMERIC_WITH_UNDERSCORE
-                ),
-                "inference_parents": spaces.Sequence(
-                    spaces.Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE)
-                ),
-                "birth_step": spaces.Discrete(1000),
-                "processed": spaces.Discrete(2),
-            }
-        )
-    )
+    observation_space: spaces.Dict
 
     def __init__(
         self,
@@ -225,8 +194,44 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         """
         super().__init__()
         self.problem_list = problem_list
-        self.state: Dict[str, Dict[str, Any]] = {}
+        self.state = ProofState(
+            clauses=[],
+            clause_labels=[],
+            action_mask=np.zeros((max_clauses,), dtype=np.float32),
+            step_number=-1,
+        )
         self.action_space = spaces.Discrete(max_clauses)
+        self.observation_space = spaces.Dict(
+            {
+                REAL_OBS: spaces.Sequence(
+                    spaces.Dict(
+                        {
+                            "label": spaces.Text(
+                                256, charset=ALPHANUMERIC_WITH_UNDERSCORE
+                            ),
+                            "role": spaces.Text(
+                                256, charset=ALPHANUMERIC_WITH_UNDERSCORE
+                            ),
+                            "literals": spaces.Text(
+                                4000,
+                                charset=ALPHANUMERIC_WITH_UNDERSCORE
+                                + "(), |~=!$",
+                            ),
+                            "inference_rule": spaces.Text(
+                                256, charset=ALPHANUMERIC_WITH_UNDERSCORE
+                            ),
+                            "inference_parents": spaces.Sequence(
+                                spaces.Text(
+                                    256, charset=ALPHANUMERIC_WITH_UNDERSCORE
+                                )
+                            ),
+                            "birth_step": spaces.Discrete(1000),
+                        }
+                    )
+                ),
+                ACTION_MASK: spaces.Box(0, 1, (max_clauses,)),
+            }
+        )
         self.task: Optional[List[str]] = None
         self.problem_filename: str = "/dev/null"
         self.render_mode = self._check_render_mode(render_mode)
@@ -245,29 +250,30 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         *,
         seed: Optional[int] = None,
         options: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:  # noqa: D102
+    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
         random.seed(seed)
         if not self.task:
             self.set_task(self.problem_list)
+        self.state = ProofState(
+            clauses=[],
+            clause_labels=[],
+            action_mask=np.zeros_like(self.state.action_mask),
+            step_number=0,
+        )
         self.problem_filename = random.choice(self.get_task())
-        return (), {}
-
-    def _max_clauses_result(
-        self, info: Dict[str, Any]
-    ) -> Tuple[bool, Dict[str, Any]]:
-        if len(self.state) > self.action_space.n:
-            info.pop(STATE_DIFF_UPDATED)
-            return True, info
-        return False, info
+        return {
+            REAL_OBS: self.state.clauses,
+            ACTION_MASK: self.state.action_mask,
+        }, {PROBLEM_FILENAME: self.problem_filename}
 
     @abstractmethod
-    def _do_deductions(self, action: np.int64) -> Dict[str, Dict[str, Any]]:
+    def _do_deductions(self, action: np.int64) -> None:
         raise NotImplementedError  # pragma: no cover
 
     def step(
         self, action: np.int64
-    ) -> Tuple[Tuple[Dict[str, Any], ...], float, bool, bool, Dict[str, Any]]:
+    ) -> Tuple[Dict[str, Any], float, bool, bool, Dict[str, Any]]:
         # noqa: D301
         """
         Run one time-step of the environment's dynamics.
@@ -289,43 +295,40 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         :raises ValueError: if the ``action`` identifies an already processed
             clause
         """
-        if (
-            action > len(self.state)
-            or list(self.state.values())[action]["processed"] == 1
-        ):
+        if self.state.action_mask[action] == 0.0:
             raise ValueError(f"action {action} is not valid")
-        old_state_size = len(self.state)
-        updated = self._do_deductions(action)
-        info = {
-            STATE_DIFF_UPDATED: updated,
-            PROBLEM_FILENAME: self.problem_filename,
-        }
-        reward, terminated = (
-            (1.0, True)
-            if max(
+        old_state_size = len(self.state.clauses)
+        self.state.step_number += 1
+        self._do_deductions(action)
+        self.state.action_mask[action] = 0.0
+        terminated = (
+            max(
                 clause["literals"] == FALSEHOOD_SYMBOL
-                for clause in self.state.values()
+                for clause in self.state.clauses
             )
-            else (
-                float(
-                    (old_state_size - len(self.state)) / self.action_space.n
-                ),
-                False,
-            )
+            or self.state.action_mask.max() == 0.0
         )
-        self.state[list(self.state.keys())[action]]["processed"] = 1
-        terminated |= 1 == min(
-            clause["processed"] for clause in self.state.values()
+        reward = float(
+            (old_state_size - len(self.state.clauses)) / self.action_space.n
+        ) + (1.0 if terminated else 0.0)
+        truncated = len(self.state.clauses) > int(self.action_space.n)
+        return (
+            {
+                REAL_OBS: self.state.clauses,
+                ACTION_MASK: self.state.action_mask,
+            },
+            reward,
+            terminated,
+            truncated,
+            {PROBLEM_FILENAME: self.problem_filename},
         )
-        truncated, info = self._max_clauses_result(info)
-        return tuple(self.state.values()), reward, terminated, truncated, info
 
     # pylint: disable=inconsistent-return-statements
     def render(self):  # noqa: D102
         tptp_string = "\n".join(
             map(
                 pretty_print,
-                self.state.values(),
+                self.state.clauses,
             )
         )
         if self.render_mode == "ansi":

@@ -22,3 +22,4 @@ doc/build/
 *.log
 .dir-locals.el
 coverage.xml
+flycheck_*
