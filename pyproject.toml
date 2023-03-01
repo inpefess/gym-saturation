@@ -83,7 +83,7 @@ ignore-signatures = true
 min-similarity-lines = 4
 
 [tool.pylint.format]
-ignore-long-lines = "(::=|:==|:math:|.. math::|https://)"
+ignore-long-lines = "https://"
 max-line-length = 79
 
 [tool.pylint.design]
