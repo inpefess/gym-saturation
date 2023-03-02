@@ -35,6 +35,8 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
     """
     A parametric actions wrapper.
 
+    .. _parametric_actions:
+
     It's incremental, i. e. it embeds only the new clauses in the observation.
     It defines the clauses as old if their order numbers are small than the
     previous step maximum.

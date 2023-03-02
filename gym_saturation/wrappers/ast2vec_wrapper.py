@@ -30,6 +30,8 @@ class AST2VecWrapper(ParamtericActionsWrapper):
     """
     An ast2vec wrappers for saturation provers.
 
+    .. _ast2vec_wrapper:
+
     The best way is to run TorchServe docker container as described here:
     https://gitlab.com/inpefess/ast2vec
 

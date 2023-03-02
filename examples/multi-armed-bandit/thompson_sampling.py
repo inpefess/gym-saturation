@@ -49,19 +49,19 @@ def train_thompson_sampling() -> None:
             "data",
             "TPTP-v8.1.2",
             "Problems",
-            "GRP",
-            "GRP001-1.p",
+            "SET",
+            "SET001-1.p",
         )
     ]
     config = (
         BanditLinTSConfig()
         .rollouts(num_rollout_workers=10)
         .environment(
-            env_config={"max_clauses": 300, "problem_list": problem_list}
+            env_config={"max_clauses": 20, "problem_list": problem_list}
         )
     )
     algo = config.build(env="VampireBandit")
-    for _ in range(100):
+    for _ in range(1000):
         algo.train()
 
 

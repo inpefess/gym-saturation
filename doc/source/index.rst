@@ -18,9 +18,10 @@
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-	     
+
    what-is-going-on
    testing-an-agent
+   experiments
    package-documentation
 
 Indices and tables

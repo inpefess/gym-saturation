@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-|Binder|\ |PyPI version|\ |Anaconda|\ |CircleCI|\ |Documentation Status|\ |codecov|\ |JOSS|
+|PyPI version|\ |Anaconda|\ |CircleCI|\ |Documentation Status|\ |codecov|\ |JOSS|
 
 gym-saturation
 ==============
@@ -92,10 +92,9 @@ How to use
    observation, reward, terminated, truncated, info = env.step(action)
 
 See `the
-notebook <https://github.com/inpefess/gym-saturation/blob/master/examples/example.ipynb>`__
-or run it in
-`Binder <https://mybinder.org/v2/gh/inpefess/gym-saturation/HEAD?labpath=example.ipynb>`__
-for more information.
+notebook <https://github.com/inpefess/gym-saturation/blob/master/examples/example.ipynb>`__ for more information.
+
+For more comprehensive experiments, please see the documentation `page <https://gym-saturation.readthedocs.io/en/latest/experiments.html>`__.
 
 How to Contribute
 =================
@@ -150,8 +149,6 @@ More documentation can be found
    :target: https://gym-saturation.readthedocs.io/en/latest/?badge=latest
 .. |codecov| image:: https://codecov.io/gh/inpefess/gym-saturation/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/inpefess/gym-saturation
-.. |Binder| image:: https://mybinder.org/badge_logo.svg
-   :target: https://mybinder.org/v2/gh/inpefess/gym-saturation/HEAD?labpath=example.ipynb
 .. |JOSS| image:: https://joss.theoj.org/papers/c4f36ec7331a0dde54d8c3808fbff9c3/status.svg
    :target: https://joss.theoj.org/papers/c4f36ec7331a0dde54d8c3808fbff9c3
 .. |Anaconda| image:: https://anaconda.org/conda-forge/gym-saturation/badges/version.svg
