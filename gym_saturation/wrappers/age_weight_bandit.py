@@ -26,6 +26,8 @@ class AgeWeightBandit(gym.ActionWrapper):
     """
     A wrapper for a saturation prover with only two actions.
 
+    .. _age_weight_bandit:
+
     ``0`` --- select the oldest clause
     ``1`` --- select the shortest clause
 

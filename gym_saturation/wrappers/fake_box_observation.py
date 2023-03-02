@@ -26,6 +26,8 @@ class FakeBoxObservation(gym.ObservationWrapper):
     """
     A wrapper which makes an observation a constant ``1``.
 
+    .. _fake_box:
+
     >>> env = FakeBoxObservation(gym.make("CartPole-v1"))
     >>> observation, info = env.reset()
     >>> observation

@@ -40,6 +40,6 @@ After processing problems, you can get a report about its performance::
 
 :ref:`Age agent<age_agent>` is an agent which always selects the clause which arrived first to the set of unprocessed clauses ('the oldest one').
 
-:ref:`Age&Weight agent<age_weight_agent>` is an agent which selects the oldest clause several times in a row and then several (probably a different number of) times --- the shotest one.
+:ref:`Age&Weight agent<age_weight_agent>` is an agent which selects the oldest clause several times in a row and then several (probably a different number of) times --- the shortest one.
      
 .. _an agent testing script: https://github.com/inpefess/gym-saturation/tree/master/gym_saturation/agent_testing.py
