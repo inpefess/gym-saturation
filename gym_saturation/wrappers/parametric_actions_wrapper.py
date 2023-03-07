@@ -155,7 +155,6 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
         observation, reward, terminated, truncated, info = self.env.step(
             action
         )
-        info[REAL_OBS] = observation
         return (
             self.observation(observation),
             reward,
