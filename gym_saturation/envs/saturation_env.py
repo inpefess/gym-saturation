@@ -254,7 +254,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         super().reset(seed=seed)
         random.seed(seed)
         if not self.task:
-            self.set_task(self.problem_list)
+            self.set_task([self.problem_list[0]])
         self.state = ProofState(
             clauses=[],
             clause_labels=[],
