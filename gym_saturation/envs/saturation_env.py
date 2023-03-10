@@ -47,51 +47,10 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
     >>> problem_list = sorted(glob(
     ...     os.path.join(tptp_folder, "Problems", "*", "*1-1.p")
     ... ))
-    >>> base_clause = {
-    ...     "label": "dummy",
-    ...     "literals": "dummy",
-    ...     "role": "lemma",
-    ...     "inference_rule": "dummy",
-    ...     "inference_parents": (),
-    ...     "birth_step": 0,
-    ... }
-    >>> class MySaturationEnv(SaturationEnv):
-    ...     def reset(
-    ...         self,
-    ...         *,
-    ...         seed: Optional[int] = None,
-    ...         options: Optional[Dict[str, Any]] = None
-    ...     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-    ...         super().reset(seed=seed)
-    ...         one = base_clause.copy()
-    ...         one.update({"literals": "p(X)", "label": "one"})
-    ...         two = base_clause.copy()
-    ...         two.update({"literals": "p(Y)", "label": "two"})
-    ...         three = base_clause.copy()
-    ...         three.update({"literals": "p(Z)", "label": "three"})
-    ...         four = base_clause.copy()
-    ...         four.update({"literals": "~p(X)", "label": "four"})
-    ...         self.state.clauses = [one, two, three, four]
-    ...         self.state.clause_labels = ["one", "two", "three", "four"]
-    ...         self.state.action_mask = np.ones((5,))
-    ...         self.state.action_mask[4] = 0.0
-    ...         return tuple(self.state.clauses), {}
-    ...
-    ...     def _do_deductions(self, action: str) -> None:
-    ...         if action == 3:
-    ...             self.state.clauses.append({
-    ...                 "literals": FALSEHOOD_SYMBOL,
-    ...                 "role": "lemma",
-    ...                 "label": "falsehood",
-    ...                 "inference_rule": "dummy",
-    ...                 "inference_parents": ("four",),
-    ...             })
-    ...             self.state.clause_labels.append("falsehood")
-    ...             self.state.action_mask[4] = 1.0
-    ...
-    >>> env = MySaturationEnv(problem_list)
+    >>> from gym_saturation.envs.dummy_saturation_env import DummySaturationEnv
+    >>> env = DummySaturationEnv(problem_list)
     >>> len(env.reset()[0])
-    4
+    2
 
     one can look at the current state in TPTP format
 
@@ -158,7 +117,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
     parameter. Let's try setting it and repeating the same solution of the same
     problem:
 
-    >>> env = MySaturationEnv(problem_list, max_clauses=3)
+    >>> env = DummySaturationEnv(problem_list, max_clauses=3)
     >>> env.get_task()
     Traceback (most recent call last):
      ...
