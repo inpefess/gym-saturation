@@ -32,6 +32,8 @@ Common modules
 .. automodule:: gym_saturation.agent_testing
    :members:
    :special-members: __init__, __call__
+.. automodule:: gym_saturation.dummy_http_handler
+   :members:		     
 		     
 Environments
 *************
