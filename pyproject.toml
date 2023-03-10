@@ -42,6 +42,7 @@ pydocstyle = "*"
 tbump = "*"
 pyenchant = "*"
 flake8 = "*"
+toml = "*"
 
 [tool.black]
 line-length=79
