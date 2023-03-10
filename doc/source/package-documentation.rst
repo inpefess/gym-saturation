@@ -59,3 +59,5 @@ Environment Wrappers
    :members:
 .. automodule:: gym_saturation.wrappers.fake_box_observation
    :members:
+.. automodule:: gym_saturation.wrappers.duplicate_key_obs
+   :members:

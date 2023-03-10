@@ -46,41 +46,7 @@ from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.tune.registry import register_env
 
 from gym_saturation.wrappers.ast2vec_wrapper import AST2VecWrapper
-
-
-class AddCart(gym.ObservationWrapper):
-    """
-    A wrapper adding a key 'cart' to the observations.
-
-    ``ParametricActionsModel`` expects a key 'cart' (probably, from the
-    CartPole environment) to be present in the observation dictionary.
-    We add such a key and use 'avail_actions' as its value, since in case of
-    the given clause algorithm, the clauses to choose from are both actions and
-    observations.
-    """
-
-    def __init__(self, env: gym.Env):
-        """Constructor for the observation wrapper."""
-        super().__init__(env)
-        self.env.observation_space = gym.spaces.Dict(
-            {
-                "avail_actions": self.env.observation_space["avail_actions"],
-                "action_mask": self.env.observation_space["action_mask"],
-                "cart": self.env.observation_space["avail_actions"],
-            }
-        )
-
-    def observation(self, observation: gym.core.ObsType) -> gym.core.ObsType:
-        """
-        Return a modified observation.
-
-        :param observation: the original observation
-        :returns: the modified observation
-        """
-        new_observation = observation.copy()
-        new_observation["cart"] = new_observation["avail_actions"]
-        return new_observation
-
+from gym_saturation.wrappers.duplicate_key_obs import DuplicateKeyObsWrapper
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -145,7 +111,7 @@ if __name__ == "__main__":
     register_env(
         "pa_cartpole",
         # and now we register our environment instead of CartPole
-        lambda _: AddCart(
+        lambda _: DuplicateKeyObsWrapper(
             AST2VecWrapper(
                 gym.make(
                     "Vampire-v0",
@@ -153,7 +119,14 @@ if __name__ == "__main__":
                     problem_list=problem_list,
                 ),
                 features_num=EMBEDDING_DIM,
-            )
+            ),
+            # ``ParametricActionsModel`` expects a key 'cart' (from the
+            # CartPole environment) to be present in the observation
+            # dictionary. We add such a key and use 'avail_actions' as its
+            # value, since in case of the given clause algorithm, the clauses
+            # to choose from are both actions and observations.
+            new_key="cart",
+            key_to_duplicate="avail_actions",
         ),
     )
     ModelCatalog.register_custom_model(
