@@ -72,7 +72,7 @@ class WeightAgent(BaseAgent):
 
     def update_state(self, observation: Dict[str, Any]) -> None:
         """
-        Update the state of the agent according with the transition.
+        Update the state of the agent according to the transition.
 
         :param observation: observation returned by prover
         """
