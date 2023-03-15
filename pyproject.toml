@@ -63,7 +63,6 @@ doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
 
 [tool.pylint.MASTER]
 load-plugins = [
-    "pylint.extensions.consider_ternary_expression",
     "pylint.extensions.docparams",
     "pylint.extensions.mccabe",
     "pylint.extensions.set_membership",
