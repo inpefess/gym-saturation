@@ -17,6 +17,8 @@
 Fake Box Observation Wrapper
 =============================
 """
+from typing import Dict
+
 import gymnasium as gym
 import numpy as np
 from gymnasium.core import ObsType
@@ -24,23 +26,24 @@ from gymnasium.core import ObsType
 
 class FakeBoxObservation(gym.ObservationWrapper):
     """
-    A wrapper which makes an observation a constant ``1``.
+    A wrapper which makes an observation a constant dictionary.
 
     .. _fake_box:
 
     >>> env = FakeBoxObservation(gym.make("CartPole-v1"))
     >>> observation, info = env.reset()
     >>> observation
-    array([1.])
+    {'item': array([[1., 0.],
+           [0., 1.]])}
     """
 
-    observation_space = gym.spaces.Box(0, 1, (1,))
+    observation_space = gym.spaces.Dict({"item": gym.spaces.Box(0, 1, (2, 2))})
 
-    def observation(self, observation: ObsType) -> np.ndarray:
+    def observation(self, observation: ObsType) -> Dict[str, np.ndarray]:
         """
         Return a modified observation.
 
         :param observation: the original observation
         :return: the modified observation
         """
-        return np.ones((1,))
+        return {"item": np.eye(2)}
