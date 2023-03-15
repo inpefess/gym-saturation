@@ -28,9 +28,10 @@ Thompson Sampling Multi-armed Bandit
 
 #. Navigate to `examples/multi-armed-bandit`
 #. `pip install -r requirements.txt`
+#. `python thompson_sampling.py --random_baseline`
 #. `python thompson_sampling.py`
 
-Since the `algorithm <https://arxiv.org/pdf/1209.3352.pdf>`__ tries to learn the best probability distributions of choosing actions, the actions takes are always random. These is no stable convergence, although it learn to behave not terminally bad nearly instantly.
+Bandit learns to prefer choosing the shortest clause, beating the random agent substantially.
 
 PPO
 ****
