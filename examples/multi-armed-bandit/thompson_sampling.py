@@ -30,7 +30,9 @@ from ray.rllib.policy.sample_batch import SampleBatch
 from ray.tune.registry import register_env
 
 from gym_saturation.wrappers.age_weight_bandit import AgeWeightBandit
-from gym_saturation.wrappers.fake_box_observation import FakeBoxObservation
+from gym_saturation.wrappers.constant_parametric_actions import (
+    ConstantParametricActionsWrapper,
+)
 
 
 def env_creator(env_config: Dict[str, Any]) -> gym.Env:
@@ -40,8 +42,9 @@ def env_creator(env_config: Dict[str, Any]) -> gym.Env:
     :param env_config: an environment config
     :returns: an environment
     """
-    return FakeBoxObservation(
-        AgeWeightBandit(gym.make("Vampire-v0", **env_config))
+    return ConstantParametricActionsWrapper(
+        AgeWeightBandit(gym.make("Vampire-v0", **env_config)),
+        avail_actions_key="item",
     )
 
 
@@ -100,22 +103,13 @@ def train_thompson_sampling() -> None:
         )
     ]
     if args.random_baseline:
-        algo = (
-            AlgorithmConfig(RandomAlgorithm)
-            .framework("torch")
-            .environment(
-                "VampireBandit",
-                env_config={"max_clauses": 20, "problem_list": problem_list},
-            )
-        ).build()
+        config = AlgorithmConfig(RandomAlgorithm).framework("torch")
     else:
-        algo = (
-            BanditLinTSConfig()
-            .environment(
-                env_config={"max_clauses": 20, "problem_list": problem_list}
-            )
-            .build(env="VampireBandit")
-        )
+        config = BanditLinTSConfig()
+    algo = config.environment(
+        "VampireBandit",
+        env_config={"max_clauses": 20, "problem_list": problem_list},
+    ).build()
     for _ in range(20):
         algo.train()
 
