@@ -41,6 +41,9 @@ from ray.rllib.examples.models.parametric_actions_model import (
     ParametricActionsModel,
     TorchParametricActionsModel,
 )
+from ray.rllib.examples.random_parametric_agent import (
+    RandomParametricAlgorithm,
+)
 from ray.rllib.models import ModelCatalog
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.tune.registry import register_env
@@ -177,7 +180,7 @@ if __name__ == "__main__":
     }
 
     results = tune.Tuner(
-        args.run,
+        RandomParametricAlgorithm if args.run == "random" else args.run,
         run_config=air.RunConfig(stop=stop, verbose=1),
         param_space=config,
     ).fit()
