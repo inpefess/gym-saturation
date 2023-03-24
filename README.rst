@@ -22,10 +22,7 @@ gym-saturation
 <https://gymnasium.farama.org/>`__ environments for reinforcement learning
 (RL) agents striving to prove theorems. Currently, only theorems
 written in `TPTP library <https://tptp.org>`__ formal language are
-supported. ``gym-saturation`` implements the ‘given clause’ algorithm
-(similar to one used in `Vampire
-<https://github.com/vprover/vampire>`__ and `E Prover
-<https://github.com/eprover/eprover>`__).
+supported.
 
 There are two environments in ``gym-saturation``: ``VampireEnv`` and
 ``IProverEnv``. ``VampireEnv`` is a wrapper around a recent
