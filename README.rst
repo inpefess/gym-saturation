@@ -25,9 +25,10 @@ written in `TPTP library <https://tptp.org>`__ formal language are
 supported.
 
 There are two environments in ``gym-saturation``: ``VampireEnv`` and
-``IProverEnv``. ``VampireEnv`` is a wrapper around a recent
-``Vampire`` prover, and ``IProverEnv`` relies on an experimental
-version of `iProver <https://gitlab.com/korovin/iprover/>`__.
+``IProverEnv``. ``VampireEnv`` is a wrapper around a recent `Vampire
+<https://github.com/vprover/vampire>`__ prover, and ``IProverEnv``
+relies on an experimental version of `iProver
+<https://gitlab.com/korovin/iprover/>`__.
 
 In contrast to monolithic architecture of a typical Automated Theorem
 Prover (ATP), ``gym-saturation`` gives different agents opportunities
