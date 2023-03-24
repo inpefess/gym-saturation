@@ -37,8 +37,8 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
 
     .. _parametric_actions:
 
-    It's incremental, i. e. it embeds only the new clauses in the observation.
-    It defines the clauses as old if their order numbers are small than the
+    It's incremental, i.e. it embeds only the new clauses in the observation.
+    It defines the clauses as old if their order numbers are smaller than the
     previous step maximum.
 
     >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
@@ -155,7 +155,6 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
         observation, reward, terminated, truncated, info = self.env.step(
             action
         )
-        info[REAL_OBS] = observation
         return (
             self.observation(observation),
             reward,

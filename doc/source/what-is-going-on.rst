@@ -41,7 +41,7 @@ An observation visible by an agent is a Python dictionary having two keys: `acti
 
 `real_obs` is the state (a tuple of clauses). After the clause is added to the state, we don't change, although the respective entries of the `action_mask` can change.
 
-One can always use an `ObservationWrapper <https://gymnasium.farama.org/api/wrappers/observation_wrappers/#gymnasium.ObservationWrapper>`__ to parse `real_obs` to a tensor representation. `gym-saturation` provides a couple of such wrappers: a generic :ref:`ParametricActionsWrapper<parametric_actions>` for any tensor representation, :ref:`AST2VecWrapper<ast2vec_wrapper>` which can be used to get tensor representation from more or less any TorchServe model (`ast2vec <https://gitlab.com/inpefess/ast2vec>`__ by default), and :ref:`FakeBoxWrapper<fake_box>` useful for a non contextual multi-armed bandit setting.
+One can always use an `ObservationWrapper <https://gymnasium.farama.org/api/wrappers/observation_wrappers/#gymnasium.ObservationWrapper>`__ to parse `real_obs` to a tensor representation. `gym-saturation` provides a couple of such wrappers: a generic :ref:`ParametricActionsWrapper<parametric_actions>` for any tensor representation, :ref:`AST2VecWrapper<ast2vec_wrapper>` which can be used to get tensor representation from more or less any TorchServe model (`ast2vec <https://gitlab.com/inpefess/ast2vec>`__ by default), and :ref:`ConstantParametricActionsWrapper<constant_parametric_actions>` useful for a non contextual multi-armed bandit setting.
 
 Action
 *******

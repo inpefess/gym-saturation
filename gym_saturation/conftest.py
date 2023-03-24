@@ -18,12 +18,13 @@ Fixtures for the Tests
 """
 import os
 import sys
-from http import HTTPStatus
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import HTTPServer
 from threading import Thread
 from typing import Generator
 
 from pytest import fixture
+
+from gym_saturation.dummy_http_handler import DummyHTTPHandler
 
 if sys.version_info.major == 3 and sys.version_info.minor >= 9:
     # pylint: disable=no-name-in-module
@@ -43,18 +44,6 @@ def mock_tptp_folder() -> Traversable:
     return files("gym_saturation").joinpath(
         os.path.join("resources", "TPTP-mock")
     )
-
-
-class DummyHTTPHandler(BaseHTTPRequestHandler):
-    """A dummy handler transforming strings to vectors."""
-
-    # pylint: disable=invalid-name
-    def do_POST(self) -> None:
-        """Respond with 256 float ones as a dummy embedding."""
-        self.send_response(HTTPStatus.OK)
-        self.send_header("Content-Type", "application/json")
-        self.end_headers()
-        self.wfile.write(str(256 * [1.0]).encode("utf-8"))
 
 
 @fixture(autouse=True, scope="session")

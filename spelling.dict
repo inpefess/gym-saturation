@@ -100,7 +100,6 @@ arxiv
 cgi
 rllib
 ParametricActionsWrapper
-FakeBoxWrapper
 iProver
 DNN
 txt
@@ -110,3 +109,5 @@ pytorch
 SeeTPTP
 VecWrapper
 pdf
+ConstantParametricActionsWrapper
+embeddings

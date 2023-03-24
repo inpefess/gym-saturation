@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "0.8.0"
+version = "0.8.2"
 description = "Gymnasium environments for saturation provers"
 authors = ["Boris Shminke <boris@shminke.ml>"]
 license = "Apache-2.0"
@@ -42,6 +42,7 @@ pydocstyle = "*"
 tbump = "*"
 pyenchant = "*"
 flake8 = "*"
+toml = "*"
 
 [tool.black]
 line-length=79
@@ -62,7 +63,6 @@ doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
 
 [tool.pylint.MASTER]
 load-plugins = [
-    "pylint.extensions.consider_ternary_expression",
     "pylint.extensions.docparams",
     "pylint.extensions.mccabe",
     "pylint.extensions.set_membership",
@@ -133,7 +133,7 @@ commands =
 github_url = "https://github.com/inpfess/gym-saturation/"
 
 [tool.tbump.version]
-current = "0.8.0"
+current = "0.8.2"
 regex = '''
   (?P<major>\d+)
   \.

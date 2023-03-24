@@ -30,67 +30,74 @@ values, not all algorithm options are supported at the moment. For example,
 algorithms might crash if they don't properly ignore the -inf action scores.
 Working configurations are given below.
 """
-
-import argparse
 import os
+from typing import Any, Dict, List, Optional
 
 import gymnasium as gym
 import ray
 from ray import air, tune
+from ray.rllib.algorithms.callbacks import DefaultCallbacks
+from ray.rllib.env import BaseEnv
+from ray.rllib.env.env_context import EnvContext
+from ray.rllib.evaluation import RolloutWorker
+from ray.rllib.evaluation.episode_v2 import EpisodeV2
 from ray.rllib.examples.models.parametric_actions_model import (
     ParametricActionsModel,
-    TorchParametricActionsModel,
-)
-from ray.rllib.examples.random_parametric_agent import (
-    RandomParametricAlgorithm,
 )
 from ray.rllib.models import ModelCatalog
+from ray.rllib.policy import Policy
 from ray.rllib.utils.test_utils import check_learning_achieved
 from ray.tune.registry import register_env
 
+from gym_saturation.envs.saturation_env import PROBLEM_FILENAME, SaturationEnv
 from gym_saturation.wrappers.ast2vec_wrapper import AST2VecWrapper
 from gym_saturation.wrappers.duplicate_key_obs import DuplicateKeyObsWrapper
+from gym_saturation.wrappers.parametric_actions_wrapper import (
+    PARAMETRIC_ACTIONS,
+)
 
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--run",
-    type=str,
-    default="PPO",
-    help="The RLlib-registered algorithm to use.",
-)
-parser.add_argument(
-    "--framework",
-    choices=["tf", "tf2", "torch"],
-    default="tf",
-    help="The DL framework specifier.",
-)
-parser.add_argument(
-    "--as-test",
-    action="store_true",
-    help="Whether this script should be run as a test: --stop-reward must "
-    "be achieved within --stop-timesteps AND --stop-iters.",
-)
-parser.add_argument(
-    "--stop-iters",
-    type=int,
-    default=200,
-    help="Number of iterations to train.",
-)
-parser.add_argument(
-    "--stop-timesteps",
-    type=int,
-    default=100000,
-    help="Number of timesteps to train.",
-)
-parser.add_argument(
-    "--stop-reward",
-    type=float,
-    default=150.0,
-    help="Reward at which we stop training.",
-)
+
+def curriculum_fn(
+    train_results: Dict[str, Any],
+    task_settable_env: SaturationEnv,
+    env_ctx: EnvContext,
+) -> List[str]:
+    current_task = task_settable_env.get_task()
+    problem_filename = current_task[0]
+    if train_results["episode_reward_mean"] > 0.95:
+        new_task_index = (
+            task_settable_env.problem_list.index(problem_filename) + 1
+        )
+        if new_task_index < len(task_settable_env.problem_list):
+            new_task = [task_settable_env.problem_list[new_task_index]]
+        else:
+            new_task = []
+    else:
+        new_task = current_task
+    return new_task
+
+
+class TerminatedPerFile(DefaultCallbacks):
+    def on_episode_end(
+        self,
+        *,
+        worker: RolloutWorker,
+        base_env: BaseEnv,
+        policies: Dict[str, Policy],
+        episode: EpisodeV2,
+        env_index: Optional[int],
+        **kwargs,
+    ) -> None:
+        agent_id = episode.get_agents()[0]
+        problem_filename = os.path.splitext(
+            os.path.basename(episode._last_infos[agent_id][PROBLEM_FILENAME])
+        )[0]
+        episode.custom_metrics[f"terminated/{problem_filename}"] = (
+            1.0 if episode.is_terminated(agent_id) else 0.0
+        )
+
 
 if __name__ == "__main__":
-    args = parser.parse_args()
     ray.init()
     problem_list = [
         os.path.join(
@@ -99,8 +106,21 @@ if __name__ == "__main__":
             "TPTP-v8.1.2",
             "Problems",
             "SET",
-            "SET001-1.p",
+            f"SET0{s}.p",
         )
+        for s in [
+            "01-1",  # 19
+            "03-1",  # 26
+            "04-1",  # 26
+            "06-1",  # 28
+            "02-1",  # 40
+            "08-1",  # 173
+            "09-1",  # 328
+            "05-1",  # 1760
+            "11-1",  # 2497
+            "10-1",  # 8083
+            "07-1",  # 14405
+        ]
     ]
     # it's a standard dimension returned by ast2vec
     EMBEDDING_DIM = 256
@@ -110,7 +130,7 @@ if __name__ == "__main__":
     # decrease ``EMBEDDING_DIM``, so we keep ``MAX_CLAUSES`` small. Of course,
     # one can use a different model instead of the default one (
     # ``ParametricActionsModel``).
-    MAX_CLAUSES = 20
+    MAX_CLAUSES = 200
     register_env(
         "pa_cartpole",
         # and now we register our environment instead of CartPole
@@ -123,69 +143,33 @@ if __name__ == "__main__":
                 ),
                 features_num=EMBEDDING_DIM,
             ),
-            # ``ParametricActionsModel`` expects a key 'cart' (from the
-            # CartPole environment) to be present in the observation
-            # dictionary. We add such a key and use 'avail_actions' as its
-            # value, since in case of the given clause algorithm, the clauses
-            # to choose from are both actions and observations.
+            key_to_duplicate=PARAMETRIC_ACTIONS,
             new_key="cart",
-            key_to_duplicate="avail_actions",
         ),
     )
-    ModelCatalog.register_custom_model(
-        "pa_model",
-        TorchParametricActionsModel
-        if args.framework == "torch"
-        else ParametricActionsModel,
-    )
-
-    if args.run == "DQN":
-        cfg = {
-            # TODO(ekl) we need to set these to prevent the masked values
-            # from being further processed in DistributionalQModel, which
-            # would mess up the masking. It is possible to support these if we
-            # defined a custom DistributionalQModel that is aware of masking.
-            "hiddens": [],
-            "dueling": False,
-        }
-    else:
-        cfg = {}
-
     config = dict(
         {
             "env": "pa_cartpole",
+            "env_task_fn": curriculum_fn,
             "model": {
-                "custom_model": "pa_model",
+                "custom_model": ParametricActionsModel,
                 # we pass relevant parameters to ``ParametricActionsModel``
                 "custom_model_config": {
                     "true_obs_shape": (EMBEDDING_DIM * MAX_CLAUSES,),
                     "action_embed_size": EMBEDDING_DIM,
                 },
             },
-            # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-            "num_gpus": int(os.environ.get("RLLIB_NUM_GPUS", "0")),
+            "num_gpus": 0,
             "num_workers": 0,
-            "framework": args.framework,
             # standard Gymnasium env_check doesn't use action masks
             # (even for standard spaces)
             "disable_env_checking": True,
+            "callbacks": TerminatedPerFile,
         },
-        **cfg
     )
-
-    stop = {
-        "training_iteration": args.stop_iters,
-        "timesteps_total": args.stop_timesteps,
-        "episode_reward_mean": args.stop_reward,
-    }
-
     results = tune.Tuner(
-        RandomParametricAlgorithm if args.run == "random" else args.run,
-        run_config=air.RunConfig(stop=stop, verbose=1),
+        "PPO",
+        run_config=air.RunConfig(),
         param_space=config,
     ).fit()
-
-    if args.as_test:
-        check_learning_achieved(results, args.stop_reward)
-
     ray.shutdown()

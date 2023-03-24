@@ -17,15 +17,22 @@
 An examples of Thompson sampling
 =================================
 """
+import argparse
 import os
 from typing import Any, Dict
 
 import gymnasium as gym
+from ray.rllib.algorithms.algorithm import Algorithm
+from ray.rllib.algorithms.algorithm_config import AlgorithmConfig
 from ray.rllib.algorithms.bandit import BanditLinTSConfig
+from ray.rllib.examples.policy.random_policy import RandomPolicy
+from ray.rllib.policy.sample_batch import SampleBatch
 from ray.tune.registry import register_env
 
 from gym_saturation.wrappers.age_weight_bandit import AgeWeightBandit
-from gym_saturation.wrappers.fake_box_observation import FakeBoxObservation
+from gym_saturation.wrappers.constant_parametric_actions import (
+    ConstantParametricActionsWrapper,
+)
 
 
 def env_creator(env_config: Dict[str, Any]) -> gym.Env:
@@ -35,13 +42,55 @@ def env_creator(env_config: Dict[str, Any]) -> gym.Env:
     :param env_config: an environment config
     :returns: an environment
     """
-    return FakeBoxObservation(
-        AgeWeightBandit(gym.make("Vampire-v0", **env_config))
+    return ConstantParametricActionsWrapper(
+        AgeWeightBandit(gym.make("Vampire-v0", **env_config)),
+        avail_actions_key="item",
     )
+
+
+class PatchedRandomPolicy(RandomPolicy):
+    """RandomPolicy from Ray examples misses a couple of methods."""
+
+    # pylint: disable=unused-argument, missing-param-doc
+    def load_batch_into_buffer(
+        self, batch: SampleBatch, buffer_index: int = 0
+    ) -> int:
+        """Don't load anything anywhere."""
+        return 0
+
+    # pylint: disable=unused-argument
+    def learn_on_loaded_batch(
+        self, offset: int = 0, buffer_index: int = 0
+    ) -> dict:
+        """Don't learn anything and return empty results."""
+        return {}
+
+
+# pylint: disable=too-few-public-methods
+class RandomAlgorithm(Algorithm):
+    """Algorithm taking random actions and not learning anything."""
+
+    # pylint: disable=unused-argument, missing-param-doc
+    @classmethod
+    def get_default_policy_class(cls, config: AlgorithmConfig) -> RandomPolicy:
+        """We created PatchedRandomPolicy exactly for this algorithm."""
+        return PatchedRandomPolicy
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--random_baseline",
+        action="store_true",
+        help="Run random baseline instead of Thompson sampling",
+    )
+    return parser.parse_args()
 
 
 def train_thompson_sampling() -> None:
     """Train Thompson sampling."""
+    args = parse_args()
     register_env("VampireBandit", env_creator)
     problem_list = [
         os.path.join(
@@ -53,15 +102,15 @@ def train_thompson_sampling() -> None:
             "SET001-1.p",
         )
     ]
-    config = (
-        BanditLinTSConfig()
-        .rollouts(num_rollout_workers=10)
-        .environment(
-            env_config={"max_clauses": 20, "problem_list": problem_list}
-        )
-    )
-    algo = config.build(env="VampireBandit")
-    for _ in range(1000):
+    if args.random_baseline:
+        config = AlgorithmConfig(RandomAlgorithm).framework("torch")
+    else:
+        config = BanditLinTSConfig()
+    algo = config.environment(
+        "VampireBandit",
+        env_config={"max_clauses": 20, "problem_list": problem_list},
+    ).build()
+    for _ in range(20):
         algo.train()
 
 

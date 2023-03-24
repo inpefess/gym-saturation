@@ -32,6 +32,8 @@ Common modules
 .. automodule:: gym_saturation.agent_testing
    :members:
    :special-members: __init__, __call__
+.. automodule:: gym_saturation.dummy_http_handler
+   :members:		     
 		     
 Environments
 *************
@@ -44,6 +46,8 @@ Environments
 .. automodule:: gym_saturation.envs.iprover_env
    :members:
    :special-members: __init__
+.. automodule:: gym_saturation.envs.dummy_saturation_env
+   :members:
 
 Environment Wrappers
 *********************
@@ -55,5 +59,7 @@ Environment Wrappers
    :special-members: __init__
 .. automodule:: gym_saturation.wrappers.age_weight_bandit
    :members:
-.. automodule:: gym_saturation.wrappers.fake_box_observation
+.. automodule:: gym_saturation.wrappers.constant_parametric_actions
+   :members:
+.. automodule:: gym_saturation.wrappers.duplicate_key_obs
    :members:
