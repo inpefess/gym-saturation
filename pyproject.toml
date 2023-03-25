@@ -36,13 +36,13 @@ pylint = "*"
 pytest-coverage = "*"
 pre-commit = "*"
 types-dataclasses = "*"
-sphinx-rtd-theme = "*"
 sphinx-autodoc-typehints = "*"
 pydocstyle = "*"
 tbump = "*"
 pyenchant = "*"
 flake8 = "*"
 toml = "*"
+furo = "*"
 
 [tool.black]
 line-length=79

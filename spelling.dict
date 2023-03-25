@@ -64,7 +64,6 @@ automodule
 vprover
 eprover
 schedmd
-rtd
 readthedocs
 utils
 ProofState
