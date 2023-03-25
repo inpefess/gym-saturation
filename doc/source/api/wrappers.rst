@@ -1,5 +1,5 @@
 ..
-  Copyright 2021-2023 Boris Shminke
+  Copyright 2023 Boris Shminke
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -13,31 +13,18 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-.. include:: ../../README.rst
-    
-.. toctree::
-   :hidden:
-   :caption: Introduction
-
-   basic-usage
-   
-.. toctree::
-   :hidden:
-   :caption: API
-
-   api/environments
-   api/wrappers
-   api/utils
-
-.. toctree::
-   :hidden:
-   :caption: Tutorials
-
-   tutorials/testing-an-agent
-   tutorials/experiments
-
-.. toctree::
-   :hidden:
-   :caption: Development
-
-   GitHub <https://github.com/inpefess/gym-saturation>
+Wrappers
+*********
+.. automodule:: gym_saturation.wrappers.parametric_actions_wrapper
+   :members:
+   :special-members: __init__
+.. automodule:: gym_saturation.wrappers.ast2vec_wrapper
+   :members:
+   :special-members: __init__
+.. automodule:: gym_saturation.wrappers.age_weight_bandit
+   :members:
+.. automodule:: gym_saturation.wrappers.constant_parametric_actions
+   :members:
+.. automodule:: gym_saturation.wrappers.duplicate_key_obs
+   :members:
+   :special-members: __init__
