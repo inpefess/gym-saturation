@@ -17,10 +17,22 @@
 Logic Operations Utility Functions
 ===================================
 """
+import os
+import sys
 from itertools import chain
 from typing import Any, Dict, Tuple
 
+if sys.version_info.major == 3 and sys.version_info.minor >= 9:
+    # pylint: disable=no-name-in-module
+    from importlib.resources import files  # type: ignore
+else:  # pragma: no cover
+    from importlib_resources import files  # pylint: disable=import-error
+
+
 FALSEHOOD_SYMBOL = "$false"
+MOCK_TPTP_FOLDER = str(
+    files("gym_saturation").joinpath(os.path.join("resources", "TPTP-mock"))
+)
 
 
 def pretty_print(clause: Dict[str, Any]) -> str:

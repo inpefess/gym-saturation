@@ -28,20 +28,20 @@ class VampireWrapper:
 
     .. _vampire-wrapper :
 
-    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
+    >>> from gym_saturation.utils import MOCK_TPTP_FOLDER
     >>> import os
     >>> tptp_problem = os.path.join(
-    ...     tptp_folder, "Problems", "TST", "TST003-1.p"
+    ...     MOCK_TPTP_FOLDER, "Problems", "TST", "TST003-1.p"
     ... )
     >>> vampire = VampireWrapper("vampire")
     >>> vampire.pick_a_clause("2")
     Traceback (most recent call last):
      ...
     ValueError: start solving a problem first!
-    >>> old_result = vampire.start(tptp_problem, tptp_folder)
+    >>> old_result = vampire.start(tptp_problem, MOCK_TPTP_FOLDER)
     >>> print(old_result)
-    (('input', '1', 'animal(X0) | ~carnivore(X0) [input]'),...
-    >>> new_result = vampire.start(tptp_problem, tptp_folder)
+    (('input', '1', 'mortal(X0) | ~man(X0) [input]'),...
+    >>> new_result = vampire.start(tptp_problem, MOCK_TPTP_FOLDER)
     >>> old_result == new_result
     True
     >>> vampire.pick_a_clause("wrong")

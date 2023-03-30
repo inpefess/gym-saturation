@@ -33,12 +33,11 @@ import numpy as np
 from gym_saturation.envs.saturation_env import (
     ACTION_MASK,
     MAX_CLAUSES,
-    PROBLEM_FILENAME,
     REAL_OBS,
     SaturationEnv,
 )
 from gym_saturation.relay_server import RelayServer, RelayTCPHandler
-from gym_saturation.utils import FALSEHOOD_SYMBOL
+from gym_saturation.utils import FALSEHOOD_SYMBOL, MOCK_TPTP_FOLDER
 
 
 async def _iprover_start(
@@ -81,11 +80,12 @@ class IProverEnv(SaturationEnv):
     """
     An RL environment around iProver.
 
-    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
+    >>> from gym_saturation.utils import MOCK_TPTP_FOLDER
     >>> from glob import glob
-    >>> problems = sorted(glob(os.path.join(tptp_folder, "Problems", "SET",
-    ...     "*-*.p")))
-    >>> iprover_env = IProverEnv(problems)
+    >>> problems = sorted(glob(os.path.join(MOCK_TPTP_FOLDER, "Problems",
+    ...      "SET", "*-*.p")))
+    >>> iprover_env = IProverEnv()
+    >>> iprover_env.set_task(problems[0])
     >>> observation, info = iprover_env.reset()
     >>> for action in [0, 1, 2, 4, 8, 9, 10]:
     ...     observation, reward, terminated, truncated, info = (iprover_env.
@@ -97,7 +97,6 @@ class IProverEnv(SaturationEnv):
 
     def __init__(
         self,
-        problem_list: List[str],
         max_clauses: int = MAX_CLAUSES,
         port_pair: Optional[Tuple[int, int]] = None,
         iprover_binary_path: str = "iproveropt",
@@ -105,14 +104,13 @@ class IProverEnv(SaturationEnv):
         """
         Initialise the environment.
 
-        :param problem_list: a list of names of TPTP problem files
         :param max_clauses: maximal number of clauses in proof state
         :param port_pair: iProver will connect to the first port,
             a port to listen for agent's connection is the second one
         :param iprover_binary_path: a path to iProver binary;
             by default, we assume it to be ``iproveropt`` and in the $PATH
         """
-        super().__init__(problem_list, max_clauses)
+        super().__init__(max_clauses)
         (
             self.iprover_port,
             self.agent_port,
@@ -133,6 +131,9 @@ class IProverEnv(SaturationEnv):
         )
         self.relay_server_thread.daemon = True
         self.relay_server_thread.start()
+        self.task = os.path.join(
+            MOCK_TPTP_FOLDER, "Problems", "TST", "TST003-1.p"
+        )
 
     def _parse_batch_clauses(
         self, batch_clauses: List[Dict[str, Any]]
@@ -200,7 +201,7 @@ class IProverEnv(SaturationEnv):
         super().reset(seed=seed)
         asyncio.run(
             _iprover_start(
-                self.iprover_port, self.get_task()[0], self.iprover_binary_path
+                self.iprover_port, self.get_task(), self.iprover_binary_path
             )
         )
         time.sleep(2)
@@ -209,7 +210,7 @@ class IProverEnv(SaturationEnv):
         return {
             REAL_OBS: self.state.clauses,
             ACTION_MASK: self.state.action_mask,
-        }, {PROBLEM_FILENAME: self.problem_filename}
+        }, {}
 
     def _get_raw_data(self) -> bytes:
         with socket.create_connection(

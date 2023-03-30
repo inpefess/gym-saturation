@@ -18,18 +18,17 @@ Saturation Environment with Vampire back-end
 ============================================
 """
 import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 
 from gym_saturation.envs.saturation_env import (
     ACTION_MASK,
     MAX_CLAUSES,
-    PROBLEM_FILENAME,
     REAL_OBS,
     SaturationEnv,
 )
-from gym_saturation.utils import FALSEHOOD_SYMBOL
+from gym_saturation.utils import FALSEHOOD_SYMBOL, MOCK_TPTP_FOLDER
 from gym_saturation.vampire_wrapper import VampireWrapper
 
 
@@ -40,17 +39,18 @@ class VampireEnv(SaturationEnv):
     This class has the same API as SaturationEnv but uses another back-end.
     Here we have only a simple smoke test.
 
-    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
-    >>> vampire_binary = os.path.join(tptp_folder, "..", "vampire-mock")
-    >>> vampire_env = VampireEnv(["test"], vampire_binary_path=vampire_binary)
+    >>> from gym_saturation.utils import MOCK_TPTP_FOLDER
+    >>> vampire_binary = os.path.join(MOCK_TPTP_FOLDER, "..", "vampire-mock")
+    >>> vampire_env = VampireEnv(vampire_binary_path=vampire_binary)
     >>> vampire_env.reset()
     Traceback (most recent call last):
      ...
     ValueError: ('Unexpected response type: ', 'who could expect that?')
     >>> from glob import glob
-    >>> set_problems = sorted(glob(os.path.join(tptp_folder, "Problems",
+    >>> set_problems = sorted(glob(os.path.join(MOCK_TPTP_FOLDER, "Problems",
     ...     "SET", "*-*.p")))
-    >>> vampire_env = VampireEnv(set_problems)
+    >>> vampire_env = VampireEnv()
+    >>> vampire_env.set_task(set_problems[0])
     >>> observation, info = vampire_env.reset()
     >>> for action in [0, 3, 6, 7, 8, 9, 10]:
     ...     observation, reward, terminated, truncated, info = (
@@ -60,8 +60,10 @@ class VampireEnv(SaturationEnv):
 
     test of a problem which is solver immediately after `reset`
 
-    >>> problems = [os.path.join(tptp_folder, "Problems", "TST", "TST004-1.p")]
-    >>> vampire_env = VampireEnv(problems)
+    >>> problem_filename = os.path.join(
+    ...     MOCK_TPTP_FOLDER, "Problems", "TST", "TST004-1.p")
+    >>> vampire_env = VampireEnv()
+    >>> vampire_env.set_task(problem_filename)
     >>> observation, info = vampire_env.reset()
     >>> obs, reward, terminated, truncated, info = vampire_env.step(0)
     >>> print(int(reward), terminated, truncated)
@@ -73,9 +75,9 @@ class VampireEnv(SaturationEnv):
     >>> import gymnasium as gym
     >>> env = gym.make(
     ...     "Vampire-v0",
-    ...     problem_list=set_problems,
     ...     max_clauses=9
     ... )
+    >>> env.set_task(set_problems[0])
     >>> check_env(env.unwrapped)
     cnf(1, ...).
     ...
@@ -84,7 +86,6 @@ class VampireEnv(SaturationEnv):
 
     def __init__(
         self,
-        problem_list: List[str],
         max_clauses: int = MAX_CLAUSES,
         render_mode: str = "human",
         vampire_binary_path: str = "vampire",
@@ -92,13 +93,15 @@ class VampireEnv(SaturationEnv):
         """
         Initialise a :ref:`VampireWrapper <vampire-wrapper>`.
 
-        :param problem_list: a list of names of TPTP problem files
         :param max_clauses: maximal number of clauses in proof state
         :param vampire_binary_path: a path to Vampire binary;
             by default we expect it to be in the $PATH
         """
-        super().__init__(problem_list, max_clauses, render_mode)
+        super().__init__(max_clauses, render_mode)
         self._vampire = VampireWrapper(vampire_binary_path)
+        self.task = os.path.join(
+            MOCK_TPTP_FOLDER, "Problems", "TST", "TST003-1.p"
+        )
 
     def _parse_vampire_response(
         self, vampire_response: Tuple[Tuple[str, str, str], ...]
@@ -127,16 +130,14 @@ class VampireEnv(SaturationEnv):
     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
         tptp_folder = os.path.join(
-            os.path.dirname(self.problem_filename), "..", ".."
+            os.path.dirname(self.get_task()), "..", ".."
         )
-        vampire_response = self._vampire.start(
-            self.problem_filename, tptp_folder
-        )
+        vampire_response = self._vampire.start(self.get_task(), tptp_folder)
         self._parse_vampire_response(vampire_response)
         return {
             REAL_OBS: self.state.clauses,
             ACTION_MASK: self.state.action_mask,
-        }, {PROBLEM_FILENAME: self.problem_filename}
+        }, {}
 
     def _do_deductions(self, action: np.int64) -> None:
         if any(

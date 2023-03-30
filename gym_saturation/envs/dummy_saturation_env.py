@@ -29,13 +29,32 @@ from gym_saturation.envs.saturation_env import (
 from gym_saturation.proof_state import ProofState
 from gym_saturation.utils import FALSEHOOD_SYMBOL
 
-BASE_CLAUSE = {
-    "label": "dummy",
-    "role": "lemma",
-    "inference_rule": "dummy",
-    "inference_parents": (),
-    "birth_step": 0,
-}
+BARBARA = (
+    {
+        "label": "all_men_are_mortal",
+        "role": "hypothesis",
+        "literals": "~man(X) | mortal(X)",
+        "inference_rule": "input",
+        "inference_parents": [],
+        "birth_step": 0,
+    },
+    {
+        "label": "socrates_is_a_man",
+        "role": "hypothesis",
+        "literals": "man(socrates)",
+        "inference_rule": "input",
+        "inference_parents": [],
+        "birth_step": 0,
+    },
+    {
+        "label": "socrates_is_mortal",
+        "role": "negated_conjecture",
+        "literals": "mortal(socrates)",
+        "inference_rule": "input",
+        "inference_parents": [],
+        "birth_step": 0,
+    },
+)
 
 
 class DummySaturationEnv(SaturationEnv):
@@ -45,18 +64,17 @@ class DummySaturationEnv(SaturationEnv):
         self,
         *,
         seed: Optional[int] = None,
-        options: Optional[Dict[str, Any]] = None
+        options: Optional[Dict[str, Any]] = None,
     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
-        one = {**BASE_CLAUSE, **{"literals": "p(X)", "label": "one"}}
-        two = {**BASE_CLAUSE, **{"literals": "p(Y)", "label": "two"}}
-        three = {**BASE_CLAUSE, **{"literals": "p(Z)", "label": "three"}}
-        four = {**BASE_CLAUSE, **{"literals": "~p(X)", "label": "four"}}
         self.state = ProofState(
-            clauses=[one, two, three, four],
-            clause_labels=["one", "two", "three", "four"],
-            action_mask=np.array([1.0, 1.0, 1.0, 1.0, 0.0]),
-            step_number=0,
+            clauses=list(BARBARA),
+            clause_labels=[str(clause["label"]) for clause in BARBARA],
+            action_mask=np.pad(
+                np.ones((len(BARBARA),), dtype=np.float32),
+                pad_width=(0, int(self.action_space.n) - len(BARBARA)),
+            ),
+            step_number=-1,
         )
         return {
             REAL_OBS: self.state.clauses,
@@ -64,15 +82,26 @@ class DummySaturationEnv(SaturationEnv):
         }, {}
 
     def _do_deductions(self, action: np.int64) -> None:
-        if action == 3:
+        if action == 1:
+            self.state.clauses.append(
+                {
+                    "literals": "dummy",
+                    "role": "lemma",
+                    "label": "dummy",
+                    "inference_rule": "dummy",
+                    "inference_parents": [],
+                }
+            )
+            self.state.clause_labels.append("dummy")
+        if action == 2:
             self.state.clauses.append(
                 {
                     "literals": FALSEHOOD_SYMBOL,
                     "role": "lemma",
                     "label": "falsehood",
                     "inference_rule": "dummy",
-                    "inference_parents": ("four",),
+                    "inference_parents": [],
                 }
             )
             self.state.clause_labels.append("falsehood")
-            self.state.action_mask[4] = 1.0
+            self.state.action_mask[len(self.state.clauses)] = 1.0

@@ -19,7 +19,7 @@ Saturation Environment
 """
 import random
 from abc import abstractmethod
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 from gymnasium import Env, spaces
@@ -28,8 +28,7 @@ from gymnasium.spaces.text import alphanumeric
 from gym_saturation.proof_state import ProofState
 from gym_saturation.utils import FALSEHOOD_SYMBOL, pretty_print
 
-PROBLEM_FILENAME = "problem_filename"
-MAX_CLAUSES = 100000
+MAX_CLAUSES = 1000
 ALPHANUMERIC_WITH_UNDERSCORE = "".join(alphanumeric) + "_"
 REAL_OBS = "real_obs"
 ACTION_MASK = "action_mask"
@@ -41,33 +40,26 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
 
     .. _saturation_env:
 
-    >>> import os
-    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
-    >>> from glob import glob
-    >>> problem_list = sorted(glob(
-    ...     os.path.join(tptp_folder, "Problems", "*", "*1-1.p")
-    ... ))
     >>> from gym_saturation.envs.dummy_saturation_env import DummySaturationEnv
-    >>> env = DummySaturationEnv(problem_list)
-    >>> len(env.reset()[0])
-    2
+    >>> env = DummySaturationEnv()
+    >>> obs, _ = env.reset()
+    >>> obs[ACTION_MASK].sum() == len(obs[REAL_OBS])
+    True
 
     one can look at the current state in TPTP format
 
     >>> env.render()
-    cnf(one, lemma, p(X), inference(dummy, [], [])).
-    cnf(two, lemma, p(Y), inference(dummy, [], [])).
-    cnf(three, lemma, p(Z), inference(dummy, [], [])).
-    cnf(four, lemma, ~p(X), inference(dummy, [], [])).
+    cnf(all_men_are_mortal, hypothesis, ~man(X) | mortal(X)...
+    cnf(socrates_is_a_man, hypothesis, man(socrates)...
+    cnf(socrates_is_mortal, negated_conjecture, mortal(socrates)...
 
     ``ansi`` mode returns the same string instead of printing it
 
     >>> env.render_mode = "ansi"
     >>> print(env.render())
-    cnf(one, lemma, p(X), inference(dummy, [], [])).
-    cnf(two, lemma, p(Y), inference(dummy, [], [])).
-    cnf(three, lemma, p(Z), inference(dummy, [], [])).
-    cnf(four, lemma, ~p(X), inference(dummy, [], [])).
+    cnf(all_men_are_mortal, hypothesis, ~man(X) | mortal(X)...
+    cnf(socrates_is_a_man, hypothesis, man(socrates)...
+    cnf(socrates_is_mortal, negated_conjecture, mortal(socrates)...
 
     other modes are not implemented yet
 
@@ -95,7 +87,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
 
     if a proof is found, then reward is ``+1``
 
-    >>> observation, reward, terminated, _, _ = env.step(3)
+    >>> observation, reward, terminated, _, _ = env.step(2)
     >>> print(reward, terminated)
     1.0 True
 
@@ -103,35 +95,30 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
     for validation purposes)
 
     >>> from gym_saturation.utils import get_tstp_proof
-    >>> print(get_tstp_proof(observation["real_obs"]))
-    cnf(four, lemma, ~p(X), inference(dummy, [], [])).
-    cnf(falsehood, lemma, $false, inference(dummy, [], [four])).
+    >>> print(get_tstp_proof(observation[REAL_OBS]))
+    cnf(falsehood, lemma, $false, inference(dummy, [], [])).
 
     One can also filter actions relevant to a particular goal:
 
     >>> from gym_saturation.utils import get_positive_actions
-    >>> get_positive_actions(observation["real_obs"])
-    (3, 4)
+    >>> get_positive_actions(observation[REAL_OBS])
+    (3,)
 
     the total number of clauses in the state is limited by the ``max_clauses``
     parameter. Let's try setting it and repeating the same solution of the same
     problem:
 
-    >>> env = DummySaturationEnv(problem_list, max_clauses=3)
-    >>> env.get_task()
-    Traceback (most recent call last):
-     ...
-    ValueError: Task is not set! Call reset or set_task first.
+    >>> env = DummySaturationEnv(max_clauses=3)
+    >>> print(env.get_task())
+    socrates
     >>> old_obs, _ = env.reset(seed=0)
 
     after the first step we bypass ``max_clauses`` by one, so the episode
     finishes with failure:
 
-    >>> obs, reward, terminated, truncated, _ = env.step(0)
+    >>> obs, reward, terminated, truncated, _ = env.step(1)
     >>> terminated, truncated, reward
     (False, True, 0.0)
-    >>> env.sample_tasks(1)
-    [['.../resources/TPTP-mock/Problems/TST/TST001-1.p']]
     """
 
     metadata = {"render_modes": ["ansi", "human"], "render_fps": 1}
@@ -141,7 +128,6 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
 
     def __init__(
         self,
-        problem_list: List[str],
         max_clauses: int = MAX_CLAUSES,
         render_mode: str = "human",
     ):
@@ -152,7 +138,6 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         :param max_clauses: maximal number of clauses to store in proof state
         """
         super().__init__()
-        self.problem_list = problem_list
         self.state = ProofState(
             clauses=[],
             clause_labels=[],
@@ -191,8 +176,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
                 ACTION_MASK: spaces.Box(0, 1, (max_clauses,)),
             }
         )
-        self.task: Optional[List[str]] = None
-        self.problem_filename: str = "/dev/null"
+        self.task: str = "socrates"
         self.render_mode = self._check_render_mode(render_mode)
 
     def _check_render_mode(self, render_mode: str) -> str:
@@ -203,7 +187,6 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
             f"but got {render_mode}"
         )
 
-    @abstractmethod
     def reset(
         self,
         *,
@@ -212,19 +195,16 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
         random.seed(seed)
-        if not self.task:
-            self.set_task([self.problem_list[0]])
         self.state = ProofState(
             clauses=[],
             clause_labels=[],
             action_mask=np.zeros_like(self.state.action_mask),
             step_number=0,
         )
-        self.problem_filename = random.choice(self.get_task())
         return {
             REAL_OBS: self.state.clauses,
             ACTION_MASK: self.state.action_mask,
-        }, {PROBLEM_FILENAME: self.problem_filename}
+        }, {}
 
     @abstractmethod
     def _do_deductions(self, action: np.int64) -> None:
@@ -276,7 +256,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
             reward,
             terminated,
             truncated,
-            {PROBLEM_FILENAME: self.problem_filename},
+            {},
         )
 
     # pylint: disable=inconsistent-return-statements
@@ -294,31 +274,19 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         else:
             super().render()
 
-    def sample_tasks(self, n_tasks: int) -> List[List[str]]:
-        """
-        Sample task of the meta-environment.
-
-        :param n_tasks: number of different TPTP problems needed
-        :returns: a list tasks (lists of absolute paths of TPTP problems)
-        """
-        return [
-            [filename]
-            for filename in random.sample(self.problem_list, n_tasks)
-        ]
-
-    def set_task(self, task: List[str]) -> None:
+    def set_task(self, task: str) -> None:
         """
         Set the specified task to the current environment.
 
-        :param task: a list of absolute paths of TPTP problems
+        :param task: a TPTP problem filename
         """
         self.task = task
 
-    def get_task(self) -> List[str]:
+    def get_task(self) -> str:
         """
         Get the task that the agent is performing in the current environment.
 
-        :returns: a list of absolute paths of TPTP problems
+        :returns: a TPTP problem filename
         :raises ValueError: is task is not set
         """
         if self.task:
