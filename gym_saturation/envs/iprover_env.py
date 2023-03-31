@@ -37,7 +37,7 @@ from gym_saturation.envs.saturation_env import (
     SaturationEnv,
 )
 from gym_saturation.relay_server import RelayServer, RelayTCPHandler
-from gym_saturation.utils import FALSEHOOD_SYMBOL, MOCK_TPTP_FOLDER
+from gym_saturation.utils import MOCK_TPTP_FOLDER
 
 
 async def _iprover_start(
@@ -84,15 +84,14 @@ class IProverEnv(SaturationEnv):
     >>> from glob import glob
     >>> problems = sorted(glob(os.path.join(MOCK_TPTP_FOLDER, "Problems",
     ...      "SET", "*-*.p")))
-    >>> iprover_env = IProverEnv()
-    >>> iprover_env.set_task(problems[0])
-    >>> observation, info = iprover_env.reset()
+    >>> env = IProverEnv()
+    >>> env.set_task(problems[0])
+    >>> observation, info = env.reset()
     >>> for action in [0, 1, 2, 4, 8, 9, 10]:
-    ...     observation, reward, terminated, truncated, info = (iprover_env.
-    ...         step(action))
+    ...     observation, reward, terminated, truncated, info = env.step(action)
     >>> print(reward, terminated, truncated)
     1.0 True False
-    >>> iprover_env.close()
+    >>> env.close()
     """
 
     def __init__(
@@ -149,14 +148,15 @@ class IProverEnv(SaturationEnv):
                     inference_rule,
                     inference_parents,
                 ) = re.findall(
-                    r"cnf\((\w+),\w+,(.*),inference\((.*),.*,\[(.*)\]\)\)\.",
+                    r"cnf\((\w+),\w+,\((.*)\),"
+                    + r"inference\((.*),.*,\[(.*)\]\)\)\.",
                     raw_clause,
                 )[
                     0
                 ]
             except IndexError:
                 label, literals = re.findall(
-                    r"cnf\((\w+),\w+,(.*),file\(.*\)\)\.",
+                    r"cnf\((\w+),\w+,\((.*)\),file\(.*\)\)\.",
                     raw_clause,
                 )[0]
                 inference_rule, inference_parents = "input", None
@@ -179,17 +179,7 @@ class IProverEnv(SaturationEnv):
             r"\% SZS status (\w+) for .+\.p",
             szs_status.replace("\n", ""),
         )[0]
-        if status_code == "Unsatisfiable":
-            self.state.add_clause(
-                {
-                    "label": "dummy",
-                    "literals": FALSEHOOD_SYMBOL,
-                    "inference_rule": "dummy",
-                    "inference_parents": (),
-                    "role": "lemma",
-                }
-            )
-        else:
+        if status_code != "Unsatisfiable":
             raise ValueError(f"unexpected status: {status_code}")
 
     def reset(
