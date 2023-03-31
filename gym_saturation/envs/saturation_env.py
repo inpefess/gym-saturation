@@ -124,6 +124,10 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
     >>> obs, reward, terminated, truncated, _ = env.step(1)
     >>> terminated, truncated, reward
     (False, True, 0.0)
+    >>> DummySaturationEnv(render_mode="rgb_array")
+    Traceback (most recent call last):
+     ...
+    ValueError: Expected a render mode among ['ansi', 'human'] but got rgb_a...
     """
 
     metadata = {"render_modes": ["ansi", "human"], "render_fps": 1}
@@ -176,7 +180,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         if render_mode in self.metadata["render_modes"]:
             return render_mode
         raise ValueError(
-            f"Expected a render mode among {self.metadata['render_modes']}"
+            f"Expected a render mode among {self.metadata['render_modes']} "
             f"but got {render_mode}"
         )
 

@@ -174,14 +174,6 @@ class IProverEnv(SaturationEnv):
             )
             self.state.set_action_mask_by_label(label, 1.0)
 
-    def _parse_szs_status(self, szs_status: str) -> None:
-        status_code = re.findall(
-            r"\% SZS status (\w+) for .+\.p",
-            szs_status.replace("\n", ""),
-        )[0]
-        if status_code != "Unsatisfiable":
-            raise ValueError(f"unexpected status: {status_code}")
-
     def reset(
         self,
         *,
@@ -238,8 +230,6 @@ class IProverEnv(SaturationEnv):
         for iprover_request in iprover_requests:
             if "clauses" in iprover_request:
                 self._parse_batch_clauses(iprover_request["clauses"])
-            if "szs_status" in iprover_request:
-                self._parse_szs_status(iprover_request["szs_status"])
 
     def _do_deductions(self, action: np.int64) -> None:
         given_clause_label = self.state.clause_labels[action][2:]
