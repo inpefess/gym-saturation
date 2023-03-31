@@ -32,6 +32,11 @@ MAX_CLAUSES = 1000
 ALPHANUMERIC_WITH_UNDERSCORE = "".join(alphanumeric) + "_"
 REAL_OBS = "real_obs"
 ACTION_MASK = "action_mask"
+SHORT_TEXT_SPACE = spaces.Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE)
+LONG_TEXT_SPACE = spaces.Text(
+    4000,
+    charset=ALPHANUMERIC_WITH_UNDERSCORE + "(), |~=!$",
+)
 
 
 class SaturationEnv(Env[Dict[str, Any], np.int64]):
@@ -150,33 +155,21 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
                 REAL_OBS: spaces.Sequence(
                     spaces.Dict(
                         {
-                            "label": spaces.Text(
-                                256, charset=ALPHANUMERIC_WITH_UNDERSCORE
-                            ),
-                            "role": spaces.Text(
-                                256, charset=ALPHANUMERIC_WITH_UNDERSCORE
-                            ),
-                            "literals": spaces.Text(
-                                4000,
-                                charset=ALPHANUMERIC_WITH_UNDERSCORE
-                                + "(), |~=!$",
-                            ),
-                            "inference_rule": spaces.Text(
-                                256, charset=ALPHANUMERIC_WITH_UNDERSCORE
-                            ),
+                            "label": SHORT_TEXT_SPACE,
+                            "role": SHORT_TEXT_SPACE,
+                            "literals": LONG_TEXT_SPACE,
+                            "inference_rule": SHORT_TEXT_SPACE,
                             "inference_parents": spaces.Sequence(
-                                spaces.Text(
-                                    256, charset=ALPHANUMERIC_WITH_UNDERSCORE
-                                )
+                                SHORT_TEXT_SPACE
                             ),
-                            "birth_step": spaces.Discrete(1000),
+                            "birth_step": spaces.Discrete(max_clauses),
                         }
                     )
                 ),
                 ACTION_MASK: spaces.Box(0, 1, (max_clauses,)),
             }
         )
-        self.task: str = "socrates"
+        self._task: str = "socrates"
         self.render_mode = self._check_render_mode(render_mode)
 
     def _check_render_mode(self, render_mode: str) -> str:
@@ -202,7 +195,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
             step_number=0,
         )
         return {
-            REAL_OBS: self.state.clauses,
+            REAL_OBS: tuple(self.state.clauses),
             ACTION_MASK: self.state.action_mask,
         }, {}
 
@@ -250,7 +243,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         reward = 1.0 if terminated else 0.0
         return (
             {
-                REAL_OBS: self.state.clauses,
+                REAL_OBS: tuple(self.state.clauses),
                 ACTION_MASK: self.state.action_mask,
             },
             reward,
@@ -280,7 +273,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
 
         :param task: a TPTP problem filename
         """
-        self.task = task
+        self._task = task
 
     def get_task(self) -> str:
         """
@@ -289,6 +282,4 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         :returns: a TPTP problem filename
         :raises ValueError: is task is not set
         """
-        if self.task:
-            return self.task
-        raise ValueError("Task is not set! Call reset or set_task first.")
+        return self._task

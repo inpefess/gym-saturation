@@ -130,7 +130,7 @@ class IProverEnv(SaturationEnv):
         )
         self.relay_server_thread.daemon = True
         self.relay_server_thread.start()
-        self.task = os.path.join(
+        self._task = os.path.join(
             MOCK_TPTP_FOLDER, "Problems", "TST", "TST003-1.p"
         )
 
@@ -198,7 +198,7 @@ class IProverEnv(SaturationEnv):
         data = self._get_json_data()
         self._parse_iprover_requests(data)
         return {
-            REAL_OBS: self.state.clauses,
+            REAL_OBS: tuple(self.state.clauses),
             ACTION_MASK: self.state.action_mask,
         }, {}
 

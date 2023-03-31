@@ -76,9 +76,9 @@ class VampireEnv(SaturationEnv):
     >>> env = gym.make(
     ...     "Vampire-v0",
     ...     max_clauses=9
-    ... )
+    ... ).unwrapped
     >>> env.set_task(set_problems[0])
-    >>> check_env(env.unwrapped)
+    >>> check_env(env)
     cnf(1, ...).
     ...
     cnf(9, ...).
@@ -99,7 +99,7 @@ class VampireEnv(SaturationEnv):
         """
         super().__init__(max_clauses, render_mode)
         self._vampire = VampireWrapper(vampire_binary_path)
-        self.task = os.path.join(
+        self._task = os.path.join(
             MOCK_TPTP_FOLDER, "Problems", "TST", "TST003-1.p"
         )
 
@@ -135,7 +135,7 @@ class VampireEnv(SaturationEnv):
         vampire_response = self._vampire.start(self.get_task(), tptp_folder)
         self._parse_vampire_response(vampire_response)
         return {
-            REAL_OBS: self.state.clauses,
+            REAL_OBS: tuple(self.state.clauses),
             ACTION_MASK: self.state.action_mask,
         }, {}
 
