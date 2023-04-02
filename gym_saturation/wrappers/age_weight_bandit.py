@@ -38,10 +38,10 @@ class AgeWeightBandit(gym.ActionWrapper):
     >>> observation, _, _, _, _ = bandit_env.step(0)
     >>> from gym_saturation.envs.saturation_env import ACTION_MASK
     >>> observation[ACTION_MASK]
-    array([0., 1., 1., 1., 1., 0., 0., 0., 0.], dtype=float32)
+    array([0, 1, 1, 1, 1, 0, 0, 0, 0], dtype=int8)
     >>> observation, _, _, _, _ = bandit_env.step(1)
     >>> observation[ACTION_MASK]
-    array([0., 1., 1., 1., 0., 0., 0., 0., 0.], dtype=float32)
+    array([0, 1, 1, 1, 0, 0, 0, 0, 0], dtype=int8)
     >>> _ = bandit_env.step(2)
     Traceback (most recent call last):
     ...

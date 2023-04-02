@@ -86,7 +86,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         self.state = ProofState(
             clauses=[],
             clause_labels=[],
-            action_mask=np.zeros((max_clauses,), dtype=np.float32),
+            action_mask=np.zeros((max_clauses,), dtype=np.int8),
             step_number=-1,
         )
         self.action_space = spaces.Discrete(max_clauses)
@@ -106,7 +106,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
                         }
                     )
                 ),
-                ACTION_MASK: spaces.Box(0, 1, (max_clauses,)),
+                ACTION_MASK: spaces.Box(0, 1, (max_clauses,), dtype=np.int8),
             }
         )
         self._task = MOCK_TPTP_PROBLEM
