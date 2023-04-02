@@ -47,3 +47,4 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 html_theme = "furo"
+html_title = "gym-saturation documentation"

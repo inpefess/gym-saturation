@@ -14,13 +14,13 @@
   limitations under the License.
 
 .. include:: ../../README.rst
-    
+
 .. toctree::
    :hidden:
    :caption: Introduction
 
    basic-usage
-   
+
 .. toctree::
    :hidden:
    :caption: API
@@ -28,6 +28,12 @@
    api/environments
    api/wrappers
    api/utils
+
+.. toctree::
+   :hidden:
+   :caption: Environments
+
+   environments/vampire
 
 .. toctree::
    :hidden:
