@@ -28,7 +28,7 @@ from gym_saturation.envs.saturation_env import (
     REAL_OBS,
     SaturationEnv,
 )
-from gym_saturation.utils import FALSEHOOD_SYMBOL, MOCK_TPTP_FOLDER
+from gym_saturation.utils import FALSEHOOD_SYMBOL
 from gym_saturation.vampire_wrapper import VampireWrapper
 
 
@@ -36,8 +36,40 @@ class VampireEnv(SaturationEnv):
     """
     An RL environment around a Vampire prover.
 
-    This class has the same API as SaturationEnv but uses another back-end.
-    Here we have only a simple smoke test.
+    We can run a full Gymnasium environment check:
+
+    >>> from gymnasium.utils.env_checker import check_env
+    >>> import gymnasium as gym
+    >>> env = gym.make(
+    ...     "Vampire-v0",
+    ...     max_clauses=5
+    ... ).unwrapped
+    >>> check_env(env)
+    cnf(1, ...).
+    ...
+    cnf(5, ...).
+
+    sometimes Vampire can solve a problem during pre-processing
+
+    >>> from gym_saturation.utils import MOCK_TPTP_PROBLEM
+    >>> trivial_problem = os.path.join(os.path.dirname(MOCK_TPTP_PROBLEM),
+    ...     "TST002-1.p")
+    >>> env.set_task(trivial_problem)
+    >>> _, _ = env.reset()
+    >>> _, _, terminated, _, _ = env.step(0)
+    >>> terminated
+    True
+
+    we can't repeat actions
+
+    >>> _ = env.reset()
+    >>> _ = env.step(0)
+    >>> env.step(0)
+    Traceback (most recent call last):
+     ...
+    ValueError: action 0 is not valid
+
+    a test of an unexpected reply from Vampire
 
     >>> from gym_saturation.utils import MOCK_TPTP_FOLDER
     >>> vampire_binary = os.path.join(MOCK_TPTP_FOLDER, "..", "vampire-mock")
@@ -46,42 +78,6 @@ class VampireEnv(SaturationEnv):
     Traceback (most recent call last):
      ...
     ValueError: ('Unexpected response type: ', 'who could expect that?')
-    >>> from glob import glob
-    >>> set_problems = sorted(glob(os.path.join(MOCK_TPTP_FOLDER, "Problems",
-    ...     "SET", "*-*.p")))
-    >>> vampire_env = VampireEnv()
-    >>> vampire_env.set_task(set_problems[0])
-    >>> observation, info = vampire_env.reset()
-    >>> for action in [0, 3, 6, 7, 8, 9, 10]:
-    ...     observation, reward, terminated, truncated, info = (
-    ...         vampire_env.step(action))
-    >>> print(reward, terminated, truncated)
-    1.0 True False
-
-    test of a problem which is solver immediately after `reset`
-
-    >>> problem_filename = os.path.join(
-    ...     MOCK_TPTP_FOLDER, "Problems", "TST", "TST004-1.p")
-    >>> vampire_env = VampireEnv()
-    >>> vampire_env.set_task(problem_filename)
-    >>> observation, info = vampire_env.reset()
-    >>> obs, reward, terminated, truncated, info = vampire_env.step(0)
-    >>> print(int(reward), terminated, truncated)
-    1 True False
-
-    we can also run a full Gymnasium environment check
-
-    >>> from gymnasium.utils.env_checker import check_env
-    >>> import gymnasium as gym
-    >>> env = gym.make(
-    ...     "Vampire-v0",
-    ...     max_clauses=9
-    ... ).unwrapped
-    >>> env.set_task(set_problems[0])
-    >>> check_env(env)
-    cnf(1, ...).
-    ...
-    cnf(9, ...).
     """
 
     def __init__(
@@ -99,9 +95,6 @@ class VampireEnv(SaturationEnv):
         """
         super().__init__(max_clauses, render_mode)
         self._vampire = VampireWrapper(vampire_binary_path)
-        self._task = os.path.join(
-            MOCK_TPTP_FOLDER, "Problems", "TST", "TST003-1.p"
-        )
 
     def _parse_vampire_response(
         self, vampire_response: Tuple[Tuple[str, str, str], ...]

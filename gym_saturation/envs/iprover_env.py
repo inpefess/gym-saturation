@@ -37,7 +37,6 @@ from gym_saturation.envs.saturation_env import (
     SaturationEnv,
 )
 from gym_saturation.relay_server import RelayServer, RelayTCPHandler
-from gym_saturation.utils import MOCK_TPTP_FOLDER
 
 
 async def _iprover_start(
@@ -80,14 +79,9 @@ class IProverEnv(SaturationEnv):
     """
     An RL environment around iProver.
 
-    >>> from gym_saturation.utils import MOCK_TPTP_FOLDER
-    >>> from glob import glob
-    >>> problems = sorted(glob(os.path.join(MOCK_TPTP_FOLDER, "Problems",
-    ...      "SET", "*-*.p")))
     >>> env = IProverEnv()
-    >>> env.set_task(problems[0])
     >>> observation, info = env.reset()
-    >>> for action in [0, 1, 2, 4, 8, 9, 10]:
+    >>> for action in [0, 1, 2, 3, 4, 6, 9]:
     ...     observation, reward, terminated, truncated, info = env.step(action)
     >>> print(reward, terminated, truncated)
     1.0 True False
@@ -130,9 +124,6 @@ class IProverEnv(SaturationEnv):
         )
         self.relay_server_thread.daemon = True
         self.relay_server_thread.start()
-        self._task = os.path.join(
-            MOCK_TPTP_FOLDER, "Problems", "TST", "TST003-1.p"
-        )
 
     def _parse_batch_clauses(
         self, batch_clauses: List[Dict[str, Any]]

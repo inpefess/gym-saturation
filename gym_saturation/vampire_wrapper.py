@@ -28,26 +28,17 @@ class VampireWrapper:
 
     .. _vampire-wrapper :
 
-    >>> from gym_saturation.utils import MOCK_TPTP_FOLDER
-    >>> import os
-    >>> tptp_problem = os.path.join(
-    ...     MOCK_TPTP_FOLDER, "Problems", "TST", "TST003-1.p"
-    ... )
+    >>> from gym_saturation.utils import MOCK_TPTP_PROBLEM, MOCK_TPTP_FOLDER
     >>> vampire = VampireWrapper("vampire")
     >>> vampire.pick_a_clause("2")
     Traceback (most recent call last):
      ...
     ValueError: start solving a problem first!
-    >>> old_result = vampire.start(tptp_problem, MOCK_TPTP_FOLDER)
-    >>> print(old_result)
-    (('input', '1', 'mortal(X0) | ~man(X0) [input]'),...
-    >>> new_result = vampire.start(tptp_problem, MOCK_TPTP_FOLDER)
-    >>> old_result == new_result
-    True
+    >>> result = vampire.start(MOCK_TPTP_PROBLEM, MOCK_TPTP_FOLDER)
     >>> vampire.pick_a_clause("wrong")
     Traceback (most recent call last):
      ...
-    ValueError: (...TST003-1.p...invalid_argument...
+    ValueError: (...TST001-1.p...invalid_argument...
     ...
     """
 

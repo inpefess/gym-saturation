@@ -31,22 +31,17 @@ class AgeWeightBandit(gym.ActionWrapper):
     ``0`` --- select the oldest clause
     ``1`` --- select the shortest clause
 
-    >>> import os
-    >>> from gym_saturation.utils import MOCK_TPTP_FOLDER
-    >>> problem_filename = os.path.join(
-    ...     MOCK_TPTP_FOLDER, "Problems", "TST", "TST003-1.p")
     >>> import gymnasium as gym
     >>> env = gym.make("Vampire-v0", max_clauses=9)
-    >>> env.set_task(problem_filename)
     >>> bandit_env = AgeWeightBandit(env)
     >>> _ = bandit_env.reset()
     >>> observation, _, _, _, _ = bandit_env.step(0)
     >>> from gym_saturation.envs.saturation_env import ACTION_MASK
     >>> observation[ACTION_MASK]
-    array([0., 1., 1., 0., 0., 0., 0., 0., 0.], dtype=float32)
+    array([0., 1., 1., 1., 1., 0., 0., 0., 0.], dtype=float32)
     >>> observation, _, _, _, _ = bandit_env.step(1)
     >>> observation[ACTION_MASK]
-    array([0., 0., 1., 0., 0., 0., 0., 0., 0.], dtype=float32)
+    array([0., 1., 1., 1., 0., 0., 0., 0., 0.], dtype=float32)
     >>> _ = bandit_env.step(2)
     Traceback (most recent call last):
     ...

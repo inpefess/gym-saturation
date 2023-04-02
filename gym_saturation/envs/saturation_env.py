@@ -26,7 +26,11 @@ from gymnasium import Env, spaces
 from gymnasium.spaces.text import alphanumeric
 
 from gym_saturation.proof_state import ProofState
-from gym_saturation.utils import FALSEHOOD_SYMBOL, pretty_print
+from gym_saturation.utils import (
+    FALSEHOOD_SYMBOL,
+    MOCK_TPTP_PROBLEM,
+    pretty_print,
+)
 
 MAX_CLAUSES = 1000
 ALPHANUMERIC_WITH_UNDERSCORE = "".join(alphanumeric) + "_"
@@ -41,93 +45,25 @@ LONG_TEXT_SPACE = spaces.Text(
 
 class SaturationEnv(Env[Dict[str, Any], np.int64]):
     """
-    Saturation algorithm defined in a Reinforcement Learning friendly way.
+    Saturation algorithm in a reinforcement learning friendly way.
 
-    .. _saturation_env:
+    It's an abstract class, so here we have only trivial smoke tests.
+    One should override ``_do_deductions`` method in children classes.
 
-    >>> from gym_saturation.envs.dummy_saturation_env import DummySaturationEnv
-    >>> env = DummySaturationEnv()
-    >>> obs, _ = env.reset()
-    >>> obs[ACTION_MASK].sum() == len(obs[REAL_OBS])
-    True
+    >>> class DummyProver(SaturationEnv):
+    ...     def _do_deductions(action):
+    ...         pass
+    >>> env = DummyProver(render_mode="rgb_array")
+    Traceback (most recent call last):
+     ...
+    ValueError: Expected a render mode among ['ansi', 'human'] but got rgb_a...
 
-    one can look at the current state in TPTP format
-
-    >>> env.render()
-    cnf(all_men_are_mortal, hypothesis, ~man(X) | mortal(X)...
-    cnf(socrates_is_a_man, hypothesis, man(socrates)...
-    cnf(socrates_is_mortal, negated_conjecture, mortal(socrates)...
-
-    ``ansi`` mode returns the same string instead of printing it
-
-    >>> env.render_mode = "ansi"
-    >>> print(env.render())
-    cnf(all_men_are_mortal, hypothesis, ~man(X) | mortal(X)...
-    cnf(socrates_is_a_man, hypothesis, man(socrates)...
-    cnf(socrates_is_mortal, negated_conjecture, mortal(socrates)...
-
-    other modes are not implemented yet
-
+    >>> env = DummyProver()
     >>> env.render_mode = "rgb_array"
     >>> env.render()
     Traceback (most recent call last):
      ...
     NotImplementedError
-
-    the test theorem can be proved in three steps
-
-    >>> next_state, reward, terminated, truncated, info = env.step(0)
-
-    repeating actions is not allowed
-
-    >>> env.step(0)
-    Traceback (most recent call last):
-     ...
-    ValueError: action 0 is not valid
-
-    there is no reward until the end of an episode
-
-    >>> (reward, terminated, truncated)
-    (0.0, False, False)
-
-    if a proof is found, then reward is ``+1``
-
-    >>> observation, reward, terminated, _, _ = env.step(2)
-    >>> print(reward, terminated)
-    1.0 True
-
-    TSTP proof is now available (one can add ``include`` directive before it
-    for validation purposes)
-
-    >>> from gym_saturation.utils import get_tstp_proof
-    >>> print(get_tstp_proof(observation[REAL_OBS]))
-    cnf(falsehood, lemma, $false, inference(dummy, [], [])).
-
-    One can also filter actions relevant to a particular goal:
-
-    >>> from gym_saturation.utils import get_positive_actions
-    >>> get_positive_actions(observation[REAL_OBS])
-    (3,)
-
-    the total number of clauses in the state is limited by the ``max_clauses``
-    parameter. Let's try setting it and repeating the same solution of the same
-    problem:
-
-    >>> env = DummySaturationEnv(max_clauses=3)
-    >>> print(env.get_task())
-    socrates
-    >>> old_obs, _ = env.reset(seed=0)
-
-    after the first step we bypass ``max_clauses`` by one, so the episode
-    finishes with failure:
-
-    >>> obs, reward, terminated, truncated, _ = env.step(1)
-    >>> terminated, truncated, reward
-    (False, True, 0.0)
-    >>> DummySaturationEnv(render_mode="rgb_array")
-    Traceback (most recent call last):
-     ...
-    ValueError: Expected a render mode among ['ansi', 'human'] but got rgb_a...
     """
 
     metadata = {"render_modes": ["ansi", "human"], "render_fps": 1}
@@ -173,7 +109,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
                 ACTION_MASK: spaces.Box(0, 1, (max_clauses,)),
             }
         )
-        self._task: str = "socrates"
+        self._task = MOCK_TPTP_PROBLEM
         self.render_mode = self._check_render_mode(render_mode)
 
     def _check_render_mode(self, render_mode: str) -> str:

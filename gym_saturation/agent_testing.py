@@ -192,21 +192,12 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> Tuple[float, bool, int]:
     """
     Try to solve the problem and logs the clauses.
 
-    >>> import os
-    >>> import shutil
-    >>> test_agent_output = "test_agent_output"
-    >>> shutil.rmtree(test_agent_output, ignore_errors=True)
-    >>> os.mkdir(test_agent_output)
-    >>> from gym_saturation.utils import MOCK_TPTP_FOLDER
-    >>> problem_filename = os.path.join(MOCK_TPTP_FOLDER,
-    ...     "Problems", "TST", "TST002-1.p")
     >>> env = gym.make(
     ...     "Vampire-v0",
-    ...     max_clauses=7,
+    ...     max_clauses=5,
     ... )
-    >>> env.set_task(problem_filename)
     >>> agent_testing_report(env, RandomAgent())
-    Proof state size limit reached in 1 step(s).
+    Proof state size limit reached in ... step(s).
 
     :param env: a `gym_saturation` environment
     :param agent: an initialised agent. Must have `get_action` method
@@ -269,26 +260,20 @@ def test_agent(args: Optional[List[str]] = None) -> None:
     """
     The main function for this module.
 
-    >>> from gym_saturation.utils import MOCK_TPTP_FOLDER
-    >>> import os
-    >>> from glob import glob
-    >>> problem_filenames = sorted(glob(os.path.join(MOCK_TPTP_FOLDER,
-    ...     "Problems", "TST", "TST00*-1.p")))
-    >>> for problem_filename in problem_filenames:
-    ...     test_agent(["--problem_filename", problem_filename])
+    >>> from gym_saturation.utils import MOCK_TPTP_PROBLEM
+    >>> test_agent(["--problem_filename", MOCK_TPTP_PROBLEM])
     Problem file: ...TST001-1.p
-    Proof of length 6 found in 0 step(s):
+    Proof of length 10 found in 6 step(s):
     ...
+    cnf(20, lemma, $false, inference(subsumption_resolution, [], [19, 5])).
+    >>> import os
+    >>> trivial_problem = os.path.join(os.path.dirname(MOCK_TPTP_PROBLEM),
+    ...     "TST002-1.p")
+    >>> test_agent(["--problem_filename", trivial_problem])
     Problem file: ...TST002-1.p
-    Proof of length 10 found in 4 step(s):
-    ...
-    Problem file: ...TST003-1.p
-    Proof of length 5 found in 2 step(s):
-    ...
-    Problem file: ...TST004-1.p
     Proof of length 3 found in 0 step(s):
-    ...
-    cnf(4, lemma, $false, inference(subsumption_resolution, [], [3, 1])).
+     ...
+    cnf(3, lemma, $false, inference(subsumption_resolution, [], [2, 1])).
 
     :param args: parameters from the command line or explicitly set
     """

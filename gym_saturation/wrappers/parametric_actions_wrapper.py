@@ -46,7 +46,7 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
     ...         return np.ones(
     ...             (self.observation_space[PARAMETRIC_ACTIONS].shape[1],)
     ...         )
-    >>> env = gym.make("Vampire-v0", max_clauses=5)
+    >>> env = gym.make("Vampire-v0", max_clauses=10)
     >>> wrapped_env = ConstantClauseWeight(env, embedding_dim=1)
     >>> observation, info = wrapped_env.reset()
     >>> observation.keys()
@@ -57,6 +57,11 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
     array([[1.],
            [1.],
            [1.],
+           [1.],
+           [1.],
+           [0.],
+           [0.],
+           [0.],
            [0.],
            [0.]])
     >>> _ = wrapped_env.step(0)
@@ -66,7 +71,12 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
            [1.],
            [1.],
            [1.],
-           [1.]])
+           [1.],
+           [1.],
+           [1.],
+           [1.],
+           [1.],
+           [0.]])
     """
 
     def __init__(
