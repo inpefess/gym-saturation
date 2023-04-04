@@ -4,7 +4,7 @@
 #   you may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at
 #
-#       http://www.apache.org/licenses/LICENSE-2.0
+#       https://www.apache.org/licenses/LICENSE-2.0
 #
 #   Unless required by applicable law or agreed to in writing, software
 #   distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,13 +35,8 @@ class AST2VecWrapper(ParamtericActionsWrapper):
     The best way is to run TorchServe docker container as described here:
     https://gitlab.com/inpefess/ast2vec
 
-    >>> import os
-    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
-    >>> problem_list = [
-    ...     os.path.join(tptp_folder, "Problems", "TST", "TST003-1.p")
-    ... ]
     >>> import gymnasium as gym
-    >>> env = gym.make("Vampire-v0", problem_list=problem_list, max_clauses=9)
+    >>> env = gym.make("Vampire-v0", max_clauses=9)
     >>> wrapped_env = AST2VecWrapper(env, features_num=256)
     >>> observation, info = wrapped_env.reset()
     >>> observation.keys()

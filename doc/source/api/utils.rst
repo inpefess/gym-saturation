@@ -13,12 +13,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-######################
-Package Documentation
-######################
-
-Common modules
-***************
+Utils
+******
 .. automodule:: gym_saturation.proof_state
    :members:
 .. automodule:: gym_saturation.utils
@@ -33,33 +29,4 @@ Common modules
    :members:
    :special-members: __init__, __call__
 .. automodule:: gym_saturation.dummy_http_handler
-   :members:		     
-		     
-Environments
-*************
-.. automodule:: gym_saturation.envs.saturation_env
-   :members:
-   :special-members: __init__
-.. automodule:: gym_saturation.envs.vampire_env
-   :members:
-   :special-members: __init__
-.. automodule:: gym_saturation.envs.iprover_env
-   :members:
-   :special-members: __init__
-.. automodule:: gym_saturation.envs.dummy_saturation_env
-   :members:
-
-Environment Wrappers
-*********************
-.. automodule:: gym_saturation.wrappers.parametric_actions_wrapper
-   :members:
-   :special-members: __init__
-.. automodule:: gym_saturation.wrappers.ast2vec_wrapper
-   :members:
-   :special-members: __init__
-.. automodule:: gym_saturation.wrappers.age_weight_bandit
-   :members:
-.. automodule:: gym_saturation.wrappers.constant_parametric_actions
-   :members:
-.. automodule:: gym_saturation.wrappers.duplicate_key_obs
    :members:

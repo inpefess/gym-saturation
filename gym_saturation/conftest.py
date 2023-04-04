@@ -16,8 +16,6 @@
 Fixtures for the Tests
 =======================
 """
-import os
-import sys
 from http.server import HTTPServer
 from threading import Thread
 from typing import Generator
@@ -25,25 +23,6 @@ from typing import Generator
 from pytest import fixture
 
 from gym_saturation.dummy_http_handler import DummyHTTPHandler
-
-if sys.version_info.major == 3 and sys.version_info.minor >= 9:
-    # pylint: disable=no-name-in-module
-    from importlib.abc import Traversable  # type: ignore
-
-    # pylint: disable=no-name-in-module
-    from importlib.resources import files  # type: ignore
-else:  # pragma: no cover
-    from pathlib import PosixPath as Traversable  # noqa: F401
-
-    from importlib_resources import files  # pylint: disable=import-error
-
-
-@fixture
-def mock_tptp_folder() -> Traversable:
-    """Return the mock TPTP folder path."""
-    return files("gym_saturation").joinpath(
-        os.path.join("resources", "TPTP-mock")
-    )
 
 
 @fixture(autouse=True, scope="session")

@@ -4,7 +4,7 @@
 #   you may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at
 #
-#       http://www.apache.org/licenses/LICENSE-2.0
+#       https://www.apache.org/licenses/LICENSE-2.0
 #
 #   Unless required by applicable law or agreed to in writing, software
 #   distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,26 +41,27 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
     It defines the clauses as old if their order numbers are smaller than the
     previous step maximum.
 
-    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
-    >>> import os
-    >>> problem_list = [os.path.join(tptp_folder, "Problems", "TST",
-    ...     "TST003-1.p")]
     >>> class ConstantClauseWeight(ParamtericActionsWrapper):
     ...     def clause_embedder(self, clause: Dict[str, Any]) -> np.ndarray:
     ...         return np.ones(
     ...             (self.observation_space[PARAMETRIC_ACTIONS].shape[1],)
     ...         )
-    >>> env = gym.make("Vampire-v0", problem_list=problem_list, max_clauses=5)
+    >>> env = gym.make("Vampire-v0", max_clauses=10)
     >>> wrapped_env = ConstantClauseWeight(env, embedding_dim=1)
     >>> observation, info = wrapped_env.reset()
     >>> observation.keys()
     dict_keys(['action_mask', 'avail_actions'])
     >>> info.keys()
-    dict_keys(['problem_filename', 'real_obs'])
+    dict_keys(['real_obs'])
     >>> observation[PARAMETRIC_ACTIONS]
     array([[1.],
            [1.],
            [1.],
+           [1.],
+           [1.],
+           [0.],
+           [0.],
+           [0.],
            [0.],
            [0.]])
     >>> _ = wrapped_env.step(0)
@@ -70,7 +71,12 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
            [1.],
            [1.],
            [1.],
-           [1.]])
+           [1.],
+           [1.],
+           [1.],
+           [1.],
+           [1.],
+           [0.]])
     """
 
     def __init__(
@@ -112,7 +118,7 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
         :param options: options for compatibility
         """
         observation, info = self.env.reset(seed=seed, options=options)
-        info["real_obs"] = observation
+        info[REAL_OBS] = observation
         self.embedded_clauses_cnt = 0
         return self.observation(observation), info
 

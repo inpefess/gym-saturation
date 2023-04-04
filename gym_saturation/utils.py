@@ -17,10 +17,25 @@
 Logic Operations Utility Functions
 ===================================
 """
+import os
+import sys
 from itertools import chain
 from typing import Any, Dict, Tuple
 
+if sys.version_info.major == 3 and sys.version_info.minor >= 9:
+    # pylint: disable=no-name-in-module
+    from importlib.resources import files  # type: ignore
+else:  # pragma: no cover
+    from importlib_resources import files  # pylint: disable=import-error
+
+
 FALSEHOOD_SYMBOL = "$false"
+MOCK_TPTP_FOLDER = str(
+    files("gym_saturation").joinpath(os.path.join("resources", "TPTP-mock"))
+)
+MOCK_TPTP_PROBLEM = os.path.join(
+    MOCK_TPTP_FOLDER, "Problems", "TST", "TST001-1.p"
+)
 
 
 def pretty_print(clause: Dict[str, Any]) -> str:
@@ -112,21 +127,4 @@ def get_tstp_proof(state: Tuple[Dict[str, Any], ...]) -> str:
     """
     return "\n".join(
         reversed([pretty_print(clause) for clause in reduce_to_proof(state)])
-    )
-
-
-def get_positive_actions(
-    state: Tuple[Dict[str, Any], ...], goal: str = FALSEHOOD_SYMBOL
-) -> Tuple[int, ...]:
-    """
-    Return a sequence of actions which contributed to the proof found.
-
-    If there is no proof yet, raises an error.
-
-    :param state: map of clause labels to clauses
-    :param goal: literals of the goal clause (``$false`` by default)
-    """
-    proof = reduce_to_proof(state, goal)
-    return tuple(
-        action for action, clause in enumerate(state) if clause in proof
     )

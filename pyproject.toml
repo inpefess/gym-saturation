@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "0.8.2"
+version = "0.9.0"
 description = "Gymnasium environments for saturation provers"
 authors = ["Boris Shminke <boris@shminke.ml>"]
 license = "Apache-2.0"
@@ -36,13 +36,13 @@ pylint = "*"
 pytest-coverage = "*"
 pre-commit = "*"
 types-dataclasses = "*"
-sphinx-rtd-theme = "*"
 sphinx-autodoc-typehints = "*"
 pydocstyle = "*"
 tbump = "*"
 pyenchant = "*"
 flake8 = "*"
 toml = "*"
+furo = "*"
 
 [tool.black]
 line-length=79
@@ -133,7 +133,7 @@ commands =
 github_url = "https://github.com/inpfess/gym-saturation/"
 
 [tool.tbump.version]
-current = "0.8.2"
+current = "0.9.0"
 regex = '''
   (?P<major>\d+)
   \.

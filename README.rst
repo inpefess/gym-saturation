@@ -24,8 +24,8 @@ gym-saturation
 written in `TPTP library <https://tptp.org>`__ formal language are
 supported.
 
-There are two environments in ``gym-saturation``: ``VampireEnv`` and
-``IProverEnv``. ``VampireEnv`` is a wrapper around a recent `Vampire
+There are two environments in ``gym-saturation``: :ref:`vampire_env` and
+:ref:`iprover_env`. ``VampireEnv`` is a wrapper around a recent `Vampire
 <https://github.com/vprover/vampire>`__ prover, and ``IProverEnv``
 relies on an experimental version of `iProver
 <https://gitlab.com/korovin/iprover/>`__.
@@ -76,19 +76,24 @@ One can also run it in a Docker container (with a pre-packed
 How to use
 ==========
 
+One can use ``gym-saturation`` environments as any other Gymnasium environment:
+
 .. code:: python
 
-   import gym_saturation
-   import gymnasium as gym
-   import os
+  import gym_saturation
+  import gymnasium
 
-   # get a TPTP problem file or create one yourself
-   env = gym.make("Vampire-v0", problem_list=["..."])
-   observation, info = env.reset()
-   # an order number of a 'given clause'
-   action = ...
-   observation, reward, terminated, truncated, info = env.step(action)
-
+  env = gymnasium.make("Vampire-v0")  # or "iProver-v0"
+  # skip this line to use the default problem
+  env.set_task("a-TPTP-problem-filename")
+  observation, info = env.reset()
+  terminated, truncated = False, False
+  while not (terminated or truncated):
+      # apply policy (a valid random action here)
+      action = env.action_space.sample(mask=observation["action_mask"])
+      observation, reward, terminated, truncated, info = env.step(action)
+  env.close()
+  
 See `the
 notebook <https://github.com/inpefess/gym-saturation/blob/master/examples/example.ipynb>`__ for more information.
 

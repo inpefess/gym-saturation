@@ -14,20 +14,38 @@
   limitations under the License.
 
 .. include:: ../../README.rst
-    
+
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :hidden:
+   :caption: Introduction
 
-   what-is-going-on
-   testing-an-agent
-   experiments
-   package-documentation
+   basic-usage
 
-Indices and tables
-==================
+.. toctree::
+   :hidden:
+   :caption: API
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-  
+   api/environments
+   api/wrappers
+   api/utils
+
+.. toctree::
+   :hidden:
+   :caption: Environments
+
+   environments/saturation-env
+   environments/vampire-env
+   environments/iprover-env
+
+.. toctree::
+   :hidden:
+   :caption: Tutorials
+
+   tutorials/testing-an-agent
+   tutorials/experiments
+
+.. toctree::
+   :hidden:
+   :caption: Development
+
+   GitHub <https://github.com/inpefess/gym-saturation>

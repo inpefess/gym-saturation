@@ -25,20 +25,16 @@ class DuplicateKeyObsWrapper(gym.ObservationWrapper):
     """
     Adding a key duplicating an existing one in dictionary observations.
 
-    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
-    >>> import os
-    >>> problem_list = [os.path.join(
-    ...     tptp_folder, "Problems", "TST", "TST001-1.p"
-    ... )]
-    >>> from gym_saturation.envs.dummy_saturation_env import DummySaturationEnv
+    >>> from gym_saturation.envs.vampire_env import VampireEnv
+    >>> from gym_saturation.envs.saturation_env import ACTION_MASK
     >>> env = DuplicateKeyObsWrapper(
-    ...     DummySaturationEnv(problem_list=problem_list),
-    ...     key_to_duplicate="action_mask",
+    ...     VampireEnv(),
+    ...     key_to_duplicate=ACTION_MASK,
     ...     new_key="test"
     ... )
     >>> obs, _ = env.reset()
     >>> import numpy as np
-    >>> np.array_equal(obs["test"], obs["action_mask"])
+    >>> np.array_equal(obs["test"], obs[ACTION_MASK])
     True
     """
 

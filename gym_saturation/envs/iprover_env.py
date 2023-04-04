@@ -33,12 +33,10 @@ import numpy as np
 from gym_saturation.envs.saturation_env import (
     ACTION_MASK,
     MAX_CLAUSES,
-    PROBLEM_FILENAME,
     REAL_OBS,
     SaturationEnv,
 )
 from gym_saturation.relay_server import RelayServer, RelayTCPHandler
-from gym_saturation.utils import FALSEHOOD_SYMBOL
 
 
 async def _iprover_start(
@@ -81,38 +79,35 @@ class IProverEnv(SaturationEnv):
     """
     An RL environment around iProver.
 
-    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
-    >>> from glob import glob
-    >>> problems = sorted(glob(os.path.join(tptp_folder, "Problems", "SET",
-    ...     "*-*.p")))
-    >>> iprover_env = IProverEnv(problems)
-    >>> observation, info = iprover_env.reset()
-    >>> for action in [0, 1, 2, 4, 8, 9, 10]:
-    ...     observation, reward, terminated, truncated, info = (iprover_env.
-    ...         step(action))
+    Refer to :ref:`iprover_env` for more documentation.
+
+    >>> env = IProverEnv()
+    >>> observation, info = env.reset()
+    >>> for action in [0, 1, 2, 3, 4, 6, 9]:
+    ...     observation, reward, terminated, truncated, info = env.step(action)
     >>> print(reward, terminated, truncated)
     1.0 True False
-    >>> iprover_env.close()
+    >>> env.close()
     """
 
     def __init__(
         self,
-        problem_list: List[str],
         max_clauses: int = MAX_CLAUSES,
+        render_mode: str = "human",
         port_pair: Optional[Tuple[int, int]] = None,
         iprover_binary_path: str = "iproveropt",
     ):
         """
         Initialise the environment.
 
-        :param problem_list: a list of names of TPTP problem files
         :param max_clauses: maximal number of clauses in proof state
+        :param render_mode: a mode of running ``render`` method
         :param port_pair: iProver will connect to the first port,
             a port to listen for agent's connection is the second one
         :param iprover_binary_path: a path to iProver binary;
             by default, we assume it to be ``iproveropt`` and in the $PATH
         """
-        super().__init__(problem_list, max_clauses)
+        super().__init__(max_clauses, render_mode)
         (
             self.iprover_port,
             self.agent_port,
@@ -148,14 +143,15 @@ class IProverEnv(SaturationEnv):
                     inference_rule,
                     inference_parents,
                 ) = re.findall(
-                    r"cnf\((\w+),\w+,(.*),inference\((.*),.*,\[(.*)\]\)\)\.",
+                    r"cnf\((\w+),\w+,\((.*)\),"
+                    + r"inference\((.*),.*,\[(.*)\]\)\)\.",
                     raw_clause,
                 )[
                     0
                 ]
             except IndexError:
                 label, literals = re.findall(
-                    r"cnf\((\w+),\w+,(.*),file\(.*\)\)\.",
+                    r"cnf\((\w+),\w+,\((.*)\),file\(.*\)\)\.",
                     raw_clause,
                 )[0]
                 inference_rule, inference_parents = "input", None
@@ -173,24 +169,6 @@ class IProverEnv(SaturationEnv):
             )
             self.state.set_action_mask_by_label(label, 1.0)
 
-    def _parse_szs_status(self, szs_status: str) -> None:
-        status_code = re.findall(
-            r"\% SZS status (\w+) for .+\.p",
-            szs_status.replace("\n", ""),
-        )[0]
-        if status_code == "Unsatisfiable":
-            self.state.add_clause(
-                {
-                    "label": "dummy",
-                    "literals": FALSEHOOD_SYMBOL,
-                    "inference_rule": "dummy",
-                    "inference_parents": (),
-                    "role": "lemma",
-                }
-            )
-        else:
-            raise ValueError(f"unexpected status: {status_code}")
-
     def reset(
         self,
         *,
@@ -200,16 +178,16 @@ class IProverEnv(SaturationEnv):
         super().reset(seed=seed)
         asyncio.run(
             _iprover_start(
-                self.iprover_port, self.get_task()[0], self.iprover_binary_path
+                self.iprover_port, self.get_task(), self.iprover_binary_path
             )
         )
         time.sleep(2)
         data = self._get_json_data()
         self._parse_iprover_requests(data)
         return {
-            REAL_OBS: self.state.clauses,
+            REAL_OBS: tuple(self.state.clauses),
             ACTION_MASK: self.state.action_mask,
-        }, {PROBLEM_FILENAME: self.problem_filename}
+        }, {}
 
     def _get_raw_data(self) -> bytes:
         with socket.create_connection(
@@ -247,8 +225,6 @@ class IProverEnv(SaturationEnv):
         for iprover_request in iprover_requests:
             if "clauses" in iprover_request:
                 self._parse_batch_clauses(iprover_request["clauses"])
-            if "szs_status" in iprover_request:
-                self._parse_szs_status(iprover_request["szs_status"])
 
     def _do_deductions(self, action: np.int64) -> None:
         given_clause_label = self.state.clause_labels[action][2:]

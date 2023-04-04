@@ -24,7 +24,7 @@ import sys
 sys.path.insert(0, os.path.abspath("../.."))
 # -- Project information -----------------------------------------------------
 project = "gym-saturation"
-version = "0.8.2"
+version = "0.9.0"
 copyright = "2021-2023, Boris Shminke"
 author = "Boris Shminke"
 # -- General configuration ---------------------------------------------------
@@ -46,4 +46,5 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
+html_title = "gym-saturation documentation"

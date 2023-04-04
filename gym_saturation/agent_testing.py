@@ -26,7 +26,12 @@ from typing import Any, Dict, List, Optional, Tuple
 import gymnasium as gym
 import numpy as np
 
-from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
+from gym_saturation.envs.saturation_env import (
+    ACTION_MASK,
+    MAX_CLAUSES,
+    REAL_OBS,
+    SaturationEnv,
+)
 from gym_saturation.utils import FALSEHOOD_SYMBOL, get_tstp_proof
 
 
@@ -80,8 +85,8 @@ class WeightAgent(BaseAgent):
             {
                 clause["label"]: (len(clause["literals"]), action_mask)
                 for clause, action_mask in zip(
-                    observation["real_obs"],
-                    observation["action_mask"].tolist(),
+                    observation[REAL_OBS],
+                    observation[ACTION_MASK].tolist(),
                 )
             }
         )
@@ -116,7 +121,7 @@ class AgeAgent(BaseAgent):
         reward: float,
         info: Dict[str, Any],
     ) -> int:  # noqa: D102
-        return observation["action_mask"].argmax()
+        return observation[ACTION_MASK].argmax()
 
 
 class AgeWeightAgent(BaseAgent):
@@ -168,7 +173,7 @@ class RandomAgent(BaseAgent):
         reward: float,
         info: Dict[str, Any],
     ) -> int:  # noqa: D102
-        return np.random.choice(np.nonzero(observation["action_mask"])[0])
+        return np.random.choice(np.nonzero(observation[ACTION_MASK])[0])
 
 
 def _proof_found_before_the_start(
@@ -187,21 +192,12 @@ def episode(env: SaturationEnv, agent: BaseAgent) -> Tuple[float, bool, int]:
     """
     Try to solve the problem and logs the clauses.
 
-    >>> import os
-    >>> import shutil
-    >>> test_agent_output = "test_agent_output"
-    >>> shutil.rmtree(test_agent_output, ignore_errors=True)
-    >>> os.mkdir(test_agent_output)
-    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
-    >>> problem_list = [os.path.join(tptp_folder,
-    ...     "Problems", "TST", "TST002-1.p")]
     >>> env = gym.make(
     ...     "Vampire-v0",
-    ...     problem_list=problem_list,
-    ...     max_clauses=7,
+    ...     max_clauses=5,
     ... )
     >>> agent_testing_report(env, RandomAgent())
-    Proof state size limit reached in 1 step(s).
+    Proof state size limit reached in ... step(s).
 
     :param env: a `gym_saturation` environment
     :param agent: an initialised agent. Must have `get_action` method
@@ -226,7 +222,7 @@ def parse_args(args: Optional[List[str]] = None) -> Namespace:
     >>> parse_args([
     ...     "--problem_filename", "this_is_a_test_case",
     ... ])
-    Namespace(max_clauses=100000, problem_filename='this_is_a_test_case')
+    Namespace(max_clauses=1000, problem_filename='this_is_a_test_case')
 
     :param args: a list of string arguments
         (for testing and use in a non script scenario)
@@ -264,35 +260,29 @@ def test_agent(args: Optional[List[str]] = None) -> None:
     """
     The main function for this module.
 
-    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
-    >>> import os
-    >>> from glob import glob
-    >>> problem_filenames = sorted(glob(os.path.join(tptp_folder, "Problems",
-    ...     "TST", "TST00*-1.p")))
-    >>> for problem_filename in problem_filenames:
-    ...     test_agent(["--problem_filename", problem_filename])
+    >>> from gym_saturation.utils import MOCK_TPTP_PROBLEM
+    >>> test_agent(["--problem_filename", MOCK_TPTP_PROBLEM])
     Problem file: ...TST001-1.p
-    Proof of length 6 found in 0 step(s):
+    Proof of length 10 found in 6 step(s):
     ...
+    cnf(20, lemma, $false, inference(subsumption_resolution, [], [19, 5])).
+    >>> import os
+    >>> trivial_problem = os.path.join(os.path.dirname(MOCK_TPTP_PROBLEM),
+    ...     "TST002-1.p")
+    >>> test_agent(["--problem_filename", trivial_problem])
     Problem file: ...TST002-1.p
-    Proof of length 10 found in 4 step(s):
-    ...
-    Problem file: ...TST003-1.p
-    Proof of length 5 found in 3 step(s):
-    ...
-    Problem file: ...TST004-1.p
     Proof of length 3 found in 0 step(s):
-    ...
-    cnf(4, lemma, $false, inference(subsumption_resolution, [], [3, 1])).
+     ...
+    cnf(3, lemma, $false, inference(subsumption_resolution, [], [2, 1])).
 
     :param args: parameters from the command line or explicitly set
     """
     arguments = parse_args(args)
-    env = gym.make(
+    env: SaturationEnv = gym.make(  # type: ignore
         "Vampire-v0",
-        problem_list=[arguments.problem_filename],
         max_clauses=arguments.max_clauses,
     )
+    env.set_task(arguments.problem_filename)
     print(f"Problem file: {arguments.problem_filename}")
     agent_testing_report(env, AgeWeightAgent(1, 1))  # type: ignore
 

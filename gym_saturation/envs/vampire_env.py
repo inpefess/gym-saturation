@@ -18,14 +18,13 @@ Saturation Environment with Vampire back-end
 ============================================
 """
 import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 
 from gym_saturation.envs.saturation_env import (
     ACTION_MASK,
     MAX_CLAUSES,
-    PROBLEM_FILENAME,
     REAL_OBS,
     SaturationEnv,
 )
@@ -37,54 +36,54 @@ class VampireEnv(SaturationEnv):
     """
     An RL environment around a Vampire prover.
 
-    This class has the same API as SaturationEnv but uses another back-end.
-    Here we have only a simple smoke test.
+    Refer to :ref:`vampire_env` for more documentation.
 
-    >>> tptp_folder = getfixture("mock_tptp_folder")  # noqa: F821
-    >>> vampire_binary = os.path.join(tptp_folder, "..", "vampire-mock")
-    >>> vampire_env = VampireEnv(["test"], vampire_binary_path=vampire_binary)
-    >>> vampire_env.reset()
-    Traceback (most recent call last):
-     ...
-    ValueError: ('Unexpected response type: ', 'who could expect that?')
-    >>> from glob import glob
-    >>> set_problems = sorted(glob(os.path.join(tptp_folder, "Problems",
-    ...     "SET", "*-*.p")))
-    >>> vampire_env = VampireEnv(set_problems)
-    >>> observation, info = vampire_env.reset()
-    >>> for action in [0, 3, 6, 7, 8, 9, 10]:
-    ...     observation, reward, terminated, truncated, info = (
-    ...         vampire_env.step(action))
-    >>> print(reward, terminated, truncated)
-    1.0 True False
-
-    test of a problem which is solver immediately after `reset`
-
-    >>> problems = [os.path.join(tptp_folder, "Problems", "TST", "TST004-1.p")]
-    >>> vampire_env = VampireEnv(problems)
-    >>> observation, info = vampire_env.reset()
-    >>> obs, reward, terminated, truncated, info = vampire_env.step(0)
-    >>> print(int(reward), terminated, truncated)
-    1 True False
-
-    we can also run a full Gymnasium environment check
+    We can run a full Gymnasium environment check:
 
     >>> from gymnasium.utils.env_checker import check_env
     >>> import gymnasium as gym
     >>> env = gym.make(
     ...     "Vampire-v0",
-    ...     problem_list=set_problems,
-    ...     max_clauses=9
-    ... )
-    >>> check_env(env.unwrapped)
+    ...     max_clauses=5
+    ... ).unwrapped
+    >>> check_env(env)
     cnf(1, ...).
     ...
-    cnf(9, ...).
+    cnf(5, ...).
+
+    sometimes Vampire can solve a problem during pre-processing
+
+    >>> from gym_saturation.utils import MOCK_TPTP_PROBLEM
+    >>> trivial_problem = os.path.join(os.path.dirname(MOCK_TPTP_PROBLEM),
+    ...     "TST002-1.p")
+    >>> env.set_task(trivial_problem)
+    >>> _, _ = env.reset()
+    >>> _, _, terminated, _, _ = env.step(0)
+    >>> terminated
+    True
+
+    we can't repeat actions
+
+    >>> _ = env.reset()
+    >>> _ = env.step(0)
+    >>> env.step(0)
+    Traceback (most recent call last):
+     ...
+    ValueError: action 0 is not valid
+
+    a test of an unexpected reply from Vampire
+
+    >>> from gym_saturation.utils import MOCK_TPTP_FOLDER
+    >>> vampire_binary = os.path.join(MOCK_TPTP_FOLDER, "..", "vampire-mock")
+    >>> vampire_env = VampireEnv(vampire_binary_path=vampire_binary)
+    >>> vampire_env.reset()
+    Traceback (most recent call last):
+     ...
+    ValueError: ('Unexpected response type: ', 'who could expect that?')
     """
 
     def __init__(
         self,
-        problem_list: List[str],
         max_clauses: int = MAX_CLAUSES,
         render_mode: str = "human",
         vampire_binary_path: str = "vampire",
@@ -92,12 +91,12 @@ class VampireEnv(SaturationEnv):
         """
         Initialise a :ref:`VampireWrapper <vampire-wrapper>`.
 
-        :param problem_list: a list of names of TPTP problem files
         :param max_clauses: maximal number of clauses in proof state
+        :param render_mode: a mode of running ``render`` method
         :param vampire_binary_path: a path to Vampire binary;
             by default we expect it to be in the $PATH
         """
-        super().__init__(problem_list, max_clauses, render_mode)
+        super().__init__(max_clauses, render_mode)
         self._vampire = VampireWrapper(vampire_binary_path)
 
     def _parse_vampire_response(
@@ -127,16 +126,14 @@ class VampireEnv(SaturationEnv):
     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
         tptp_folder = os.path.join(
-            os.path.dirname(self.problem_filename), "..", ".."
+            os.path.dirname(self.get_task()), "..", ".."
         )
-        vampire_response = self._vampire.start(
-            self.problem_filename, tptp_folder
-        )
+        vampire_response = self._vampire.start(self.get_task(), tptp_folder)
         self._parse_vampire_response(vampire_response)
         return {
-            REAL_OBS: self.state.clauses,
+            REAL_OBS: tuple(self.state.clauses),
             ACTION_MASK: self.state.action_mask,
-        }, {PROBLEM_FILENAME: self.problem_filename}
+        }, {}
 
     def _do_deductions(self, action: np.int64) -> None:
         if any(
