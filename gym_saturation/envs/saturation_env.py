@@ -79,8 +79,8 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         """
         Initialise spaces et al.
 
-        :param problem_list: a list of the names of TPTP problem files
         :param max_clauses: maximal number of clauses to store in proof state
+        :param render_mode: a mode of running ``render`` method
         """
         super().__init__()
         self.state = ProofState(

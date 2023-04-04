@@ -91,6 +91,7 @@ class IProverEnv(SaturationEnv):
     def __init__(
         self,
         max_clauses: int = MAX_CLAUSES,
+        render_mode: str = "human",
         port_pair: Optional[Tuple[int, int]] = None,
         iprover_binary_path: str = "iproveropt",
     ):
@@ -98,12 +99,13 @@ class IProverEnv(SaturationEnv):
         Initialise the environment.
 
         :param max_clauses: maximal number of clauses in proof state
+        :param render_mode: a mode of running ``render`` method
         :param port_pair: iProver will connect to the first port,
             a port to listen for agent's connection is the second one
         :param iprover_binary_path: a path to iProver binary;
             by default, we assume it to be ``iproveropt`` and in the $PATH
         """
-        super().__init__(max_clauses)
+        super().__init__(max_clauses, render_mode)
         (
             self.iprover_port,
             self.agent_port,

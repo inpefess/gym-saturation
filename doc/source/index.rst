@@ -33,7 +33,9 @@
    :hidden:
    :caption: Environments
 
-   environments/vampire
+   environments/saturation-env
+   environments/vampire-env
+   environments/iprover-env
 
 .. toctree::
    :hidden:

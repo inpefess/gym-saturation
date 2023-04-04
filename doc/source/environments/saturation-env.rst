@@ -13,17 +13,19 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-###########
-VampireEnv
-###########
+.. _saturation_env:
 
-``VampireEnv`` is an environment for guiding a `Vampire <https://vprover.github.io/>`__ prover's saturation loop.
+##############
+SaturationEnv
+##############
+
+``SaturationEnv`` is an abstract class for environments guiding the choice of a given clause in the saturation algorithm used to build automated theorem provers. It has two subclasses: :ref:`vampire_env` and :ref:`iprover_env`.
 
 .. csv-table::
    
    Action Space, ``Dicscrete(n)``
    Observation Space, "``Dict('action_mask': Box(0, 1, (n,), int8), 'real_obs': Sequence(Clause(n), stack=False))``"
-   import, ``import gym_saturation; gymnasium.make("Vampire-v0")``
+   import, ``only subclasses can be instantiated``
 
 Here ``Clause(n)`` is an alias for
 
@@ -118,20 +120,11 @@ The environment returns no additional information.
 Arguments
 **********
 
-.. code-block:: python
-
-    import gymnasium as gym
-    
-    gym.make(
-        "Vampire-v0",
-	max_clauses=1000,
-	render_mode="human",
-	vampire_binary_path="vampire"
-    )
+There are two arguments shared by all the subclasses of ``SaturationEnv``:
 
 ``max_clauses=1000``: the size ``n`` of the action space.
+
 ``render_mode="human"``: either ``ansi`` (return the clauses from the current proof state in the TPTP format) or ``human`` (print the ``ansi`` rendering to the standard output)
-``vampire_binary_path="vampire"``: the path to Vampire binary (supposed to be on the ``$PATH`` by default)
 
 References
 ***********
@@ -141,4 +134,4 @@ References
 Version History
 ****************
 
-* v0: Initial version release
+There are no versions of ``SaturationEnv``, since it's an abstract class. Refer to :ref:`vampire_env` and :ref:`iprover_env` instead.

@@ -90,6 +90,7 @@ class VampireEnv(SaturationEnv):
         Initialise a :ref:`VampireWrapper <vampire-wrapper>`.
 
         :param max_clauses: maximal number of clauses in proof state
+        :param render_mode: a mode of running ``render`` method
         :param vampire_binary_path: a path to Vampire binary;
             by default we expect it to be in the $PATH
         """
