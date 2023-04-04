@@ -23,7 +23,7 @@ SaturationEnv
 
 .. csv-table::
    
-   Action Space, ``Dicscrete(n)``
+   Action Space, ``Discrete(n)``
    Observation Space, "``Dict('action_mask': Box(0, 1, (n,), int8), 'real_obs': Sequence(Clause(n), stack=False))``"
    import, ``only subclasses can be instantiated``
 
@@ -63,7 +63,7 @@ The given clause (or saturation) algorithm is the basis of many contemporary pro
         unprocessed_clauses.remove(given_clause)
         processed_clauses.append(given_clause)
 
-``get_preprocessed_theorem_statement`` corresponds to the environment reset, and typically includes parsing, `Skolemization <https://en.wikipedia.org/wiki/Skolem_normal_form>`__, transfomation to `conjuntive normal form <https://en.wikipedia.org/wiki/Conjunctive_normal_form>`__ among other things.
+``get_preprocessed_theorem_statement`` corresponds to the environment reset, and typically includes parsing, `Skolemization <https://en.wikipedia.org/wiki/Skolem_normal_form>`__, transformation to `conjunctive normal form <https://en.wikipedia.org/wiki/Conjunctive_normal_form>`__ among other things.
 
 ``apply_inference_rules`` is a 'logic engine' of a prover corresponding to what happens during the environment's ``step``. It usually includes `resolution <https://en.wikipedia.org/wiki/Resolution_(logic)>`__, `superposition <https://en.wikipedia.org/wiki/Superposition_calculus>`__ and other nasty stuff. To guarantee the algorithm applicability, the inference rules system must be `refutation complete <https://en.wikipedia.org/wiki/Completeness_(logic)#Refutation_completeness>`__.
 

@@ -23,7 +23,7 @@ VampireEnv
 
 .. csv-table::
    
-   Action Space, ``Dicscrete(n)``
+   Action Space, ``Discrete(n)``
    Observation Space, "``Dict('action_mask': Box(0, 1, (n,), int8), 'real_obs': Sequence(Clause(n), stack=False))``"
    import, ``import gym_saturation; gymnasium.make("Vampire-v0")``
 

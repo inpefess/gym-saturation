@@ -17,10 +17,10 @@
 Basic Usage
 ############
 
-Initializing Environments
+Initialising Environments
 **************************
 
-Using environments from ``gym-saturation`` is very similar to using them in `Gymnasium <https://gymnasium.farama.org/>`__. You initialize an environment via:
+Using environments from ``gym-saturation`` is very similar to using them in `Gymnasium <https://gymnasium.farama.org/>`__. You initialise an environment via:
 
 .. code:: python
 
@@ -34,5 +34,5 @@ Additional Environment API
 
 There are two additional methods to each ``gym-saturation`` environment:
 
-* ``set_task`` --- to specify a filename of a `TPTP <https://tptp.org/>`__ problem to solve (like in `MetaWorld <https://github.com/Farama-Foundation/Metaworld>`__ multi-task environments)
+* ``set_task`` --- to specify a filename of a `TPTP <https://tptp.org/>`__ problem to solve (like in `Meta-World <https://github.com/Farama-Foundation/Metaworld>`__ multi-task environments)
 * ``get_task`` --- to look up a filename of a TPTP problem being solved (like in ``TaskSettableEnv`` in `Ray RLlib <https://docs.ray.io/en/latest/rllib/rllib-advanced-api.html#curriculum-learning>`__)
