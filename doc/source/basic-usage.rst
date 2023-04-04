@@ -25,9 +25,9 @@ Using environments from ``gym-saturation`` is very similar to using them in `Gym
 .. code:: python
 
    import gym_saturation
-   import gymnasium as gym
+   import gymnasium
 
-   env = gym.make("Vampire-v0")
+   env = gymnasium.make("Vampire-v0")
 
 Additional Environment API
 ***************************

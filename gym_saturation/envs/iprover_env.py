@@ -79,6 +79,8 @@ class IProverEnv(SaturationEnv):
     """
     An RL environment around iProver.
 
+    Refer to :ref:`iprover_env` for more documentation.
+
     >>> env = IProverEnv()
     >>> observation, info = env.reset()
     >>> for action in [0, 1, 2, 3, 4, 6, 9]:

@@ -50,6 +50,8 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
     It's an abstract class, so here we have only trivial smoke tests.
     One should override ``_do_deductions`` method in children classes.
 
+    Refer to :ref:`saturation_env` for more documentation.
+
     >>> class DummyProver(SaturationEnv):
     ...     def _do_deductions(action):
     ...         pass
