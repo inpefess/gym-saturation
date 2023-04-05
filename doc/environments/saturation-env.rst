@@ -93,7 +93,7 @@ A starting state of the environment depends on a task set (a theorem to prove). 
 
 By default, the task is a simple theorem from group theory:
 
-.. include:: ../../../gym_saturation/resources/TPTP-mock/Problems/TST/TST001-1.p
+.. include:: ../../gym_saturation/resources/TPTP-mock/Problems/TST/TST001-1.p
    :literal:
 
 One can set another task by specifying a filename of a respective TPTP problem:
