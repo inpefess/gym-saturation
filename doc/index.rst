@@ -41,6 +41,7 @@
    :hidden:
    :caption: Tutorials
 
+   auto_examples/index
    tutorials/testing-an-agent
    tutorials/experiments
 

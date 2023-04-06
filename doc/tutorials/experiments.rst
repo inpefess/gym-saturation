@@ -26,7 +26,7 @@ In the experiments, we try to solve a `trivial set theory problem <https://tptp.
 Thompson Sampling Multi-armed Bandit
 *************************************
 
-#. Navigate to ``examples/multi-armed-bandit``
+#. Navigate to ``experiments/multi-armed-bandit``
 #. ``pip install -r requirements.txt``
 #. ``python thompson_sampling.py --random_baseline``
 #. ``python thompson_sampling.py``
@@ -36,7 +36,7 @@ Bandit learns to prefer choosing the shortest clause, beating the random agent s
 DQN
 ****
 
-#. Navigate to ``examples/ppo``
+#. Navigate to ``experiments/ppo``
 #. ``pip install -r requirements.txt``
 #. ``python parametric_actions_vampire.py --run random``
 #. ``python parametric_actions_vampire.py --run DQN``
@@ -46,7 +46,7 @@ Since the DQN uses a replay buffer and we have the zero reward nearly all the ti
 PPO
 ****
 
-#. Navigate to ``examples/ppo``
+#. Navigate to ``experiments/ppo``
 #. ``pip install -r requirements.txt``
 #. ``python parametric_actions_vampire.py --run random``
 #. ``python parametric_actions_vampire.py``

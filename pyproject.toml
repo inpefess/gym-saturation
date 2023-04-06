@@ -43,6 +43,9 @@ pyenchant = "*"
 flake8 = "*"
 toml = "*"
 furo = "*"
+sphinx-gallery = "*"
+pillow = "*"
+matplotlib = "*"
 
 [tool.black]
 line-length=79
