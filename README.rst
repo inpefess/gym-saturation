@@ -93,11 +93,10 @@ One can use ``gym-saturation`` environments as any other Gymnasium environment:
       action = env.action_space.sample(mask=observation["action_mask"])
       observation, reward, terminated, truncated, info = env.step(action)
   env.close()
-  
-See `the
-notebook <https://github.com/inpefess/gym-saturation/blob/master/examples/example.ipynb>`__ for more information.
 
-For more comprehensive experiments, please see the documentation `page <https://gym-saturation.readthedocs.io/en/latest/experiments.html>`__.
+Or have a look at the basic `tutorial <https://gym-saturation.readthedocs.io/en/latest/tutorials/auto_examples/plot_age_agent.html>`__.
+  
+For a bit more comprehensive experiments, please navigate the documentation `page <https://gym-saturation.readthedocs.io/en/latest/tutorials/experiments.html>`__.
 
 How to Contribute
 =================

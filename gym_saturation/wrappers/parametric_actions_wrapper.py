@@ -22,13 +22,8 @@ from typing import Any, Dict, Optional, Tuple
 import gymnasium as gym
 import numpy as np
 
-from gym_saturation.envs.saturation_env import (
-    ACTION_MASK,
-    REAL_OBS,
-    SaturationEnv,
-)
-
-PARAMETRIC_ACTIONS = "avail_actions"
+from gym_saturation.constants import ACTION_MASK, PARAMETRIC_ACTIONS, REAL_OBS
+from gym_saturation.envs.saturation_env import SaturationEnv
 
 
 class ParamtericActionsWrapper(gym.Wrapper, ABC):

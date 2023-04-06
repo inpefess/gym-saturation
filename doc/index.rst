@@ -13,22 +13,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-.. include:: ../../README.rst
+.. include:: ../README.rst
 
 .. toctree::
    :hidden:
    :caption: Introduction
 
    basic-usage
-
-.. toctree::
-   :hidden:
-   :caption: API
-
-   api/environments
-   api/wrappers
-   api/utils
-
+   
 .. toctree::
    :hidden:
    :caption: Environments
@@ -41,8 +33,17 @@
    :hidden:
    :caption: Tutorials
 
+   auto_examples/index
    tutorials/testing-an-agent
    tutorials/experiments
+
+.. toctree::
+   :hidden:
+   :caption: API
+
+   api/environments
+   api/wrappers
+   api/utils
 
 .. toctree::
    :hidden:

@@ -11,7 +11,7 @@ runs/
 \#*.*#
 *.gz
 *.whl
-doc/build/
+doc/_build/
 *.pdf
 .idea/
 *.out

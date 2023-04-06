@@ -30,12 +30,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from gym_saturation.envs.saturation_env import (
-    ACTION_MASK,
-    MAX_CLAUSES,
-    REAL_OBS,
-    SaturationEnv,
-)
+from gym_saturation.constants import ACTION_MASK, REAL_OBS
+from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
 from gym_saturation.relay_server import RelayServer, RelayTCPHandler
 
 

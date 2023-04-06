@@ -1,4 +1,4 @@
-# Copyright 2021-2023 Boris Shminke
+# Copyright 2023 Boris Shminke
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,14 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
-There are two environments in this module.
 
-They are registered using a limit for the number of steps in an episode and the
-maximal possible reward is set to ``1.0`` (proof is found).
+# noqa: D205, D400
 """
-from gymnasium.envs.registration import register
-
-register(id="Vampire-v0", entry_point="gym_saturation.envs:VampireEnv")
-register(id="iProver-v0", entry_point="gym_saturation.envs:IProverEnv")
-__version__ = "0.9.1"
+Constants used throughout the package
+======================================
+"""
+REAL_OBS = "real_obs"
+ACTION_MASK = "action_mask"
+PARAMETRIC_ACTIONS = "avail_actions"

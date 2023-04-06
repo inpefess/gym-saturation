@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "0.9.0"
+version = "0.9.1"
 description = "Gymnasium environments for saturation provers"
 authors = ["Boris Shminke <boris@shminke.ml>"]
 license = "Apache-2.0"
@@ -43,6 +43,9 @@ pyenchant = "*"
 flake8 = "*"
 toml = "*"
 furo = "*"
+sphinx-gallery = "*"
+pillow = "*"
+matplotlib = "*"
 
 [tool.black]
 line-length=79
@@ -133,7 +136,7 @@ commands =
 github_url = "https://github.com/inpfess/gym-saturation/"
 
 [tool.tbump.version]
-current = "0.9.0"
+current = "0.9.1"
 regex = '''
   (?P<major>\d+)
   \.
@@ -153,4 +156,4 @@ src = "gym_saturation/__init__.py"
 src = "pyproject.toml"
 
 [[tool.tbump.file]]
-src = "doc/source/conf.py"
+src = "doc/conf.py"
