@@ -94,7 +94,7 @@ One can use ``gym-saturation`` environments as any other Gymnasium environment:
       observation, reward, terminated, truncated, info = env.step(action)
   env.close()
 
-Or have a look at the basic `tutorial <https://gym-saturation.readthedocs.io/en/latest/tutorials/auto_examples/plot_age_agent.html>`__.
+Or have a look at the basic `tutorial <https://gym-saturation.readthedocs.io/en/latest/auto_examples/plot_age_agent.html>`__.
   
 For a bit more comprehensive experiments, please navigate the documentation `page <https://gym-saturation.readthedocs.io/en/latest/tutorials/experiments.html>`__.
 
