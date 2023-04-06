@@ -51,3 +51,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 #
 html_theme = "furo"
 html_title = "gym-saturation documentation"
+
+sphinx_gallery_conf = {
+    "download_all_examples": False,
+}
