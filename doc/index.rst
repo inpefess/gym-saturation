@@ -20,15 +20,7 @@
    :caption: Introduction
 
    basic-usage
-
-.. toctree::
-   :hidden:
-   :caption: API
-
-   api/environments
-   api/wrappers
-   api/utils
-
+   
 .. toctree::
    :hidden:
    :caption: Environments
@@ -44,6 +36,14 @@
    auto_examples/index
    tutorials/testing-an-agent
    tutorials/experiments
+
+.. toctree::
+   :hidden:
+   :caption: API
+
+   api/environments
+   api/wrappers
+   api/utils
 
 .. toctree::
    :hidden:
