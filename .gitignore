@@ -12,7 +12,6 @@ runs/
 *.gz
 *.whl
 doc/_build/
-doc/auto_examples/
 *.pdf
 .idea/
 *.out

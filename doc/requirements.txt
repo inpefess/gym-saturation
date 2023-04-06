@@ -3,6 +3,3 @@ pexpect
 sphinx-autodoc-typehints
 importlib_resources
 furo
-sphinx-gallery
-pillow 
-matplotlib
