@@ -25,6 +25,7 @@ import numpy as np
 from gymnasium import Env, spaces
 from gymnasium.spaces.text import alphanumeric
 
+from gym_saturation.constants import ACTION_MASK, REAL_OBS
 from gym_saturation.proof_state import ProofState
 from gym_saturation.utils import (
     FALSEHOOD_SYMBOL,
@@ -34,8 +35,6 @@ from gym_saturation.utils import (
 
 MAX_CLAUSES = 1000
 ALPHANUMERIC_WITH_UNDERSCORE = "".join(alphanumeric) + "_"
-REAL_OBS = "real_obs"
-ACTION_MASK = "action_mask"
 SHORT_TEXT_SPACE = spaces.Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE)
 LONG_TEXT_SPACE = spaces.Text(
     4000,

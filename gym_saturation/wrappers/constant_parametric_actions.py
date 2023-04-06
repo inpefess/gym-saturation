@@ -23,6 +23,8 @@ import gymnasium as gym
 import numpy as np
 from gymnasium.core import ObsType
 
+from gym_saturation.constants import PARAMETRIC_ACTIONS
+
 
 class ConstantParametricActionsWrapper(gym.ObservationWrapper):
     """
@@ -37,7 +39,9 @@ class ConstantParametricActionsWrapper(gym.ObservationWrapper):
            [0., 1.]])}
     """
 
-    def __init__(self, env: gym.Env, avail_actions_key: str = "avail_actions"):
+    def __init__(
+        self, env: gym.Env, avail_actions_key: str = PARAMETRIC_ACTIONS
+    ):
         """Initialise the observation wrapper."""
         super().__init__(env)
         self.avail_actions_key = avail_actions_key
