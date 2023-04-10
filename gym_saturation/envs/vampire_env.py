@@ -75,7 +75,7 @@ class VampireEnv(SaturationEnv):
 
     >>> from gym_saturation.utils import MOCK_TPTP_FOLDER
     >>> vampire_binary = os.path.join(MOCK_TPTP_FOLDER, "..", "vampire-mock")
-    >>> vampire_env = VampireEnv(vampire_binary_path=vampire_binary)
+    >>> vampire_env = VampireEnv(prover_binary_path=vampire_binary)
     >>> vampire_env.reset()
     Traceback (most recent call last):
      ...
@@ -86,18 +86,18 @@ class VampireEnv(SaturationEnv):
         self,
         max_clauses: int = MAX_CLAUSES,
         render_mode: str = "human",
-        vampire_binary_path: str = "vampire",
+        prover_binary_path: str = "vampire",
     ):
         """
         Initialise a :ref:`VampireWrapper <vampire-wrapper>`.
 
         :param max_clauses: maximal number of clauses in proof state
         :param render_mode: a mode of running ``render`` method
-        :param vampire_binary_path: a path to Vampire binary;
+        :param prover_binary_path: a path to Vampire binary;
             by default we expect it to be in the $PATH
         """
         super().__init__(max_clauses, render_mode)
-        self._vampire = VampireWrapper(vampire_binary_path)
+        self._vampire = VampireWrapper(prover_binary_path)
 
     def _parse_vampire_response(
         self, vampire_response: Tuple[Tuple[str, str, str], ...]

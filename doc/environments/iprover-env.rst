@@ -51,17 +51,14 @@ Arguments
        "iProver-v0",
        max_clauses=1000,
        render_mode="human",
-       port_pair=None,
-       iprover_binary_path="iproveropt"
+       prover_binary_path="iproveropt"
    )
 
 ``max_clauses=1000``: the size ``n`` of the action space.
 
 ``render_mode="human"``: either ``ansi`` (return the clauses from the current proof state in the TPTP format) or ``human`` (print the ``ansi`` rendering to the standard output)
 
-``port_pair=None``: a pair of ephemeral ports for the relay server. iProver will connect to the first port, a port to listen for agent's connection is the second one. If not set, port numbers are assigned at random
-
-``iprover_binary_path="iproveropt"``: the path to iProver binary (supposed to be on the ``$PATH`` by default)
+``prover_binary_path="iproveropt"``: the path to iProver binary (supposed to be on the ``$PATH`` by default)
 
 References
 ***********

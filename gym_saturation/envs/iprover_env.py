@@ -32,7 +32,7 @@ from gym_saturation.relay_server import RelayServer, RelayTCPHandler
 
 
 def _iprover_start(
-    iprover_port: int, problem_filename: str, iprover_binary_path: str
+    iprover_port: int, problem_filename: str, prover_binary_path: str
 ) -> subprocess.Popen:
     tptp_folder = os.path.join(os.path.dirname(problem_filename), "..", "..")
     arguments = [
@@ -63,7 +63,7 @@ def _iprover_start(
         problem_filename,
     ]
     return subprocess.Popen(
-        [iprover_binary_path] + arguments, stdout=subprocess.DEVNULL
+        [prover_binary_path] + arguments, stdout=subprocess.DEVNULL
     )
 
 
@@ -93,18 +93,18 @@ class IProverEnv(SaturationEnv):
         self,
         max_clauses: int = MAX_CLAUSES,
         render_mode: str = "human",
-        iprover_binary_path: str = "iproveropt",
+        prover_binary_path: str = "iproveropt",
     ):
         """
         Initialise the environment.
 
         :param max_clauses: maximal number of clauses in proof state
         :param render_mode: a mode of running ``render`` method
-        :param iprover_binary_path: a path to iProver binary;
+        :param prover_binary_path: a path to iProver binary;
             by default, we assume it to be ``iproveropt`` and in the $PATH
         """
         super().__init__(max_clauses, render_mode)
-        self.iprover_binary_path = iprover_binary_path
+        self.prover_binary_path = prover_binary_path
         self._relay_server: Optional[RelayServer] = None
         self.relay_server_thread: Optional[Thread] = None
         self.iprover_process: Optional[subprocess.Popen] = None
@@ -172,7 +172,7 @@ class IProverEnv(SaturationEnv):
         self.iprover_process = _iprover_start(
             self.relay_server.server_address[1],
             self.get_task(),
-            self.iprover_binary_path,
+            self.prover_binary_path,
         )
         data = self._get_json_data()
         self._parse_iprover_requests(data)

@@ -95,7 +95,7 @@ class RelayTCPHandler(BaseRequestHandler):
                     new_messages, raw_data = self._read_messages(raw_data)
                     json_messages.extend(new_messages)
                 for json_message in json_messages:
-                    self.server.input_queue.put_nowait(json_message)
+                    self.server.input_queue.put(json_message)
                 if json_messages[-1]["query"] == "given_clause_request":
                     self.request.sendall(self.server.output_queue.get())
                     self.server.output_queue.task_done()
