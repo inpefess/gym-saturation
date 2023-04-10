@@ -24,7 +24,7 @@ from typing import Any, Dict, Tuple
 
 if sys.version_info.major == 3 and sys.version_info.minor >= 9:
     # pylint: disable=no-name-in-module
-    from importlib.resources import files  # type: ignore
+    from importlib.resources import files  # type: ignore  # pragma: no cover
 else:  # pragma: no cover
     from importlib_resources import files  # pylint: disable=import-error
 
