@@ -310,11 +310,11 @@ we did to find proof.
  .. code-block:: none
 
     {'literals': '$false',
-     'label': '20',
+     'label': '18',
      'role': 'lemma',
      'inference_rule': 'subsumption_resolution',
-     'inference_parents': ('19', '5'),
-     'birth_step': 6}
+     'inference_parents': ('17', '5'),
+     'birth_step': 5}
 
 
 
@@ -342,15 +342,15 @@ proof)
  .. code-block:: none
 
     cnf(1, lemma, mult(X0,mult(X1,X2)) = mult(mult(X0,X1),X2), inference(input, [], [])).
-    cnf(11, lemma, mult(inv(X0),mult(X0,X1)) = mult(e,X1), inference(superposition, [], [1, 3])).
+    cnf(7, lemma, mult(inv(X1),mult(X1,X2)) = mult(e,X2), inference(superposition, [], [1, 3])).
     cnf(2, lemma, mult(e,X0) = X0, inference(input, [], [])).
-    cnf(12, lemma, mult(inv(X0),mult(X0,X1)) = X1, inference(forward_demodulation, [], [11, 2])).
+    cnf(9, lemma, mult(inv(X1),mult(X1,X2)) = X2, inference(forward_demodulation, [], [7, 2])).
     cnf(4, lemma, a = mult(a,a), inference(input, [], [])).
-    cnf(17, lemma, a = mult(inv(a),a), inference(superposition, [], [12, 4])).
+    cnf(12, lemma, a = mult(inv(a),a), inference(superposition, [], [9, 4])).
     cnf(3, lemma, e = mult(inv(X0),X0), inference(input, [], [])).
-    cnf(19, lemma, e = a, inference(forward_demodulation, [], [17, 3])).
+    cnf(17, lemma, e = a, inference(forward_demodulation, [], [12, 3])).
     cnf(5, lemma, e != a, inference(input, [], [])).
-    cnf(20, lemma, $false, inference(subsumption_resolution, [], [19, 5])).
+    cnf(18, lemma, $false, inference(subsumption_resolution, [], [17, 5])).
 
 
 
@@ -399,12 +399,6 @@ order they became available
 
 
 
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    Loop <_UnixSelectorEventLoop running=False closed=True debug=False> that handles pid 65413 is closed
-
 
 
 
@@ -444,7 +438,7 @@ steps. And the proof found looks a bit different
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.071 seconds)
+   **Total running time of the script:** ( 0 minutes  0.715 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_age_agent.py:

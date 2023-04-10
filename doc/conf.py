@@ -54,4 +54,5 @@ html_title = "gym-saturation documentation"
 
 sphinx_gallery_conf = {
     "download_all_examples": False,
+    "run_stale_examples": True,
 }
