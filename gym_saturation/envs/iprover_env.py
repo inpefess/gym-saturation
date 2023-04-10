@@ -17,7 +17,6 @@
 Saturation Environment with iProver back-end
 ============================================
 """
-import asyncio
 import json
 import os
 import re
@@ -32,9 +31,9 @@ from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
 from gym_saturation.relay_server import RelayServer, RelayTCPHandler
 
 
-async def _iprover_start(
+def _iprover_start(
     iprover_port: int, problem_filename: str, iprover_binary_path: str
-) -> asyncio.subprocess.Process:
+) -> subprocess.Popen:
     tptp_folder = os.path.join(os.path.dirname(problem_filename), "..", "..")
     arguments = [
         "--interactive_mode",
@@ -63,8 +62,8 @@ async def _iprover_start(
         tptp_folder,
         problem_filename,
     ]
-    return await asyncio.create_subprocess_exec(
-        iprover_binary_path, *arguments, stdout=subprocess.DEVNULL
+    return subprocess.Popen(
+        [iprover_binary_path] + arguments, stdout=subprocess.DEVNULL
     )
 
 
@@ -74,13 +73,20 @@ class IProverEnv(SaturationEnv):
 
     Refer to :ref:`iprover_env` for more documentation.
 
-    >>> env = IProverEnv()
-    >>> observation, info = env.reset()
-    >>> for action in [0, 1, 2, 3, 4, 6, 9]:
-    ...     observation, reward, terminated, truncated, info = env.step(action)
-    >>> print(reward, terminated, truncated)
-    1.0 True False
-    >>> env.close()
+    >>> from gymnasium.utils.env_checker import check_env
+    >>> import gymnasium as gym
+    >>> env = gym.make(
+    ...     "iProver-v0",
+    ...     max_clauses=5
+    ... ).unwrapped
+    >>> env.relay_server
+    Traceback (most recent call last):
+     ...
+    ValueError: run ``reset`` first!
+    >>> check_env(env)
+    cnf(c_53, ...).
+    ...
+    cnf(c_49, ...).
     """
 
     def __init__(
@@ -99,9 +105,16 @@ class IProverEnv(SaturationEnv):
         """
         super().__init__(max_clauses, render_mode)
         self.iprover_binary_path = iprover_binary_path
-        self.relay_server = RelayServer(("localhost", 0), RelayTCPHandler)
+        self._relay_server: Optional[RelayServer] = None
+        self.relay_server_thread: Optional[Thread] = None
+        self.iprover_process: Optional[subprocess.Popen] = None
+
+    def _restart_relay_server(self) -> None:
+        if self._relay_server:
+            self.close()
+        self._relay_server = RelayServer(("localhost", 0), RelayTCPHandler)
         self.relay_server_thread = Thread(
-            target=self.relay_server.serve_forever
+            target=self._relay_server.serve_forever
         )
         self.relay_server_thread.daemon = True
         self.relay_server_thread.start()
@@ -153,12 +166,13 @@ class IProverEnv(SaturationEnv):
         options: Optional[Dict[str, Any]] = None,
     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
-        asyncio.run(
-            _iprover_start(
-                self.relay_server.server_address[1],
-                self.get_task(),
-                self.iprover_binary_path,
-            )
+        if self.iprover_process:
+            self.iprover_process.terminate()
+        self._restart_relay_server()
+        self.iprover_process = _iprover_start(
+            self.relay_server.server_address[1],
+            self.get_task(),
+            self.iprover_binary_path,
         )
         data = self._get_json_data()
         self._parse_iprover_requests(data)
@@ -200,6 +214,18 @@ class IProverEnv(SaturationEnv):
 
     def close(self) -> None:
         """Stop relay server."""
-        self.relay_server.shutdown()
-        self.relay_server.server_close()
-        self.relay_server_thread.join()
+        if self._relay_server:
+            self._relay_server.shutdown()
+        if self.relay_server_thread:
+            self.relay_server_thread.join()
+
+    @property
+    def relay_server(self) -> RelayServer:
+        """
+        Return the relay server object.
+
+        :raises ValueError: if called before ``reset``
+        """
+        if self._relay_server:
+            return self._relay_server
+        raise ValueError("run ``reset`` first!")

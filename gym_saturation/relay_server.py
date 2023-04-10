@@ -19,11 +19,11 @@ Relay Server between Two Sockets
 """
 import json
 from queue import Queue
-from socketserver import BaseRequestHandler, TCPServer
+from socketserver import BaseRequestHandler, ThreadingTCPServer
 from typing import Any, Dict, List, Tuple, Type
 
 
-class RelayServer(TCPServer):
+class RelayServer(ThreadingTCPServer):
     r"""
     Server relaying i/o of a long-running connection to a TCP socket to queues.
 
@@ -64,6 +64,7 @@ class RelayServer(TCPServer):
         )
         self.input_queue: Queue = Queue()
         self.output_queue: Queue = Queue()
+        self.daemon_threads = True
 
 
 class RelayTCPHandler(BaseRequestHandler):
@@ -94,7 +95,7 @@ class RelayTCPHandler(BaseRequestHandler):
                     new_messages, raw_data = self._read_messages(raw_data)
                     json_messages.extend(new_messages)
                 for json_message in json_messages:
-                    self.server.input_queue.put(json_message)
+                    self.server.input_queue.put_nowait(json_message)
                 if json_messages[-1]["query"] == "given_clause_request":
-                    item = self.server.output_queue.get()
-                    self.request.sendall(item)
+                    self.request.sendall(self.server.output_queue.get())
+                    self.server.output_queue.task_done()
