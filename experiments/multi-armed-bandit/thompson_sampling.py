@@ -42,10 +42,20 @@ def env_creator(env_config: Dict[str, Any]) -> gym.Env:
     :param env_config: an environment config
     :returns: an environment
     """
-    return ConstantParametricActionsWrapper(
+    env = ConstantParametricActionsWrapper(
         AgeWeightBandit(gym.make("Vampire-v0", **env_config)),
         avail_actions_key="item",
     )
+    problem_filename = os.path.join(
+        os.environ["WORK"],
+        "data",
+        "TPTP-v8.1.2",
+        "Problems",
+        "SET",
+        "SET001-1.p",
+    )
+    env.set_task(problem_filename)
+    return env
 
 
 class PatchedRandomPolicy(RandomPolicy):
@@ -92,23 +102,13 @@ def train_thompson_sampling() -> None:
     """Train Thompson sampling."""
     args = parse_args()
     register_env("VampireBandit", env_creator)
-    problem_list = [
-        os.path.join(
-            os.environ["WORK"],
-            "data",
-            "TPTP-v8.1.2",
-            "Problems",
-            "SET",
-            "SET001-1.p",
-        )
-    ]
     if args.random_baseline:
         config = AlgorithmConfig(RandomAlgorithm).framework("torch")
     else:
         config = BanditLinTSConfig()
     algo = config.environment(
         "VampireBandit",
-        env_config={"max_clauses": 20, "problem_list": problem_list},
+        env_config={"max_clauses": 20},
     ).build()
     for _ in range(20):
         algo.train()
