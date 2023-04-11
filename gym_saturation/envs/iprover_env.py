@@ -17,14 +17,10 @@
 Saturation Environment with iProver back-end
 ============================================
 """
-import asyncio
 import json
 import os
-import random
 import re
-import socket
 import subprocess
-import time
 from threading import Thread
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -35,9 +31,9 @@ from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
 from gym_saturation.relay_server import RelayServer, RelayTCPHandler
 
 
-async def _iprover_start(
-    iprover_port: int, problem_filename: str, iprover_binary_path: str
-) -> asyncio.subprocess.Process:
+def _iprover_start(
+    iprover_port: int, problem_filename: str, prover_binary_path: str
+) -> subprocess.Popen:
     tptp_folder = os.path.join(os.path.dirname(problem_filename), "..", "..")
     arguments = [
         "--interactive_mode",
@@ -66,8 +62,8 @@ async def _iprover_start(
         tptp_folder,
         problem_filename,
     ]
-    return await asyncio.create_subprocess_exec(
-        iprover_binary_path, *arguments, stdout=subprocess.DEVNULL
+    return subprocess.Popen(
+        [prover_binary_path] + arguments, stdout=subprocess.DEVNULL
     )
 
 
@@ -75,52 +71,50 @@ class IProverEnv(SaturationEnv):
     """
     An RL environment around iProver.
 
-    Refer to :ref:`iprover_env` for more documentation.
+    Refer to :ref:`saturation_env` for more documentation.
 
-    >>> env = IProverEnv()
-    >>> observation, info = env.reset()
-    >>> for action in [0, 1, 2, 3, 4, 6, 9]:
-    ...     observation, reward, terminated, truncated, info = env.step(action)
-    >>> print(reward, terminated, truncated)
-    1.0 True False
-    >>> env.close()
+    >>> from gymnasium.utils.env_checker import check_env
+    >>> import gymnasium as gym
+    >>> env = gym.make(
+    ...     "iProver-v0",
+    ...     max_clauses=5
+    ... ).unwrapped
+    >>> env.relay_server
+    Traceback (most recent call last):
+     ...
+    ValueError: run ``reset`` first!
+    >>> check_env(env)
+    cnf(c_53, ...).
+    ...
+    cnf(c_49, ...).
     """
 
     def __init__(
         self,
         max_clauses: int = MAX_CLAUSES,
         render_mode: str = "human",
-        port_pair: Optional[Tuple[int, int]] = None,
-        iprover_binary_path: str = "iproveropt",
+        prover_binary_path: str = "iproveropt",
     ):
         """
         Initialise the environment.
 
         :param max_clauses: maximal number of clauses in proof state
         :param render_mode: a mode of running ``render`` method
-        :param port_pair: iProver will connect to the first port,
-            a port to listen for agent's connection is the second one
-        :param iprover_binary_path: a path to iProver binary;
+        :param prover_binary_path: a path to iProver binary;
             by default, we assume it to be ``iproveropt`` and in the $PATH
         """
         super().__init__(max_clauses, render_mode)
-        (
-            self.iprover_port,
-            self.agent_port,
-        ) = (  # pylint: disable=unbalanced-tuple-unpacking
-            (
-                random.randint(10000, 2**16 - 1),
-                random.randint(10000, 2**16 - 1),
-            )
-            if port_pair is None
-            else port_pair
-        )
-        self.iprover_binary_path = iprover_binary_path
-        self.relay_server = RelayServer(
-            self.iprover_port, ("localhost", self.agent_port), RelayTCPHandler
-        )
+        self.prover_binary_path = prover_binary_path
+        self._relay_server: Optional[RelayServer] = None
+        self.relay_server_thread: Optional[Thread] = None
+        self.iprover_process: Optional[subprocess.Popen] = None
+
+    def _restart_relay_server(self) -> None:
+        if self._relay_server:
+            self.close()
+        self._relay_server = RelayServer(("localhost", 0), RelayTCPHandler)
         self.relay_server_thread = Thread(
-            target=self.relay_server.serve_forever
+            target=self._relay_server.serve_forever
         )
         self.relay_server_thread.daemon = True
         self.relay_server_thread.start()
@@ -172,28 +166,20 @@ class IProverEnv(SaturationEnv):
         options: Optional[Dict[str, Any]] = None,
     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
-        asyncio.run(
-            _iprover_start(
-                self.iprover_port, self.get_task(), self.iprover_binary_path
-            )
+        if self.iprover_process:
+            self.iprover_process.terminate()
+        self._restart_relay_server()
+        self.iprover_process = _iprover_start(
+            self.relay_server.server_address[1],
+            self.get_task(),
+            self.prover_binary_path,
         )
-        time.sleep(2)
         data = self._get_json_data()
         self._parse_iprover_requests(data)
         return {
             REAL_OBS: tuple(self.state.clauses),
             ACTION_MASK: self.state.action_mask,
         }, {}
-
-    def _get_raw_data(self) -> bytes:
-        with socket.create_connection(
-            ("localhost", self.agent_port)
-        ) as tcp_socket:
-            tcp_socket.sendall(b"READ")
-            raw_data = tcp_socket.recv(4096)
-            while b"\x00" not in raw_data[-3:]:
-                raw_data += tcp_socket.recv(4096)
-        return raw_data
 
     def _get_json_data(self) -> List[Dict[str, Any]]:
         json_data = [{"query": "None"}]
@@ -202,17 +188,9 @@ class IProverEnv(SaturationEnv):
             "szs_status",
             "proof_out",
         }:
-            raw_data = self._get_raw_data()
-            raw_jsons = [
-                request.replace("\n", "")
-                for request in raw_data.decode("utf8").split("\x00")
-            ]
-            for raw_json in raw_jsons:
-                if raw_json:
-                    parsed_json = json.loads(
-                        raw_json.replace("\n", "").replace("\x00", "")
-                    )
-                    json_data.append(parsed_json)
+            parsed_json = self.relay_server.input_queue.get()
+            self.relay_server.input_queue.task_done()
+            json_data.append(parsed_json)
         return json_data[1:]
 
     def _parse_iprover_requests(
@@ -223,22 +201,31 @@ class IProverEnv(SaturationEnv):
                 self._parse_batch_clauses(iprover_request["clauses"])
 
     def _do_deductions(self, action: np.int64) -> None:
-        given_clause_label = self.state.clause_labels[action][2:]
-        scores = (
-            f"""{{"given_clause": {given_clause_label},"""
-            + """"passive_is_empty": false}\n\x00\n"""
+        iprover_scores_message = {
+            "given_clause": int(self.state.clause_labels[action][2:]),
+            "passive_is_empty": False,
+        }
+        relayed_scores_message = bytes(
+            json.dumps(iprover_scores_message) + "\n\x00\n", "utf8"
         )
-        with socket.create_connection(
-            ("localhost", self.agent_port)
-        ) as tcp_socket:
-            tcp_socket.sendall(scores.encode("utf8"))
+        self.relay_server.output_queue.put(relayed_scores_message)
         data = self._get_json_data()
-        if data:
-            self._parse_iprover_requests(data)
+        self._parse_iprover_requests(data)
 
     def close(self) -> None:
         """Stop relay server."""
-        self.relay_server.data_connection.close()
-        self.relay_server.shutdown()
-        self.relay_server.server_close()
-        self.relay_server_thread.join()
+        if self._relay_server:
+            self._relay_server.shutdown()
+        if self.relay_server_thread:
+            self.relay_server_thread.join()
+
+    @property
+    def relay_server(self) -> RelayServer:
+        """
+        Return the relay server object.
+
+        :raises ValueError: if called before ``reset``
+        """
+        if self._relay_server:
+            return self._relay_server
+        raise ValueError("run ``reset`` first!")

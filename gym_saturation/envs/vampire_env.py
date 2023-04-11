@@ -28,7 +28,6 @@ from gym_saturation.envs.saturation_env import (
     REAL_OBS,
     SaturationEnv,
 )
-from gym_saturation.utils import FALSEHOOD_SYMBOL
 from gym_saturation.vampire_wrapper import VampireWrapper
 
 
@@ -36,7 +35,7 @@ class VampireEnv(SaturationEnv):
     """
     An RL environment around a Vampire prover.
 
-    Refer to :ref:`vampire_env` for more documentation.
+    Refer to :ref:`saturation_env` for more documentation.
 
     We can run a full Gymnasium environment check:
 
@@ -51,17 +50,6 @@ class VampireEnv(SaturationEnv):
     ...
     cnf(5, ...).
 
-    sometimes Vampire can solve a problem during pre-processing
-
-    >>> from gym_saturation.utils import MOCK_TPTP_PROBLEM
-    >>> trivial_problem = os.path.join(os.path.dirname(MOCK_TPTP_PROBLEM),
-    ...     "TST002-1.p")
-    >>> env.set_task(trivial_problem)
-    >>> _, _ = env.reset()
-    >>> _, _, terminated, _, _ = env.step(0)
-    >>> terminated
-    True
-
     we can't repeat actions
 
     >>> _ = env.reset()
@@ -71,11 +59,24 @@ class VampireEnv(SaturationEnv):
      ...
     ValueError: action 0 is not valid
 
+    sometimes Vampire can solve a problem during pre-processing
+
+    >>> from gym_saturation.constants import MOCK_TPTP_PROBLEM
+    >>> trivial_problem = os.path.join(os.path.dirname(MOCK_TPTP_PROBLEM),
+    ...     "TST002-1.p")
+    >>> env.set_task(trivial_problem)
+    >>> _, _ = env.reset()
+    >>> env.state.terminated
+    True
+    >>> _, _, terminated, _, _ = env.step(0)
+    >>> terminated
+    True
+
     a test of an unexpected reply from Vampire
 
-    >>> from gym_saturation.utils import MOCK_TPTP_FOLDER
+    >>> from gym_saturation.constants import MOCK_TPTP_FOLDER
     >>> vampire_binary = os.path.join(MOCK_TPTP_FOLDER, "..", "vampire-mock")
-    >>> vampire_env = VampireEnv(vampire_binary_path=vampire_binary)
+    >>> vampire_env = VampireEnv(prover_binary_path=vampire_binary)
     >>> vampire_env.reset()
     Traceback (most recent call last):
      ...
@@ -86,18 +87,18 @@ class VampireEnv(SaturationEnv):
         self,
         max_clauses: int = MAX_CLAUSES,
         render_mode: str = "human",
-        vampire_binary_path: str = "vampire",
+        prover_binary_path: str = "vampire",
     ):
         """
         Initialise a :ref:`VampireWrapper <vampire-wrapper>`.
 
         :param max_clauses: maximal number of clauses in proof state
         :param render_mode: a mode of running ``render`` method
-        :param vampire_binary_path: a path to Vampire binary;
+        :param prover_binary_path: a path to Vampire binary;
             by default we expect it to be in the $PATH
         """
         super().__init__(max_clauses, render_mode)
-        self._vampire = VampireWrapper(vampire_binary_path)
+        self._vampire = VampireWrapper(prover_binary_path)
 
     def _parse_vampire_response(
         self, vampire_response: Tuple[Tuple[str, str, str], ...]
@@ -136,11 +137,6 @@ class VampireEnv(SaturationEnv):
         }, {}
 
     def _do_deductions(self, action: np.int64) -> None:
-        if any(
-            clause["literals"] == FALSEHOOD_SYMBOL
-            for clause in self.state.clauses
-        ):
-            return
         self._parse_vampire_response(
             self._vampire.pick_a_clause(self.state.clause_labels[action])
         )

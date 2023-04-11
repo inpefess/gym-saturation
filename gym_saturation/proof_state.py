@@ -22,6 +22,8 @@ from typing import Any, Dict, List
 
 import numpy as np
 
+from gym_saturation.constants import FALSEHOOD_SYMBOL
+
 
 @dataclass
 class ProofState:
@@ -64,3 +66,19 @@ class ProofState:
         clause_index = self.clause_labels.index(clause_label)
         if clause_index < self.action_mask.shape[0]:
             self.action_mask[clause_index] = mask_value
+
+    @property
+    def terminated(self) -> bool:
+        """Refutation found or satisfiability established."""
+        return (
+            max(
+                clause["literals"] == FALSEHOOD_SYMBOL
+                for clause in self.clauses
+            )
+            or self.action_mask.max() == 0.0
+        ) and not self.truncated
+
+    @property
+    def truncated(self) -> bool:
+        """More clauses generated than expected."""
+        return len(self.clauses) > self.action_mask.shape[0]

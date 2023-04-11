@@ -17,81 +17,85 @@
 Relay Server between Two Sockets
 ================================
 """
-import socket
-from socketserver import BaseRequestHandler, TCPServer
-from typing import Optional, Tuple, Type
+import json
+from queue import Queue
+from socketserver import BaseRequestHandler, ThreadingTCPServer
+from typing import Any, Dict, List, Tuple, Type
 
 
-class RelayServer(TCPServer):
+class RelayServer(ThreadingTCPServer):
     r"""
-    A TCP server to read and write data from another opened TCP socket.
+    Server relaying i/o of a long-running connection to a TCP socket to queues.
 
+    >>> import socket
     >>> from threading import Thread
-    >>> import random
-    >>> data_port = random.randint(10000, 2 ** 16 - 1)
-    >>> control_port = random.randint(10000, 2 ** 16 - 1)
-    >>> with RelayServer(
-    ...     data_port, ("localhost", control_port), RelayTCPHandler
+    >>> with RelayServer(("localhost", 0), RelayTCPHandler
     ... ) as relay_server:
     ...     thread = Thread(target=relay_server.serve_forever)
     ...     thread.daemon = True
     ...     thread.start()
-    ...     with socket.create_connection(
-    ...         ("localhost", data_port)
-    ...     ) as data_connection:
-    ...         data_connection.sendall(b"test\x00")
-    ...         with socket.create_connection(
-    ...             ("localhost", control_port)
-    ...         ) as control_connection:
-    ...             control_connection.sendall(b"READ")
-    ...             print(control_connection.recv(4096))
-    ...         with socket.create_connection(
-    ...             ("localhost", control_port)
-    ...         ) as control_connection:
-    ...             control_connection.sendall(b"anything but READ")
-    ...             print(control_connection.recv(4096).decode("utf8"))
+    ...     with socket.create_connection(relay_server.server_address
+    ...     ) as socket_connection:
+    ...         # data sent to the socket are stored in one queue
+    ...         socket_connection.sendall(
+    ...             b'{"query":"given_clause_request"}\n\x00\n'
+    ...         )
+    ...         print(relay_server.input_queue.get())
+    ...         # data from another queue are sent to the client
+    ...         relay_server.output_queue.put(b"test")
+    ...         print(str(socket_connection.recv(4096), "utf8"))
+    ...         # message format for closing connection
+    ...         socket_connection.sendall(b'{"query":"proof_out"}\n\x00\n')
     ...     relay_server.shutdown()
     ...     thread.join()
-    b'test\x00'
-    OK
+    {'query': 'given_clause_request'}
+    test
     """
 
     def __init__(
         self,
-        data_port: int,
         server_address: Tuple[str, int],
         request_handler_class: Type[BaseRequestHandler],
         bind_and_activate: bool = True,
     ):
-        """Accept a data connection."""
+        """Initialise queues."""
         super().__init__(
             server_address, request_handler_class, bind_and_activate
         )
-        self.data_socket = socket.create_server(
-            address=("localhost", data_port), family=socket.AF_INET
-        )
-        self._data_connection: Optional[socket.socket] = None
-
-    @property
-    def data_connection(self) -> socket.socket:
-        """Get the connection to read from and write to."""
-        if self._data_connection is None:
-            self._data_connection = self.data_socket.accept()[0]
-        return self._data_connection
+        self.input_queue: Queue = Queue()
+        self.output_queue: Queue = Queue()
+        self.daemon_threads = True
 
 
 class RelayTCPHandler(BaseRequestHandler):
     """The request handler class for relay server."""
 
+    def _read_messages(
+        self, old_data: str
+    ) -> Tuple[List[Dict[str, Any]], str]:
+        raw_data = old_data + str(self.request.recv(4096), "utf8")
+        raw_jsons = raw_data.split("\n\x00\n")
+        return list(map(json.loads, raw_jsons[:-1])), raw_jsons[-1]
+
     def handle(self) -> None:
         """Read data from another TCP socket or send data to it."""
         if isinstance(self.server, RelayServer):
-            command = self.request.recv(4096)
-            if command == b"READ":
-                input_data = b""
-                while b"\x00" not in input_data[-3:]:
-                    input_data += self.server.data_connection.recv(4096)
-                self.request.sendall(input_data)
-            else:
-                self.server.data_connection.sendall(command)
-                self.request.sendall(b"OK")
+            json_messages: List[Dict[str, Any]] = []
+            while (
+                len(json_messages) == 0
+                or json_messages[-1].get("query", "no") != "proof_out"
+            ):
+                raw_data, json_messages = "", []
+                while len(json_messages) == 0 or json_messages[-1].get(
+                    "query", "no"
+                ) not in {
+                    "given_clause_request",
+                    "proof_out",
+                }:
+                    new_messages, raw_data = self._read_messages(raw_data)
+                    json_messages.extend(new_messages)
+                for json_message in json_messages:
+                    self.server.input_queue.put(json_message)
+                if json_messages[-1]["query"] == "given_clause_request":
+                    self.request.sendall(self.server.output_queue.get())
+                    self.server.output_queue.task_done()

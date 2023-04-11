@@ -17,6 +17,22 @@
 Constants used throughout the package
 ======================================
 """
+import os
+import sys
+
+if sys.version_info.major == 3 and sys.version_info.minor >= 9:
+    # pylint: disable=no-name-in-module
+    from importlib.resources import files  # type: ignore  # pragma: no cover
+else:  # pragma: no cover
+    from importlib_resources import files  # pylint: disable=import-error
+
 REAL_OBS = "real_obs"
 ACTION_MASK = "action_mask"
 PARAMETRIC_ACTIONS = "avail_actions"
+FALSEHOOD_SYMBOL = "$false"
+MOCK_TPTP_FOLDER = str(
+    files("gym_saturation").joinpath(os.path.join("resources", "TPTP-mock"))
+)
+MOCK_TPTP_PROBLEM = os.path.join(
+    MOCK_TPTP_FOLDER, "Problems", "TST", "TST001-1.p"
+)

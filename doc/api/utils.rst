@@ -30,3 +30,5 @@ Utils
    :special-members: __init__, __call__
 .. automodule:: gym_saturation.dummy_http_handler
    :members:
+.. automodule:: gym_saturation.constants
+   :members:

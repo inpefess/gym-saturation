@@ -25,13 +25,9 @@ import numpy as np
 from gymnasium import Env, spaces
 from gymnasium.spaces.text import alphanumeric
 
-from gym_saturation.constants import ACTION_MASK, REAL_OBS
+from gym_saturation.constants import ACTION_MASK, MOCK_TPTP_PROBLEM, REAL_OBS
 from gym_saturation.proof_state import ProofState
-from gym_saturation.utils import (
-    FALSEHOOD_SYMBOL,
-    MOCK_TPTP_PROBLEM,
-    pretty_print,
-)
+from gym_saturation.utils import pretty_print
 
 MAX_CLAUSES = 1000
 ALPHANUMERIC_WITH_UNDERSCORE = "".join(alphanumeric) + "_"
@@ -170,26 +166,18 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         """
         if self.state.action_mask[action] == 0.0:
             raise ValueError(f"action {action} is not valid")
-        self.state.step_number += 1
-        self._do_deductions(action)
-        self.state.action_mask[action] = 0.0
-        truncated = len(self.state.clauses) > int(self.action_space.n)
-        terminated = (
-            max(
-                clause["literals"] == FALSEHOOD_SYMBOL
-                for clause in self.state.clauses
-            )
-            or self.state.action_mask.max() == 0.0
-        ) and not truncated
-        reward = 1.0 if terminated else 0.0
+        if not (self.state.terminated or self.state.truncated):
+            self.state.step_number += 1
+            self._do_deductions(action)
+            self.state.action_mask[action] = 0.0
         return (
             {
                 REAL_OBS: tuple(self.state.clauses),
                 ACTION_MASK: self.state.action_mask,
             },
-            reward,
-            terminated,
-            truncated,
+            1.0 if self.state.terminated else 0.0,
+            self.state.terminated,
+            self.state.truncated,
             {},
         )
 

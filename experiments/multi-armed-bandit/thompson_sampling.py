@@ -42,10 +42,20 @@ def env_creator(env_config: Dict[str, Any]) -> gym.Env:
     :param env_config: an environment config
     :returns: an environment
     """
-    return ConstantParametricActionsWrapper(
-        AgeWeightBandit(gym.make("Vampire-v0", **env_config)),
+    env = ConstantParametricActionsWrapper(
+        AgeWeightBandit(gym.make(**env_config)),
         avail_actions_key="item",
     )
+    problem_filename = os.path.join(
+        os.environ["WORK"],
+        "data",
+        "TPTP-v8.1.2",
+        "Problems",
+        "SET",
+        "SET001-1.p",
+    )
+    env.set_task(problem_filename)
+    return env
 
 
 class PatchedRandomPolicy(RandomPolicy):
@@ -85,30 +95,35 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Run random baseline instead of Thompson sampling",
     )
+    parser.add_argument(
+        "--prover",
+        choices=["Vampire", "iProver"],
+        required=True,
+        help="Which prover to guide: Vampire or iProver",
+    )
+    parser.add_argument(
+        "--max_clauses",
+        type=int,
+        required=True,
+        help="Maximal number of clauses in the proof state",
+    )
     return parser.parse_args()
 
 
 def train_thompson_sampling() -> None:
     """Train Thompson sampling."""
     args = parse_args()
-    register_env("VampireBandit", env_creator)
-    problem_list = [
-        os.path.join(
-            os.environ["WORK"],
-            "data",
-            "TPTP-v8.1.2",
-            "Problems",
-            "SET",
-            "SET001-1.p",
-        )
-    ]
+    register_env("ProverBandit", env_creator)
     if args.random_baseline:
         config = AlgorithmConfig(RandomAlgorithm).framework("torch")
     else:
         config = BanditLinTSConfig()
     algo = config.environment(
-        "VampireBandit",
-        env_config={"max_clauses": 20, "problem_list": problem_list},
+        "ProverBandit",
+        env_config={
+            "id": f"{args.prover}-v0",
+            "max_clauses": args.max_clauses,
+        },
     ).build()
     for _ in range(20):
         algo.train()

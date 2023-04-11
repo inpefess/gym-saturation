@@ -23,3 +23,5 @@ doc/_build/
 .dir-locals.el
 coverage.xml
 flycheck_*
+*.md5
+*.pickle

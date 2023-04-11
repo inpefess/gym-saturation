@@ -24,8 +24,7 @@ gym-saturation
 written in `TPTP library <https://tptp.org>`__ formal language are
 supported.
 
-There are two environments in ``gym-saturation``: `VampireEnv <https://gym-saturation.readthedocs.io/en/latest/environments/vampire-env.html#vampire-env>`__ and
-`IProverEnv <https://gym-saturation.readthedocs.io/en/latest/environments/iprover-env.html#iprover-env>`__. ``VampireEnv`` is a wrapper around a recent `Vampire
+There are two environments in ``gym-saturation`` following the same API: `SaturationEnv <https://gym-saturation.readthedocs.io/en/latest/environments/saturation-env.html>`__: ``VampireEnv`` is a wrapper around a recent `Vampire
 <https://github.com/vprover/vampire>`__ prover, and ``IProverEnv``
 relies on an experimental version of `iProver
 <https://gitlab.com/korovin/iprover/>`__.
@@ -49,9 +48,9 @@ How to Install
    latest `release
    <https://github.com/vprover/vampire/releases/tag/v4.7>`__.
 
-   To use ``IProverEnv``, please build iProver from source using
-   `this branch
-   <https://gitlab.com/korovin/iprover/-/tree/2022_sockets>`__.
+   To use ``IProverEnv``, please download the experimental iProver 
+   `release
+   <https://gitlab.com/inpefess/iprover/-/releases/2022.11.03>`__ or build it from `this commit <https://gitlab.com/korovin/iprover/-/commit/32c76fc0ec665a06324d11dc9d4bf902871d5f15>`__.
 
 The best way to install this package is to use ``pip``:
 
@@ -65,8 +64,8 @@ Another option is to use ``conda``:
 
    conda install -c conda-forge gym-saturation
    
-One can also run it in a Docker container (with a pre-packed
-``vampire`` binary):
+One can also run it in a Docker container (pre-packed with
+``vampire`` and ``iproveropt`` binaries):
 
 .. code:: sh
 
@@ -114,10 +113,14 @@ welcome. To start:
    poetry install
    # recommended but not necessary
    pre-commit install
-   # install vampire binary
+   # install Vampire binary
    wget https://github.com/vprover/vampire/releases/download/v4.7/vampire4.7.zip -O vampire.zip
    unzip vampire.zip
    # then use vampire_z3_rel_static_HEAD_6295 as an argument or add it to $PATH
+   # install iProver binary
+   wget https://gitlab.com/api/v4/projects/39846772/jobs/artifacts/2022.11.03/download?job=build-job -O iprover.zip
+   unzip iprover.zip
+   # then use iproveropt
 
 All the tests in this package are
 `doctests <https://docs.python.org/3/library/doctest.html>`__. One can

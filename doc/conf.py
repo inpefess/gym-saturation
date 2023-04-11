@@ -24,7 +24,7 @@ import sys
 sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 project = "gym-saturation"
-version = "0.9.1"
+version = "0.9.2"
 copyright = "2021-2023, Boris Shminke"
 author = "Boris Shminke"
 # -- General configuration ---------------------------------------------------
@@ -54,4 +54,5 @@ html_title = "gym-saturation documentation"
 
 sphinx_gallery_conf = {
     "download_all_examples": False,
+    "run_stale_examples": True,
 }
