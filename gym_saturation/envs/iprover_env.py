@@ -71,7 +71,7 @@ class IProverEnv(SaturationEnv):
     """
     An RL environment around iProver.
 
-    Refer to :ref:`iprover_env` for more documentation.
+    Refer to :ref:`saturation_env` for more documentation.
 
     >>> from gymnasium.utils.env_checker import check_env
     >>> import gymnasium as gym

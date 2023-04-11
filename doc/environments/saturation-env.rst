@@ -19,13 +19,17 @@
 SaturationEnv
 ##############
 
-``SaturationEnv`` is an abstract class for environments guiding the choice of a given clause in the saturation algorithm used to build automated theorem provers. It has two subclasses: :ref:`vampire_env` and :ref:`iprover_env`.
+``SaturationEnv`` is an abstract class for environments guiding the choice of a given clause in the saturation algorithm used to build automated theorem provers. It has two subclasses:
 
+* ``VampireEnv`` is an environment for guiding the choice of a given clause in the saturation loop of a `Vampire <https://vprover.github.io/>`__ prover. Since we focus on guiding the saturation loop here, we don't use the Avatar [3]_
+* ``IProverEnv`` is an environment for guiding the choice of a given clause in the saturation loop of the `iProver <https://gitlab.com/korovin/iprover>`__ [1]_
+  
 .. csv-table::
    
    Action Space, ``Discrete(n)``
    Observation Space, "``Dict('action_mask': Box(0, 1, (n,), int8), 'real_obs': Sequence(Clause(n), stack=False))``"
-   import, ``only subclasses can be instantiated``
+   import, ``import gym_saturation; gymnasium.make("Vampire-v0")``
+   import, ``import gym_saturation; gymnasium.make("iProver-v0")``
 
 Here ``Clause(n)`` is an alias for
 
@@ -48,7 +52,7 @@ and ``EXTENDED_ALPHANUMERIC`` is ``ALPHANUMERIC_WITH_UNDERSCORE`` extended by ni
 Description
 ************
 
-The given clause (or saturation) algorithm is the basis of many contemporary provers. See [1]_ for an excellent introduction and Python code snippets. In short, the algorithm is the following one:
+The given clause (or saturation) algorithm is the basis of many contemporary provers. See [2]_ for an excellent introduction and Python code snippets. In short, the algorithm is the following one:
 
 .. code-block:: python
 
@@ -120,18 +124,33 @@ The environment returns no additional information.
 Arguments
 **********
 
-There are two arguments shared by all the subclasses of ``SaturationEnv``:
+.. code-block:: python
+
+   import gymnasium
+    
+   gymnasium.make(
+       "Vampire-v0",  # or "iProver-v0"
+       max_clauses=1000,
+       render_mode="human",
+       prover_binary_path="vampire",  # or "iproveropt"
+   )
 
 ``max_clauses=1000``: the size ``n`` of the action space.
 
 ``render_mode="human"``: either ``ansi`` (return the clauses from the current proof state in the TPTP format) or ``human`` (print the ``ansi`` rendering to the standard output)
 
+``prover_binary_path="vampire"`` (or ``"iproveropt"``): the path to a prover binary (supposed to be on the ``$PATH`` by default)
+
 References
 ***********
 
-.. [1] Schulz, S., Pease, A. (2020). Teaching Automated Theorem Proving by Example: PyRes 1.2. In: Peltier, N., Sofronie-Stokkermans, V. (eds) Automated Reasoning. IJCAR 2020. Lecture Notes in Computer Science(), vol 12167. Springer, Cham. `<https://doi.org/10.1007/978-3-030-51054-1_9>`__
+.. [1] Duarte, A., Korovin, K. (2020). Implementing Superposition in iProver (System Description). In: Peltier, N., Sofronie-Stokkermans, V. (eds) Automated Reasoning. IJCAR 2020. Lecture Notes in Computer Science(), vol 12167. Springer, Cham. `<https://doi.org/10.1007/978-3-030-51054-1_24>`__
+
+.. [2] Schulz, S., Pease, A. (2020). Teaching Automated Theorem Proving by Example: PyRes 1.2. In: Peltier, N., Sofronie-Stokkermans, V. (eds) Automated Reasoning. IJCAR 2020. Lecture Notes in Computer Science(), vol 12167. Springer, Cham. `<https://doi.org/10.1007/978-3-030-51054-1_9>`__
+
+.. [3] Voronkov, A. (2014). AVATAR: The Architecture for First-Order Theorem Provers. In: Biere, A., Bloem, R. (eds) Computer Aided Verification. CAV 2014. Lecture Notes in Computer Science, vol 8559. Springer, Cham. `<https://doi.org/10.1007/978-3-319-08867-9_46>`__       
 
 Version History
 ****************
 
-There are no versions of ``SaturationEnv``, since it's an abstract class. Refer to :ref:`vampire_env` and :ref:`iprover_env` instead.
+* v0: Initial version release

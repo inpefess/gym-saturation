@@ -24,8 +24,7 @@ gym-saturation
 written in `TPTP library <https://tptp.org>`__ formal language are
 supported.
 
-There are two environments in ``gym-saturation``: `VampireEnv <https://gym-saturation.readthedocs.io/en/latest/environments/vampire-env.html#vampire-env>`__ and
-`IProverEnv <https://gym-saturation.readthedocs.io/en/latest/environments/iprover-env.html#iprover-env>`__. ``VampireEnv`` is a wrapper around a recent `Vampire
+There are two environments in ``gym-saturation`` following the same API: `SaturationEnv <https://gym-saturation.readthedocs.io/en/latest/environments/saturation-env.html>`__: ``VampireEnv`` is a wrapper around a recent `Vampire
 <https://github.com/vprover/vampire>`__ prover, and ``IProverEnv``
 relies on an experimental version of `iProver
 <https://gitlab.com/korovin/iprover/>`__.

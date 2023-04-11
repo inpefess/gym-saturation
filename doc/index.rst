@@ -26,8 +26,6 @@
    :caption: Environments
 
    environments/saturation-env
-   environments/vampire-env
-   environments/iprover-env
 
 .. toctree::
    :hidden:

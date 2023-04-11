@@ -35,7 +35,7 @@ class VampireEnv(SaturationEnv):
     """
     An RL environment around a Vampire prover.
 
-    Refer to :ref:`vampire_env` for more documentation.
+    Refer to :ref:`saturation_env` for more documentation.
 
     We can run a full Gymnasium environment check:
 
