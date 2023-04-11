@@ -113,10 +113,14 @@ welcome. To start:
    poetry install
    # recommended but not necessary
    pre-commit install
-   # install vampire binary
+   # install Vampire binary
    wget https://github.com/vprover/vampire/releases/download/v4.7/vampire4.7.zip -O vampire.zip
    unzip vampire.zip
    # then use vampire_z3_rel_static_HEAD_6295 as an argument or add it to $PATH
+   # install iProver binary
+   wget https://gitlab.com/api/v4/projects/39846772/jobs/artifacts/2022.11.03/download?job=build-job -O iprover.zip
+   unzip iprover.zip
+   # then use iproveropt
 
 All the tests in this package are
 `doctests <https://docs.python.org/3/library/doctest.html>`__. One can
