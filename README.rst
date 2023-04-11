@@ -49,9 +49,9 @@ How to Install
    latest `release
    <https://github.com/vprover/vampire/releases/tag/v4.7>`__.
 
-   To use ``IProverEnv``, please build iProver from source using
-   `this branch
-   <https://gitlab.com/korovin/iprover/-/tree/2022_sockets>`__.
+   To use ``IProverEnv``, please download the experimental iProver 
+   `release
+   <https://gitlab.com/inpefess/iprover/-/releases/2022.11.03>`__ or build it from `this commit <https://gitlab.com/korovin/iprover/-/commit/32c76fc0ec665a06324d11dc9d4bf902871d5f15>`__.
 
 The best way to install this package is to use ``pip``:
 
@@ -65,8 +65,8 @@ Another option is to use ``conda``:
 
    conda install -c conda-forge gym-saturation
    
-One can also run it in a Docker container (with a pre-packed
-``vampire`` binary):
+One can also run it in a Docker container (pre-packed with
+``vampire`` and ``iproveropt`` binaries):
 
 .. code:: sh
 
