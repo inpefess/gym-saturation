@@ -43,7 +43,7 @@ def env_creator(env_config: Dict[str, Any]) -> gym.Env:
     :returns: an environment
     """
     env = ConstantParametricActionsWrapper(
-        AgeWeightBandit(gym.make("Vampire-v0", **env_config)),
+        AgeWeightBandit(gym.make(**env_config)),
         avail_actions_key="item",
     )
     problem_filename = os.path.join(
@@ -95,20 +95,35 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Run random baseline instead of Thompson sampling",
     )
+    parser.add_argument(
+        "--prover",
+        choices=["Vampire", "iProver"],
+        required=True,
+        help="Which prover to guide: Vampire or iProver",
+    )
+    parser.add_argument(
+        "--max_clauses",
+        type=int,
+        required=True,
+        help="Maximal number of clauses in the proof state",
+    )
     return parser.parse_args()
 
 
 def train_thompson_sampling() -> None:
     """Train Thompson sampling."""
     args = parse_args()
-    register_env("VampireBandit", env_creator)
+    register_env("ProverBandit", env_creator)
     if args.random_baseline:
         config = AlgorithmConfig(RandomAlgorithm).framework("torch")
     else:
         config = BanditLinTSConfig()
     algo = config.environment(
-        "VampireBandit",
-        env_config={"max_clauses": 20},
+        "ProverBandit",
+        env_config={
+            "id": f"{args.prover}-v0",
+            "max_clauses": args.max_clauses,
+        },
     ).build()
     for _ in range(20):
         algo.train()

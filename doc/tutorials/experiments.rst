@@ -28,8 +28,10 @@ Thompson Sampling Multi-armed Bandit
 
 #. Navigate to ``experiments/multi-armed-bandit``
 #. ``pip install -r requirements.txt``
-#. ``python thompson_sampling.py --random_baseline``
-#. ``python thompson_sampling.py``
+#. ``python thompson_sampling.py --random_baseline --prover Vampire --max_clauses 20`` or
+   ``python thompson_sampling.py --random_baseline --prover iProver --max_clauses 15``
+#. ``python thompson_sampling.py --prover Vampire --max_clauses 20`` or
+   ``python thompson_sampling.py --prover iProver --max_clauses 15``
 
 Bandit learns to prefer choosing the shortest clause, beating the random agent substantially.
 
