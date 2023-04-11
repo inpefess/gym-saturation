@@ -23,8 +23,7 @@ import os
 from enchant import DictWithPWL
 from enchant.checker import SpellChecker
 
-doc_folder = os.path.join("doc", "source")
-for dirpath, dirnames, filenames in os.walk(doc_folder):
+for dirpath, dirnames, filenames in os.walk("doc"):
     for filename in filenames:
         if os.path.splitext(filename)[1] == ".rst":
             checker = SpellChecker(DictWithPWL("en_GB", "spelling.dict"))
@@ -33,7 +32,6 @@ for dirpath, dirnames, filenames in os.walk(doc_folder):
             ) as doc_file:
                 doc_text = doc_file.read()
             checker.set_text(doc_text)
-            print(
-                filename,
-                {spelling_problem.word for spelling_problem in checker},
-            )
+            typos = {spelling_problem.word for spelling_problem in checker}
+            if typos:
+                print(filename, typos)
