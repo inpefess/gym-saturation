@@ -28,7 +28,6 @@ from gym_saturation.envs.saturation_env import (
     REAL_OBS,
     SaturationEnv,
 )
-from gym_saturation.utils import FALSEHOOD_SYMBOL
 from gym_saturation.vampire_wrapper import VampireWrapper
 
 
@@ -51,17 +50,6 @@ class VampireEnv(SaturationEnv):
     ...
     cnf(5, ...).
 
-    sometimes Vampire can solve a problem during pre-processing
-
-    >>> from gym_saturation.constants import MOCK_TPTP_PROBLEM
-    >>> trivial_problem = os.path.join(os.path.dirname(MOCK_TPTP_PROBLEM),
-    ...     "TST002-1.p")
-    >>> env.set_task(trivial_problem)
-    >>> _, _ = env.reset()
-    >>> _, _, terminated, _, _ = env.step(0)
-    >>> terminated
-    True
-
     we can't repeat actions
 
     >>> _ = env.reset()
@@ -70,6 +58,19 @@ class VampireEnv(SaturationEnv):
     Traceback (most recent call last):
      ...
     ValueError: action 0 is not valid
+
+    sometimes Vampire can solve a problem during pre-processing
+
+    >>> from gym_saturation.constants import MOCK_TPTP_PROBLEM
+    >>> trivial_problem = os.path.join(os.path.dirname(MOCK_TPTP_PROBLEM),
+    ...     "TST002-1.p")
+    >>> env.set_task(trivial_problem)
+    >>> _, _ = env.reset()
+    >>> env.state.terminated
+    True
+    >>> _, _, terminated, _, _ = env.step(0)
+    >>> terminated
+    True
 
     a test of an unexpected reply from Vampire
 
@@ -136,11 +137,6 @@ class VampireEnv(SaturationEnv):
         }, {}
 
     def _do_deductions(self, action: np.int64) -> None:
-        if any(
-            clause["literals"] == FALSEHOOD_SYMBOL
-            for clause in self.state.clauses
-        ):
-            return
         self._parse_vampire_response(
             self._vampire.pick_a_clause(self.state.clause_labels[action])
         )

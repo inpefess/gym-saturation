@@ -166,16 +166,16 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         """
         if self.state.action_mask[action] == 0.0:
             raise ValueError(f"action {action} is not valid")
-        self.state.step_number += 1
-        self._do_deductions(action)
-        self.state.action_mask[action] = 0.0
-        reward = 1.0 if self.state.terminated else 0.0
+        if not (self.state.terminated or self.state.truncated):
+            self.state.step_number += 1
+            self._do_deductions(action)
+            self.state.action_mask[action] = 0.0
         return (
             {
                 REAL_OBS: tuple(self.state.clauses),
                 ACTION_MASK: self.state.action_mask,
             },
-            reward,
+            1.0 if self.state.terminated else 0.0,
             self.state.terminated,
             self.state.truncated,
             {},
