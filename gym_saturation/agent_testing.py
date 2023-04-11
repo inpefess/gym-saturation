@@ -260,7 +260,7 @@ def test_agent(args: Optional[List[str]] = None) -> None:
     """
     The main function for this module.
 
-    >>> from gym_saturation.utils import MOCK_TPTP_PROBLEM
+    >>> from gym_saturation.constants import MOCK_TPTP_PROBLEM
     >>> test_agent(["--problem_filename", MOCK_TPTP_PROBLEM])
     Problem file: ...TST001-1.p
     Proof of length 10 found in 6 step(s):

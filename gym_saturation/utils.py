@@ -17,25 +17,10 @@
 Logic Operations Utility Functions
 ===================================
 """
-import os
-import sys
 from itertools import chain
 from typing import Any, Dict, Tuple
 
-if sys.version_info.major == 3 and sys.version_info.minor >= 9:
-    # pylint: disable=no-name-in-module
-    from importlib.resources import files  # type: ignore  # pragma: no cover
-else:  # pragma: no cover
-    from importlib_resources import files  # pylint: disable=import-error
-
-
-FALSEHOOD_SYMBOL = "$false"
-MOCK_TPTP_FOLDER = str(
-    files("gym_saturation").joinpath(os.path.join("resources", "TPTP-mock"))
-)
-MOCK_TPTP_PROBLEM = os.path.join(
-    MOCK_TPTP_FOLDER, "Problems", "TST", "TST001-1.p"
-)
+from gym_saturation.constants import FALSEHOOD_SYMBOL
 
 
 def pretty_print(clause: Dict[str, Any]) -> str:

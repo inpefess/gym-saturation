@@ -28,7 +28,8 @@ class VampireWrapper:
 
     .. _vampire-wrapper :
 
-    >>> from gym_saturation.utils import MOCK_TPTP_PROBLEM, MOCK_TPTP_FOLDER
+    >>> from gym_saturation.constants import (MOCK_TPTP_PROBLEM,
+    ...     MOCK_TPTP_FOLDER)
     >>> vampire = VampireWrapper("vampire")
     >>> vampire.pick_a_clause("2")
     Traceback (most recent call last):

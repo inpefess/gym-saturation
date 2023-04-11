@@ -53,7 +53,7 @@ class VampireEnv(SaturationEnv):
 
     sometimes Vampire can solve a problem during pre-processing
 
-    >>> from gym_saturation.utils import MOCK_TPTP_PROBLEM
+    >>> from gym_saturation.constants import MOCK_TPTP_PROBLEM
     >>> trivial_problem = os.path.join(os.path.dirname(MOCK_TPTP_PROBLEM),
     ...     "TST002-1.p")
     >>> env.set_task(trivial_problem)
@@ -73,7 +73,7 @@ class VampireEnv(SaturationEnv):
 
     a test of an unexpected reply from Vampire
 
-    >>> from gym_saturation.utils import MOCK_TPTP_FOLDER
+    >>> from gym_saturation.constants import MOCK_TPTP_FOLDER
     >>> vampire_binary = os.path.join(MOCK_TPTP_FOLDER, "..", "vampire-mock")
     >>> vampire_env = VampireEnv(prover_binary_path=vampire_binary)
     >>> vampire_env.reset()
