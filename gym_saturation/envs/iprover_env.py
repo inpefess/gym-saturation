@@ -87,6 +87,13 @@ class IProverEnv(SaturationEnv):
     cnf(c_53, ...).
     ...
     cnf(c_49, ...).
+
+    when episode truncated, all threads are terminated
+
+    >>> _ = env.reset()
+    >>> _, _, _, truncated, _ = env.step(4)
+    >>> truncated
+    True
     """
 
     def __init__(
@@ -111,7 +118,7 @@ class IProverEnv(SaturationEnv):
 
     def _restart_relay_server(self) -> None:
         if self._relay_server:
-            self.close()
+            self._terminate_threads()
         self._relay_server = RelayServer(("localhost", 0), RelayTCPHandler)
         self.relay_server_thread = Thread(
             target=self._relay_server.serve_forever
@@ -214,10 +221,7 @@ class IProverEnv(SaturationEnv):
 
     def close(self) -> None:
         """Stop relay server."""
-        if self._relay_server:
-            self._relay_server.shutdown()
-        if self.relay_server_thread:
-            self.relay_server_thread.join()
+        self._terminate_threads()
 
     @property
     def relay_server(self) -> RelayServer:
@@ -229,3 +233,16 @@ class IProverEnv(SaturationEnv):
         if self._relay_server:
             return self._relay_server
         raise ValueError("run ``reset`` first!")
+
+    def on_truncated(self) -> None:
+        """Terminate threads."""
+        self._terminate_threads()
+
+    def _terminate_threads(self) -> None:
+        if self._relay_server:
+            self._relay_server.shutdown()
+        if self.relay_server_thread:
+            self.relay_server_thread.join()
+        if self.iprover_process:
+            self.iprover_process.terminate()
+            self.iprover_process.wait()

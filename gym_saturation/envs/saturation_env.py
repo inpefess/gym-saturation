@@ -38,6 +38,10 @@ LONG_TEXT_SPACE = spaces.Text(
 )
 
 
+class InvalidAction(Exception):
+    """Raised when step is called with invalid action."""
+
+
 class SaturationEnv(Env[Dict[str, Any], np.int64]):
     """
     Saturation algorithm in a reinforcement learning friendly way.
@@ -161,15 +165,17 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
               state were reached
             * info: contains auxiliary diagnostic information (helpful for
               debugging, and sometimes learning)
-        :raises ValueError: if the ``action`` identifies an already processed
-            clause
+        :raises InvalidAction: if the ``action`` identifies an already
+            processed clause
         """
-        if self.state.action_mask[action] == 0.0:
-            raise ValueError(f"action {action} is not valid")
         if not (self.state.terminated or self.state.truncated):
+            if self.state.action_mask[action] == 0.0:
+                raise InvalidAction
             self.state.step_number += 1
             self._do_deductions(action)
             self.state.action_mask[action] = 0.0
+            if self.state.truncated:
+                self.on_truncated()
         return (
             {
                 REAL_OBS: tuple(self.state.clauses),
@@ -212,3 +218,6 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         :raises ValueError: is task is not set
         """
         return self._task
+
+    def on_truncated(self) -> None:
+        """Prover-specific episode truncation."""
