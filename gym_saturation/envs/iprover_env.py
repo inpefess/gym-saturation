@@ -52,8 +52,6 @@ def _iprover_start(
         "true",
         "--sup_iter_deepening",
         "0",
-        "--interactive_mode",
-        "true",
         "--sup_passive_queue_type",
         "external_agent",
         "--preprocessing_flag",
