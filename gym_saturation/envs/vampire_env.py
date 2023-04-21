@@ -52,12 +52,13 @@ class VampireEnv(SaturationEnv):
 
     we can't repeat actions
 
+    >>> env = gym.make("Vampire-v0")
     >>> _ = env.reset()
     >>> _ = env.step(0)
     >>> env.step(0)
     Traceback (most recent call last):
      ...
-    ValueError: action 0 is not valid
+    gym_saturation.envs.saturation_env.InvalidAction
 
     sometimes Vampire can solve a problem during pre-processing
 
@@ -159,3 +160,13 @@ class VampireEnv(SaturationEnv):
             "inference_parents": inference_parents,
             "birth_step": self.state.step_number,
         }
+
+    def on_truncated(self) -> None:
+        """Terminate Vampire process."""
+        self._vampire.proc.terminate()
+        self._vampire.proc.wait()
+
+    def close(self) -> None:
+        """Terminate Vampire process."""
+        self._vampire.proc.terminate()
+        self._vampire.proc.wait()
