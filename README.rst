@@ -26,7 +26,7 @@ supported.
 
 There are two environments in ``gym-saturation`` following the same API: `SaturationEnv <https://gym-saturation.readthedocs.io/en/latest/environments/saturation-env.html>`__: ``VampireEnv`` is a wrapper around a recent `Vampire
 <https://github.com/vprover/vampire>`__ prover, and ``IProverEnv``
-relies on an experimental version of `iProver
+relies on a stable version of `iProver
 <https://gitlab.com/korovin/iprover/>`__.
 
 In contrast to monolithic architecture of a typical Automated Theorem
@@ -48,9 +48,9 @@ How to Install
    latest `release
    <https://github.com/vprover/vampire/releases/tag/v4.7>`__.
 
-   To use ``IProverEnv``, please download the experimental iProver 
+   To use ``IProverEnv``, please download a stable iProver 
    `release
-   <https://gitlab.com/inpefess/iprover/-/releases/2022.11.03>`__ or build it from `this commit <https://gitlab.com/korovin/iprover/-/commit/32c76fc0ec665a06324d11dc9d4bf902871d5f15>`__.
+   <https://gitlab.com/inpefess/iprover/-/releases/2023.04.10>`__ or build it from `this commit <https://gitlab.com/korovin/iprover/-/commit/9504e78f60262c394b564678201cb7d2f8a4bbea>`__.
 
 The best way to install this package is to use ``pip``:
 
@@ -118,7 +118,7 @@ welcome. To start:
    unzip vampire.zip
    # then use vampire_z3_rel_static_HEAD_6295 as an argument or add it to $PATH
    # install iProver binary
-   wget https://gitlab.com/api/v4/projects/39846772/jobs/artifacts/2022.11.03/download?job=build-job -O iprover.zip
+   wget https://gitlab.com/api/v4/projects/39846772/jobs/artifacts/2023.04.10/download?job=build-job -O iprover.zip
    unzip iprover.zip
    # then use iproveropt
 
