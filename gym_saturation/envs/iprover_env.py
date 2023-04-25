@@ -28,7 +28,12 @@ import numpy as np
 
 from gym_saturation.constants import ACTION_MASK, REAL_OBS
 from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
-from gym_saturation.relay_server import RelayServer, RelayTCPHandler
+from gym_saturation.relay_server import (
+    QUERY_END_MESSAGE,
+    SESSION_END_MESSAGE,
+    RelayServer,
+    RelayTCPHandler,
+)
 
 
 def _iprover_start(
@@ -38,9 +43,9 @@ def _iprover_start(
     arguments = [
         "--interactive_mode",
         "true",
-        "--enigma_ip_address",
+        "--external_ip_address",
         "127.0.0.1",
-        "--enigma_port",
+        "--external_port",
         str(iprover_port),
         "--schedule",
         "none",
@@ -52,8 +57,6 @@ def _iprover_start(
         "true",
         "--sup_iter_deepening",
         "0",
-        "--interactive_mode",
-        "true",
         "--sup_passive_queue_type",
         "external_agent",
         "--preprocessing_flag",
@@ -189,11 +192,10 @@ class IProverEnv(SaturationEnv):
         }, {}
 
     def _get_json_data(self) -> List[Dict[str, Any]]:
-        json_data = [{"query": "None"}]
-        while json_data[-1]["query"] not in {
-            "given_clause_request",
-            "szs_status",
-            "proof_out",
+        json_data = [{"tag": "None"}]
+        while json_data[-1]["tag"] not in {
+            QUERY_END_MESSAGE,
+            SESSION_END_MESSAGE,
         }:
             parsed_json = self.relay_server.input_queue.get()
             self.relay_server.input_queue.task_done()
@@ -209,11 +211,16 @@ class IProverEnv(SaturationEnv):
 
     def _do_deductions(self, action: np.int64) -> None:
         iprover_scores_message = {
-            "given_clause": int(self.state.clause_labels[action][2:]),
+            "tag": "given_clause_res",
             "passive_is_empty": False,
+            "given_clause": int(self.state.clause_labels[action][2:]),
         }
         relayed_scores_message = bytes(
-            json.dumps(iprover_scores_message) + "\n\x00\n", "utf8"
+            json.dumps({"tag": "server_queries_end"})
+            + "\n\x00\n"
+            + json.dumps(iprover_scores_message)
+            + "\n\x00\n",
+            "utf8",
         )
         self.relay_server.output_queue.put(relayed_scores_message)
         data = self._get_json_data()

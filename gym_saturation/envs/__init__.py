@@ -18,4 +18,5 @@ Environment for Saturation Provers
 ===================================
 """
 from gym_saturation.envs.iprover_env import IProverEnv
+from gym_saturation.envs.saturation_env import SaturationEnv
 from gym_saturation.envs.vampire_env import VampireEnv

@@ -22,6 +22,9 @@ from queue import Queue
 from socketserver import BaseRequestHandler, ThreadingTCPServer
 from typing import Any, Dict, List, Tuple, Type
 
+QUERY_END_MESSAGE = "server_queries_start"
+SESSION_END_MESSAGE = "proof_out"
+
 
 class RelayServer(ThreadingTCPServer):
     r"""
@@ -37,18 +40,20 @@ class RelayServer(ThreadingTCPServer):
     ...     with socket.create_connection(relay_server.server_address
     ...     ) as socket_connection:
     ...         # data sent to the socket are stored in one queue
-    ...         socket_connection.sendall(
-    ...             b'{"query":"given_clause_request"}\n\x00\n'
+    ...         socket_connection.sendall(bytes(
+    ...             f'{{"tag": "{QUERY_END_MESSAGE}"}}\n\x00\n', "utf8")
     ...         )
     ...         print(relay_server.input_queue.get())
     ...         # data from another queue are sent to the client
     ...         relay_server.output_queue.put(b"test")
     ...         print(str(socket_connection.recv(4096), "utf8"))
     ...         # message format for closing connection
-    ...         socket_connection.sendall(b'{"query":"proof_out"}\n\x00\n')
+    ...         socket_connection.sendall(bytes(
+    ...             f'{{"tag": "{SESSION_END_MESSAGE}"}}\n\x00\n', "utf8"
+    ...         ))
     ...     relay_server.shutdown()
     ...     thread.join()
-    {'query': 'given_clause_request'}
+    {'tag': 'server_queries_start'}
     test
     """
 
@@ -83,19 +88,19 @@ class RelayTCPHandler(BaseRequestHandler):
             json_messages: List[Dict[str, Any]] = []
             while (
                 len(json_messages) == 0
-                or json_messages[-1].get("query", "no") != "proof_out"
+                or json_messages[-1]["tag"] != SESSION_END_MESSAGE
             ):
                 raw_data, json_messages = "", []
-                while len(json_messages) == 0 or json_messages[-1].get(
-                    "query", "no"
-                ) not in {
-                    "given_clause_request",
-                    "proof_out",
+                while len(json_messages) == 0 or json_messages[-1][
+                    "tag"
+                ] not in {
+                    QUERY_END_MESSAGE,
+                    SESSION_END_MESSAGE,
                 }:
                     new_messages, raw_data = self._read_messages(raw_data)
                     json_messages.extend(new_messages)
                 for json_message in json_messages:
                     self.server.input_queue.put(json_message)
-                if json_messages[-1]["query"] == "given_clause_request":
+                if json_messages[-1]["tag"] == QUERY_END_MESSAGE:
                     self.request.sendall(self.server.output_queue.get())
                     self.server.output_queue.task_done()
