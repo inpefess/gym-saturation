@@ -33,14 +33,18 @@ Implement Features
 
 Look through the GitHub issues for features. Anything tagged with
 "enhancement" and "help wanted" is open to whoever wants to implement
-it.
+it. Contributors to the source code hold copyright of their work and
+should agree to distribute it under `Apache 2.0
+<https://www.apache.org/licenses/LICENSE-2.0>`__ licence.
 
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
 
-``gym-saturation`` could always use more
-documentation, whether as part of the official docs, in docstrings,
-or even on the web in blog posts, articles, and such.
+``gym-saturation`` could always use more documentation, whether as
+part of the official docs, in docstrings, or even on the web in blog
+posts, articles, and such. Documentation authors hold copyright of
+their work and should agree to distribute it under `Apache 2.0
+<https://www.apache.org/licenses/LICENSE-2.0>`__ licence.
 
 Submit Feedback
 ~~~~~~~~~~~~~~~
