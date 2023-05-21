@@ -47,4 +47,6 @@
    :hidden:
    :caption: Development
 
+   code-of-conduct
+   contributing
    GitHub <https://github.com/inpefess/gym-saturation>
