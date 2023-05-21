@@ -100,45 +100,7 @@ For a bit more comprehensive experiments, please navigate the documentation `pag
 How to Contribute
 =================
 
-`Pull requests <https://github.com/inpefess/gym-saturation/pulls>`__ are
-welcome. To start:
-
-.. code:: sh
-
-   git clone https://github.com/inpefess/gym-saturation
-   cd gym-saturation
-   # activate python virtual environment with Python 3.8+
-   pip install -U pip
-   pip install -U setuptools wheel poetry
-   poetry install
-   # recommended but not necessary
-   pre-commit install
-   # install Vampire binary
-   wget https://github.com/vprover/vampire/releases/download/v4.7/vampire4.7.zip -O vampire.zip
-   unzip vampire.zip
-   # then use vampire_z3_rel_static_HEAD_6295 as an argument or add it to $PATH
-   # install iProver binary
-   wget https://gitlab.com/api/v4/projects/39846772/jobs/artifacts/2023.04.10/download?job=build-job -O iprover.zip
-   unzip iprover.zip
-   # then use iproveropt
-
-All the tests in this package are
-`doctests <https://docs.python.org/3/library/doctest.html>`__. One can
-run them with the following command:
-
-.. code:: sh
-
-   pytest --doctest-modules gym-saturation
-
-To check the code quality before creating a pull request, one might run
-the script ``local-build.sh``. It locally does nearly the same as the CI
-pipeline after the PR is created.
-
-Reporting issues or problems with the software
-==============================================
-
-Questions and bug reports are welcome on `the
-tracker <https://github.com/inpefess/gym-saturation/issues>`__.
+Please follow `the contribution guide <https://gym-saturation.readthedocs.io/en/latest/contributing.html>`__ while adhering to `the code of conduct <https://gym-saturation.readthedocs.io/en/latest/code-of-conduct.html>`__.
 
 More documentation
 ==================
