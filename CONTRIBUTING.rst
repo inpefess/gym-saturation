@@ -3,7 +3,8 @@ Contributing
 ============
 
 Contributions are welcome, and they are greatly appreciated! Every
-little bit helps, and credit will always be given.
+little bit helps, and credit will always be given. Don't forget to
+read and adhere to the :ref:`code-of-conduct`.
 
 You can contribute in many ways:
 
