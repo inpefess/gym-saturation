@@ -49,4 +49,5 @@
 
    code-of-conduct
    contributing
+   development-guide
    GitHub <https://github.com/inpefess/gym-saturation>
