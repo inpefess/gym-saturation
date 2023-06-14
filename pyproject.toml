@@ -24,7 +24,7 @@ include = ["gym_saturation/py.typed"]
 
 [tool.poetry.dependencies]
 python = ">= 3.8.1, < 3.12"
-importlib_resources = {version = "*", markers = "python_version < \"3.9\""}
+importlib_resources = {version = "*", markers = "python_version < '3.9'"}
 pexpect = "*"
 gymnasium = "*"
 
@@ -47,6 +47,7 @@ pillow = "*"
 matplotlib = "*"
 jedi = "*"
 bandit = {version = "*", extras = ["toml"]}
+pyupgrade = "*"
 
 [tool.black]
 line-length=79
@@ -138,13 +139,13 @@ github_url = "https://github.com/inpfess/gym-saturation/"
 
 [tool.tbump.version]
 current = "0.10.1"
-regex = '''
-  (?P<major>\d+)
-  \.
-  (?P<minor>\d+)
-  \.
-  (?P<patch>\d+)
-  '''
+regex = """
+  (?P<major>\\d+)
+  \\.
+  (?P<minor>\\d+)
+  \\.
+  (?P<patch>\\d+)
+  """
 
 [tool.tbump.git]
 message_template = "Bump to {new_version}"

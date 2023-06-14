@@ -17,12 +17,17 @@ repos:
         language: system
         types: [python]
     -   id: pylint
-        name:  pylint
+        name: pylint
         entry: pylint
         language: system
         types: [python]
     -   id: mypy
         name: mypy
         entry: mypy
+        language: system
+        types: [python]
+    -   id: pyupgrade
+        name: pyupgrade
+        entry: pyupgrade
         language: system
         types: [python]
