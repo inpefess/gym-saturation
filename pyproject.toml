@@ -21,6 +21,7 @@ classifiers=[
 	"Typing :: Typed"
 ]
 include = ["gym_saturation/py.typed"]
+keywords = ["saturation prover", "OpenAI Gym", "Gymnasium", "automated theorem prover"]
 
 [tool.poetry.dependencies]
 python = ">= 3.8.1, < 3.12"
@@ -48,6 +49,7 @@ matplotlib = "*"
 jedi = "*"
 bandit = {version = "*", extras = ["toml"]}
 pyupgrade = "*"
+pyroma = "*"
 
 [tool.black]
 line-length=79
@@ -126,12 +128,14 @@ deps =
     toml
     pyenchant
     flake8
+    pyroma
 commands =
     pydocstyle gym_saturation
     flake8 gym_saturation
     pylint gym_saturation
     mypy gym_saturation
     pytest
+    pyroma .
 """
 
 [tool.tbump]
