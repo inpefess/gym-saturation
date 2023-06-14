@@ -30,7 +30,6 @@ gymnasium = "*"
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
-jupyterlab = "*"
 mypy = "*"
 pylint = "*"
 pytest-coverage = "*"
@@ -46,6 +45,7 @@ furo = "*"
 sphinx-gallery = "*"
 pillow = "*"
 matplotlib = "*"
+jedi = "*"
 
 [tool.black]
 line-length=79
