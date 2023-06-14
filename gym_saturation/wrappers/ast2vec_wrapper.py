@@ -17,7 +17,7 @@ ast2vec Wrapper
 ================
 """
 import json
-from urllib.request import Request, urlopen
+from urllib.request import HTTPHandler, OpenerDirector, Request
 
 import numpy as np
 
@@ -78,6 +78,8 @@ class AST2VecWrapper(ParamtericActionsWrapper):
             f'{{"data": "{prepared_literals}"}}'.encode("utf8"),
             {"Content-Type": "application/json"},
         )
-        with urlopen(req) as response:
+        opener = OpenerDirector()
+        opener.add_handler(HTTPHandler())
+        with opener.open(req) as response:
             clause_embedding = json.loads(response.read().decode("utf-8"))
         return np.array(clause_embedding)
