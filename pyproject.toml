@@ -46,6 +46,7 @@ sphinx-gallery = "*"
 pillow = "*"
 matplotlib = "*"
 jedi = "*"
+bandit = {version = "*", extras = ["toml"]}
 
 [tool.black]
 line-length=79
