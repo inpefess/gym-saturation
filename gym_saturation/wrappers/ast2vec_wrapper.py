@@ -75,7 +75,7 @@ class AST2VecWrapper(ParamtericActionsWrapper):
         )
         req = Request(
             self.torch_serve_url,
-            f'{{"data": "{prepared_literals}"}}'.encode("utf8"),
+            f'{{"data": "{prepared_literals}"}}'.encode(),
             {"Content-Type": "application/json"},
         )
         opener = OpenerDirector()
