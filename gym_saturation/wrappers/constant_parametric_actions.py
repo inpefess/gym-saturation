@@ -67,12 +67,10 @@ class ConstantParametricActionsWrapper(gym.ObservationWrapper):
         """
         return {
             self.avail_actions_key: np.eye(
-                (
-                    self.env.observation_space[
-                        self.avail_actions_key
-                    ].shape[  # type: ignore
-                        0
-                    ]
-                )
+                self.env.observation_space[
+                    self.avail_actions_key
+                ].shape[  # type: ignore
+                    0
+                ]
             ),
         }
