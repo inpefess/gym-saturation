@@ -34,6 +34,7 @@ author = "Boris Shminke"
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    # uncomment to rebuild examples
     # "sphinx_gallery.gen_gallery",
 ]
 
