@@ -19,26 +19,32 @@ gym-saturation
 ==============
 
 ``gym-saturation`` is a collection of `Gymnasium
-<https://gymnasium.farama.org/>`__ environments for reinforcement learning
-(RL) agents striving to prove theorems. Currently, only theorems
-written in `TPTP library <https://tptp.org>`__ formal language are
-supported.
+<https://gymnasium.farama.org/>`__ environments for reinforcement
+learning (RL) agents guiding saturation-style automated theorem
+provers (ATPs) based on the `given clause algorithm
+<https://royalsocietypublishing.org/doi/10.1098/rsta.2018.0034#d3e468>`__.
 
-There are two environments in ``gym-saturation`` following the same API: `SaturationEnv <https://gym-saturation.readthedocs.io/en/latest/environments/saturation-env.html>`__: ``VampireEnv`` is a wrapper around a recent `Vampire
+There are two environments in ``gym-saturation`` following the same
+API: `SaturationEnv
+<https://gym-saturation.readthedocs.io/en/latest/environments/saturation-env.html>`__:
+``VampireEnv`` --- for `Vampire
 <https://github.com/vprover/vampire>`__ prover, and ``IProverEnv``
-relies on a stable version of `iProver
-<https://gitlab.com/korovin/iprover/>`__.
-
-In contrast to monolithic architecture of a typical Automated Theorem
-Prover (ATP), ``gym-saturation`` gives different agents opportunities
-to select clauses themselves and train from their experience.
-Combined with a particular agent, ``gym-saturation`` can work as an
-ATP.
+--- for `iProver <https://gitlab.com/korovin/iprover/>`__.
 
 ``gym-saturation`` can be interesting for RL practitioners willing to
 apply their experience to theorem proving without coding all the
-logic-related stuff themselves. It also can be useful for automated
-deduction researchers who want to create an RL-empowered ATP.
+logic-related stuff themselves.
+
+In particular, ATPs serving as ``gym-saturation`` backends
+incapsulate parsing the input formal language (usually, one of the
+`TPTP <https://tptp.org/>`__ (Thousands of Problems for Theorem
+Provers) library), transforming the input formulae to the `clausal
+normal form
+<https://en.wikipedia.org/wiki/Conjunctive_normal_form>`__, and logic
+inference using rules such as `resolution
+<https://en.wikipedia.org/wiki/Resolution_(logic)>`__ and
+`superposition
+<https://en.wikipedia.org/wiki/Superposition_calculus>`__.
 
 How to Install
 ==============
