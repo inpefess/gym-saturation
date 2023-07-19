@@ -46,7 +46,7 @@ How to Install
 .. attention:: If you want to use ``VampireEnv`` you should have a
    Vampire binary on your machine. For example, download the
    latest `release
-   <https://github.com/vprover/vampire/releases/tag/v4.7>`__.
+   <https://github.com/vprover/vampire/releases/tag/v4.8casc2023>`__.
 
    To use ``IProverEnv``, please download a stable iProver 
    `release
