@@ -163,10 +163,8 @@ class VampireEnv(SaturationEnv):
 
     def on_truncated(self) -> None:
         """Terminate Vampire process."""
-        self._vampire.proc.terminate()
-        self._vampire.proc.wait()
+        self._vampire.terminate()
 
     def close(self) -> None:
         """Terminate Vampire process."""
-        self._vampire.proc.terminate()
-        self._vampire.proc.wait()
+        self._vampire.terminate()
