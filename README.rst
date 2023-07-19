@@ -103,16 +103,44 @@ Or have a look at the basic `tutorial <https://gym-saturation.readthedocs.io/en/
   
 For a bit more comprehensive experiments, please navigate the documentation `page <https://gym-saturation.readthedocs.io/en/latest/tutorials/experiments.html>`__.
 
+More Documentation
+==================
+
+More documentation can be found
+`here <https://gym-saturation.readthedocs.io/en/latest>`__.
+
+Related Projects
+=================
+
+``gym-saturation`` is compatible with RL-frameworks such as `Ray
+RLlib <https://docs.ray.io/en/latest/rllib/package_ref/index.html>`__
+and can leverage code embeddings such as `CodeBERT
+<https://github.com/microsoft/CodeBERT>`__.
+
+Other projects using RL-guidance for ATPs include:
+
+* `TRAIL <https://github.com/IBM/TRAIL>`__
+* `FLoP <https://github.com/atpcurr/atpcurr>`__ (see `the paper <https://doi.org/10.1007/978-3-030-86059-2_10>`__ for more details)
+* `lazyCoP <https://github.com/MichaelRawson/lazycop>`__ (see `the paper <https://doi.org/10.1007/978-3-030-86059-2_11>`__ for more details)
+
+Other projects not using RL per se, but iterating a supervised
+learning procedure instead:
+
+* ENIGMA (several repos, e.g. `this one
+  <https://gitlab.ciirc.cvut.cz/chvalkar/iprover-gnn-server>`__ for
+  iProver; see `the paper <https://doi.org/10.29007/tp23>`__ for
+  others)
+* `Deepire <https://github.com/quickbeam123/deepire-paper-supplementary-materials>`__
+
 How to Contribute
 =================
 
 Please follow `the contribution guide <https://gym-saturation.readthedocs.io/en/latest/contributing.html>`__ while adhering to `the code of conduct <https://gym-saturation.readthedocs.io/en/latest/code-of-conduct.html>`__.
 
-More documentation
-==================
+How to Cite
+============
 
-More documentation can be found
-`here <https://gym-saturation.readthedocs.io/en/latest>`__.
+If you are writing a research paper and want to cite ``gym-saturation``, please use the following `DOI <https://doi.org/10.21105/joss.03849>`__.
 
 .. |PyPI version| image:: https://badge.fury.io/py/gym-saturation.svg
    :target: https://badge.fury.io/py/gym-saturation
