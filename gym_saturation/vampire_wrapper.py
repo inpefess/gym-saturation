@@ -118,3 +118,9 @@ class VampireWrapper:
         if self._proc is None:
             raise ValueError("start solving a problem first!")
         return self._proc
+
+    def terminate(self) -> None:
+        """Terminate Vampire process if any."""
+        if self._proc is not None:
+            self._proc.terminate()
+            self._proc.wait()

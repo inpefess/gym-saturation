@@ -19,26 +19,32 @@ gym-saturation
 ==============
 
 ``gym-saturation`` is a collection of `Gymnasium
-<https://gymnasium.farama.org/>`__ environments for reinforcement learning
-(RL) agents striving to prove theorems. Currently, only theorems
-written in `TPTP library <https://tptp.org>`__ formal language are
-supported.
+<https://gymnasium.farama.org/>`__ environments for reinforcement
+learning (RL) agents guiding saturation-style automated theorem
+provers (ATPs) based on the `given clause algorithm
+<https://royalsocietypublishing.org/doi/10.1098/rsta.2018.0034#d3e468>`__.
 
-There are two environments in ``gym-saturation`` following the same API: `SaturationEnv <https://gym-saturation.readthedocs.io/en/latest/environments/saturation-env.html>`__: ``VampireEnv`` is a wrapper around a recent `Vampire
+There are two environments in ``gym-saturation`` following the same
+API: `SaturationEnv
+<https://gym-saturation.readthedocs.io/en/latest/environments/saturation-env.html>`__:
+``VampireEnv`` --- for `Vampire
 <https://github.com/vprover/vampire>`__ prover, and ``IProverEnv``
-relies on a stable version of `iProver
-<https://gitlab.com/korovin/iprover/>`__.
-
-In contrast to monolithic architecture of a typical Automated Theorem
-Prover (ATP), ``gym-saturation`` gives different agents opportunities
-to select clauses themselves and train from their experience.
-Combined with a particular agent, ``gym-saturation`` can work as an
-ATP.
+--- for `iProver <https://gitlab.com/korovin/iprover/>`__.
 
 ``gym-saturation`` can be interesting for RL practitioners willing to
 apply their experience to theorem proving without coding all the
-logic-related stuff themselves. It also can be useful for automated
-deduction researchers who want to create an RL-empowered ATP.
+logic-related stuff themselves.
+
+In particular, ATPs serving as ``gym-saturation`` backends
+incapsulate parsing the input formal language (usually, one of the
+`TPTP <https://tptp.org/>`__ (Thousands of Problems for Theorem
+Provers) library), transforming the input formulae to the `clausal
+normal form
+<https://en.wikipedia.org/wiki/Conjunctive_normal_form>`__, and logic
+inference using rules such as `resolution
+<https://en.wikipedia.org/wiki/Resolution_(logic)>`__ and
+`superposition
+<https://en.wikipedia.org/wiki/Superposition_calculus>`__.
 
 How to Install
 ==============
@@ -46,7 +52,7 @@ How to Install
 .. attention:: If you want to use ``VampireEnv`` you should have a
    Vampire binary on your machine. For example, download the
    latest `release
-   <https://github.com/vprover/vampire/releases/tag/v4.7>`__.
+   <https://github.com/vprover/vampire/releases/tag/v4.8casc2023>`__.
 
    To use ``IProverEnv``, please download a stable iProver 
    `release
@@ -97,16 +103,44 @@ Or have a look at the basic `tutorial <https://gym-saturation.readthedocs.io/en/
   
 For a bit more comprehensive experiments, please navigate the documentation `page <https://gym-saturation.readthedocs.io/en/latest/tutorials/experiments.html>`__.
 
+More Documentation
+==================
+
+More documentation can be found
+`here <https://gym-saturation.readthedocs.io/en/latest>`__.
+
+Related Projects
+=================
+
+``gym-saturation`` is compatible with RL-frameworks such as `Ray
+RLlib <https://docs.ray.io/en/latest/rllib/package_ref/index.html>`__
+and can leverage code embeddings such as `CodeBERT
+<https://github.com/microsoft/CodeBERT>`__.
+
+Other projects using RL-guidance for ATPs include:
+
+* `TRAIL <https://github.com/IBM/TRAIL>`__
+* `FLoP <https://github.com/atpcurr/atpcurr>`__ (see `the paper <https://doi.org/10.1007/978-3-030-86059-2_10>`__ for more details)
+* `lazyCoP <https://github.com/MichaelRawson/lazycop>`__ (see `the paper <https://doi.org/10.1007/978-3-030-86059-2_11>`__ for more details)
+
+Other projects not using RL per se, but iterating a supervised
+learning procedure instead:
+
+* ENIGMA (several repos, e.g. `this one
+  <https://gitlab.ciirc.cvut.cz/chvalkar/iprover-gnn-server>`__ for
+  iProver; see `the paper <https://doi.org/10.29007/tp23>`__ for
+  others)
+* `Deepire <https://github.com/quickbeam123/deepire-paper-supplementary-materials>`__
+
 How to Contribute
 =================
 
 Please follow `the contribution guide <https://gym-saturation.readthedocs.io/en/latest/contributing.html>`__ while adhering to `the code of conduct <https://gym-saturation.readthedocs.io/en/latest/code-of-conduct.html>`__.
 
-More documentation
-==================
+How to Cite
+============
 
-More documentation can be found
-`here <https://gym-saturation.readthedocs.io/en/latest>`__.
+If you are writing a research paper and want to cite ``gym-saturation``, please use the following `DOI <https://doi.org/10.21105/joss.03849>`__.
 
 .. |PyPI version| image:: https://badge.fury.io/py/gym-saturation.svg
    :target: https://badge.fury.io/py/gym-saturation
