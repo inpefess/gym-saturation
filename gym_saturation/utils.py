@@ -17,7 +17,9 @@
 Logic Operations Utility Functions
 ===================================
 """
+from http.server import HTTPServer
 from itertools import chain
+from threading import Thread
 from typing import Any, Dict, Tuple
 
 from gym_saturation.constants import FALSEHOOD_SYMBOL
@@ -131,3 +133,14 @@ def tptp2python(literals: str) -> str:
         .replace("$false", "False")
         .replace("as", "__as")
     )
+
+
+def start_server_in_a_thread(server: HTTPServer) -> None:
+    """
+    Start a given HTTP server as a daemon.
+
+    :param server: HTTP server
+    """
+    thread = Thread(target=server.serve_forever)
+    thread.daemon = True
+    thread.start()
