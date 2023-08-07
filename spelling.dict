@@ -152,3 +152,15 @@ thumbcontainer
 sphx
 glr
 sg
+pydocstyle
+docstring
+venv
+cd
+doctest
+mypy
+pytest
+artifacts
+wget
+setuptools
+scm
+cov

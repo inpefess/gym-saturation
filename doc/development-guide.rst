@@ -14,17 +14,17 @@ development. Please note this documentation assumes you already have
 installed and ready to go.
 
 #. `Fork <https://github.com/inpefess/gym-saturation/fork>`__ the
-   `gym-saturation` repo on GitHub.
+   `gym-saturation` on GitHub.
 
 #. Clone your fork locally:
 
    .. code:: sh
 
-      cd path_for_the_repo
+      cd git_URL
       git clone git@github.com:YOUR_NAME/gym-saturation.git
 
 #. It's highly recommended to use a virtual environment for your
-   local development (by the standand means of Python or using
+   local development (by the standard means of Python or using
    Anaconda or anything else):
 
    .. code:: bash
@@ -60,7 +60,7 @@ installed and ready to go.
 
    .. code:: bash
 
-      git checkout -b name-of-your-bugfix-or-feature
+      git checkout -b name-of-your-bug-fix-or-feature
 
    Now you can make your changes locally.
 
@@ -75,7 +75,7 @@ installed and ready to go.
       mypy gym_saturation
 
 #. The next step would be to run the test cases. `gym-saturation`
-   uses pytest and all the existing tests are `doctests
+   uses pytest and all the existing tests are `doctest
    <https://docs.python.org/3/library/doctest.html>`__.
 
    .. code:: bash
@@ -92,7 +92,7 @@ installed and ready to go.
 
       git add .
       git commit -m "Your detailed description of your changes."
-      git push origin name-of-your-bugfix-or-feature
+      git push origin name-of-your-bug-fix-or-feature
 
 #. Submit a pull request through the GitHub website.
 
