@@ -32,3 +32,10 @@ class DummyHTTPHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json")
         self.end_headers()
         self.wfile.write(str(self._num_features * [1.0]).encode("utf-8"))
+
+    # pylint: disable=invalid-name
+    def do_GET(self) -> None:
+        """Respond with ``self._num_features`` ones as a dummy embedding."""
+        self.send_response(HTTPStatus.OK)
+        self.end_headers()
+        self.wfile.write(str(self._num_features * [1.0]).encode("utf-8"))
