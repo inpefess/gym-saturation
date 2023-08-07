@@ -18,7 +18,7 @@ Large Language Model Wrapper
 """
 import json
 from urllib.parse import urlencode
-from urllib.request import urlopen
+from urllib.request import HTTPHandler, build_opener
 
 import numpy as np
 
@@ -64,6 +64,8 @@ class LLMWrapper(ParamtericActionsWrapper):
         :returns: an embedding vector
         """
         data = {"code_snippet": tptp2python(literals)}
-        with urlopen(f"{self.api_url}?{urlencode(data)}") as response:
+        with build_opener(HTTPHandler()).open(
+            f"{self.api_url}?{urlencode(data)}"
+        ) as response:
             clause_embedding = response.read().decode("utf8")
         return np.array(json.loads(clause_embedding))
