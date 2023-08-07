@@ -181,7 +181,7 @@ def _proof_found_before_the_start(
 ) -> Tuple[float, bool, bool]:
     if tuple(
         1
-        for clause in env.state.clauses
+        for clause in env.unwrapped.state.clauses  # type: ignore
         if clause["literals"] == FALSEHOOD_SYMBOL
     ):
         return 1.0, True, False
@@ -246,7 +246,9 @@ def agent_testing_report(env: SaturationEnv, agent: BaseAgent) -> None:
     """
     _, truncated, step_count = episode(env, agent)
     if not truncated:
-        a_proof = get_tstp_proof(tuple(env.state.clauses))
+        a_proof = get_tstp_proof(
+            tuple(env.unwrapped.state.clauses)  # type: ignore
+        )
         proof_length = len(a_proof.split("\n"))
         print(
             f"Proof of length {proof_length} found "
@@ -282,9 +284,9 @@ def test_agent(args: Optional[List[str]] = None) -> None:
         "Vampire-v0",
         max_clauses=arguments.max_clauses,
     )
-    env.set_task(arguments.problem_filename)
+    env.unwrapped.set_task(arguments.problem_filename)  # type: ignore
     print(f"Problem file: {arguments.problem_filename}")
-    agent_testing_report(env, AgeWeightAgent(1, 1))  # type: ignore
+    agent_testing_report(env, AgeWeightAgent(1, 1))
 
 
 if __name__ == "__main__":

@@ -19,8 +19,6 @@ Age-Weight Bandit
 import gymnasium as gym
 import numpy as np
 
-from gym_saturation.envs.saturation_env import SaturationEnv
-
 
 class AgeWeightBandit(gym.ActionWrapper):
     """
@@ -58,18 +56,18 @@ class AgeWeightBandit(gym.ActionWrapper):
         :returns: The modified action
         :raises ValueError: if an ``action`` is anything except ``0`` or ``1``
         """
-        env: SaturationEnv = self.env  # type: ignore
+        state = self.env.unwrapped.state  # type: ignore
         if action == 0:
-            return env.state.action_mask.argmax()
+            return state.action_mask.argmax()
         if action == 1:
-            clauses = env.state.clauses[: env.state.action_mask.shape[0]]
+            clauses = state.clauses[: state.action_mask.shape[0]]
             return (
                 np.pad(
                     np.array(
                         [1 / len(clause["literals"]) for clause in clauses]
                     ),
-                    (0, env.state.action_mask.shape[0] - len(clauses)),
+                    (0, state.action_mask.shape[0] - len(clauses)),
                 )
-                * env.state.action_mask
+                * state.action_mask
             ).argmax()
         raise ValueError(f"Impossible action: {action}")

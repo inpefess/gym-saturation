@@ -65,9 +65,9 @@ class VampireEnv(SaturationEnv):
     >>> from gym_saturation.constants import MOCK_TPTP_PROBLEM
     >>> trivial_problem = os.path.join(os.path.dirname(MOCK_TPTP_PROBLEM),
     ...     "TST002-1.p")
-    >>> env.set_task(trivial_problem)
+    >>> env.unwrapped.set_task(trivial_problem)
     >>> _, _ = env.reset()
-    >>> env.state.terminated
+    >>> env.unwrapped.state.terminated
     True
     >>> _, _, terminated, _, _ = env.step(0)
     >>> terminated
