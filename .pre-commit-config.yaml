@@ -31,3 +31,8 @@ repos:
         entry: pyupgrade
         language: system
         types: [python]
+    -   id: bandit
+        name: bandit
+        entry: bandit
+        language: system
+        types: [python]

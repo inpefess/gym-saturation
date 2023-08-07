@@ -129,6 +129,7 @@ deps =
     pyenchant
     flake8
     pyroma
+    bandit
 commands =
     pydocstyle gym_saturation
     flake8 gym_saturation
@@ -136,6 +137,7 @@ commands =
     mypy gym_saturation
     pytest
     pyroma .
+    bandit -r gym_saturation
 """
 
 [tool.tbump]
