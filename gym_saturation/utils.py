@@ -113,3 +113,21 @@ def get_tstp_proof(state: Tuple[Dict[str, Any], ...]) -> str:
     return "\n".join(
         reversed([pretty_print(clause) for clause in reduce_to_proof(state)])
     )
+
+
+def tptp2python(literals: str) -> str:
+    """
+    Transform a TPTP CNF formula literals to look like Python code.
+
+    :param literals: literals of a TPTP-formatted first-order formula in CNF
+    :return: (hopefully syntactically correct) Python Boolean-valued expression
+    """
+    return (
+        literals.replace("==", "^^")
+        .replace("!=", "^^^")
+        .replace("=", "==")
+        .replace("^^^", "!=")
+        .replace("^^", "==")
+        .replace("$false", "False")
+        .replace("as", "__as")
+    )

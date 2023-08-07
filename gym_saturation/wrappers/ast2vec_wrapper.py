@@ -21,6 +21,7 @@ from urllib.request import HTTPHandler, OpenerDirector, Request
 
 import numpy as np
 
+from gym_saturation.utils import tptp2python
 from gym_saturation.wrappers.parametric_actions_wrapper import (
     ParamtericActionsWrapper,
 )
@@ -64,15 +65,7 @@ class AST2VecWrapper(ParamtericActionsWrapper):
         :param literals: a TPTP clause literals to embed
         :returns: an embedding vector
         """
-        prepared_literals = (
-            literals.replace("==", "^^")
-            .replace("!=", "^^^")
-            .replace("=", "==")
-            .replace("^^^", "!=")
-            .replace("^^", "==")
-            .replace("$false", "False")
-            .replace("as", "__as")
-        )
+        prepared_literals = tptp2python(literals)
         req = Request(
             self.torch_serve_url,
             f'{{"data": "{prepared_literals}"}}'.encode(),
