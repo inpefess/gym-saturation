@@ -17,10 +17,10 @@
 Saturation Environment with iProver back-end
 ============================================
 """
+import asyncio
 import json
 import os
 import re
-import subprocess
 from threading import Thread
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -36,38 +36,47 @@ from gym_saturation.relay_server import (
 )
 
 
+async def _run_ascync_subprocess(command: str) -> asyncio.subprocess.Process:
+    return await asyncio.create_subprocess_shell(
+        command,
+        stdout=asyncio.subprocess.DEVNULL,
+        stderr=asyncio.subprocess.DEVNULL,
+    )
+
+
 def _iprover_start(
     iprover_port: int, problem_filename: str, prover_binary_path: str
-) -> subprocess.Popen:
+) -> asyncio.subprocess.Process:
     tptp_folder = os.path.join(os.path.dirname(problem_filename), "..", "..")
-    arguments = [
-        "--interactive_mode",
-        "true",
-        "--external_ip_address",
-        "127.0.0.1",
-        "--external_port",
-        str(iprover_port),
-        "--schedule",
-        "none",
-        "--resolution_flag",
-        "false",
-        "--instantiation_flag",
-        "false",
-        "--superposition_flag",
-        "true",
-        "--sup_iter_deepening",
-        "0",
-        "--sup_passive_queue_type",
-        "external_agent",
-        "--preprocessing_flag",
-        "false",
-        "--include_path",
-        tptp_folder,
-        problem_filename,
-    ]
-    return subprocess.Popen(
-        [prover_binary_path] + arguments, stdout=subprocess.DEVNULL
+    command = " ".join(
+        [
+            prover_binary_path,
+            "--interactive_mode",
+            "true",
+            "--external_ip_address",
+            "127.0.0.1",
+            "--external_port",
+            str(iprover_port),
+            "--schedule",
+            "none",
+            "--resolution_flag",
+            "false",
+            "--instantiation_flag",
+            "false",
+            "--superposition_flag",
+            "true",
+            "--sup_iter_deepening",
+            "0",
+            "--sup_passive_queue_type",
+            "external_agent",
+            "--preprocessing_flag",
+            "false",
+            "--include_path",
+            tptp_folder,
+            problem_filename,
+        ]
     )
+    return asyncio.run(_run_ascync_subprocess(command))
 
 
 class IProverEnv(SaturationEnv):
@@ -117,7 +126,7 @@ class IProverEnv(SaturationEnv):
         self.prover_binary_path = prover_binary_path
         self._relay_server: Optional[RelayServer] = None
         self.relay_server_thread: Optional[Thread] = None
-        self.iprover_process: Optional[subprocess.Popen] = None
+        self.iprover_process: Optional[asyncio.subprocess.Process] = None
 
     def _restart_relay_server(self) -> None:
         if self._relay_server:
@@ -252,4 +261,3 @@ class IProverEnv(SaturationEnv):
             self.relay_server_thread.join()
         if self.iprover_process:
             self.iprover_process.terminate()
-            self.iprover_process.wait()
