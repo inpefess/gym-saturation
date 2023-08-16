@@ -13,4 +13,4 @@ pytest --cov-report term-missing
 pyroma .
 bandit -r ${PACKAGE_NAME}
 bandit -r scripts
-scc -i py ${PACKAGE_NAME}
+scc --no-cocomo --by-file -i py ${PACKAGE_NAME}
