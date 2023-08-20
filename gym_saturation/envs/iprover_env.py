@@ -258,4 +258,7 @@ class IProverEnv(SaturationEnv):
         if self.relay_server_thread:
             self.relay_server_thread.join()
         if self.iprover_process:
-            self.iprover_process.terminate()
+            try:
+                self.iprover_process.terminate()
+            except ProcessLookupError:  # pragma: no cover
+                pass
