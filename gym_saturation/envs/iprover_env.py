@@ -36,14 +36,6 @@ from gym_saturation.relay_server import (
 )
 
 
-async def _run_ascync_subprocess(command: str) -> asyncio.subprocess.Process:
-    return await asyncio.create_subprocess_shell(
-        command,
-        stdout=asyncio.subprocess.DEVNULL,
-        stderr=asyncio.subprocess.DEVNULL,
-    )
-
-
 def _iprover_start(
     iprover_port: int, problem_filename: str, prover_binary_path: str
 ) -> asyncio.subprocess.Process:
@@ -76,7 +68,13 @@ def _iprover_start(
             problem_filename,
         ]
     )
-    return asyncio.run(_run_ascync_subprocess(command))
+    return asyncio.run(
+        asyncio.create_subprocess_shell(
+            command,
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.DEVNULL,
+        )
+    )
 
 
 class IProverEnv(SaturationEnv):
