@@ -13,11 +13,12 @@
 #   limitations under the License.
 # noqa: D205, D400
 """
-ast2vec Wrapper
-================
+Large Language Model Wrapper
+=============================
 """
 import json
-from urllib.request import HTTPHandler, OpenerDirector, Request
+from urllib.parse import urlencode
+from urllib.request import HTTPHandler, build_opener
 
 import numpy as np
 
@@ -27,36 +28,33 @@ from gym_saturation.wrappers.parametric_actions_wrapper import (
 )
 
 
-class AST2VecWrapper(ParamtericActionsWrapper):
+class LLMWrapper(ParamtericActionsWrapper):
     """
-    An ast2vec wrappers for saturation provers.
+    A Large Language Model wrapper for saturation provers.
 
-    .. _ast2vec_wrapper:
-
-    The best way is to run TorchServe docker container as described here:
-    https://gitlab.com/inpefess/ast2vec
+    An example Docker image: https://gitlab.com/inpefess/codebert-features
 
     >>> import gymnasium as gym
     >>> env = gym.make("Vampire-v0", max_clauses=9)
-    >>> wrapped_env = AST2VecWrapper(env, features_num=256)
+    >>> wrapped_env = LLMWrapper(env, features_num=768)
     >>> observation, info = wrapped_env.reset()
     >>> observation.keys()
     dict_keys(['action_mask', 'avail_actions'])
     >>> from gym_saturation.wrappers.parametric_actions_wrapper import (
     ...     PARAMETRIC_ACTIONS)
     >>> observation[PARAMETRIC_ACTIONS].shape
-    (9, 256)
+    (9, 768)
     """
 
     def __init__(
         self,
         env,
         features_num: int,
-        torch_serve_url: str = "http://127.0.0.1:9080/predictions/ast2vec",
+        api_url: str = "http://127.0.0.1:7860/",
     ):
         """Initialise all the things."""
         super().__init__(env, features_num)
-        self.torch_serve_url = torch_serve_url
+        self.api_url = api_url
 
     def clause_embedder(self, literals: str) -> np.ndarray:
         """
@@ -65,14 +63,9 @@ class AST2VecWrapper(ParamtericActionsWrapper):
         :param literals: a TPTP clause literals to embed
         :returns: an embedding vector
         """
-        prepared_literals = tptp2python(literals)
-        req = Request(
-            self.torch_serve_url,
-            f'{{"data": "{prepared_literals}"}}'.encode(),
-            {"Content-Type": "application/json"},
-        )
-        opener = OpenerDirector()
-        opener.add_handler(HTTPHandler())
-        with opener.open(req) as response:
-            clause_embedding = json.loads(response.read().decode("utf-8"))
-        return np.array(clause_embedding)
+        data = {"code_snippet": tptp2python(literals)}
+        with build_opener(HTTPHandler()).open(
+            f"{self.api_url}?{urlencode(data)}"
+        ) as response:
+            clause_embedding = response.read().decode("utf8")
+        return np.array(json.loads(clause_embedding))

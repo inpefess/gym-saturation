@@ -17,12 +17,12 @@ Fixtures for the Tests
 =======================
 """
 from http.server import HTTPServer
-from threading import Thread
 from typing import Generator
 
 from pytest import fixture
 
 from gym_saturation.dummy_http_handler import DummyHTTPHandler
+from gym_saturation.utils import start_server_in_a_thread
 
 
 @fixture(autouse=True, scope="session")
@@ -33,7 +33,23 @@ def http_server() -> Generator[HTTPServer, None, None]:
     :returns: a mock HTTP server
     """
     with HTTPServer(("localhost", 9080), DummyHTTPHandler) as server:
-        thread = Thread(target=server.serve_forever)
-        thread.daemon = True
-        thread.start()
+        start_server_in_a_thread(server)
+        yield server
+
+
+class DummyCodeBERTHandler(DummyHTTPHandler):
+    """Dummy handler with a different embedding dimension."""
+
+    _num_features = 768
+
+
+@fixture(autouse=True, scope="session")
+def codebert_features_server() -> Generator[HTTPServer, None, None]:
+    """
+    Mock a CodeBERT features server behaviour with a simplistic HTTP server.
+
+    :returns: a mock HTTP server
+    """
+    with HTTPServer(("localhost", 7860), DummyCodeBERTHandler) as server:
+        start_server_in_a_thread(server)
         yield server

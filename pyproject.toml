@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "0.10.3"
+version = "0.10.4"
 description = "Gymnasium environments for saturation provers"
 authors = ["Boris Shminke <boris@shminke.ml>"]
 license = "Apache-2.0"
@@ -129,6 +129,7 @@ deps =
     pyenchant
     flake8
     pyroma
+    bandit
 commands =
     pydocstyle gym_saturation
     flake8 gym_saturation
@@ -136,13 +137,14 @@ commands =
     mypy gym_saturation
     pytest
     pyroma .
+    bandit -r gym_saturation
 """
 
 [tool.tbump]
 github_url = "https://github.com/inpfess/gym-saturation/"
 
 [tool.tbump.version]
-current = "0.10.3"
+current = "0.10.4"
 regex = """
   (?P<major>\\d+)
   \\.

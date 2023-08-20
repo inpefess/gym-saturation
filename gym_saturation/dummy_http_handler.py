@@ -23,10 +23,19 @@ from http.server import BaseHTTPRequestHandler
 class DummyHTTPHandler(BaseHTTPRequestHandler):
     """A dummy handler transforming strings to vectors."""
 
+    _num_features = 256
+
     # pylint: disable=invalid-name
     def do_POST(self) -> None:
-        """Respond with 256 float ones as a dummy embedding."""
+        """Respond with ``self._num_features`` ones as a dummy embedding."""
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
-        self.wfile.write(str(256 * [1.0]).encode("utf-8"))
+        self.wfile.write(str(self._num_features * [1.0]).encode("utf-8"))
+
+    # pylint: disable=invalid-name
+    def do_GET(self) -> None:
+        """Respond with ``self._num_features`` ones as a dummy embedding."""
+        self.send_response(HTTPStatus.OK)
+        self.end_headers()
+        self.wfile.write(str(self._num_features * [1.0]).encode("utf-8"))

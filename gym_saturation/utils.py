@@ -17,7 +17,9 @@
 Logic Operations Utility Functions
 ===================================
 """
+from http.server import HTTPServer
 from itertools import chain
+from threading import Thread
 from typing import Any, Dict, Tuple
 
 from gym_saturation.constants import FALSEHOOD_SYMBOL
@@ -113,3 +115,32 @@ def get_tstp_proof(state: Tuple[Dict[str, Any], ...]) -> str:
     return "\n".join(
         reversed([pretty_print(clause) for clause in reduce_to_proof(state)])
     )
+
+
+def tptp2python(literals: str) -> str:
+    """
+    Transform a TPTP CNF formula literals to look like Python code.
+
+    :param literals: literals of a TPTP-formatted first-order formula in CNF
+    :return: (hopefully syntactically correct) Python Boolean-valued expression
+    """
+    return (
+        literals.replace("==", "^^")
+        .replace("!=", "^^^")
+        .replace("=", "==")
+        .replace("^^^", "!=")
+        .replace("^^", "==")
+        .replace("$false", "False")
+        .replace("as", "__as")
+    )
+
+
+def start_server_in_a_thread(server: HTTPServer) -> None:
+    """
+    Start a given HTTP server as a daemon.
+
+    :param server: HTTP server
+    """
+    thread = Thread(target=server.serve_forever)
+    thread.daemon = True
+    thread.start()

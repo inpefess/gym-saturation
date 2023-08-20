@@ -56,7 +56,7 @@ How to Install
 
    To use ``IProverEnv``, please download a stable iProver 
    `release
-   <https://gitlab.com/inpefess/iprover/-/releases/2023.04.10>`__ or build it from `this commit <https://gitlab.com/korovin/iprover/-/commit/9504e78f60262c394b564678201cb7d2f8a4bbea>`__.
+   <https://gitlab.com/inpefess/iprover/-/releases/2023.07.13>`__ or build it from `this commit <https://gitlab.com/korovin/iprover/-/commit/11831c13057ff984e62c8acb7226288e7092797a>`__.
 
 The best way to install this package is to use ``pip``:
 

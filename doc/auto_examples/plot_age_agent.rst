@@ -310,10 +310,10 @@ we did to find proof.
  .. code-block:: none
 
     {'literals': '$false',
-     'label': '25',
+     'label': '27',
      'role': 'lemma',
      'inference_rule': 'subsumption_resolution',
-     'inference_parents': ('24', '5'),
+     'inference_parents': ('26', '5'),
      'birth_step': 7}
 
 
@@ -342,15 +342,15 @@ proof)
  .. code-block:: none
 
     cnf(1, lemma, mult(X0,mult(X1,X2)) = mult(mult(X0,X1),X2), inference(input, [], [])).
-    cnf(15, lemma, mult(inv(X0),mult(X0,X1)) = mult(e,X1), inference(superposition, [], [1, 3])).
+    cnf(6, lemma, mult(inv(X0),mult(X0,X1)) = mult(e,X1), inference(superposition, [], [1, 3])).
     cnf(2, lemma, mult(e,X0) = X0, inference(input, [], [])).
-    cnf(16, lemma, mult(inv(X0),mult(X0,X1)) = X1, inference(forward_demodulation, [], [15, 2])).
+    cnf(10, lemma, mult(inv(X0),mult(X0,X1)) = X1, inference(forward_demodulation, [], [6, 2])).
     cnf(4, lemma, a = mult(a,a), inference(input, [], [])).
-    cnf(21, lemma, a = mult(inv(a),a), inference(superposition, [], [16, 4])).
+    cnf(22, lemma, a = mult(inv(a),a), inference(superposition, [], [10, 4])).
     cnf(3, lemma, e = mult(inv(X0),X0), inference(input, [], [])).
-    cnf(24, lemma, e = a, inference(forward_demodulation, [], [21, 3])).
+    cnf(26, lemma, e = a, inference(forward_demodulation, [], [22, 3])).
     cnf(5, lemma, e != a, inference(input, [], [])).
-    cnf(25, lemma, $false, inference(subsumption_resolution, [], [24, 5])).
+    cnf(27, lemma, $false, inference(subsumption_resolution, [], [26, 5])).
 
 
 
@@ -438,7 +438,7 @@ steps. And the proof found looks a bit different
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.709 seconds)
+   **Total running time of the script:** ( 0 minutes  0.757 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_age_agent.py:
