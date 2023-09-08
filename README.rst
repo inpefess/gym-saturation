@@ -101,7 +101,7 @@ One can use ``gym-saturation`` environments as any other Gymnasium environment:
 
 Or have a look at the basic `tutorial <https://gym-saturation.readthedocs.io/en/latest/auto_examples/plot_age_agent.html>`__.
   
-For a bit more comprehensive experiments, please navigate the documentation `page <https://gym-saturation.readthedocs.io/en/latest/tutorials/experiments.html>`__.
+For a bit more comprehensive experiments, please see `this project <https://github.com/inpefess/ray-prover>`__.
 
 More Documentation
 ==================

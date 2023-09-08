@@ -1,4 +1,0 @@
-gym-saturation==0.10.0
-ray[rllib]==2.4.0
-tensorflow-probability==0.19.0
-tensorflow==2.12.0
