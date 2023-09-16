@@ -84,8 +84,8 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
         self.env: SaturationEnv = env  # type: ignore
         action_mask = self.env.observation_space[ACTION_MASK]
         parametric_actions = gym.spaces.Box(
-            low=-1,
-            high=1,
+            low=-np.infty,
+            high=np.infty,
             shape=(
                 action_mask.shape[0],  # type: ignore
                 embedding_dim,
