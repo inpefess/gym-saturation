@@ -140,7 +140,7 @@ Please follow `the contribution guide <https://gym-saturation.readthedocs.io/en/
 How to Cite
 ============
 
-If you are writing a research paper and want to cite ``gym-saturation``, please use the following `DOI <https://doi.org/10.21105/joss.03849>`__.
+If you are writing a research paper and want to cite ``gym-saturation``, please use the following `DOI <https://doi.org/10.1007/978-3-031-43513-3_11>`__.
 
 .. |PyPI version| image:: https://badge.fury.io/py/gym-saturation.svg
    :target: https://badge.fury.io/py/gym-saturation
