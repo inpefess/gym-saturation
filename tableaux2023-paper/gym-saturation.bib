@@ -1,0 +1,553 @@
+@article{Shminke2022,
+  doi = {10.21105/joss.03849},
+  year = {2022},
+  publisher = {{The Open Journal}},
+  volume = {7},
+  number = {71},
+  pages = {3849},
+  author = {Boris Shminke},
+  title = {{gym-saturation: an OpenAI Gym environment for saturation provers}},
+  journal = {{Journal of Open Source Software}}
+}
+@article{DBLP:journals/corr/BrockmanCPSSTZ16,
+  author    = {Greg Brockman and
+               Vicki Cheung and
+               Ludwig Pettersson and
+               Jonas Schneider and
+               John Schulman and
+               Jie Tang and
+               Wojciech Zaremba},
+  title     = {{OpenAI Gym}},
+  journal   = {{arXiv}},
+  year      = {2016},
+  doi       = {10.48550/arXiv.1606.01540},
+  eprinttype = {arXiv},
+  eprint    = {1606.01540},
+  timestamp = {Fri, 08 Nov 2019 12:51:06 +0100},
+  biburl    = {https://dblp.org/rec/journals/corr/BrockmanCPSSTZ16.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+@article{https://doi.org/10.48550/arxiv.2209.02562,
+  doi = {10.48550/ARXIV.2209.02562},
+  journal = {{arXiv}},
+  author = {Shminke, Boris},
+  keywords = {Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences},
+  title = {{Project proposal: A modular reinforcement learning based automated theorem prover}},
+  publisher = {arXiv},
+  year = {2022},
+  copyright = {Creative Commons Attribution 4.0 International}
+}
+@article{9669114,
+  author={Abdelaziz, Ibrahim and Crouse, Maxwell and Makni, Bassem and Austel, Vernon and Cornelio, Cristina and Ikbal, Shajith and Kapanipathi, Pavan and Makondo, Ndivhuwo and Srinivas, Kavitha and Witbrock, Michael and Fokoue, Achille},
+  journal={{IEEE Transactions on Pattern Analysis and Machine Intelligence}},
+  title={{Learning to Guide a Saturation-Based Theorem Prover}},
+  year={2023},
+  volume={45},
+  number={1},
+  pages={738-751},
+  doi={10.1109/TPAMI.2022.3140382}
+}
+@InProceedings{10.1007/978-3-030-86059-2_11,
+author="Rawson, Michael
+and Reger, Giles",
+editor="Das, Anupam
+and Negri, Sara",
+title={{lazyCoP: Lazy Paramodulation Meets Neurally Guided Search}},
+booktitle={{Automated Reasoning with Analytic Tableaux and Related Methods}},
+year="2021",
+publisher="Springer International Publishing",
+address="Cham",
+pages="187--199",
+abstract="State-of-the-art automated theorem provers explore large search spaces with carefully-engineered routines, but most do not learn from past experience as human mathematicians can. Unfortunately, machine-learned heuristics for theorem proving are typically either fast or accurate, not both. Therefore, systems must make a tradeoff between the quality of heuristic guidance and the reduction in inference rate required to use it. We present a system (lazyCoP) based on lazy paramodulation that is completely insulated from heuristic overhead, allowing the use of even deep neural networks with no measurable reduction in inference rate. Given 10 s to find proofs in a corpus of mathematics, the system improves from 64{\%} to 70{\%} when trained on its own proofs.",
+isbn="978-3-030-86059-2",
+doi={10.1007/978-3-030-86059-2_11}
+}
+@InProceedings{FLoP,
+author="Zombori, Zsolt
+and Csisz{\'a}rik, Adri{\'a}n
+and Michalewski, Henryk
+and Kaliszyk, Cezary
+and Urban, Josef",
+editor="Das, Anupam
+and Negri, Sara",
+title={{Towards Finding Longer Proofs}},
+booktitle={{Automated Reasoning with Analytic Tableaux and Related Methods}},
+year="2021",
+publisher={{Springer International Publishing}},
+address="Cham",
+pages="167--186",
+abstract="We present a reinforcement learning (RL) based guidance system for automated theorem proving geared towards Finding Longer Proofs (FLoP). Unlike most learning based approaches, we focus on generalising from very little training data and achieving near complete confidence. We use several simple, structured datasets with very long proofs to show that FLoP can successfully generalise a single training proof to a large class of related problems. On these benchmarks, FLoP is competitive with strong theorem provers despite using very limited search, due to its ability to solve problems that are prohibitively long for other systems.",
+isbn="978-3-030-86059-2",
+doi={10.1007/978-3-030-86059-2_10}
+}
+@inproceedings{fCoP,
+author = {Kaliszyk, Cezary and Urban, Josef and Vysko\v{c}il, Ji\v{r}i},
+title = {{Certified Connection Tableaux Proofs for HOL Light and TPTP}},
+year = {2015},
+isbn = {9781450332965},
+publisher = {{Association for Computing Machinery}},
+address = {New York, NY, USA},
+doi = {10.1145/2676724.2693176},
+abstract = {In recent years, the Metis prover based on ordered paramodulation and model elimination has replaced the earlier built-in methods for general-purpose proof automation in HOL4 and Isabelle/HOL. In the annual CASC competition, the leanCoP system based on connection tableaux has however performed better than Metis. In this paper we show how the leanCoP's core algorithm can be implemented inside HOL Light. leanCoP's flagship feature, namely its minimalistic core, results in a very simple proof system. This plays a crucial role in extending the MESON proof reconstruction mechanism to connection tableaux proofs, providing an implementation of leanCoP that certifies its proofs. We discuss the differences between our direct implementation using an explicit Prolog stack,to the continuation passing implementation of MESON present in HOL Light and compare their performance on all core HOL Light goals. The resulting prover can be also used as a general purpose TPTP prover. We compare its performance against the resolution based Metis on TPTP and other interesting datasets.},
+booktitle = {{Proceedings of the 2015 Conference on Certified Programs and Proofs}},
+pages = {59–66},
+numpages = {8},
+keywords = {interactive theorem proving, connection tableaux, certified proofs, leancop, automated reasoning, hol light},
+location = {Mumbai, India},
+series = {CPP '15}
+}
+@article{OTTEN2003139,
+title = {{leanCoP: lean connection-based theorem proving}},
+journal = {{Journal of Symbolic Computation}},
+volume = {36},
+number = {1},
+pages = {139-161},
+year = {2003},
+note = {{First Order Theorem Proving}},
+issn = {0747-7171},
+doi = {10.1016/S0747-7171(03)00037-3},
+author = {Jens Otten and Wolfgang Bibel},
+abstract = {The Prolog program implements a theorem prover for classical first-order (clausal) logic which is based on the connection calculus. It is sound and complete (provided that an arbitrarily large I is iteratively given), and demonstrates a comparatively strong performance.}
+}
+@InProceedings{10.1007/978-3-030-29436-6_29,
+author="Schulz, Stephan
+and Cruanes, Simon
+and Vukmirovi{\'{c}}, Petar",
+editor="Fontaine, Pascal",
+title={{Faster, Higher, Stronger: E 2.3}},
+booktitle={{Automated Deduction -- CADE 27}},
+year="2019",
+publisher={{Springer International Publishing}},
+address="Cham",
+pages="495--507",
+abstract="E 2.3 is a theorem prover for many-sorted first-order logic with equality. We describe the basic logical and software architecture of the system, as well as core features of the implementation. We particularly discuss recently added features and extensions, including the extension to many-sorted logic, optional limited support for higher-order logic, and the integration of SAT techniques via PicoSAT. Minor additions include improved support for TPTP standard features, always-on internal proof objects, and lazy orphan removal. The paper also gives an overview of the performance of the system, and describes ongoing and future work.",
+isbn="978-3-030-29436-6",
+doi={10.1007/978-3-030-29436-6_29}
+}
+@InProceedings{10.1007/978-3-642-39799-8_1,
+author="Kov{\'a}cs, Laura
+and Voronkov, Andrei",
+editor="Sharygina, Natasha
+and Veith, Helmut",
+title={{First-Order Theorem Proving and Vampire}},
+booktitle={{Computer Aided Verification}},
+year="2013",
+publisher={{Springer Berlin Heidelberg}},
+address="Berlin, Heidelberg",
+pages="1--35",
+abstract="In this paper we give a short introduction in first-order theorem proving and the use of the theorem prover Vampire. We discuss the superposition calculus and explain the key concepts of saturation and redundancy elimination, present saturation algorithms and preprocessing, and demonstrate how these concepts are implemented in Vampire. Further, we also cover more recent topics and features of Vampire designed for advanced applications, including satisfiability checking, theory reasoning, interpolation, consequence elimination, and program analysis.",
+isbn="978-3-642-39799-8",
+doi={10.1007/978-3-642-39799-8_1}
+}
+@inproceedings{DBLP:conf/cade/DuarteK20,
+  author    = {Andr{\'{e}} Duarte and
+               Konstantin Korovin},
+  editor    = {Nicolas Peltier and
+               Viorica Sofronie{-}Stokkermans},
+  title     = {{Implementing Superposition in iProver (System Description)}},
+  booktitle = {{Automated Reasoning - 10th International Joint Conference, IJCAR
+               2020, Paris, France, July 1-4, 2020, Proceedings, Part II}},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {12167},
+  pages     = {388--397},
+  publisher = {Springer},
+  year      = {2020},
+  doi       = {10.1007/978-3-030-51054-1\_24},
+  timestamp = {Thu, 14 Oct 2021 10:31:31 +0200},
+  biburl    = {https://dblp.org/rec/conf/cade/DuarteK20.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+@article{DBLP:journals/jar/Sutcliffe17,
+  author    = {Geoff Sutcliffe},
+  title     = {{The TPTP Problem Library and Associated Infrastructure - From {CNF}
+               to TH0, TPTP v6.4.0}},
+  journal   = {{Journal of Automated Reasoning}},
+  volume    = {59},
+  number    = {4},
+  pages     = {483--502},
+  year      = {2017},
+  doi       = {10.1007/s10817-017-9407-7},
+  timestamp = {Wed, 02 Sep 2020 13:30:01 +0200},
+  biburl    = {https://dblp.org/rec/journals/jar/Sutcliffe17.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+@InProceedings{10.1007/978-3-030-34968-4_28,
+author="Gleiss, Bernhard
+and Kov{\'a}cs, Laura
+and Schnedlitz, Lena",
+editor="Ahrendt, Wolfgang
+and Tapia Tarifa, Silvia Lizeth",
+title={{Interactive Visualization of Saturation Attempts in Vampire}},
+booktitle={{Integrated Formal Methods}},
+year="2019",
+publisher="Springer International Publishing",
+address="Cham",
+pages="504--513",
+abstract="Many applications of formal methods require automated reasoning about system properties, such as system safety and security. To improve the performance of automated reasoning engines, such as SAT/SMT solvers and first-order theorem prover, it is necessary to understand both the successful and failing attempts of these engines towards producing formal certificates, such as logical proofs and/or models. Such an analysis is challenging due to the large number of logical formulas generated during proof/model search. In this paper we focus on saturation-based first-order theorem proving and introduce the SatVis tool for interactively visualizing saturation-based proof attempts in first-order theorem proving. We build SatVis on top of the world-leading theorem prover Vampire, by interactively visualizing the saturation attempts of Vampire in SatVis. Our work combines the automatic layout and visualization of the derivation graph induced by the saturation attempt with interactive transformations and search functionality. As a result, we are able to analyze and debug (failed) proof attempts of Vampire. Thanks to its interactive visualisation, we believe SatVis helps both experts and non-experts in theorem proving to understand first-order proofs and analyze/refine failing proof attempts of first-order provers.",
+isbn="978-3-030-34968-4",
+doi={10.1007/978-3-030-34968-4_28}
+}
+@InProceedings{10.1007/978-3-030-29436-6_27,
+author="Rawson, Michael
+and Reger, Giles",
+editor="Fontaine, Pascal",
+title={{Old or Heavy? Decaying Gracefully with Age/Weight Shapes}},
+booktitle={{Automated Deduction -- CADE 27}},
+year="2019",
+publisher="Springer International Publishing",
+address="Cham",
+pages="462--476",
+abstract="Modern saturation theorem provers are based on the given-clause algorithm, which iteratively selects new clauses to process. This clause selection has a large impact on the performance of proof search and has been the subject of much folklore. The standard approach is to alternate between selecting the oldest clause and the lightest clause with a fixed, but configurable age/weight ratio (AWR). An optimal fixed value of this ratio is shown to produce proofs significantly more quickly on a given problem, and further that varying AWR during proof search can improve upon a fixed ratio. Several new modes for the Vampire prover which vary AWR according to a ``shape'' during proof search are developed based on these observations. The modes solve a number of new problems in the TPTP benchmark set.",
+isbn="978-3-030-29436-6",
+doi={10.1007/978-3-030-29436-6_27}
+}
+@InProceedings{10.1007/978-3-030-79876-5_31,
+author="Suda, Martin",
+editor="Platzer, Andr{\'e}
+and Sutcliffe, Geoff",
+title={{Improving ENIGMA-style Clause Selection while Learning From History}},
+booktitle={{Automated Deduction -- CADE 28}},
+year="2021",
+publisher={{Springer International Publishing}},
+address="Cham",
+pages="543--561",
+abstract="We re-examine the topic of machine-learned clause selection guidance in saturation-based theorem provers. The central idea, recently popularized by the ENIGMA system, is to learn a classifier for recognizing clauses that appeared in previously discovered proofs. In subsequent runs, clauses classified positively are prioritized for selection. We propose several improvements to this approach and experimentally confirm their viability. For the demonstration, we use a recursive neural network to classify clauses based on their derivation history and the presence or absence of automatically supplied theory axioms therein. The automatic theorem prover Vampire guided by the network achieves a 41 {\%} improvement on a relevant subset of SMT-LIB in a real time evaluation.",
+isbn="978-3-030-79876-5",
+doi={10.1007/978-3-030-79876-5_31}
+}
+@article{VectorRepresentations,
+    author = {PurgaŁ, StanisŁaw and Parsert, Julian and Kaliszyk, Cezary},
+    title = {{A study of continuous vector representations for theorem proving}},
+    journal = {{Journal of Logic and Computation}},
+    volume = {31},
+    number = {8},
+    pages = {2057-2083},
+    year = {2021},
+    month = {02},
+    abstract = "{Applying machine learning to mathematical terms and formulas requires a suitable representation of formulas that is adequate for AI methods. In this paper, we develop an encoding that allows for logical properties to be preserved and is additionally reversible. This means that the tree shape of a formula including all symbols can be reconstructed from the dense vector representation. We do that by training two decoders: one that extracts the top symbol of the tree and one that extracts embedding vectors of subtrees. The syntactic and semantic logical properties that we aim to preserve include both structural formula properties, applicability of natural deduction steps and even more complex operations like unifiability. We propose datasets that can be used to train these syntactic and semantic properties. We evaluate the viability of the developed encoding across the proposed datasets as well as for the practical theorem proving problem of premise selection in the Mizar corpus.}",
+    issn = {0955-792X},
+    doi = {10.1093/logcom/exab006},
+    eprint = {https://academic.oup.com/logcom/article-pdf/31/8/2057/41808853/exab006.pdf},
+}
+@InProceedings{10.1007/978-3-031-21203-1_22,
+author="Ballout, Ali
+and da Costa Pereira, C{\'e}lia
+and Tettamanzi, Andrea G. B.",
+editor="Aydo{\u{g}}an, Reyhan
+and Criado, Natalia
+and Lang, J{\'e}r{\^o}me
+and Sanchez-Anguix, Victor
+and Serramia, Marc",
+title={{Learning to Classify Logical Formulas Based on Their Semantic Similarity}},
+booktitle={{PRIMA 2022: Principles and Practice of Multi-Agent Systems}},
+year="2023",
+publisher="Springer International Publishing",
+address="Cham",
+pages="364--380",
+abstract="An important task in logic, given a formula and a knowledge base which represents what an agent knows of the current state of the world, is to be able to guess the truth value of the formula. Logic reasoners are designed to perform inferences, that is, to decide whether a formula is a logical consequence of the knowledge base, which is stronger than that and can be intractable in some cases. In addition, under the open-world assumption, it may turn out impossible to infer a formula or its negation. In many practical situations, however, when an agent has to make a decision, it is acceptable to resort to heuristic methods to determine the probable veracity or falsehood of a formula, even in the absence of a guarantee of correctness, to avoid blocking the decision-making process and move forward. This is why we propose a method to train a classification model based on available knowledge in order to be able of accurately guessing whether an arbitrary, unseen formula is true or false. Our method exploits a kernel representation of logical formulas based on a model-theoretic measure of semantic similarity. The results of experiments show that the proposed method is highly effective and accurate.",
+isbn="978-3-031-21203-1",
+doi={10.1007/978-3-031-21203-1_22}
+}
+@inproceedings{10.5555/3495724.3495883,
+author = {Brown, Tom B. and Mann, Benjamin and Ryder, Nick and Subbiah, Melanie and Kaplan, Jared and Dhariwal, Prafulla and Neelakantan, Arvind and Shyam, Pranav and Sastry, Girish and Askell, Amanda and Agarwal, Sandhini and Herbert-Voss, Ariel and Krueger, Gretchen and Henighan, Tom and Child, Rewon and Ramesh, Aditya and Ziegler, Daniel M. and Wu, Jeffrey and Winter, Clemens and Hesse, Christopher and Chen, Mark and Sigler, Eric and Litwin, Mateusz and Gray, Scott and Chess, Benjamin and Clark, Jack and Berner, Christopher and McCandlish, Sam and Radford, Alec and Sutskever, Ilya and Amodei, Dario},
+title = {{Language Models Are Few-Shot Learners}},
+year = {2020},
+isbn = {9781713829546},
+publisher = {Curran Associates Inc.},
+address = {Red Hook, NY, USA},
+abstract = {We demonstrate that scaling up language models greatly improves task-agnostic, few-shot performance, sometimes even becoming competitive with prior state-of-the-art fine-tuning approaches. Specifically, we train GPT-3, an autoregressive language model with 175 billion parameters, 10x more than any previous non-sparse language model, and test its performance in the few-shot setting. For all tasks, GPT-3 is applied without any gradient updates or fine-tuning, with tasks and few-shot demonstrations specified purely via text interaction with the model. GPT-3 achieves strong performance on many NLP datasets, including translation, question-answering, and cloze tasks. We also identify some datasets where GPT-3's few-shot learning still struggles, as well as some datasets where GPT-3 faces methodological issues related to training on large web corpora.},
+booktitle = {Proceedings of the 34th International Conference on Neural Information Processing Systems},
+articleno = {159},
+numpages = {25},
+location = {Vancouver, BC, Canada},
+series = {NIPS'20},
+url = {https://proceedings.neurips.cc/paper_files/paper/2020/file/1457c0d6bfcb4967418bfb8ac142f64a-Paper.pdf}
+}
+@article{alon2019code2vec,
+ author = {Alon, Uri and Zilberstein, Meital and Levy, Omer and Yahav, Eran},
+ title = {{Code2Vec: Learning Distributed Representations of Code}},
+ journal = {{Proceedings of the ACM on Programming Languages}},
+ issue_date = {January 2019},
+ volume = {3},
+ number = {POPL},
+ month = jan,
+ year = {2019},
+ issn = {2475-1421},
+ pages = {40:1--40:29},
+ articleno = {40},
+ numpages = {29},
+ doi = {10.1145/3290353},
+ acmid = {3290353},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {Big Code, Distributed Representations, Machine Learning},
+}
+@Article{Paassen2022,
+author="Paa{\ss}en, Benjamin
+and Koprinska, Irena
+and Yacef, Kalina",
+title={{Recursive tree grammar autoencoders}},
+journal={{Machine Learning}},
+year="2022",
+month="Aug",
+day="02",
+abstract="Machine learning on trees has been mostly focused on trees as input. Much less research has investigated trees as output, which has many applications, such as molecule optimization for drug discovery, or hint generation for intelligent tutoring systems. In this work, we propose a novel autoencoder approach, called recursive tree grammar autoencoder (RTG-AE), which encodes trees via a bottom-up parser and decodes trees via a tree grammar, both learned via recursive neural networks that minimize the variational autoencoder loss. The resulting encoder and decoder can then be utilized in subsequent tasks, such as optimization and time series prediction. RTG-AEs are the first model to combine three features: recursive processing, grammatical knowledge, and deep learning. Our key message is that this unique combination of all three features outperforms models which combine any two of the three. Experimentally, we show that RTG-AE improves the autoencoding error, training time, and optimization score on synthetic as well as real datasets compared to four baselines. We further prove that RTG-AEs parse and generate trees in linear time and are expressive enough to handle all regular tree grammars.",
+issn="1573-0565",
+doi={10.1007/s10994-022-06223-7}
+}
+@article{Paassen_McBroom_Jeffries_Koprinska_Yacef_2021,
+  title={{Mapping Python Programs to Vectors using Recursive Neural Encodings}},
+  volume={13},
+  url={https://jedm.educationaldatamining.org/index.php/JEDM/article/view/499},
+  DOI={10.5281/zenodo.5634224},
+  abstractNote={&amp;lt;p&amp;gt;Educational data mining involves the application of data mining techniques to student activity. However, in the context of computer programming, many data mining techniques can not be applied because they require vector-shaped input, whereas computer programs have the form of syntax trees. In this paper, we present ast2vec, a neural network that maps Python syntax trees to vectors and back, thereby enabling about a hundred data mining techniques that were previously not applicable. Ast2vec has been trained on almost half a million programs of novice programmers and is designed to be applied across learning tasks without re-training, meaning that users can apply it without any need for deep learning. We demonstrate the generality of ast2vec in three settings. First, we provide example analyses using ast2vec on a classroom-sized dataset, involving two novel techniques, namely progress-variance projection for visualization and a dynamical systems analysis for prediction. In these examples, we also explain how ast2vec can be utilized for educational decisions. Second, we consider the ability of ast2vec to recover the original syntax tree from its vector representation on the training data and two other large-scale programming datasets. Finally, we evaluate the predictive capability of a linear dynamical system on top of ast2vec, obtaining similar results to techniques that work directly on syntax trees while being much faster (constant- instead of linear-time processing). We hope ast2vec can augment the educational data mining toolkit by making analyses of computer programs easier, richer, and more efficient.&amp;lt;/p&amp;gt;},
+  number={3},
+  journal={{Journal of Educational Data Mining}},
+  author={Paassen, Benjamin and McBroom, Jessica and Jeffries, Bryn and Koprinska, Irena and Yacef, Kalina},
+  year={2021},
+  month={Oct.},
+  pages={1–35}
+}
+@article{harris2020array,
+ title         = {{Array programming with NumPy}},
+ author        = {Charles R. Harris and K. Jarrod Millman and St{\'{e}}fan J.
+                 van der Walt and Ralf Gommers and Pauli Virtanen and David
+                 Cournapeau and Eric Wieser and Julian Taylor and Sebastian
+                 Berg and Nathaniel J. Smith and Robert Kern and Matti Picus
+                 and Stephan Hoyer and Marten H. van Kerkwijk and Matthew
+                 Brett and Allan Haldane and Jaime Fern{\'{a}}ndez del
+                 R{\'{i}}o and Mark Wiebe and Pearu Peterson and Pierre
+                 G{\'{e}}rard-Marchant and Kevin Sheppard and Tyler Reddy and
+                 Warren Weckesser and Hameer Abbasi and Christoph Gohlke and
+                 Travis E. Oliphant},
+ year          = {2020},
+ month         = sep,
+ journal       = {Nature},
+ volume        = {585},
+ number        = {7825},
+ pages         = {357--362},
+ doi           = {10.1038/s41586-020-2649-2},
+ publisher     = {Springer Science and Business Media {LLC}},
+}
+@inproceedings{mockju-ecai20,
+  author    = {Miroslav Ols{\'{a}}k and Cezary Kaliszyk and
+               Josef Urban},
+  editor    = {Giuseppe De Giacomo and
+               Alejandro Catal{\'{a}} and
+               Bistra Dilkina and
+               Michela Milano and
+               Sen{\'{e}}n Barro and
+               Alberto Bugar{\'{\i}}n and
+               J{\'{e}}r{\^{o}}me Lang},
+  title     = {{Property Invariant Embedding for Automated Reasoning}},
+  booktitle = {{ECAI 2020 - 24th European Conference on Artificial
+Intelligence}},
+  series    = {Frontiers in Artificial Intelligence and Applications},
+  volume    = {325},
+  pages     = {1395--1402},
+  publisher = {{IOS Press}},
+  year      = {2020},
+  doi       = {10.3233/FAIA200244},
+}
+@InProceedings{pmlr-v28-agrawal13,
+  title = 	 {{Thompson Sampling for Contextual Bandits with Linear Payoffs}},
+  author = 	 {Agrawal, Shipra and Goyal, Navin},
+  booktitle = 	 {{Proceedings of the 30th International Conference on Machine Learning}},
+  pages = 	 {127--135},
+  year = 	 {2013},
+  editor = 	 {Dasgupta, Sanjoy and McAllester, David},
+  volume = 	 {28},
+  number =       {3},
+  series = 	 {Proceedings of Machine Learning Research},
+  address = 	 {Atlanta, Georgia, USA},
+  month = 	 {17--19 Jun},
+  publisher =    {PMLR},
+  pdf = 	 {http://proceedings.mlr.press/v28/agrawal13.pdf},
+  url = 	 {https://proceedings.mlr.press/v28/agrawal13.html},
+  abstract = 	 {Thompson Sampling is one of the oldest heuristics for multi-armed bandit problems. It is a randomized algorithm based on Bayesian ideas, and has recently generated significant interest after several studies demonstrated it to have better empirical performance compared to the state of the art methods. However, many questions regarding its theoretical performance remained open. In this paper, we design and analyze Thompson Sampling algorithm for the stochastic contextual multi-armed bandit problem with linear payoff functions, when the contexts are provided by an adaptive adversary. This is among the most important and widely studied version of the contextual bandits problem. We prove a high probability regret bound of \tildeO(\fracd\sqrtε\sqrtT^1+ε) in time T for any ε∈(0,1), where d is the dimension of each context vector and εis a parameter used by the algorithm. Our results provide the first theoretical guarantees for the contextual version of Thompson Sampling, and are close to the lower bound of Ω(\sqrtdT) for this problem. This essentially solves the COLT open problem of Chapelle and Li [COLT 2012] regarding regret bounds for Thompson Sampling for contextual bandits problem with linear payoff functions.     Our version of Thompson sampling uses Gaussian prior and Gaussian likelihood function. Our novel martingale-based analysis techniques also allow easy extensions to the use of other distributions, satisfying certain general conditions.   }
+}
+@InProceedings{10.1007/978-3-031-10769-6_38,
+author="Suda, Martin",
+editor="Blanchette, Jasmin
+and Kov{\'a}cs, Laura
+and Pattinson, Dirk",
+title={{Vampire Getting Noisy: Will Random Bits Help Conquer Chaos? (System Description)}},
+booktitle={{Automated Reasoning}},
+year="2022",
+publisher="Springer International Publishing",
+address="Cham",
+pages="659--667",
+abstract="Treating a saturation-based automatic theorem prover (ATP) as a Las Vegas randomized algorithm is a way to illuminate the chaotic nature of proof search and make it amenable to study by probabilistic tools. On a series of experiments with the ATP Vampire, the paper showcases some implications of this perspective for prover evaluation.",
+isbn="978-3-031-10769-6",
+doi={10.1007/978-3-031-10769-6_38}
+}
+@article{DBLP:journals/corr/abs-2302-13971,
+  author       = {Hugo Touvron and
+                  Thibaut Lavril and
+                  Gautier Izacard and
+                  Xavier Martinet and
+                  Marie{-}Anne Lachaux and
+                  Timoth{\'{e}}e Lacroix and
+                  Baptiste Rozi{\`{e}}re and
+                  Naman Goyal and
+                  Eric Hambro and
+                  Faisal Azhar and
+                  Aur{\'{e}}lien Rodriguez and
+                  Armand Joulin and
+                  Edouard Grave and
+                  Guillaume Lample},
+  title        = {{LLaMA: Open and Efficient Foundation Language Models}},
+  journal      = {{arXiv}},
+  year         = {2023},
+  doi          = {10.48550/arXiv.2302.13971},
+  eprinttype    = {arXiv},
+  eprint       = {2302.13971},
+  timestamp    = {Tue, 28 Feb 2023 14:02:05 +0100},
+  biburl       = {https://dblp.org/rec/journals/corr/abs-2302-13971.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+@InProceedings{pmlr-v100-yu20a,
+  title = 	 {{Meta-World: A Benchmark and Evaluation for Multi-Task and Meta Reinforcement Learning}},
+  author =       {Yu, Tianhe and Quillen, Deirdre and He, Zhanpeng and Julian, Ryan and Hausman, Karol and Finn, Chelsea and Levine, Sergey},
+  booktitle = 	 {{Proceedings of the Conference on Robot Learning}},
+  pages = 	 {1094--1100},
+  year = 	 {2020},
+  editor = 	 {Kaelbling, Leslie Pack and Kragic, Danica and Sugiura, Komei},
+  volume = 	 {100},
+  series = 	 {Proceedings of Machine Learning Research},
+  month = 	 {30 Oct--01 Nov},
+  publisher =    {PMLR},
+  pdf = 	 {http://proceedings.mlr.press/v100/yu20a/yu20a.pdf},
+  url = 	 {https://proceedings.mlr.press/v100/yu20a.html},
+  abstract = 	 {Meta-reinforcement learning algorithms can enable robots to acquire new skills much more quickly, by leveraging prior experience to learn how to learn. However, much of the current research on meta-reinforcement learning focuses on task distributions that are very narrow. For example, a commonly used meta-reinforcement learning benchmark uses different running velocities for a simulated robot as different tasks. When policies are meta-trained on such narrow task distributions, they cannot possibly generalize to more quickly acquire entirely new tasks. Therefore, if the aim of these methods is enable faster acquisition of entirely new behaviors, we must evaluate them on task distributions that are sufficiently broad to enable generalization to new behaviors. In this paper, we propose an open-source simulated benchmark for meta-reinforcement learning and multitask learning consisting of 50 distinct robotic manipulation tasks. Our aim is to make it possible to develop algorithms that generalize to accelerate the acquisition of entirely new, held-out tasks. We evaluate 6 state-of-the-art meta-reinforcement learning and multi-task learning algorithms on these tasks. Surprisingly, while each task and its variations (e.g., with different object positions) can be learned with reasonable success, these algorithms struggle to learn with multiple tasks at the same time, even with as few as ten distinct training tasks. Our analysis and open-source environments pave the way for future research in multi-task learning and meta-learning that can enable meaningful generalization, thereby unlocking the full potential of these methods.1.}
+}
+@misc{nlu-with-tensorrt-bert,
+author={Purnendu Mukherjee and Eddie Weill and Rohit Taneja and Davide Onofrio and Young-Jun Ko and Siddharth Sharma},
+title={{Real-Time Natural Language Understanding with BERT Using TensorRT}},
+url={https://developer.nvidia.com/blog/nlu-with-tensorrt-bert/},
+month={aug},
+year={2019}
+}
+@misc{nvidia-blog,
+author={Vinh Nguyen and Nikhil Srihari and Parth Chadha and Charles Chen and Joohoon Lee and Jay Rodge},
+title={{Optimizing T5 and GPT-2 for Real-Time Inference with NVIDIA TensorRT}},
+url={https://developer.nvidia.com/blog/optimizing-t5-and-gpt-2-for-real-time-inference-with-tensorrt/},
+month={dec},
+year={2021}
+}
+@misc{torchserve,
+author={{PyTorch Serve Contributors}},
+title={{TorchServe}},
+url={https://github.com/pytorch/serve},
+month={feb},
+year={2023}
+}
+@misc{grpc,
+author={{gRPC authors}},
+title={{gRPC – An RPC library and framework}},
+url={https://github.com/grpc/grpc},
+month={apr},
+year={2023}
+}
+@misc{memcached,
+author={{Danga Interactive, Inc.}},
+title={{Memcached}},
+url={https://github.com/memcached/memcached},
+month={mar},
+year={2023}
+}
+@inproceedings{NEURIPS2019_bdbca288,
+ author = {Paszke, Adam and Gross, Sam and Massa, Francisco and Lerer, Adam and Bradbury, James and Chanan, Gregory and Killeen, Trevor and Lin, Zeming and Gimelshein, Natalia and Antiga, Luca and Desmaison, Alban and Kopf, Andreas and Yang, Edward and DeVito, Zachary and Raison, Martin and Tejani, Alykhan and Chilamkurthy, Sasank and Steiner, Benoit and Fang, Lu and Bai, Junjie and Chintala, Soumith},
+ booktitle = {{Advances in Neural Information Processing Systems}},
+ editor = {H. Wallach and H. Larochelle and A. Beygelzimer and F. d\textquotesingle Alch\'{e}-Buc and E. Fox and R. Garnett},
+ pages = {},
+ publisher = {{Curran Associates, Inc.}},
+ title = {{PyTorch: An Imperative Style, High-Performance Deep Learning Library}},
+ url = {https://proceedings.neurips.cc/paper_files/paper/2019/file/bdbca288fee7f92f2bfa9f7012727740-Paper.pdf},
+ volume = {32},
+ year = {2019}
+}
+@misc{tensorflow2015-whitepaper,
+title={{TensorFlow: Large-Scale Machine Learning on Heterogeneous Systems}},
+url={https://www.tensorflow.org/},
+note={Software available from tensorflow.org},
+author={
+    Mart\'{i}n~Abadi and
+    Ashish~Agarwal and
+    Paul~Barham and
+    Eugene~Brevdo and
+    Zhifeng~Chen and
+    Craig~Citro and
+    Greg~S.~Corrado and
+    Andy~Davis and
+    Jeffrey~Dean and
+    Matthieu~Devin and
+    Sanjay~Ghemawat and
+    Ian~Goodfellow and
+    Andrew~Harp and
+    Geoffrey~Irving and
+    Michael~Isard and
+    Yangqing Jia and
+    Rafal~Jozefowicz and
+    Lukasz~Kaiser and
+    Manjunath~Kudlur and
+    Josh~Levenberg and
+    Dandelion~Man\'{e} and
+    Rajat~Monga and
+    Sherry~Moore and
+    Derek~Murray and
+    Chris~Olah and
+    Mike~Schuster and
+    Jonathon~Shlens and
+    Benoit~Steiner and
+    Ilya~Sutskever and
+    Kunal~Talwar and
+    Paul~Tucker and
+    Vincent~Vanhoucke and
+    Vijay~Vasudevan and
+    Fernanda~Vi\'{e}gas and
+    Oriol~Vinyals and
+    Pete~Warden and
+    Martin~Wattenberg and
+    Martin~Wicke and
+    Yuan~Yu and
+    Xiaoqiang~Zheng},
+  year={2015},
+}
+@article{DBLP:journals/aicom/Sutcliffe21,
+  author    = {Geoff Sutcliffe},
+  title     = {{The 10th IJCAR automated theorem proving system competition - CASC-J10}},
+  journal   = {{AI Communications}},
+  volume    = {34},
+  number    = {2},
+  pages     = {163--177},
+  year      = {2021},
+  doi       = {10.3233/AIC-201566},
+  timestamp = {Wed, 15 Sep 2021 16:45:16 +0200},
+  biburl    = {https://dblp.org/rec/journals/aicom/Sutcliffe21.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+@inproceedings{LPAR2023:Guiding_an_Instantiation_Prover,
+  author    = {Karel Chvalovsk\'y and Konstantin Korovin and Jelle Piepenbrock and Josef Urban},
+  title     = {{Guiding an Instantiation Prover with Graph Neural Networks}},
+  booktitle = {{Proceedings of 24th International Conference on Logic for Programming, Artificial Intelligence and Reasoning}},
+  editor    = {Ruzica Piskac and Andrei Voronkov},
+  series    = {EPiC Series in Computing},
+  volume    = {94},
+  pages     = {112--123},
+  year      = {2023},
+  publisher = {EasyChair},
+  bibsource = {EasyChair, https://easychair.org},
+  issn      = {2398-7340},
+  url       = {https://easychair.org/publications/paper/5z94},
+  doi       = {10.29007/tp23}}
+@misc{towers_gymnasium_2023,
+        title = {Gymnasium},
+        abstract = {An API standard for single-agent reinforcement learning environments, with popular reference environments and related utilities (formerly Gym)},
+        urldate = {2023-07-08},
+        publisher = {Zenodo},
+        author = {Towers, Mark and Terry, Jordan K. and Kwiatkowski, Ariel and Balis, John U. and Cola, Gianluca de and Deleu, Tristan and Goulão, Manuel and Kallinteris, Andreas and KG, Arjun and Krimmel, Markus and Perez-Vicente, Rodrigo and Pierré, Andrea and Schulhoff, Sander and Tai, Jun Jet and Shen, Andrew Tan Jin and Younis, Omar G.},
+        month = mar,
+        year = {2023},
+        doi = {10.5281/zenodo.8127026},
+}
