@@ -183,8 +183,6 @@ class IProverEnv(SaturationEnv):
         options: Optional[Dict[str, Any]] = None,
     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
-        if self.iprover_process:
-            self.iprover_process.terminate()
         self._restart_relay_server()
         self.iprover_process = _iprover_start(
             self.relay_server.server_address[1],
