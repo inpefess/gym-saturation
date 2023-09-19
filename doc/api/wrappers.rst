@@ -21,8 +21,6 @@ Wrappers
 .. automodule:: gym_saturation.wrappers.ast2vec_wrapper
    :members:
    :special-members: __init__
-.. automodule:: gym_saturation.wrappers.age_weight_bandit
-   :members:
 .. automodule:: gym_saturation.wrappers.constant_parametric_actions
    :members:
 .. automodule:: gym_saturation.wrappers.duplicate_key_obs

@@ -91,7 +91,6 @@ tensorflow
 logdir
 DQN
 ppo
-AgeWeightBandit
 TimeLimit
 arxiv
 cgi
