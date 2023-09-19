@@ -22,11 +22,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 
-from gym_saturation.envs.saturation_env import (
-    MAX_CLAUSES,
-    REAL_OBS,
-    SaturationEnv,
-)
+from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
 from gym_saturation.vampire_wrapper import VampireWrapper
 
 
@@ -124,16 +120,14 @@ class VampireEnv(SaturationEnv):
         *,
         seed: Optional[int] = None,
         options: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:  # noqa: D102
+    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
         tptp_folder = os.path.join(
             os.path.dirname(self.get_task()), "..", ".."
         )
         vampire_response = self._vampire.start(self.get_task(), tptp_folder)
         self._parse_vampire_response(vampire_response)
-        return {
-            REAL_OBS: tuple(self.state.clauses),
-        }, {}
+        return tuple(self.state.clauses), {}
 
     def _do_deductions(self, action: np.int64) -> None:
         self._parse_vampire_response(

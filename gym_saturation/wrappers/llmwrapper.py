@@ -24,11 +24,11 @@ import numpy as np
 
 from gym_saturation.utils import tptp2python
 from gym_saturation.wrappers.parametric_actions_wrapper import (
-    ParamtericActionsWrapper,
+    ParametricActionsWrapper,
 )
 
 
-class LLMWrapper(ParamtericActionsWrapper):
+class LLMWrapper(ParametricActionsWrapper):
     """
     A Large Language Model wrapper for saturation provers.
 

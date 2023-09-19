@@ -23,11 +23,11 @@ import numpy as np
 
 from gym_saturation.utils import tptp2python
 from gym_saturation.wrappers.parametric_actions_wrapper import (
-    ParamtericActionsWrapper,
+    ParametricActionsWrapper,
 )
 
 
-class AST2VecWrapper(ParamtericActionsWrapper):
+class AST2VecWrapper(ParametricActionsWrapper):
     """
     An ast2vec wrappers for saturation provers.
 

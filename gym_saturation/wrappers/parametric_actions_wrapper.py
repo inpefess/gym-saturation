@@ -22,11 +22,11 @@ from typing import Any, Dict, Optional, Tuple
 import gymnasium as gym
 import numpy as np
 
-from gym_saturation.constants import PARAMETRIC_ACTIONS, REAL_OBS
+from gym_saturation.constants import PARAMETRIC_ACTIONS
 from gym_saturation.envs.saturation_env import SaturationEnv
 
 
-class ParamtericActionsWrapper(gym.Wrapper, ABC):
+class ParametricActionsWrapper(gym.Wrapper, ABC):
     """
     A parametric actions wrapper.
 
@@ -36,7 +36,7 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
     It defines the clauses as old if their order numbers are smaller than the
     previous step maximum.
 
-    >>> class ConstantClauseWeight(ParamtericActionsWrapper):
+    >>> class ConstantClauseWeight(ParametricActionsWrapper):
     ...     def clause_embedder(self, clause: Dict[str, Any]) -> np.ndarray:
     ...         return np.ones(
     ...             (self.observation_space[PARAMETRIC_ACTIONS].shape[1],)
@@ -111,11 +111,13 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
         :param options: options for compatibility
         """
         observation, info = self.env.reset(seed=seed, options=options)
-        info[REAL_OBS] = observation
+        info["real_obs"] = observation
         self.embedded_clauses_cnt = 0
         return self.observation(observation), info
 
-    def observation(self, observation: Dict[str, Any]) -> Dict[str, Any]:
+    def observation(
+        self, observation: Tuple[Dict[str, Any], ...]
+    ) -> Dict[str, Any]:
         """
         Return a modified observation.
 
@@ -124,7 +126,7 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
         """
         new_clauses = [
             clause["literals"]
-            for clause in observation[REAL_OBS][self.embedded_clauses_cnt :]
+            for clause in observation[self.embedded_clauses_cnt :]
         ]
         new_clauses_count = len(new_clauses)
         if (

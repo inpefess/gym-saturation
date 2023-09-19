@@ -25,7 +25,7 @@ import numpy as np
 from gymnasium import Env, spaces
 from gymnasium.spaces.text import alphanumeric
 
-from gym_saturation.constants import MOCK_TPTP_PROBLEM, REAL_OBS
+from gym_saturation.constants import MOCK_TPTP_PROBLEM
 from gym_saturation.proof_state import ProofState
 from gym_saturation.utils import pretty_print
 
@@ -38,7 +38,7 @@ LONG_TEXT_SPACE = spaces.Text(
 )
 
 
-class SaturationEnv(Env[Dict[str, Any], np.int64]):
+class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
     """
     Saturation algorithm in a reinforcement learning friendly way.
 
@@ -66,7 +66,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
     metadata = {"render_modes": ["ansi", "human"], "render_fps": 1}
     reward_range = (0, 1)
     action_space: spaces.Discrete
-    observation_space: spaces.Dict
+    observation_space: spaces.Sequence
 
     def __init__(
         self,
@@ -87,23 +87,17 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
             max_clauses=max_clauses,
         )
         self.action_space = spaces.Discrete(max_clauses)
-        self.observation_space = spaces.Dict(
-            {
-                REAL_OBS: spaces.Sequence(
-                    spaces.Dict(
-                        {
-                            "label": SHORT_TEXT_SPACE,
-                            "role": SHORT_TEXT_SPACE,
-                            "literals": LONG_TEXT_SPACE,
-                            "inference_rule": SHORT_TEXT_SPACE,
-                            "inference_parents": spaces.Sequence(
-                                SHORT_TEXT_SPACE
-                            ),
-                            "birth_step": spaces.Discrete(max_clauses),
-                        }
-                    )
-                ),
-            }
+        self.observation_space = spaces.Sequence(
+            spaces.Dict(
+                {
+                    "label": SHORT_TEXT_SPACE,
+                    "role": SHORT_TEXT_SPACE,
+                    "literals": LONG_TEXT_SPACE,
+                    "inference_rule": SHORT_TEXT_SPACE,
+                    "inference_parents": spaces.Sequence(SHORT_TEXT_SPACE),
+                    "birth_step": spaces.Discrete(max_clauses),
+                }
+            )
         )
         self._task = MOCK_TPTP_PROBLEM
         self.render_mode = self._check_render_mode(render_mode)
@@ -121,7 +115,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         *,
         seed: Optional[int] = None,
         options: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:  # noqa: D102
+    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
         random.seed(seed)
         self.state = ProofState(
@@ -130,9 +124,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
             step_number=0,
             max_clauses=self.state.max_clauses,
         )
-        return {
-            REAL_OBS: tuple(self.state.clauses),
-        }, {}
+        return tuple(self.state.clauses), {}
 
     @abstractmethod
     def _do_deductions(self, action: np.int64) -> None:
@@ -140,7 +132,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
 
     def step(
         self, action: np.int64
-    ) -> Tuple[Dict[str, Any], float, bool, bool, Dict[str, Any]]:
+    ) -> Tuple[Tuple[Dict[str, Any], ...], float, bool, bool, Dict[str, Any]]:
         # noqa: D301
         """
         Run one time-step of the environment's dynamics.
@@ -169,9 +161,7 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
             if self.state.truncated:
                 self.on_truncated()
         return (
-            {
-                REAL_OBS: tuple(self.state.clauses),
-            },
+            tuple(self.state.clauses),
             1.0 if self.state.terminated else 0.0,
             self.state.terminated,
             self.state.truncated,
