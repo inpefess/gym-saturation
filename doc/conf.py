@@ -24,7 +24,7 @@ import sys
 sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 project = "gym-saturation"
-version = "0.10.4"
+version = "0.10.5"
 copyright = "2021-2023, Boris Shminke"
 author = "Boris Shminke"
 # -- General configuration ---------------------------------------------------
