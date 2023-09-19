@@ -18,11 +18,8 @@ Logic Operations Utility Functions
 ===================================
 """
 from http.server import HTTPServer
-from itertools import chain
 from threading import Thread
-from typing import Any, Dict, Tuple
-
-from gym_saturation.constants import FALSEHOOD_SYMBOL
+from typing import Any, Dict
 
 
 def pretty_print(clause: Dict[str, Any]) -> str:
@@ -40,81 +37,6 @@ def pretty_print(clause: Dict[str, Any]) -> str:
         + "])"
     )
     return res + ")."
-
-
-class NoProofFoundError(Exception):
-    """Exception raised when proof is requested but not found yet."""
-
-
-def _flat_list(list_of_lists: Tuple[Tuple[Any, ...], ...]) -> Tuple[Any, ...]:
-    return tuple(set(chain(*list_of_lists)))
-
-
-def reduce_to_proof(
-    clauses: Tuple[Dict[str, Any], ...], goal: str = FALSEHOOD_SYMBOL
-) -> Tuple[Dict[str, Any], ...]:
-    """
-    Leave only clauses belonging to the refutation proof.
-
-    >>> one = {
-    ...     "literals": FALSEHOOD_SYMBOL, "label": "one",
-    ...     "inference_parents": ()
-    ... }
-    >>> reduce_to_proof((one, {"literals": FALSEHOOD_SYMBOL, "label": "two"}))
-    Traceback (most recent call last):
-     ...
-    gym_saturation.utils.NoProofFoundError
-    >>> state = (one, )
-    >>> reduce_to_proof(state) == state
-    True
-
-    :param clauses: a map of clause labels to clauses
-    :param goal: literals of a goal clause (``$false`` by default)
-    :returns: the reduced list of clauses
-    :raises NoProofFoundError: if there is no complete refutation proof
-        in a given proof state
-    """
-    empty_clauses = tuple(
-        clause for clause in clauses if clause["literals"] == goal
-    )
-    if len(empty_clauses) == 1:
-        reduced: Tuple[Dict[str, Any], ...] = ()
-        new_reduced: Tuple[Dict[str, Any], ...] = (empty_clauses[0],)
-        while len(new_reduced) > 0:
-            reduced += tuple(
-                clause for clause in new_reduced if clause not in reduced
-            )
-            new_reduced = tuple(
-                clause
-                for clause in clauses
-                if clause["label"]
-                in tuple(
-                    reversed(
-                        sorted(
-                            _flat_list(
-                                tuple(
-                                    clause["inference_parents"]
-                                    for clause in new_reduced
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-        return reduced
-    raise NoProofFoundError
-
-
-def get_tstp_proof(state: Tuple[Dict[str, Any], ...]) -> str:
-    """
-    Return TSTP proof (if found; raises an error otherwise).
-
-    :param state: tuple of clauses
-    :return: a TSTP formatted string
-    """
-    return "\n".join(
-        reversed([pretty_print(clause) for clause in reduce_to_proof(state)])
-    )
 
 
 def tptp2python(literals: str) -> str:
