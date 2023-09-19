@@ -101,7 +101,7 @@ One can use ``gym-saturation`` environments as any other Gymnasium environment:
 
 Or have a look at the basic `tutorial <https://gym-saturation.readthedocs.io/en/latest/auto_examples/plot_age_agent.html>`__.
   
-For a bit more comprehensive experiments, please navigate the documentation `page <https://gym-saturation.readthedocs.io/en/latest/tutorials/experiments.html>`__.
+For a bit more comprehensive experiments, please see `this project <https://github.com/inpefess/ray-prover>`__.
 
 More Documentation
 ==================
@@ -140,7 +140,7 @@ Please follow `the contribution guide <https://gym-saturation.readthedocs.io/en/
 How to Cite
 ============
 
-If you are writing a research paper and want to cite ``gym-saturation``, please use the following `DOI <https://doi.org/10.21105/joss.03849>`__.
+If you are writing a research paper and want to cite ``gym-saturation``, please use the following `DOI <https://doi.org/10.1007/978-3-031-43513-3_11>`__.
 
 .. |PyPI version| image:: https://badge.fury.io/py/gym-saturation.svg
    :target: https://badge.fury.io/py/gym-saturation
