@@ -32,7 +32,6 @@
    :caption: Tutorials
 
    auto_examples/index
-   tutorials/experiments
 
 .. toctree::
    :hidden:
