@@ -40,7 +40,7 @@ class VampireEnv(SaturationEnv):
 
     >>> from gymnasium.utils.env_checker import check_env
     >>> import gymnasium as gym
-    >>> env = gym.make("Vampire-v0", max_clauses=5).unwrapped
+    >>> env = gym.make("Vampire-v0").unwrapped
     >>> check_env(env)
     cnf(1, ...).
     ...

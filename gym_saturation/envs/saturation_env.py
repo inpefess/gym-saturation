@@ -164,7 +164,8 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         """
         if not (self.state.terminated or self.state.truncated):
             self.state.step_number += 1
-            self._do_deductions(action)
+            if action < len(self.state.clauses):
+                self._do_deductions(action)
             if self.state.truncated:
                 self.on_truncated()
         return (
