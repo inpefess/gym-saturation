@@ -57,8 +57,6 @@ setrecursionlimit
 provers
 PyRes
 github
-slurm
-Slurm
 wikipedia
 automodule
 vprover
