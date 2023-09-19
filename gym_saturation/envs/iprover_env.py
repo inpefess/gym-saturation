@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from gym_saturation.constants import ACTION_MASK, REAL_OBS
+from gym_saturation.constants import REAL_OBS
 from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
 from gym_saturation.relay_server import (
     QUERY_END_MESSAGE,
@@ -174,7 +174,6 @@ class IProverEnv(SaturationEnv):
                     else (),
                 }
             )
-            self.state.set_action_mask_by_label(label, 1.0)
 
     def reset(
         self,
@@ -193,7 +192,6 @@ class IProverEnv(SaturationEnv):
         self._parse_iprover_requests(data)
         return {
             REAL_OBS: tuple(self.state.clauses),
-            ACTION_MASK: self.state.action_mask,
         }, {}
 
     def _get_json_data(self) -> List[Dict[str, Any]]:

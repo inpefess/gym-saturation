@@ -25,7 +25,7 @@ import numpy as np
 from gymnasium import Env, spaces
 from gymnasium.spaces.text import alphanumeric
 
-from gym_saturation.constants import ACTION_MASK, MOCK_TPTP_PROBLEM, REAL_OBS
+from gym_saturation.constants import MOCK_TPTP_PROBLEM, REAL_OBS
 from gym_saturation.proof_state import ProofState
 from gym_saturation.utils import pretty_print
 
@@ -36,10 +36,6 @@ LONG_TEXT_SPACE = spaces.Text(
     4000,
     charset=ALPHANUMERIC_WITH_UNDERSCORE + "(), |~=!$",
 )
-
-
-class InvalidAction(Exception):
-    """Raised when step is called with invalid action."""
 
 
 class SaturationEnv(Env[Dict[str, Any], np.int64]):
@@ -87,8 +83,8 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         self.state = ProofState(
             clauses=[],
             clause_labels=[],
-            action_mask=np.zeros((max_clauses,), dtype=np.int8),
             step_number=-1,
+            max_clauses=max_clauses,
         )
         self.action_space = spaces.Discrete(max_clauses)
         self.observation_space = spaces.Dict(
@@ -107,7 +103,6 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
                         }
                     )
                 ),
-                ACTION_MASK: spaces.Box(0, 1, (max_clauses,), dtype=np.int8),
             }
         )
         self._task = MOCK_TPTP_PROBLEM
@@ -132,12 +127,11 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
         self.state = ProofState(
             clauses=[],
             clause_labels=[],
-            action_mask=np.zeros_like(self.state.action_mask),
             step_number=0,
+            max_clauses=self.state.max_clauses,
         )
         return {
             REAL_OBS: tuple(self.state.clauses),
-            ACTION_MASK: self.state.action_mask,
         }, {}
 
     @abstractmethod
@@ -169,17 +163,13 @@ class SaturationEnv(Env[Dict[str, Any], np.int64]):
             processed clause
         """
         if not (self.state.terminated or self.state.truncated):
-            if self.state.action_mask[action] == 0.0:
-                raise InvalidAction
             self.state.step_number += 1
             self._do_deductions(action)
-            self.state.action_mask[action] = 0.0
             if self.state.truncated:
                 self.on_truncated()
         return (
             {
                 REAL_OBS: tuple(self.state.clauses),
-                ACTION_MASK: self.state.action_mask,
             },
             1.0 if self.state.terminated else 0.0,
             self.state.terminated,

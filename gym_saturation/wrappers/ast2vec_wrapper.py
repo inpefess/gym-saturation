@@ -41,7 +41,7 @@ class AST2VecWrapper(ParamtericActionsWrapper):
     >>> wrapped_env = AST2VecWrapper(env, features_num=256)
     >>> observation, info = wrapped_env.reset()
     >>> observation.keys()
-    dict_keys(['action_mask', 'avail_actions'])
+    dict_keys(['avail_actions'])
     >>> from gym_saturation.wrappers.parametric_actions_wrapper import (
     ...     PARAMETRIC_ACTIONS)
     >>> observation[PARAMETRIC_ACTIONS].shape

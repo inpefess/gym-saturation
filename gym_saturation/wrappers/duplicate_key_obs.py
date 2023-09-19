@@ -26,15 +26,15 @@ class DuplicateKeyObsWrapper(gym.ObservationWrapper):
     Adding a key duplicating an existing one in dictionary observations.
 
     >>> from gym_saturation.envs.vampire_env import VampireEnv
-    >>> from gym_saturation.envs.saturation_env import ACTION_MASK
+    >>> from gym_saturation.envs.saturation_env import REAL_OBS
     >>> env = DuplicateKeyObsWrapper(
     ...     VampireEnv(),
-    ...     key_to_duplicate=ACTION_MASK,
+    ...     key_to_duplicate=REAL_OBS,
     ...     new_key="test"
     ... )
     >>> obs, _ = env.reset()
     >>> import numpy as np
-    >>> np.array_equal(obs["test"], obs[ACTION_MASK])
+    >>> np.array_equal(obs["test"], obs[REAL_OBS])
     True
     """
 

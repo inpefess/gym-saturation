@@ -23,7 +23,6 @@ from typing import Any, Dict, Optional, Tuple
 import numpy as np
 
 from gym_saturation.envs.saturation_env import (
-    ACTION_MASK,
     MAX_CLAUSES,
     REAL_OBS,
     SaturationEnv,
@@ -109,15 +108,13 @@ class VampireEnv(SaturationEnv):
                 self.state.add_clause(
                     self._parse_vampire_clause(clause_label, clause_text)
                 )
-            elif response_type in {
+            elif response_type not in {
                 "active",
                 "forward reduce",
                 "backward reduce",
+                "passive",
+                "new propositional",
             }:
-                self.state.set_action_mask_by_label(clause_label, 0.0)
-            elif response_type == "passive":
-                self.state.set_action_mask_by_label(clause_label, 1.0)
-            elif response_type != "new propositional":
                 raise ValueError("Unexpected response type: ", response_type)
 
     def reset(
@@ -134,7 +131,6 @@ class VampireEnv(SaturationEnv):
         self._parse_vampire_response(vampire_response)
         return {
             REAL_OBS: tuple(self.state.clauses),
-            ACTION_MASK: self.state.action_mask,
         }, {}
 
     def _do_deductions(self, action: np.int64) -> None:

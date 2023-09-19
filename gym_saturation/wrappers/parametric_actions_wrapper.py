@@ -22,7 +22,7 @@ from typing import Any, Dict, Optional, Tuple
 import gymnasium as gym
 import numpy as np
 
-from gym_saturation.constants import ACTION_MASK, PARAMETRIC_ACTIONS, REAL_OBS
+from gym_saturation.constants import PARAMETRIC_ACTIONS, REAL_OBS
 from gym_saturation.envs.saturation_env import SaturationEnv
 
 
@@ -45,7 +45,7 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
     >>> wrapped_env = ConstantClauseWeight(env, embedding_dim=1)
     >>> observation, info = wrapped_env.reset()
     >>> observation.keys()
-    dict_keys(['action_mask', 'avail_actions'])
+    dict_keys(['avail_actions'])
     >>> info.keys()
     dict_keys(['real_obs'])
     >>> observation[PARAMETRIC_ACTIONS]
@@ -82,18 +82,16 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
         """Initialise all the things."""
         super().__init__(env)
         self.env: SaturationEnv = env  # type: ignore
-        action_mask = self.env.observation_space[ACTION_MASK]
         parametric_actions = gym.spaces.Box(
             low=-np.infty,
             high=np.infty,
             shape=(
-                action_mask.shape[0],  # type: ignore
+                int(env.action_space.n),
                 embedding_dim,
             ),
         )
         self.observation_space = gym.spaces.Dict(
             {
-                ACTION_MASK: env.observation_space[ACTION_MASK],
                 PARAMETRIC_ACTIONS: parametric_actions,
             }
         )
@@ -141,7 +139,6 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
             ] = np.array(list(map(self.clause_embedder, new_clauses)))
             self.embedded_clauses_cnt += new_clauses_count
         return {
-            ACTION_MASK: observation[ACTION_MASK],
             PARAMETRIC_ACTIONS: self.clause_embeddings,
         }
 
