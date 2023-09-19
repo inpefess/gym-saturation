@@ -65,7 +65,11 @@ class VampireWrapper:
                 result_type, result_body = line[5:].split(": ")
                 clause_label, clause = result_body.split(". ")
                 result += ((result_type, clause_label, clause),)
-        if result:
+        if (
+            result
+            or "User error: No clause in Passive has id"
+            in self.proc.before.decode("utf-8")
+        ):
             return result
         raise ValueError(
             self.problem_filename, self.proc.before.decode("utf-8")

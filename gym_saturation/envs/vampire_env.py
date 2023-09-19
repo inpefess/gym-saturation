@@ -40,24 +40,26 @@ class VampireEnv(SaturationEnv):
 
     >>> from gymnasium.utils.env_checker import check_env
     >>> import gymnasium as gym
-    >>> env = gym.make(
-    ...     "Vampire-v0",
-    ...     max_clauses=5
-    ... ).unwrapped
+    >>> env = gym.make("Vampire-v0", max_clauses=5).unwrapped
     >>> check_env(env)
     cnf(1, ...).
     ...
     cnf(5, ...).
 
-    we can't repeat actions
+    repeating actions change nothing
 
-    >>> env = gym.make("Vampire-v0")
+    >>> env = gym.make("Vampire-v0", max_clauses=8)
     >>> _ = env.reset()
-    >>> _ = env.step(0)
-    >>> env.step(0)
-    Traceback (most recent call last):
-     ...
-    gym_saturation.envs.saturation_env.InvalidAction
+    >>> one = env.step(0)
+    >>> two = env.step(0)
+    >>> one == two
+    True
+
+    episode is truncated if we have more than ``max_clauses`` clauses
+
+    >>> _, _, _, truncated, _ = env.step(1)
+    >>> truncated
+    True
 
     sometimes Vampire can solve a problem during pre-processing
 
