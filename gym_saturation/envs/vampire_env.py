@@ -22,6 +22,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 
+from gym_saturation.constants import FALSEHOOD_SYMBOL
 from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
 from gym_saturation.vampire_wrapper import VampireWrapper
 
@@ -44,7 +45,7 @@ class VampireEnv(SaturationEnv):
 
     repeating actions change nothing
 
-    >>> env = gym.make("Vampire-v0", max_clauses=8)
+    >>> env = gym.make("Vampire-v0", max_clauses=5)
     >>> _ = env.reset()
     >>> one = env.step(0)
     >>> two = env.step(0)
@@ -54,6 +55,7 @@ class VampireEnv(SaturationEnv):
     episode is truncated if we have more than ``max_clauses`` clauses
 
     >>> _, _, _, truncated, _ = env.step(1)
+    >>> _, _, _, truncated, _ = env.step(2)
     >>> truncated
     True
 
@@ -102,7 +104,7 @@ class VampireEnv(SaturationEnv):
         self, vampire_response: Tuple[Tuple[str, str, str], ...]
     ) -> None:
         for response_type, clause_label, clause_text in vampire_response:
-            if response_type in {"new", "final", "input", "fn def discovered"}:
+            if response_type == "passive" or FALSEHOOD_SYMBOL in clause_text:
                 self.state.add_clause(
                     self._parse_vampire_clause(clause_label, clause_text)
                 )
@@ -110,8 +112,11 @@ class VampireEnv(SaturationEnv):
                 "active",
                 "forward reduce",
                 "backward reduce",
-                "passive",
                 "new propositional",
+                "new",
+                "final",
+                "input",
+                "fn def discovered",
             }:
                 raise ValueError("Unexpected response type: ", response_type)
 

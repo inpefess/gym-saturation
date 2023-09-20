@@ -67,10 +67,10 @@ class ParametricActionsWrapper(gym.Wrapper, ABC):
            [1.],
            [1.],
            [1.],
-           [1.],
-           [1.],
-           [1.],
-           [1.],
+           [0.],
+           [0.],
+           [0.],
+           [0.],
            [0.]])
     """
 
