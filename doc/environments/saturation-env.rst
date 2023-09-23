@@ -60,12 +60,12 @@ The given clause (or saturation) algorithm is the basis of many contemporary pro
     processed_clauses: list[Clause] = []
     while EMPTY_CLAUSE not in unprocessed_clauses and unprocessed_clauses:
         given_clause: Clause = select_given_clause(unprocessed_clauses)
+        processed_clauses.append(given_clause)
         new_clauses: list[Clause] = apply_inference_rules(
             given_clause, processed_clauses
         )
         unprocessed_clauses.extend(new_clauses)
         unprocessed_clauses.remove(given_clause)
-        processed_clauses.append(given_clause)
 
 ``get_preprocessed_theorem_statement`` corresponds to the environment reset, and typically includes parsing, `Skolemization <https://en.wikipedia.org/wiki/Skolem_normal_form>`__, transformation to `conjunctive normal form <https://en.wikipedia.org/wiki/Conjunctive_normal_form>`__ among other things.
 
@@ -109,7 +109,8 @@ Reward is ``1.0`` after a step iff the saturation algorithm terminated at this s
 Episode End
 ************
 
-* Termination means the saturation algorithm ended with refutation found or satisfiability established. * Truncation happens if the number of clauses in the state exceeds ``action_space.n``.
+* Termination means the saturation algorithm ended with refutation found or satisfiability established.
+* Truncation happens if the number of clauses in the state exceeds ``action_space.n``.
 
 Information
 ************
