@@ -105,8 +105,8 @@ class VampireEnv(SaturationEnv):
     ) -> None:
         for response_type, clause_label, clause_text in vampire_response:
             if response_type == "passive" or FALSEHOOD_SYMBOL in clause_text:
-                self.state.add_clause(
-                    self._parse_vampire_clause(clause_label, clause_text)
+                self.state.clauses[clause_label] = self._parse_vampire_clause(
+                    clause_label, clause_text
                 )
             elif response_type not in {
                 "active",
@@ -132,11 +132,13 @@ class VampireEnv(SaturationEnv):
         )
         vampire_response = self._vampire.start(self.get_task(), tptp_folder)
         self._parse_vampire_response(vampire_response)
-        return tuple(self.state.clauses), {}
+        return tuple(self.state.clauses.values()), {}
 
     def _do_deductions(self, action: np.int64) -> None:
         self._parse_vampire_response(
-            self._vampire.pick_a_clause(self.state.clause_labels[action])
+            self._vampire.pick_a_clause(
+                list(self.state.clauses.items())[action][0]
+            )
         )
 
     def _parse_vampire_clause(

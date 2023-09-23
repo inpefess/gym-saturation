@@ -18,7 +18,7 @@ Proof State
 ============
 """
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from gym_saturation.constants import FALSEHOOD_SYMBOL
 
@@ -28,26 +28,14 @@ class ProofState:
     """
     An object to store all relevant info about a saturation prover state.
 
-    :param clauses: clauses (both processed and not) for access by index
-    :param clause_labels: string labels (another way to address clauses)
+    :param clauses: passive clauses
     :param step_number: current step number. ``-1`` before reset, ``0`` after
     :param max_clauses: maximal possible number of clauses in the proof state
     """
 
-    clauses: List[Dict[str, Any]]
-    clause_labels: List[str]
+    clauses: Dict[str, Dict[str, Any]]
     step_number: int
     max_clauses: int
-
-    def add_clause(self, clause: Dict[str, Any]) -> None:
-        """
-        Add clause and its label to the state.
-
-        :param clause: a clause to add (together with its label)
-        """
-        if clause["label"] not in self.clause_labels:
-            self.clauses.append(clause)
-            self.clause_labels.append(clause["label"])
 
     @property
     def terminated(self) -> bool:
@@ -55,7 +43,7 @@ class ProofState:
         return (
             max(
                 clause["literals"] == FALSEHOOD_SYMBOL
-                for clause in self.clauses
+                for clause in self.clauses.values()
             )
         ) and not self.truncated
 

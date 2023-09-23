@@ -161,18 +161,16 @@ class IProverEnv(SaturationEnv):
                     raw_clause,
                 )[0]
                 inference_rule, inference_parents = "input", None
-            self.state.add_clause(
-                {
-                    "literals": literals,
-                    "label": label,
-                    "role": "lemma",
-                    "birth_step": dict_clause["clause_features"]["born"] - 1,
-                    "inference_rule": inference_rule,
-                    "inference_parents": tuple(inference_parents.split(","))
-                    if inference_parents is not None
-                    else (),
-                }
-            )
+            self.state.clauses[label] = {
+                "literals": literals,
+                "label": label,
+                "role": "lemma",
+                "birth_step": dict_clause["clause_features"]["born"] - 1,
+                "inference_rule": inference_rule,
+                "inference_parents": tuple(inference_parents.split(","))
+                if inference_parents is not None
+                else (),
+            }
 
     def reset(
         self,
@@ -189,7 +187,7 @@ class IProverEnv(SaturationEnv):
         )
         data = self._get_json_data()
         self._parse_iprover_requests(data)
-        return tuple(self.state.clauses), {}
+        return tuple(self.state.clauses.values()), {}
 
     def _get_json_data(self) -> List[Dict[str, Any]]:
         json_data = [{"tag": "None"}]
@@ -210,10 +208,11 @@ class IProverEnv(SaturationEnv):
                 self._parse_batch_clauses(iprover_request["clauses"])
 
     def _do_deductions(self, action: np.int64) -> None:
+        given_clause_label = list(self.state.clauses.items())[action][0]
         iprover_scores_message = {
             "tag": "given_clause_res",
             "passive_is_empty": False,
-            "given_clause": int(self.state.clause_labels[action][2:]),
+            "given_clause": int(given_clause_label[2:]),
         }
         relayed_scores_message = bytes(
             json.dumps({"tag": "server_queries_end"})

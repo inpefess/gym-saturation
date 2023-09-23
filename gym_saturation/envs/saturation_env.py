@@ -81,8 +81,7 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         """
         super().__init__()
         self.state = ProofState(
-            clauses=[],
-            clause_labels=[],
+            clauses={},
             step_number=-1,
             max_clauses=max_clauses,
         )
@@ -119,12 +118,11 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         super().reset(seed=seed)
         random.seed(seed)
         self.state = ProofState(
-            clauses=[],
-            clause_labels=[],
+            clauses={},
             step_number=0,
             max_clauses=self.state.max_clauses,
         )
-        return tuple(self.state.clauses), {}
+        return tuple(self.state.clauses.values()), {}
 
     @abstractmethod
     def _do_deductions(self, action: np.int64) -> None:
@@ -158,10 +156,10 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
             self.state.step_number += 1
             if action < len(self.state.clauses):
                 self._do_deductions(action)
-            if self.state.truncated:
-                self.on_truncated()
+        if self.state.truncated:
+            self.on_truncated()
         return (
-            tuple(self.state.clauses),
+            tuple(self.state.clauses.values()),
             1.0 if self.state.terminated else 0.0,
             self.state.terminated,
             self.state.truncated,
@@ -173,7 +171,7 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         tptp_string = "\n".join(
             map(
                 pretty_print,
-                self.state.clauses,
+                self.state.clauses.values(),
             )
         )
         if self.render_mode == "ansi":
