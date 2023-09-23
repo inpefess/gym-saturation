@@ -34,6 +34,7 @@ author = "Boris Shminke"
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.coverage",
     # uncomment to rebuild examples
     # "sphinx_gallery.gen_gallery",
 ]
@@ -52,8 +53,9 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 #
 html_theme = "furo"
 html_title = "gym-saturation documentation"
-
 sphinx_gallery_conf = {
     "download_all_examples": False,
     "run_stale_examples": True,
+    "image_scrapers": (),
+    "reset_modules": (),
 }

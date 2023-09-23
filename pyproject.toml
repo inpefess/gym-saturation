@@ -44,8 +44,6 @@ flake8 = "*"
 toml = "*"
 furo = "*"
 sphinx-gallery = "*"
-pillow = "*"
-matplotlib = "*"
 jedi = "*"
 bandit = {version = "*", extras = ["toml"]}
 pyupgrade = "*"

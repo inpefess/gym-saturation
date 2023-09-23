@@ -30,9 +30,9 @@ print(info)
 # %%
 # observation is a tuple of JSON representations of logic clauses
 
-import pprint
+from pprint import pprint
 
-pprint.pp(observation)
+pprint(observation)
 
 # %%
 # We can render the environment state in the TPTP format.
@@ -61,7 +61,7 @@ print(terminated, truncated, reward)
 # It means we arrived at a contradiction (``$false``) which proves the lemma.
 # Notice the ``birth_step`` number of a contradiction, it shows how many steps
 # we did to find proof.
-pprint.pp(observation[-1])
+pprint(observation[-1])
 
 # %%
 # Age agent for iProver
@@ -87,4 +87,4 @@ env.close()
 # We still arrive at contradiction but it takes a different number of steps
 
 print(terminated, truncated, reward)
-pprint.pp(observation[-1])
+pprint(observation[-1])

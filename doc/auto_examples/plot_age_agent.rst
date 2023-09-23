@@ -113,9 +113,9 @@ observation is a tuple of JSON representations of logic clauses
 .. code-block:: default
 
 
-    import pprint
+    from pprint import pprint
 
-    pprint.pp(observation)
+    pprint(observation)
 
 
 
@@ -125,36 +125,36 @@ observation is a tuple of JSON representations of logic clauses
 
  .. code-block:: none
 
-    ({'literals': 'mult(X0,mult(X1,X2)) = mult(mult(X0,X1),X2)',
+    ({'birth_step': 0,
+      'inference_parents': (),
+      'inference_rule': 'input',
       'label': '1',
-      'role': 'lemma',
-      'inference_rule': 'input',
+      'literals': 'mult(X0,mult(X1,X2)) = mult(mult(X0,X1),X2)',
+      'role': 'lemma'},
+     {'birth_step': 0,
       'inference_parents': (),
-      'birth_step': 0},
-     {'literals': 'mult(e,X0) = X0',
+      'inference_rule': 'input',
       'label': '2',
-      'role': 'lemma',
-      'inference_rule': 'input',
+      'literals': 'mult(e,X0) = X0',
+      'role': 'lemma'},
+     {'birth_step': 0,
       'inference_parents': (),
-      'birth_step': 0},
-     {'literals': 'e = mult(inv(X0),X0)',
+      'inference_rule': 'input',
       'label': '3',
-      'role': 'lemma',
-      'inference_rule': 'input',
+      'literals': 'e = mult(inv(X0),X0)',
+      'role': 'lemma'},
+     {'birth_step': 0,
       'inference_parents': (),
-      'birth_step': 0},
-     {'literals': 'a = mult(a,a)',
+      'inference_rule': 'input',
       'label': '4',
-      'role': 'lemma',
-      'inference_rule': 'input',
+      'literals': 'a = mult(a,a)',
+      'role': 'lemma'},
+     {'birth_step': 0,
       'inference_parents': (),
-      'birth_step': 0},
-     {'literals': 'e != a',
+      'inference_rule': 'input',
       'label': '5',
-      'role': 'lemma',
-      'inference_rule': 'input',
-      'inference_parents': (),
-      'birth_step': 0})
+      'literals': 'e != a',
+      'role': 'lemma'})
 
 
 
@@ -247,7 +247,7 @@ we did to find proof.
 
 .. code-block:: default
 
-    pprint.pp(observation[-1])
+    pprint(observation[-1])
 
 
 
@@ -257,12 +257,12 @@ we did to find proof.
 
  .. code-block:: none
 
-    {'literals': '$false',
-     'label': '18',
-     'role': 'lemma',
-     'inference_rule': 'subsumption_resolution',
+    {'birth_step': 1077,
      'inference_parents': ('17', '5'),
-     'birth_step': 1911}
+     'inference_rule': 'subsumption_resolution',
+     'label': '18',
+     'literals': '$false',
+     'role': 'lemma'}
 
 
 
@@ -314,7 +314,7 @@ order they appear
 
  .. code-block:: none
 
-    Loop <_UnixSelectorEventLoop running=False closed=True debug=False> that handles pid 24572 is closed
+    Loop <_UnixSelectorEventLoop running=False closed=True debug=False> that handles pid 6081 is closed
 
 
 
@@ -329,7 +329,7 @@ We still arrive at contradiction but it takes a different number of steps
 
 
     print(terminated, truncated, reward)
-    pprint.pp(observation[-1])
+    pprint(observation[-1])
 
 
 
@@ -339,12 +339,12 @@ We still arrive at contradiction but it takes a different number of steps
  .. code-block:: none
 
     True False 1.0
-    {'literals': '$false',
-     'label': 'c_86',
-     'role': 'lemma',
-     'birth_step': 1,
+    {'birth_step': 1,
+     'inference_parents': ('c_85', 'c_53'),
      'inference_rule': 'forward_subsumption_resolution',
-     'inference_parents': ('c_85', 'c_53')}
+     'label': 'c_86',
+     'literals': '$false',
+     'role': 'lemma'}
 
 
 
@@ -352,7 +352,7 @@ We still arrive at contradiction but it takes a different number of steps
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.985 seconds)
+   **Total running time of the script:** (0 minutes 0.816 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_age_agent.py:
