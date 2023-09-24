@@ -94,8 +94,8 @@ One can use ``gym-saturation`` environments as any other Gymnasium environment:
   observation, info = env.reset()
   terminated, truncated = False, False
   while not (terminated or truncated):
-      # apply policy (a valid random action here)
-      action = env.action_space.sample(mask=observation["action_mask"])
+      # apply policy (a random action here)
+      action = env.action_space.sample()
       observation, reward, terminated, truncated, info = env.step(action)
   env.close()
 

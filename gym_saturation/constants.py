@@ -26,8 +26,6 @@ if sys.version_info.major == 3 and sys.version_info.minor >= 9:
 else:  # pragma: no cover
     from importlib_resources import files  # pylint: disable=import-error
 
-REAL_OBS = "real_obs"
-ACTION_MASK = "action_mask"
 PARAMETRIC_ACTIONS = "avail_actions"
 FALSEHOOD_SYMBOL = "$false"
 MOCK_TPTP_FOLDER = str(

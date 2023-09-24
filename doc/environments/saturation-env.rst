@@ -27,7 +27,7 @@ SaturationEnv
 .. csv-table::
    
    Action Space, ``Discrete(n)``
-   Observation Space, "``Dict('action_mask': Box(0, 1, (n,), int8), 'real_obs': Sequence(Clause(n), stack=False))``"
+   Observation Space, "``Sequence(Clause(n), stack=False)``"
    import, ``import gym_saturation; gymnasium.make("Vampire-v0")``
    import, ``import gym_saturation; gymnasium.make("iProver-v0")``
 
@@ -60,12 +60,12 @@ The given clause (or saturation) algorithm is the basis of many contemporary pro
     processed_clauses: list[Clause] = []
     while EMPTY_CLAUSE not in unprocessed_clauses and unprocessed_clauses:
         given_clause: Clause = select_given_clause(unprocessed_clauses)
+        processed_clauses.append(given_clause)
         new_clauses: list[Clause] = apply_inference_rules(
             given_clause, processed_clauses
         )
         unprocessed_clauses.extend(new_clauses)
         unprocessed_clauses.remove(given_clause)
-        processed_clauses.append(given_clause)
 
 ``get_preprocessed_theorem_statement`` corresponds to the environment reset, and typically includes parsing, `Skolemization <https://en.wikipedia.org/wiki/Skolem_normal_form>`__, transformation to `conjunctive normal form <https://en.wikipedia.org/wiki/Conjunctive_normal_form>`__ among other things.
 
@@ -83,17 +83,12 @@ Action is an index of a given clause. It belongs to a discrete space of size ``n
 Observation Space
 ******************
 
-An observation is a dictionary with two keys:
-
-* ``real_obs`` --- a tuple of strings, containing a clause literals in the TPTP syntax, e.g. ``'mult(X, mult(Y, Z)) = mult(mult(X, Y), Z)'`` for each clause belonging to ``unprocessed_clauses`` and ``processed_clauses``
-* ``action_mask`` --- a ``numpy`` array of shape ``(action_space.n,)`` filled with zeros and ones
-
-An action ``0<=i<n`` is valid (i.e. ``observation["action_mask"][i] == 1.0``) iff it's an index of a clause from ``unprocessed_clauses``.
+An observation is a tuple of strings, containing a clause literals in the TPTP syntax, e.g. ``'mult(X, mult(Y, Z)) = mult(mult(X, Y), Z)'`` for each clause belonging to ``unprocessed_clauses`` and ``processed_clauses``
 
 Starting State
 ***************
 
-A starting state of the environment depends on a task set (a theorem to prove). If there are ``N`` unprocessed clauses in the pre-processed theorem statement, the ``real_obs`` list of the starting state contains ``N`` strings, and ``action_mask[i] == 1.0 if i < N else 0.0``.
+A starting state of the environment depends on a task set (a theorem to prove). If there are ``N`` unprocessed clauses in the pre-processed theorem statement, the starting state contains ``N`` strings.
 
 By default, the task is a simple theorem from group theory:
 
@@ -114,7 +109,8 @@ Reward is ``1.0`` after a step iff the saturation algorithm terminated at this s
 Episode End
 ************
 
-* Termination means the saturation algorithm ended with refutation found or satisfiability established. * Truncation happens if the ``real_obs`` length exceeds ``action_space.n``.
+* Termination means the saturation algorithm ended with refutation found or satisfiability established.
+* Truncation happens if the number of clauses in the state exceeds ``action_space.n``.
 
 Information
 ************

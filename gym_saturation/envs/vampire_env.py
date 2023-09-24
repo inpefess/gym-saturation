@@ -22,12 +22,8 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 
-from gym_saturation.envs.saturation_env import (
-    ACTION_MASK,
-    MAX_CLAUSES,
-    REAL_OBS,
-    SaturationEnv,
-)
+from gym_saturation.constants import FALSEHOOD_SYMBOL
+from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
 from gym_saturation.vampire_wrapper import VampireWrapper
 
 
@@ -41,24 +37,27 @@ class VampireEnv(SaturationEnv):
 
     >>> from gymnasium.utils.env_checker import check_env
     >>> import gymnasium as gym
-    >>> env = gym.make(
-    ...     "Vampire-v0",
-    ...     max_clauses=5
-    ... ).unwrapped
+    >>> env = gym.make("Vampire-v0").unwrapped
     >>> check_env(env)
     cnf(1, ...).
     ...
     cnf(5, ...).
 
-    we can't repeat actions
+    repeating actions change nothing
 
-    >>> env = gym.make("Vampire-v0")
+    >>> env = gym.make("Vampire-v0", max_clauses=5)
     >>> _ = env.reset()
-    >>> _ = env.step(0)
-    >>> env.step(0)
-    Traceback (most recent call last):
-     ...
-    gym_saturation.envs.saturation_env.InvalidAction
+    >>> one = env.step(0)
+    >>> two = env.step(0)
+    >>> one == two
+    True
+
+    episode is truncated if we have more than ``max_clauses`` clauses
+
+    >>> _, _, _, truncated, _ = env.step(1)
+    >>> _, _, _, truncated, _ = env.step(2)
+    >>> truncated
+    True
 
     sometimes Vampire can solve a problem during pre-processing
 
@@ -105,19 +104,20 @@ class VampireEnv(SaturationEnv):
         self, vampire_response: Tuple[Tuple[str, str, str], ...]
     ) -> None:
         for response_type, clause_label, clause_text in vampire_response:
-            if response_type in {"new", "final", "input", "fn def discovered"}:
-                self.state.add_clause(
-                    self._parse_vampire_clause(clause_label, clause_text)
+            if response_type == "passive" or FALSEHOOD_SYMBOL in clause_text:
+                self.state.clauses[clause_label] = self._parse_vampire_clause(
+                    clause_label, clause_text
                 )
-            elif response_type in {
+            elif response_type not in {
                 "active",
                 "forward reduce",
                 "backward reduce",
+                "new propositional",
+                "new",
+                "final",
+                "input",
+                "fn def discovered",
             }:
-                self.state.set_action_mask_by_label(clause_label, 0.0)
-            elif response_type == "passive":
-                self.state.set_action_mask_by_label(clause_label, 1.0)
-            elif response_type != "new propositional":
                 raise ValueError("Unexpected response type: ", response_type)
 
     def reset(
@@ -125,21 +125,20 @@ class VampireEnv(SaturationEnv):
         *,
         seed: Optional[int] = None,
         options: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:  # noqa: D102
+    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:  # noqa: D102
         super().reset(seed=seed)
         tptp_folder = os.path.join(
             os.path.dirname(self.get_task()), "..", ".."
         )
         vampire_response = self._vampire.start(self.get_task(), tptp_folder)
         self._parse_vampire_response(vampire_response)
-        return {
-            REAL_OBS: tuple(self.state.clauses),
-            ACTION_MASK: self.state.action_mask,
-        }, {}
+        return tuple(self.state.clauses.values()), {}
 
     def _do_deductions(self, action: np.int64) -> None:
         self._parse_vampire_response(
-            self._vampire.pick_a_clause(self.state.clause_labels[action])
+            self._vampire.pick_a_clause(
+                list(self.state.clauses.items())[action][0]
+            )
         )
 
     def _parse_vampire_clause(

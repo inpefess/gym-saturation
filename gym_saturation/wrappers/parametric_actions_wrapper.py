@@ -22,11 +22,11 @@ from typing import Any, Dict, Optional, Tuple
 import gymnasium as gym
 import numpy as np
 
-from gym_saturation.constants import ACTION_MASK, PARAMETRIC_ACTIONS, REAL_OBS
+from gym_saturation.constants import PARAMETRIC_ACTIONS
 from gym_saturation.envs.saturation_env import SaturationEnv
 
 
-class ParamtericActionsWrapper(gym.Wrapper, ABC):
+class ParametricActionsWrapper(gym.Wrapper, ABC):
     """
     A parametric actions wrapper.
 
@@ -36,7 +36,7 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
     It defines the clauses as old if their order numbers are smaller than the
     previous step maximum.
 
-    >>> class ConstantClauseWeight(ParamtericActionsWrapper):
+    >>> class ConstantClauseWeight(ParametricActionsWrapper):
     ...     def clause_embedder(self, clause: Dict[str, Any]) -> np.ndarray:
     ...         return np.ones(
     ...             (self.observation_space[PARAMETRIC_ACTIONS].shape[1],)
@@ -45,7 +45,7 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
     >>> wrapped_env = ConstantClauseWeight(env, embedding_dim=1)
     >>> observation, info = wrapped_env.reset()
     >>> observation.keys()
-    dict_keys(['action_mask', 'avail_actions'])
+    dict_keys(['avail_actions'])
     >>> info.keys()
     dict_keys(['real_obs'])
     >>> observation[PARAMETRIC_ACTIONS]
@@ -67,10 +67,10 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
            [1.],
            [1.],
            [1.],
-           [1.],
-           [1.],
-           [1.],
-           [1.],
+           [0.],
+           [0.],
+           [0.],
+           [0.],
            [0.]])
     """
 
@@ -82,18 +82,16 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
         """Initialise all the things."""
         super().__init__(env)
         self.env: SaturationEnv = env  # type: ignore
-        action_mask = self.env.observation_space[ACTION_MASK]
         parametric_actions = gym.spaces.Box(
             low=-np.infty,
             high=np.infty,
             shape=(
-                action_mask.shape[0],  # type: ignore
+                int(env.action_space.n),
                 embedding_dim,
             ),
         )
         self.observation_space = gym.spaces.Dict(
             {
-                ACTION_MASK: env.observation_space[ACTION_MASK],
                 PARAMETRIC_ACTIONS: parametric_actions,
             }
         )
@@ -113,11 +111,13 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
         :param options: options for compatibility
         """
         observation, info = self.env.reset(seed=seed, options=options)
-        info[REAL_OBS] = observation
+        info["real_obs"] = observation
         self.embedded_clauses_cnt = 0
         return self.observation(observation), info
 
-    def observation(self, observation: Dict[str, Any]) -> Dict[str, Any]:
+    def observation(
+        self, observation: Tuple[Dict[str, Any], ...]
+    ) -> Dict[str, Any]:
         """
         Return a modified observation.
 
@@ -126,7 +126,7 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
         """
         new_clauses = [
             clause["literals"]
-            for clause in observation[REAL_OBS][self.embedded_clauses_cnt :]
+            for clause in observation[self.embedded_clauses_cnt :]
         ]
         new_clauses_count = len(new_clauses)
         if (
@@ -141,7 +141,6 @@ class ParamtericActionsWrapper(gym.Wrapper, ABC):
             ] = np.array(list(map(self.clause_embedder, new_clauses)))
             self.embedded_clauses_cnt += new_clauses_count
         return {
-            ACTION_MASK: observation[ACTION_MASK],
             PARAMETRIC_ACTIONS: self.clause_embeddings,
         }
 

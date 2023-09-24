@@ -106,14 +106,16 @@ before using the environment, we should reset it
 
 .. GENERATED FROM PYTHON SOURCE LINES 31-32
 
-observation is a dictionary with two keys
+observation is a tuple of JSON representations of logic clauses
 
-.. GENERATED FROM PYTHON SOURCE LINES 32-35
+.. GENERATED FROM PYTHON SOURCE LINES 32-37
 
 .. code-block:: default
 
 
-    print(observation.keys())
+    from pprint import pprint
+
+    pprint(observation)
 
 
 
@@ -123,103 +125,47 @@ observation is a dictionary with two keys
 
  .. code-block:: none
 
-    dict_keys(['real_obs', 'action_mask'])
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 36-37
-
-``real_obs`` value is a JSON representation of logic clauses
-
-.. GENERATED FROM PYTHON SOURCE LINES 37-44
-
-.. code-block:: default
-
-
-    import pprint
-
-    from gym_saturation.constants import ACTION_MASK, REAL_OBS
-
-    pprint.pp(observation[REAL_OBS])
-
-
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    ({'literals': 'mult(X0,mult(X1,X2)) = mult(mult(X0,X1),X2)',
+    ({'birth_step': 0,
+      'inference_parents': (),
+      'inference_rule': 'input',
       'label': '1',
-      'role': 'lemma',
-      'inference_rule': 'input',
+      'literals': 'mult(X0,mult(X1,X2)) = mult(mult(X0,X1),X2)',
+      'role': 'lemma'},
+     {'birth_step': 0,
       'inference_parents': (),
-      'birth_step': 0},
-     {'literals': 'mult(e,X0) = X0',
+      'inference_rule': 'input',
       'label': '2',
-      'role': 'lemma',
-      'inference_rule': 'input',
+      'literals': 'mult(e,X0) = X0',
+      'role': 'lemma'},
+     {'birth_step': 0,
       'inference_parents': (),
-      'birth_step': 0},
-     {'literals': 'e = mult(inv(X0),X0)',
+      'inference_rule': 'input',
       'label': '3',
-      'role': 'lemma',
-      'inference_rule': 'input',
+      'literals': 'e = mult(inv(X0),X0)',
+      'role': 'lemma'},
+     {'birth_step': 0,
       'inference_parents': (),
-      'birth_step': 0},
-     {'literals': 'a = mult(a,a)',
+      'inference_rule': 'input',
       'label': '4',
-      'role': 'lemma',
-      'inference_rule': 'input',
+      'literals': 'a = mult(a,a)',
+      'role': 'lemma'},
+     {'birth_step': 0,
       'inference_parents': (),
-      'birth_step': 0},
-     {'literals': 'e != a',
+      'inference_rule': 'input',
       'label': '5',
-      'role': 'lemma',
-      'inference_rule': 'input',
-      'inference_parents': (),
-      'birth_step': 0})
+      'literals': 'e != a',
+      'role': 'lemma'})
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-46
-
-``action_mask`` is a ``numpy`` array of zeros and ones
-
-.. GENERATED FROM PYTHON SOURCE LINES 46-51
-
-.. code-block:: default
-
-
-    print(type(observation[ACTION_MASK]))
-    print(observation[ACTION_MASK].shape)
-    print(observation[ACTION_MASK][:10])
-
-
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    <class 'numpy.ndarray'>
-    (1000,)
-    [1 1 1 1 1 0 0 0 0 0]
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 52-55
+.. GENERATED FROM PYTHON SOURCE LINES 38-41
 
 We can render the environment state in the TPTP format.
 By default, we are trying to prove a basic group theory lemma:
 every idempotent element equals the identity
 
-.. GENERATED FROM PYTHON SOURCE LINES 55-58
+.. GENERATED FROM PYTHON SOURCE LINES 41-44
 
 .. code-block:: default
 
@@ -243,18 +189,20 @@ every idempotent element equals the identity
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 59-60
+.. GENERATED FROM PYTHON SOURCE LINES 45-47
 
-here is an example of an episode during which we play random avail actions
+here is an example of an episode during which we play random actions.
+We set the random seed for reproducibility.
 
-.. GENERATED FROM PYTHON SOURCE LINES 60-67
+.. GENERATED FROM PYTHON SOURCE LINES 47-55
 
 .. code-block:: default
 
 
+    env.action_space.seed(0)
     terminated, truncated = False, False
     while not (terminated or truncated):
-        action = env.action_space.sample(mask=observation[ACTION_MASK])
+        action = env.action_space.sample()
         observation, reward, terminated, truncated, info = env.step(action)
     env.close()
 
@@ -265,11 +213,11 @@ here is an example of an episode during which we play random avail actions
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 68-69
+.. GENERATED FROM PYTHON SOURCE LINES 56-57
 
 the episode terminated with positive reward
 
-.. GENERATED FROM PYTHON SOURCE LINES 69-72
+.. GENERATED FROM PYTHON SOURCE LINES 57-60
 
 .. code-block:: default
 
@@ -289,17 +237,17 @@ the episode terminated with positive reward
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 73-76
+.. GENERATED FROM PYTHON SOURCE LINES 61-64
 
 It means we arrived at a contradiction (``$false``) which proves the lemma.
 Notice the ``birth_step`` number of a contradiction, it shows how many steps
 we did to find proof.
 
-.. GENERATED FROM PYTHON SOURCE LINES 76-78
+.. GENERATED FROM PYTHON SOURCE LINES 64-66
 
 .. code-block:: default
 
-    pprint.pp(observation[REAL_OBS][-1])
+    pprint(observation[-1])
 
 
 
@@ -309,60 +257,24 @@ we did to find proof.
 
  .. code-block:: none
 
-    {'literals': '$false',
-     'label': '27',
-     'role': 'lemma',
+    {'birth_step': 1077,
+     'inference_parents': ('17', '5'),
      'inference_rule': 'subsumption_resolution',
-     'inference_parents': ('26', '5'),
-     'birth_step': 7}
+     'label': '18',
+     'literals': '$false',
+     'role': 'lemma'}
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 79-82
-
-the package also provides a utility function for extracting only clauses
-which became parts of the proof (some steps might be unnecessary to find the
-proof)
-
-.. GENERATED FROM PYTHON SOURCE LINES 82-86
-
-.. code-block:: default
-
-    from gym_saturation.utils import get_tstp_proof
-
-    print(get_tstp_proof(observation[REAL_OBS]))
-
-
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    cnf(1, lemma, mult(X0,mult(X1,X2)) = mult(mult(X0,X1),X2), inference(input, [], [])).
-    cnf(6, lemma, mult(inv(X0),mult(X0,X1)) = mult(e,X1), inference(superposition, [], [1, 3])).
-    cnf(2, lemma, mult(e,X0) = X0, inference(input, [], [])).
-    cnf(10, lemma, mult(inv(X0),mult(X0,X1)) = X1, inference(forward_demodulation, [], [6, 2])).
-    cnf(4, lemma, a = mult(a,a), inference(input, [], [])).
-    cnf(22, lemma, a = mult(inv(a),a), inference(superposition, [], [10, 4])).
-    cnf(3, lemma, e = mult(inv(X0),X0), inference(input, [], [])).
-    cnf(26, lemma, e = a, inference(forward_demodulation, [], [22, 3])).
-    cnf(5, lemma, e != a, inference(input, [], [])).
-    cnf(27, lemma, $false, inference(subsumption_resolution, [], [26, 5])).
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 87-91
+.. GENERATED FROM PYTHON SOURCE LINES 67-71
 
 Age agent for iProver
 ----------------------
 
 We initialise iProver-based environment in the same way
 
-.. GENERATED FROM PYTHON SOURCE LINES 91-94
+.. GENERATED FROM PYTHON SOURCE LINES 71-74
 
 .. code-block:: default
 
@@ -376,12 +288,12 @@ We initialise iProver-based environment in the same way
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 95-97
+.. GENERATED FROM PYTHON SOURCE LINES 75-77
 
 Instead of a random agent, let's use Age agent which selects actions in the
-order they became available
+order they appear
 
-.. GENERATED FROM PYTHON SOURCE LINES 97-107
+.. GENERATED FROM PYTHON SOURCE LINES 77-86
 
 .. code-block:: default
 
@@ -390,29 +302,10 @@ order they became available
     terminated, truncated = False, False
     action = 0
     while not (terminated or truncated):
-        if observation[ACTION_MASK][action] == 1:
-            observation, reward, terminated, truncated, info = env.step(action)
+        observation, reward, terminated, truncated, info = env.step(action)
         action += 1
     env.close()
 
-
-
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 108-110
-
-We still arrive at the contradiction but it might take a different number of
-steps. And the proof found looks a bit different
-
-.. GENERATED FROM PYTHON SOURCE LINES 110-112
-
-.. code-block:: default
-
-
-    print(get_tstp_proof(observation[REAL_OBS]))
 
 
 
@@ -421,16 +314,37 @@ steps. And the proof found looks a bit different
 
  .. code-block:: none
 
-    cnf(c_49, lemma, mult(mult(X0,X1),X2)=mult(X0,mult(X1,X2)), inference(input, [], [])).
-    cnf(c_62, lemma, mult(inv(X0),mult(X0,X1))=mult(e,X1), inference(superposition, [], [c_51, c_49])).
-    cnf(c_50, lemma, mult(e,X0)=X0, inference(input, [], [])).
-    cnf(c_70, lemma, mult(inv(X0),mult(X0,X1))=X1, inference(demodulation, [], [c_62, c_50])).
-    cnf(c_52, lemma, mult(a,a)=a, inference(input, [], [])).
-    cnf(c_74, lemma, mult(inv(a),a)=a, inference(superposition, [], [c_52, c_70])).
-    cnf(c_51, lemma, mult(inv(X0),X0)=e, inference(input, [], [])).
-    cnf(c_85, lemma, e=a, inference(demodulation, [], [c_74, c_51])).
-    cnf(c_53, lemma, e!=a, inference(input, [], [])).
-    cnf(c_86, lemma, $false, inference(forward_subsumption_resolution, [], [c_85, c_53])).
+    Loop <_UnixSelectorEventLoop running=False closed=True debug=False> that handles pid 6081 is closed
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 87-88
+
+We still arrive at contradiction but it takes a different number of steps
+
+.. GENERATED FROM PYTHON SOURCE LINES 88-91
+
+.. code-block:: default
+
+
+    print(terminated, truncated, reward)
+    pprint(observation[-1])
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    True False 1.0
+    {'birth_step': 1,
+     'inference_parents': ('c_85', 'c_53'),
+     'inference_rule': 'forward_subsumption_resolution',
+     'label': 'c_86',
+     'literals': '$false',
+     'role': 'lemma'}
 
 
 
@@ -438,7 +352,7 @@ steps. And the proof found looks a bit different
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.757 seconds)
+   **Total running time of the script:** (0 minutes 0.816 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_age_agent.py:

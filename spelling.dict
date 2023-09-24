@@ -57,8 +57,6 @@ setrecursionlimit
 provers
 PyRes
 github
-slurm
-Slurm
 wikipedia
 automodule
 vprover
@@ -93,7 +91,6 @@ tensorflow
 logdir
 DQN
 ppo
-AgeWeightBandit
 TimeLimit
 arxiv
 cgi
