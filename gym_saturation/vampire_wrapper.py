@@ -91,8 +91,8 @@ class VampireWrapper:
         if self._proc is not None:
             self._proc.close()
         self._proc = pexpect.spawn(
-            f"{self.binary_path} --manual_cs on --show_everything on "
-            + "--time_limit 1D --avatar off "
+            f"{self.binary_path} --manual_cs on --show_passive on"
+            + " --show_new on --time_limit 0 --avatar off "
             + f"--include {tptp_folder} {problem_filename}",
             echo=False,
         )
