@@ -65,7 +65,7 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
 
     metadata = {"render_modes": ["ansi", "human"], "render_fps": 1}
     reward_range = (0, 1)
-    action_space: spaces.Discrete
+    action_space: spaces.Space
     observation_space: spaces.Sequence
 
     def __init__(
@@ -85,7 +85,6 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
             step_number=-1,
             max_clauses=max_clauses,
         )
-        self.action_space = spaces.Discrete(max_clauses)
         self.observation_space = spaces.Sequence(
             spaces.Dict(
                 {
@@ -125,11 +124,11 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         return tuple(self.state.clauses.values()), {}
 
     @abstractmethod
-    def _do_deductions(self, action: np.int64) -> None:
+    def _do_deductions(self, action: Any) -> None:
         raise NotImplementedError  # pragma: no cover
 
     def step(
-        self, action: np.int64
+        self, action: Any
     ) -> Tuple[Tuple[Dict[str, Any], ...], float, bool, bool, Dict[str, Any]]:
         # noqa: D301
         """
@@ -149,13 +148,10 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
               state were reached
             * info: contains auxiliary diagnostic information (helpful for
               debugging, and sometimes learning)
-        :raises InvalidAction: if the ``action`` identifies an already
-            processed clause
         """
         if not (self.state.terminated or self.state.truncated):
             self.state.step_number += 1
-            if action < len(self.state.clauses):
-                self._do_deductions(action)
+            self._do_deductions(action)
         if self.state.truncated:
             self.on_truncated()
         return (

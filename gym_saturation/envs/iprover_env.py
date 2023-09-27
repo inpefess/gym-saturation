@@ -25,6 +25,7 @@ from threading import Thread
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
+from gymnasium.spaces import Discrete
 
 from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
 from gym_saturation.relay_server import (
@@ -120,6 +121,7 @@ class IProverEnv(SaturationEnv):
             by default, we assume it to be ``iproveropt`` and in the $PATH
         """
         super().__init__(max_clauses, render_mode)
+        self.action_space = Discrete(self.state.max_clauses)
         self.prover_binary_path = prover_binary_path
         self._relay_server: Optional[RelayServer] = None
         self.relay_server_thread: Optional[Thread] = None
@@ -208,22 +210,23 @@ class IProverEnv(SaturationEnv):
                 self._parse_batch_clauses(iprover_request["clauses"])
 
     def _do_deductions(self, action: np.int64) -> None:
-        given_clause_label = list(self.state.clauses.items())[action][0]
-        iprover_scores_message = {
-            "tag": "given_clause_res",
-            "passive_is_empty": False,
-            "given_clause": int(given_clause_label[2:]),
-        }
-        relayed_scores_message = bytes(
-            json.dumps({"tag": "server_queries_end"})
-            + "\n\x00\n"
-            + json.dumps(iprover_scores_message)
-            + "\n\x00\n",
-            "utf8",
-        )
-        self.relay_server.output_queue.put(relayed_scores_message)
-        data = self._get_json_data()
-        self._parse_iprover_requests(data)
+        if action < len(self.state.clauses):
+            given_clause_label = list(self.state.clauses.keys())[action]
+            iprover_scores_message = {
+                "tag": "given_clause_res",
+                "passive_is_empty": False,
+                "given_clause": int(given_clause_label[2:]),
+            }
+            relayed_scores_message = bytes(
+                json.dumps({"tag": "server_queries_end"})
+                + "\n\x00\n"
+                + json.dumps(iprover_scores_message)
+                + "\n\x00\n",
+                "utf8",
+            )
+            self.relay_server.output_queue.put(relayed_scores_message)
+            data = self._get_json_data()
+            self._parse_iprover_requests(data)
 
     def close(self) -> None:
         """Stop relay server."""

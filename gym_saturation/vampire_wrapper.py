@@ -79,6 +79,7 @@ class VampireWrapper:
             result
             or "User error: No clause in Passive has id"
             in self.proc.before.decode("utf-8")
+            or not self.proc.before
         ):
             return result
         raise ValueError(

@@ -21,6 +21,7 @@ import os
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
+from gymnasium.spaces import Discrete
 
 from gym_saturation.constants import FALSEHOOD_SYMBOL
 from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
@@ -99,6 +100,7 @@ class VampireEnv(SaturationEnv):
         """
         super().__init__(max_clauses, render_mode)
         self._vampire = VampireWrapper(prover_binary_path)
+        self.action_space = Discrete(self.state.max_clauses)
 
     def _parse_vampire_response(
         self, vampire_response: Tuple[Tuple[str, str, str], ...]
@@ -135,11 +137,12 @@ class VampireEnv(SaturationEnv):
         return tuple(self.state.clauses.values()), {}
 
     def _do_deductions(self, action: np.int64) -> None:
-        self._parse_vampire_response(
-            self._vampire.pick_a_clause(
-                list(self.state.clauses.items())[action][0]
+        if action < len(self.state.clauses):
+            self._parse_vampire_response(
+                self._vampire.pick_a_clause(
+                    list(self.state.clauses.keys())[action]
+                )
             )
-        )
 
     def _parse_vampire_clause(
         self, clause_label: str, clause_text: str

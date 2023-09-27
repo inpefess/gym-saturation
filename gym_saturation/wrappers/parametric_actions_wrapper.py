@@ -86,7 +86,7 @@ class ParametricActionsWrapper(gym.Wrapper, ABC):
             low=-np.infty,
             high=np.infty,
             shape=(
-                int(env.action_space.n),
+                int(env.action_space.n),  # type: ignore
                 embedding_dim,
             ),
         )
