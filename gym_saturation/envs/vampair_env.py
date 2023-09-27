@@ -17,10 +17,8 @@
 Environment with experimental pair-selection Vampire back-end
 ==============================================================
 """
-from typing import Tuple
-
 import numpy as np
-from gymnasium import spaces
+from gymnasium.spaces import MultiDiscrete
 
 from gym_saturation.envs.saturation_env import MAX_CLAUSES
 from gym_saturation.envs.vampire_env import VampireEnv
@@ -60,16 +58,11 @@ class VampairEnv(VampireEnv):
             command_line_arguments=" -sa given_pair --show_passive on"
             " --show_new on --time_limit 0 --avatar off ",
         )
-        self.action_space = spaces.Tuple(
-            [
-                spaces.Discrete(self.state.max_clauses),
-                spaces.Discrete(self.state.max_clauses),
-            ]
+        self.action_space = MultiDiscrete(
+            [self.state.max_clauses, self.state.max_clauses]
         )
 
-    def _do_deductions(
-        self, action: Tuple[np.int64, np.int64]  # type: ignore
-    ) -> None:
+    def _do_deductions(self, action: np.ndarray) -> None:  # type: ignore
         clause_labels = list(self.state.clauses.keys())
         total_clauses = len(clause_labels)
         if action[0] < total_clauses and action[1] < total_clauses:
