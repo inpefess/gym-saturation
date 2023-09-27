@@ -21,12 +21,13 @@ from typing import Any, Dict, Optional, Tuple
 
 import gymnasium as gym
 import numpy as np
+from gymnasium.core import ObservationWrapper
 
 from gym_saturation.constants import CLAUSE_EMBEDDINGS
 from gym_saturation.envs.saturation_env import SaturationEnv
 
 
-class ClauseEmbeddingsWrapper(gym.Wrapper, ABC):
+class ClauseEmbeddingsWrapper(ObservationWrapper, ABC):
     """
     A clause embeddings wrapper.
 
@@ -79,12 +80,11 @@ class ClauseEmbeddingsWrapper(gym.Wrapper, ABC):
     ):
         """Initialise all the things."""
         super().__init__(env)
-        self.env: SaturationEnv = env  # type: ignore
         clause_embeddings = gym.spaces.Box(
             low=-np.infty,
             high=np.infty,
             shape=(
-                int(env.action_space.n),  # type: ignore
+                self.env.unwrapped.state.max_clauses,  # type: ignore
                 embedding_dim,
             ),
         )
@@ -108,10 +108,10 @@ class ClauseEmbeddingsWrapper(gym.Wrapper, ABC):
         :param seed: seed for compatibility
         :param options: options for compatibility
         """
-        observation, info = self.env.reset(seed=seed, options=options)
+        observation, info = super().reset(seed=seed, options=options)
         info["clauses"] = observation
         self.embedded_clauses_cnt = 0
-        return self.observation(observation), info
+        return observation, info
 
     def observation(
         self, observation: Tuple[Dict[str, Any], ...]
@@ -141,25 +141,6 @@ class ClauseEmbeddingsWrapper(gym.Wrapper, ABC):
         return {
             CLAUSE_EMBEDDINGS: self.clause_embeddings,
         }
-
-    def step(
-        self, action: np.int64
-    ) -> Tuple[Dict[str, Any], float, bool, bool, Dict[str, Any]]:
-        """
-        Make the environment step.
-
-        :param action: agent's action of choice
-        """
-        observation, reward, terminated, truncated, info = self.env.step(
-            action
-        )
-        return (
-            self.observation(observation),
-            reward,
-            terminated,
-            truncated,
-            info,
-        )
 
     @abstractmethod
     def clause_embedder(self, literals: str) -> np.ndarray:
