@@ -29,7 +29,7 @@ from gym_saturation.vampire_wrapper import VampireWrapper
 
 class VampireEnv(SaturationEnv):
     """
-    An RL environment around a Vampire prover.
+    An RL environment wrapper around Vampire prover.
 
     Refer to :ref:`saturation_env` for more documentation.
 

@@ -43,7 +43,9 @@ class VampireWrapper:
     ...
     """
 
-    def __init__(self, binary_path: str):
+    def __init__(
+        self, binary_path: str, command_line_arguments: Optional[str] = None
+    ):
         """
         Remember the path to Vampire, don't start the process yet.
 
@@ -52,10 +54,18 @@ class VampireWrapper:
         self.binary_path = binary_path
         self._proc = None
         self.problem_filename: Optional[str] = None
+        self.command_line_arguments = (
+            " --manual_cs on --show_passive on"
+            " --show_new on --time_limit 0 --avatar off "
+            if command_line_arguments is None
+            else command_line_arguments
+        )
 
     def _get_stdout(self) -> Tuple[Tuple[str, str, str], ...]:
         result: Tuple[Tuple[str, str, str], ...] = ()
-        self.proc.expect(["Pick a clause:", pexpect.EOF])
+        self.proc.expect(
+            ["Pick a clause:", "Pick a clause pair:", pexpect.EOF]
+        )
         for line in self.proc.before.decode("utf-8").split("\r\n"):
             if (
                 line[:5] == "[SA] "
@@ -91,9 +101,8 @@ class VampireWrapper:
         if self._proc is not None:
             self._proc.close()
         self._proc = pexpect.spawn(
-            f"{self.binary_path} --manual_cs on --show_passive on"
-            + " --show_new on --time_limit 0 --avatar off "
-            + f"--include {tptp_folder} {problem_filename}",
+            f"{self.binary_path} {self.command_line_arguments} "
+            f"--include {tptp_folder} {problem_filename}",
             echo=False,
         )
         # https://pexpect.readthedocs.io/en/stable/commonissues.html#timing-issue-with-send-and-sendline
