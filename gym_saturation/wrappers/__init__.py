@@ -21,4 +21,5 @@ from gym_saturation.wrappers.ast2vec_wrapper import AST2VecWrapper
 from gym_saturation.wrappers.clause_embeddings_wrapper import (
     ClauseEmbeddingsWrapper,
 )
-from gym_saturation.wrappers.llmwrapper import LLMWrapper
+from gym_saturation.wrappers.llm_wrapper import LLMWrapper
+from gym_saturation.wrappers.md2d_wrapper import Md2DWrapper
