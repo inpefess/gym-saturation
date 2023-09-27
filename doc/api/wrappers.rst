@@ -24,3 +24,6 @@ Wrappers
 .. automodule:: gym_saturation.wrappers.llmwrapper
    :members:
    :special-members: __init__
+.. automodule:: gym_saturation.wrappers.md2d_wrapper
+   :members:
+   :special-members: __init__
