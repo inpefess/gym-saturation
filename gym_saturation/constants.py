@@ -26,7 +26,7 @@ if sys.version_info.major == 3 and sys.version_info.minor >= 9:
 else:  # pragma: no cover
     from importlib_resources import files  # pylint: disable=import-error
 
-PARAMETRIC_ACTIONS = "avail_actions"
+CLAUSE_EMBEDDINGS = "clause_embeddings"
 FALSEHOOD_SYMBOL = "$false"
 MOCK_TPTP_FOLDER = str(
     files("gym_saturation").joinpath(os.path.join("resources", "TPTP-mock"))

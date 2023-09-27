@@ -23,12 +23,12 @@ from urllib.request import HTTPHandler, build_opener
 import numpy as np
 
 from gym_saturation.utils import tptp2python
-from gym_saturation.wrappers.parametric_actions_wrapper import (
-    ParametricActionsWrapper,
+from gym_saturation.wrappers.clause_embeddings_wrapper import (
+    ClauseEmbeddingsWrapper,
 )
 
 
-class LLMWrapper(ParametricActionsWrapper):
+class LLMWrapper(ClauseEmbeddingsWrapper):
     """
     A Large Language Model wrapper for saturation provers.
 
@@ -39,10 +39,10 @@ class LLMWrapper(ParametricActionsWrapper):
     >>> wrapped_env = LLMWrapper(env, features_num=768)
     >>> observation, info = wrapped_env.reset()
     >>> observation.keys()
-    dict_keys(['avail_actions'])
-    >>> from gym_saturation.wrappers.parametric_actions_wrapper import (
-    ...     PARAMETRIC_ACTIONS)
-    >>> observation[PARAMETRIC_ACTIONS].shape
+    dict_keys(['clause_embeddings'])
+    >>> from gym_saturation.wrappers.clause_embeddings_wrapper import (
+    ...     CLAUSE_EMBEDDINGS)
+    >>> observation[CLAUSE_EMBEDDINGS].shape
     (9, 768)
     """
 

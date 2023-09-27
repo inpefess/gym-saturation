@@ -95,7 +95,6 @@ TimeLimit
 arxiv
 cgi
 rllib
-ParametricActionsWrapper
 iProver
 DNN
 txt
@@ -105,7 +104,6 @@ pytorch
 SeeTPTP
 VecWrapper
 pdf
-ConstantParametricActionsWrapper
 embeddings
 pre
 OCaml

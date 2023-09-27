@@ -15,7 +15,7 @@
 
 Wrappers
 *********
-.. automodule:: gym_saturation.wrappers.parametric_actions_wrapper
+.. automodule:: gym_saturation.wrappers.clause_embeddings_wrapper
    :members:
    :special-members: __init__
 .. automodule:: gym_saturation.wrappers.ast2vec_wrapper

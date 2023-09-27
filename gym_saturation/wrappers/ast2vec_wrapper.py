@@ -22,12 +22,12 @@ from urllib.request import HTTPHandler, OpenerDirector, Request
 import numpy as np
 
 from gym_saturation.utils import tptp2python
-from gym_saturation.wrappers.parametric_actions_wrapper import (
-    ParametricActionsWrapper,
+from gym_saturation.wrappers.clause_embeddings_wrapper import (
+    ClauseEmbeddingsWrapper,
 )
 
 
-class AST2VecWrapper(ParametricActionsWrapper):
+class AST2VecWrapper(ClauseEmbeddingsWrapper):
     """
     An ast2vec wrappers for saturation provers.
 
@@ -41,10 +41,10 @@ class AST2VecWrapper(ParametricActionsWrapper):
     >>> wrapped_env = AST2VecWrapper(env, features_num=256)
     >>> observation, info = wrapped_env.reset()
     >>> observation.keys()
-    dict_keys(['avail_actions'])
-    >>> from gym_saturation.wrappers.parametric_actions_wrapper import (
-    ...     PARAMETRIC_ACTIONS)
-    >>> observation[PARAMETRIC_ACTIONS].shape
+    dict_keys(['clause_embeddings'])
+    >>> from gym_saturation.wrappers.clause_embeddings_wrapper import (
+    ...     CLAUSE_EMBEDDINGS)
+    >>> observation[CLAUSE_EMBEDDINGS].shape
     (9, 256)
     """
 
