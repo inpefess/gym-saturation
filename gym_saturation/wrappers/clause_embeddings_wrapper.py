@@ -13,42 +13,41 @@
 #   limitations under the License.
 # noqa: D205, D400
 """
-Parametric Actions Wrapper
-===========================
+Clause Embeddings Wrapper
+==========================
 """
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Tuple
 
 import gymnasium as gym
 import numpy as np
+from gymnasium.core import ObservationWrapper
 
-from gym_saturation.constants import PARAMETRIC_ACTIONS
+from gym_saturation.constants import CLAUSE_EMBEDDINGS
 from gym_saturation.envs.saturation_env import SaturationEnv
 
 
-class ParametricActionsWrapper(gym.Wrapper, ABC):
+class ClauseEmbeddingsWrapper(ObservationWrapper, ABC):
     """
-    A parametric actions wrapper.
-
-    .. _parametric_actions:
+    A clause embeddings wrapper.
 
     It's incremental, i.e. it embeds only the new clauses in the observation.
     It defines the clauses as old if their order numbers are smaller than the
     previous step maximum.
 
-    >>> class ConstantClauseWeight(ParametricActionsWrapper):
+    >>> class ConstantClauseWeight(ClauseEmbeddingsWrapper):
     ...     def clause_embedder(self, clause: Dict[str, Any]) -> np.ndarray:
     ...         return np.ones(
-    ...             (self.observation_space[PARAMETRIC_ACTIONS].shape[1],)
+    ...             (self.observation_space[CLAUSE_EMBEDDINGS].shape[1],)
     ...         )
     >>> env = gym.make("Vampire-v0", max_clauses=10)
     >>> wrapped_env = ConstantClauseWeight(env, embedding_dim=1)
     >>> observation, info = wrapped_env.reset()
     >>> observation.keys()
-    dict_keys(['avail_actions'])
+    dict_keys(['clause_embeddings'])
     >>> info.keys()
-    dict_keys(['real_obs'])
-    >>> observation[PARAMETRIC_ACTIONS]
+    dict_keys(['clauses'])
+    >>> observation[CLAUSE_EMBEDDINGS]
     array([[1.],
            [1.],
            [1.],
@@ -61,7 +60,7 @@ class ParametricActionsWrapper(gym.Wrapper, ABC):
            [0.]])
     >>> _ = wrapped_env.step(0)
     >>> observation, _, _, _, _ = wrapped_env.step(1)
-    >>> observation[PARAMETRIC_ACTIONS]
+    >>> observation[CLAUSE_EMBEDDINGS]
     array([[1.],
            [1.],
            [1.],
@@ -81,21 +80,20 @@ class ParametricActionsWrapper(gym.Wrapper, ABC):
     ):
         """Initialise all the things."""
         super().__init__(env)
-        self.env: SaturationEnv = env  # type: ignore
-        parametric_actions = gym.spaces.Box(
+        clause_embeddings = gym.spaces.Box(
             low=-np.infty,
             high=np.infty,
             shape=(
-                int(env.action_space.n),
+                self.env.unwrapped.state.max_clauses,  # type: ignore
                 embedding_dim,
             ),
         )
         self.observation_space = gym.spaces.Dict(
             {
-                PARAMETRIC_ACTIONS: parametric_actions,
+                CLAUSE_EMBEDDINGS: clause_embeddings,
             }
         )
-        self.clause_embeddings = np.zeros(parametric_actions.shape)
+        self.clause_embeddings = np.zeros(clause_embeddings.shape)
         self.embedded_clauses_cnt = 0
 
     def reset(
@@ -110,10 +108,10 @@ class ParametricActionsWrapper(gym.Wrapper, ABC):
         :param seed: seed for compatibility
         :param options: options for compatibility
         """
-        observation, info = self.env.reset(seed=seed, options=options)
-        info["real_obs"] = observation
+        observation, info = super().reset(seed=seed, options=options)
+        info["clauses"] = observation
         self.embedded_clauses_cnt = 0
-        return self.observation(observation), info
+        return observation, info
 
     def observation(
         self, observation: Tuple[Dict[str, Any], ...]
@@ -141,27 +139,8 @@ class ParametricActionsWrapper(gym.Wrapper, ABC):
             ] = np.array(list(map(self.clause_embedder, new_clauses)))
             self.embedded_clauses_cnt += new_clauses_count
         return {
-            PARAMETRIC_ACTIONS: self.clause_embeddings,
+            CLAUSE_EMBEDDINGS: self.clause_embeddings,
         }
-
-    def step(
-        self, action: np.int64
-    ) -> Tuple[Dict[str, Any], float, bool, bool, Dict[str, Any]]:
-        """
-        Make the environment step.
-
-        :param action: agent's action of choice
-        """
-        observation, reward, terminated, truncated, info = self.env.step(
-            action
-        )
-        return (
-            self.observation(observation),
-            reward,
-            terminated,
-            truncated,
-            info,
-        )
 
     @abstractmethod
     def clause_embedder(self, literals: str) -> np.ndarray:

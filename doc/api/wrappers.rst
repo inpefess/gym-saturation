@@ -15,12 +15,18 @@
 
 Wrappers
 *********
-.. automodule:: gym_saturation.wrappers.parametric_actions_wrapper
+.. automodule:: gym_saturation.wrappers.clause_embeddings_wrapper
    :members:
    :special-members: __init__
 .. automodule:: gym_saturation.wrappers.ast2vec_wrapper
    :members:
    :special-members: __init__
-.. automodule:: gym_saturation.wrappers.llmwrapper
+.. automodule:: gym_saturation.wrappers.llm_wrapper
+   :members:
+   :special-members: __init__
+.. automodule:: gym_saturation.wrappers.md2d_wrapper
+   :members:
+   :special-members: __init__
+.. automodule:: gym_saturation.wrappers.useful_actions_wrapper
    :members:
    :special-members: __init__

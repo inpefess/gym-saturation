@@ -21,4 +21,5 @@ from gymnasium.envs.registration import register
 
 register(id="Vampire-v0", entry_point="gym_saturation.envs:VampireEnv")
 register(id="iProver-v0", entry_point="gym_saturation.envs:IProverEnv")
-__version__ = "0.11.0"
+register(id="Vampair-v0", entry_point="gym_saturation.envs:VampairEnv")
+__version__ = "0.11.1"
