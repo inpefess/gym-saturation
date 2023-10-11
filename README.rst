@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-|PyPI version|\ |Anaconda|\ |CircleCI|\ |Documentation Status|\ |codecov|\ |JOSS|
+|PyPI version|\ |Anaconda|\ |CircleCI|\ |Documentation Status|\ |codecov|\ |DOI|
 
 gym-saturation
 ==============
@@ -150,7 +150,7 @@ If you are writing a research paper and want to cite ``gym-saturation``, please 
    :target: https://gym-saturation.readthedocs.io/en/latest/?badge=latest
 .. |codecov| image:: https://codecov.io/gh/inpefess/gym-saturation/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/inpefess/gym-saturation
-.. |JOSS| image:: https://joss.theoj.org/papers/c4f36ec7331a0dde54d8c3808fbff9c3/status.svg
-   :target: https://joss.theoj.org/papers/c4f36ec7331a0dde54d8c3808fbff9c3
+.. |DOI| image:: https://img.shields.io/badge/DOI-10.1007%2F978--3--031--43513--3__11-blue
+   :target: https://doi.org/10.1007/978-3-031-43513-3_11
 .. |Anaconda| image:: https://anaconda.org/conda-forge/gym-saturation/badges/version.svg
    :target: https://anaconda.org/conda-forge/gym-saturation
