@@ -16,7 +16,7 @@
 Useful Actions Wrapper
 ======================
 """
-from typing import Any
+from typing import Any, Dict, Tuple
 
 from gymnasium.core import ActionWrapper
 
@@ -47,7 +47,7 @@ class UsefulActionsWrapper(ActionWrapper):
 
     def step(
         self, action: Any
-    ) -> tuple[Any, float, bool, bool, dict[str, Any]]:
+    ) -> Tuple[Any, float, bool, bool, Dict[str, Any]]:
         """
         Run the ``step`` and modify ``action``.
 
