@@ -107,6 +107,7 @@ class ClauseEmbeddingsWrapper(ObservationWrapper, ABC):
 
         :param seed: seed for compatibility
         :param options: options for compatibility
+        :returns: observations and info
         """
         observation, info = super().reset(seed=seed, options=options)
         info["clauses"] = observation

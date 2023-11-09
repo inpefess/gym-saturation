@@ -77,7 +77,7 @@ load-plugins = [
 [tool.pylint.parameter_documentation]
 accept-no-param-doc = false
 accept-no-raise-doc = false
-accept-no-return-doc = true
+accept-no-return-doc = false
 accept-no-yields-doc = false
 default-docstring-type = "sphinx"
 

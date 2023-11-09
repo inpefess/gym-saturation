@@ -113,7 +113,14 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         *,
         seed: Optional[int] = None,
         options: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:  # noqa: D102
+    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:
+        """
+        Reset the environment.
+
+        :param seed: seed for compatibility
+        :param options: options for compatibility
+        :returns: observations and info
+        """
         super().reset(seed=seed)
         random.seed(seed)
         self.state = ProofState(
@@ -163,7 +170,13 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         )
 
     # pylint: disable=inconsistent-return-statements
-    def render(self):  # noqa: D102
+    def render(self) -> None:
+        """
+        Return or print the proof state.
+
+        :returns: proof state (TPTP formatted) or nothing
+            (depending on ``render_mode``)
+        """
         tptp_string = "\n".join(
             map(
                 pretty_print,
@@ -171,7 +184,7 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
             )
         )
         if self.render_mode == "ansi":
-            return tptp_string
+            return tptp_string  # type: ignore
         if self.render_mode == "human":
             print(tptp_string)
         else:
