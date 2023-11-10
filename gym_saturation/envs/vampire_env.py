@@ -127,7 +127,14 @@ class VampireEnv(SaturationEnv):
         *,
         seed: Optional[int] = None,
         options: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:  # noqa: D102
+    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:
+        """
+        Reset the environment.
+
+        :param seed: seed for compatibility
+        :param options: options for compatibility
+        :returns: observations and info
+        """
         super().reset(seed=seed)
         tptp_folder = os.path.join(
             os.path.dirname(self.get_task()), "..", ".."

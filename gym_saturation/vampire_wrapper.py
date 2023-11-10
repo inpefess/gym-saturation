@@ -36,11 +36,6 @@ class VampireWrapper:
      ...
     ValueError: start solving a problem first!
     >>> result = vampire.start(MOCK_TPTP_PROBLEM, MOCK_TPTP_FOLDER)
-    >>> vampire.pick_a_clause("wrong")
-    Traceback (most recent call last):
-     ...
-    ValueError: (...TST001-1.p...invalid_argument...
-    ...
     """
 
     def __init__(
@@ -66,25 +61,13 @@ class VampireWrapper:
         self.proc.expect(
             ["Pick a clause:", "Pick a clause pair:", pexpect.EOF]
         )
-        for line in self.proc.before.decode("utf-8").split("\r\n"):
-            if (
-                line[:5] == "[SA] "
-                or line[:12] in {"[PP] final: ", "[PP] input: "}
-                or "[PP] fn def discovered: " in line
-            ):
+        lines = self.proc.before.decode("utf-8").split("\r\n")
+        for line in lines:
+            if line[:5] == "[SA] ":
                 result_type, result_body = line[5:].split(": ")
                 clause_label, clause = result_body.split(". ")
                 result += ((result_type, clause_label, clause),)
-        if (
-            result
-            or "User error: No clause in Passive has id"
-            in self.proc.before.decode("utf-8")
-            or not self.proc.before
-        ):
-            return result
-        raise ValueError(
-            self.problem_filename, self.proc.before.decode("utf-8")
-        )
+        return result
 
     def start(
         self, problem_filename: str, tptp_folder: str
