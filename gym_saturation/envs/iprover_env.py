@@ -1,4 +1,4 @@
-# Copyright 2022-2023 Boris Shminke
+# Copyright 2022-2024 Boris Shminke
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -169,9 +169,11 @@ class IProverEnv(SaturationEnv):
                 "role": "lemma",
                 "birth_step": dict_clause["clause_features"]["born"] - 1,
                 "inference_rule": inference_rule,
-                "inference_parents": tuple(inference_parents.split(","))
-                if inference_parents is not None
-                else (),
+                "inference_parents": (
+                    tuple(inference_parents.split(","))
+                    if inference_parents is not None
+                    else ()
+                ),
             }
 
     def reset(
