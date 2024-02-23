@@ -1,4 +1,4 @@
-# Copyright 2021-2023 Boris Shminke
+# Copyright 2021-2024 Boris Shminke
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,4 +22,4 @@ from gymnasium.envs.registration import register
 register(id="Vampire-v0", entry_point="gym_saturation.envs:VampireEnv")
 register(id="iProver-v0", entry_point="gym_saturation.envs:IProverEnv")
 register(id="Vampair-v0", entry_point="gym_saturation.envs:VampairEnv")
-__version__ = "0.11.4"
+__version__ = "0.11.5"

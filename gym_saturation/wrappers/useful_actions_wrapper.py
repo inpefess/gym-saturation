@@ -1,4 +1,4 @@
-#   Copyright 2023 Boris Shminke
+#   Copyright 2023-2024 Boris Shminke
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -60,10 +60,12 @@ class UsefulActionsWrapper(ActionWrapper):
         )
         return (
             observation,
-            -1.0
-            if len(self.env.unwrapped.state.clauses)  # type: ignore
-            == old_state_size
-            else reward,
+            (
+                -1.0
+                if len(self.env.unwrapped.state.clauses)  # type: ignore
+                == old_state_size
+                else reward
+            ),
             terminated,
             truncated,
             info,
