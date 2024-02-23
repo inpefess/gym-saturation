@@ -20,7 +20,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath(".."))
 project = "gym-saturation"
-version = "0.11.4"
+version = "0.11.5"
 copyright = "2021-2024, Boris Shminke"
 author = "Boris Shminke"
 extensions = [
