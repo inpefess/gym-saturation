@@ -72,6 +72,16 @@ load-plugins = [
     "pylint.extensions.docparams",
     "pylint.extensions.mccabe",
     "pylint.extensions.set_membership",
+    "pylint.extensions.code_style",
+    "pylint.extensions.broad_try_clause",
+    "pylint.extensions.comparison_placement",
+    "pylint.extensions.dict_init_mutate",
+    "pylint.extensions.redefined_loop_name",
+    "pylint.extensions.dunder",
+    "pylint.extensions.eq_without_hash",
+    "pylint.extensions.redefined_variable_type",
+    "pylint.extensions.overlapping_exceptions",
+    "pylint.extensions.confusing_elif",
 ]
 
 [tool.pylint.parameter_documentation]
