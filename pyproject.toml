@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "0.11.8"
+version = "0.11.9"
 description = "Gymnasium environments for saturation provers"
 authors = ["Boris Shminke <boris@shminke.com>"]
 license = "Apache-2.0"
@@ -28,7 +28,8 @@ keywords = ["saturation prover", "OpenAI Gym", "Gymnasium", "automated theorem p
 python = ">= 3.8.1, < 3.13"
 importlib_resources = {version = "*", markers = "python_version < '3.9'"}
 pexpect = "*"
-gymnasium = "*"
+gymnasium = "<1.0.0"
+numpy = "<2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
@@ -72,6 +73,16 @@ load-plugins = [
     "pylint.extensions.docparams",
     "pylint.extensions.mccabe",
     "pylint.extensions.set_membership",
+    "pylint.extensions.code_style",
+    "pylint.extensions.broad_try_clause",
+    "pylint.extensions.comparison_placement",
+    "pylint.extensions.dict_init_mutate",
+    "pylint.extensions.redefined_loop_name",
+    "pylint.extensions.dunder",
+    "pylint.extensions.eq_without_hash",
+    "pylint.extensions.redefined_variable_type",
+    "pylint.extensions.overlapping_exceptions",
+    "pylint.extensions.confusing_elif",
 ]
 
 [tool.pylint.parameter_documentation]
@@ -143,7 +154,7 @@ commands =
 github_url = "https://github.com/inpfess/gym-saturation/"
 
 [tool.tbump.version]
-current = "0.11.8"
+current = "0.11.9"
 regex = """
   (?P<major>\\d+)
   \\.
