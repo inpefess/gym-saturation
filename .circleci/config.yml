@@ -9,7 +9,7 @@ jobs:
           name: use tox
           command: |
             pip install tox
-            pyenv local 3.8.18 3.9.18 3.10.13 3.11.5 3.12.0
+            pyenv local 3.9.18 3.10.13 3.11.5 3.12.0
             tox
       - run:
           name: upload data to codecov
