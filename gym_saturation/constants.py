@@ -18,13 +18,7 @@ Constants used throughout the package
 ======================================
 """
 import os
-import sys
-
-if sys.version_info.major == 3 and sys.version_info.minor >= 9:
-    # pylint: disable=no-name-in-module
-    from importlib.resources import files  # type: ignore  # pragma: no cover
-else:  # pragma: no cover
-    from importlib_resources import files  # pylint: disable=import-error
+from importlib.resources import files
 
 CLAUSE_EMBEDDINGS = "clause_embeddings"
 FALSEHOOD_SYMBOL = "$false"

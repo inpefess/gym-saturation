@@ -19,10 +19,10 @@ Logic Operations Utility Functions
 """
 from http.server import HTTPServer
 from threading import Thread
-from typing import Any, Dict
+from typing import Any
 
 
-def pretty_print(clause: Dict[str, Any]) -> str:
+def pretty_print(clause: dict[str, Any]) -> str:
     """
     Print a logical formula back to TPTP language.
 

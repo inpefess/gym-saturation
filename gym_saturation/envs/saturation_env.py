@@ -19,7 +19,7 @@ Saturation Environment
 """
 import random
 from abc import abstractmethod
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 import numpy as np
 from gymnasium import Env, spaces
@@ -38,7 +38,7 @@ LONG_TEXT_SPACE = spaces.Text(
 )
 
 
-class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
+class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
     """
     Saturation algorithm in a reinforcement learning friendly way.
 
@@ -112,8 +112,8 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
         self,
         *,
         seed: Optional[int] = None,
-        options: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:
+        options: Optional[dict[str, Any]] = None,
+    ) -> tuple[tuple[dict[str, Any], ...], dict[str, Any]]:
         """
         Reset the environment.
 
@@ -136,7 +136,7 @@ class SaturationEnv(Env[Tuple[Dict[str, Any], ...], np.int64]):
 
     def step(
         self, action: Any
-    ) -> Tuple[Tuple[Dict[str, Any], ...], float, bool, bool, Dict[str, Any]]:
+    ) -> tuple[tuple[dict[str, Any], ...], float, bool, bool, dict[str, Any]]:
         # noqa: D301
         """
         Run one time-step of the environment's dynamics.

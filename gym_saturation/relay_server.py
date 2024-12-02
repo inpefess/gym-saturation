@@ -20,7 +20,7 @@ Relay Server between Two Sockets
 import json
 from queue import Queue
 from socketserver import BaseRequestHandler, ThreadingTCPServer
-from typing import Any, Dict, List, Tuple, Type
+from typing import Any
 
 QUERY_END_MESSAGE = "server_queries_start"
 SESSION_END_MESSAGE = "proof_out"
@@ -59,8 +59,8 @@ class RelayServer(ThreadingTCPServer):
 
     def __init__(
         self,
-        server_address: Tuple[str, int],
-        request_handler_class: Type[BaseRequestHandler],
+        server_address: tuple[str, int],
+        request_handler_class: type[BaseRequestHandler],
         bind_and_activate: bool = True,
     ):
         """Initialise queues."""
@@ -77,7 +77,7 @@ class RelayTCPHandler(BaseRequestHandler):
 
     def _read_messages(
         self, old_data: str
-    ) -> Tuple[List[Dict[str, Any]], str]:
+    ) -> tuple[list[dict[str, Any]], str]:
         raw_data = old_data + str(self.request.recv(4096), "utf8")
         raw_jsons = raw_data.split("\n\x00\n")
         return list(map(json.loads, raw_jsons[:-1])), raw_jsons[-1]
@@ -85,7 +85,7 @@ class RelayTCPHandler(BaseRequestHandler):
     def handle(self) -> None:
         """Read data from another TCP socket or send data to it."""
         if isinstance(self.server, RelayServer):
-            json_messages: List[Dict[str, Any]] = []
+            json_messages: list[dict[str, Any]] = []
             while (
                 len(json_messages) == 0
                 or json_messages[-1]["tag"] != SESSION_END_MESSAGE

@@ -22,7 +22,7 @@ import json
 import os
 import re
 from threading import Thread
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 import numpy as np
 from gymnasium.spaces import Discrete
@@ -138,7 +138,7 @@ class IProverEnv(SaturationEnv):
         self.relay_server_thread.start()
 
     def _parse_batch_clauses(
-        self, batch_clauses: List[Dict[str, Any]]
+        self, batch_clauses: list[dict[str, Any]]
     ) -> None:
         for dict_clause in batch_clauses:
             raw_clause = (
@@ -180,8 +180,8 @@ class IProverEnv(SaturationEnv):
         self,
         *,
         seed: Optional[int] = None,
-        options: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:
+        options: Optional[dict[str, Any]] = None,
+    ) -> tuple[tuple[dict[str, Any], ...], dict[str, Any]]:
         """
         Reset the environment.
 
@@ -200,7 +200,7 @@ class IProverEnv(SaturationEnv):
         self._parse_iprover_requests(data)
         return tuple(self.state.clauses.values()), {}
 
-    def _get_json_data(self) -> List[Dict[str, Any]]:
+    def _get_json_data(self) -> list[dict[str, Any]]:
         json_data = [{"tag": "None"}]
         while json_data[-1]["tag"] not in {
             QUERY_END_MESSAGE,
@@ -212,7 +212,7 @@ class IProverEnv(SaturationEnv):
         return json_data[1:]
 
     def _parse_iprover_requests(
-        self, iprover_requests: List[Dict[str, Any]]
+        self, iprover_requests: list[dict[str, Any]]
     ) -> None:
         for iprover_request in iprover_requests:
             if "clauses" in iprover_request:
