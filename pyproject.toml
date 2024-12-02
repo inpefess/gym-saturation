@@ -118,7 +118,7 @@ disable_error_code = "no-redef"
 check_untyped_defs = true
 
 [[tool.mypy.overrides]]
-module = ["pexpect", "importlib_resources", "enchant.*"]
+module = ["pexpect", "enchant.*"]
 ignore_missing_imports = true
 
 [tool.tox]
