@@ -18,7 +18,7 @@ Proof State
 ============
 """
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any
 
 from gym_saturation.constants import FALSEHOOD_SYMBOL
 
@@ -33,7 +33,7 @@ class ProofState:
     :param max_clauses: maximal possible number of clauses in the proof state
     """
 
-    clauses: Dict[str, Dict[str, Any]]
+    clauses: dict[str, dict[str, Any]]
     step_number: int
     max_clauses: int
 

@@ -17,7 +17,7 @@ Fixtures for the Tests
 =======================
 """
 from http.server import HTTPServer
-from typing import Generator
+from collections.abc import Generator
 
 from pytest import fixture
 

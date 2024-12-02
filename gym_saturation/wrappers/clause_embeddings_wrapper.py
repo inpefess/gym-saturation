@@ -17,7 +17,7 @@ Clause Embeddings Wrapper
 ==========================
 """
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 import gymnasium as gym
 import numpy as np
@@ -36,7 +36,7 @@ class ClauseEmbeddingsWrapper(ObservationWrapper, ABC):
     previous step maximum.
 
     >>> class ConstantClauseWeight(ClauseEmbeddingsWrapper):
-    ...     def clause_embedder(self, clause: Dict[str, Any]) -> np.ndarray:
+    ...     def clause_embedder(self, clause: dict[str, Any]) -> np.ndarray:
     ...         return np.ones(
     ...             (self.observation_space[CLAUSE_EMBEDDINGS].shape[1],)
     ...         )
@@ -100,8 +100,8 @@ class ClauseEmbeddingsWrapper(ObservationWrapper, ABC):
         self,
         *,
         seed: Optional[int] = None,
-        options: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+        options: Optional[dict[str, Any]] = None,
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
         """
         Reset the environment.
 
@@ -115,8 +115,8 @@ class ClauseEmbeddingsWrapper(ObservationWrapper, ABC):
         return observation, info
 
     def observation(
-        self, observation: Tuple[Dict[str, Any], ...]
-    ) -> Dict[str, Any]:
+        self, observation: tuple[dict[str, Any], ...]
+    ) -> dict[str, Any]:
         """
         Return a modified observation.
 

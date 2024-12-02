@@ -17,7 +17,7 @@
 Vampire Wrapper
 ================
 """
-from typing import Optional, Tuple
+from typing import Optional
 
 import pexpect
 
@@ -56,8 +56,8 @@ class VampireWrapper:
             else command_line_arguments
         )
 
-    def _get_stdout(self) -> Tuple[Tuple[str, str, str], ...]:
-        result: Tuple[Tuple[str, str, str], ...] = ()
+    def _get_stdout(self) -> tuple[tuple[str, str, str], ...]:
+        result: tuple[tuple[str, str, str], ...] = ()
         self.proc.expect(
             ["Pick a clause:", "Pick a clause pair:", pexpect.EOF]
         )
@@ -71,7 +71,7 @@ class VampireWrapper:
 
     def start(
         self, problem_filename: str, tptp_folder: str
-    ) -> Tuple[Tuple[str, str, str], ...]:
+    ) -> tuple[tuple[str, str, str], ...]:
         """
         Start Vampire in a manual mode on a given problem.
 
@@ -95,7 +95,7 @@ class VampireWrapper:
 
     def pick_a_clause(
         self, clause_label: str
-    ) -> Tuple[Tuple[str, str, str], ...]:
+    ) -> tuple[tuple[str, str, str], ...]:
         """
         Select a clause and get response from Vampire.
 

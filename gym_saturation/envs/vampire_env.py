@@ -18,7 +18,7 @@ Saturation Environment with Vampire back-end
 ============================================
 """
 import os
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 import numpy as np
 from gymnasium.spaces import Discrete
@@ -103,7 +103,7 @@ class VampireEnv(SaturationEnv):
         self.action_space = Discrete(self.state.max_clauses)
 
     def _parse_vampire_response(
-        self, vampire_response: Tuple[Tuple[str, str, str], ...]
+        self, vampire_response: tuple[tuple[str, str, str], ...]
     ) -> None:
         for response_type, clause_label, clause_text in vampire_response:
             if response_type == "passive" or FALSEHOOD_SYMBOL in clause_text:
@@ -126,8 +126,8 @@ class VampireEnv(SaturationEnv):
         self,
         *,
         seed: Optional[int] = None,
-        options: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[Tuple[Dict[str, Any], ...], Dict[str, Any]]:
+        options: Optional[dict[str, Any]] = None,
+    ) -> tuple[tuple[dict[str, Any], ...], dict[str, Any]]:
         """
         Reset the environment.
 
@@ -153,7 +153,7 @@ class VampireEnv(SaturationEnv):
 
     def _parse_vampire_clause(
         self, clause_label: str, clause_text: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         formula, inference_info = clause_text.split("[")
         pre_inference = inference_info.split("]")[0].split(" ")
         if len(pre_inference) > 1:
