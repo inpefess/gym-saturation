@@ -1,4 +1,4 @@
-# Copyright 2021-2024 Boris Shminke
+# Copyright 2021-2025 Boris Shminke
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ for dirpath, dirnames, filenames in os.walk("doc"):
         if os.path.splitext(filename)[1] == ".rst":
             checker = SpellChecker(DictWithPWL("en_GB", "spelling.dict"))
             with open(
-                os.path.join(dirpath, filename), "r", encoding="utf-8"
+                os.path.join(dirpath, filename), encoding="utf-8"
             ) as doc_file:
                 doc_text = doc_file.read()
             checker.set_text(doc_text)
