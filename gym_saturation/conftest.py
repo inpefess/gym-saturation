@@ -1,4 +1,4 @@
-# Copyright 2023-2024 Boris Shminke
+# Copyright 2023-2025 Boris Shminke
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 Fixtures for the Tests
 =======================
 """
-from http.server import HTTPServer
 from collections.abc import Generator
+from http.server import HTTPServer
 
 from pytest import fixture
 

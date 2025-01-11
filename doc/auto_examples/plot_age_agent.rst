@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_auto_examples_plot_age_agent.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -30,7 +30,7 @@ To make a ``gym-saturation`` environment, we have to import the package
 
 .. GENERATED FROM PYTHON SOURCE LINES 10-15
 
-.. code-block:: default
+.. code-block:: Python
 
 
     import gymnasium as gym
@@ -50,7 +50,7 @@ then we can make a prover environment as any other Gymnasium one
 
 .. GENERATED FROM PYTHON SOURCE LINES 17-20
 
-.. code-block:: default
+.. code-block:: Python
 
 
     env = gym.make("Vampire-v0")
@@ -68,7 +68,7 @@ before using the environment, we should reset it
 
 .. GENERATED FROM PYTHON SOURCE LINES 22-25
 
-.. code-block:: default
+.. code-block:: Python
 
 
     observation, info = env.reset()
@@ -86,7 +86,7 @@ before using the environment, we should reset it
 
 .. GENERATED FROM PYTHON SOURCE LINES 27-30
 
-.. code-block:: default
+.. code-block:: Python
 
 
     print(info)
@@ -110,7 +110,7 @@ observation is a tuple of JSON representations of logic clauses
 
 .. GENERATED FROM PYTHON SOURCE LINES 32-37
 
-.. code-block:: default
+.. code-block:: Python
 
 
     from pprint import pprint
@@ -167,7 +167,7 @@ every idempotent element equals the identity
 
 .. GENERATED FROM PYTHON SOURCE LINES 41-44
 
-.. code-block:: default
+.. code-block:: Python
 
 
     env.render()
@@ -196,7 +196,7 @@ We set the random seed for reproducibility.
 
 .. GENERATED FROM PYTHON SOURCE LINES 47-55
 
-.. code-block:: default
+.. code-block:: Python
 
 
     env.action_space.seed(0)
@@ -219,7 +219,7 @@ the episode terminated with positive reward
 
 .. GENERATED FROM PYTHON SOURCE LINES 57-60
 
-.. code-block:: default
+.. code-block:: Python
 
 
     print(terminated, truncated, reward)
@@ -245,7 +245,7 @@ we did to find proof.
 
 .. GENERATED FROM PYTHON SOURCE LINES 64-66
 
-.. code-block:: default
+.. code-block:: Python
 
     pprint(observation[-1])
 
@@ -276,7 +276,7 @@ We initialise iProver-based environment in the same way
 
 .. GENERATED FROM PYTHON SOURCE LINES 71-74
 
-.. code-block:: default
+.. code-block:: Python
 
 
     env = gym.make("iProver-v0")
@@ -295,7 +295,7 @@ order they appear
 
 .. GENERATED FROM PYTHON SOURCE LINES 77-86
 
-.. code-block:: default
+.. code-block:: Python
 
 
     observation, info = env.reset()
@@ -310,12 +310,6 @@ order they appear
 
 
 
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    Loop <_UnixSelectorEventLoop running=False closed=True debug=False> that handles pid 7094 is closed
-
 
 
 
@@ -325,7 +319,7 @@ We still arrive at contradiction but it takes a different number of steps
 
 .. GENERATED FROM PYTHON SOURCE LINES 88-91
 
-.. code-block:: default
+.. code-block:: Python
 
 
     print(terminated, truncated, reward)
@@ -352,7 +346,7 @@ We still arrive at contradiction but it takes a different number of steps
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.825 seconds)
+   **Total running time of the script:** (0 minutes 0.841 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_age_agent.py:
@@ -361,16 +355,17 @@ We still arrive at contradiction but it takes a different number of steps
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
 
-
+      :download:`Download Jupyter notebook: plot_age_agent.ipynb <plot_age_agent.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_age_agent.py <plot_age_agent.py>`
 
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
+    .. container:: sphx-glr-download sphx-glr-download-zip
 
-      :download:`Download Jupyter notebook: plot_age_agent.ipynb <plot_age_agent.ipynb>`
+      :download:`Download zipped: plot_age_agent.zip <plot_age_agent.zip>`
 
 
 .. only:: html
