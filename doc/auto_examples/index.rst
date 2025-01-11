@@ -9,6 +9,7 @@ Agents-provers
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -26,6 +27,8 @@ Agents-provers
       <div class="sphx-glr-thumbnail-title">Random and age agents for Vampire and iProver</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
