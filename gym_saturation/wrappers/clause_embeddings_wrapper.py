@@ -81,8 +81,8 @@ class ClauseEmbeddingsWrapper(ObservationWrapper, ABC):
         """Initialise all the things."""
         super().__init__(env)
         clause_embeddings = gym.spaces.Box(
-            low=-np.infty,
-            high=np.infty,
+            low=-np.inf,
+            high=np.inf,
             shape=(
                 self.env.unwrapped.state.max_clauses,  # type: ignore
                 embedding_dim,

@@ -28,7 +28,7 @@ keywords = ["saturation prover", "OpenAI Gym", "Gymnasium", "automated theorem p
 python = ">= 3.9.0, < 3.14"
 pexpect = "*"
 gymnasium = "<1.0.0"
-numpy = "<2.0.0"
+numpy = "*"
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
