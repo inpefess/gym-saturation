@@ -23,6 +23,9 @@ installed and ready to go.
       cd git_URL
       git clone git@github.com:YOUR_NAME/gym-saturation.git
 
+#. Install
+   [poetry](https://python-poetry.org/docs/#installing-with-the-official-installer)
+
 #. It's highly recommended to use a virtual environment for your
    local development (by the standard means of Python or using
    Anaconda or anything else):
@@ -42,9 +45,7 @@ installed and ready to go.
 
    .. code:: bash
 		   
-      pip install -U pip
-      pip install -U setuptools wheel poetry
-      poetry install
+      poetry install --all-groups
       # install Vampire binary
       wget https://github.com/vprover/vampire/releases/download/v4.7/vampire4.7.zip -O vampire.zip
       unzip vampire.zip
