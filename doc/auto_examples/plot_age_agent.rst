@@ -21,14 +21,14 @@
 Random and age agents for Vampire and iProver
 ==============================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 6-10
+.. GENERATED FROM PYTHON SOURCE LINES 7-11
 
 Random agent for Vampire
 -------------------------
 
 To make a ``gym-saturation`` environment, we have to import the package
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-15
+.. GENERATED FROM PYTHON SOURCE LINES 11-16
 
 .. code-block:: Python
 
@@ -44,11 +44,11 @@ To make a ``gym-saturation`` environment, we have to import the package
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 16-17
+.. GENERATED FROM PYTHON SOURCE LINES 17-18
 
 then we can make a prover environment as any other Gymnasium one
 
-.. GENERATED FROM PYTHON SOURCE LINES 17-20
+.. GENERATED FROM PYTHON SOURCE LINES 18-21
 
 .. code-block:: Python
 
@@ -62,11 +62,11 @@ then we can make a prover environment as any other Gymnasium one
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 21-22
+.. GENERATED FROM PYTHON SOURCE LINES 22-23
 
 before using the environment, we should reset it
 
-.. GENERATED FROM PYTHON SOURCE LINES 22-25
+.. GENERATED FROM PYTHON SOURCE LINES 23-26
 
 .. code-block:: Python
 
@@ -80,11 +80,11 @@ before using the environment, we should reset it
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 26-27
+.. GENERATED FROM PYTHON SOURCE LINES 27-28
 
 ``gym-saturation`` environments don't return any ``info``
 
-.. GENERATED FROM PYTHON SOURCE LINES 27-30
+.. GENERATED FROM PYTHON SOURCE LINES 28-31
 
 .. code-block:: Python
 
@@ -104,11 +104,11 @@ before using the environment, we should reset it
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 31-32
+.. GENERATED FROM PYTHON SOURCE LINES 32-33
 
 observation is a tuple of JSON representations of logic clauses
 
-.. GENERATED FROM PYTHON SOURCE LINES 32-37
+.. GENERATED FROM PYTHON SOURCE LINES 33-38
 
 .. code-block:: Python
 
@@ -159,13 +159,13 @@ observation is a tuple of JSON representations of logic clauses
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 38-41
+.. GENERATED FROM PYTHON SOURCE LINES 39-42
 
 We can render the environment state in the TPTP format.
 By default, we are trying to prove a basic group theory lemma:
 every idempotent element equals the identity
 
-.. GENERATED FROM PYTHON SOURCE LINES 41-44
+.. GENERATED FROM PYTHON SOURCE LINES 42-45
 
 .. code-block:: Python
 
@@ -189,12 +189,12 @@ every idempotent element equals the identity
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-47
+.. GENERATED FROM PYTHON SOURCE LINES 46-48
 
 here is an example of an episode during which we play random actions.
 We set the random seed for reproducibility.
 
-.. GENERATED FROM PYTHON SOURCE LINES 47-55
+.. GENERATED FROM PYTHON SOURCE LINES 48-56
 
 .. code-block:: Python
 
@@ -213,11 +213,11 @@ We set the random seed for reproducibility.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 56-57
+.. GENERATED FROM PYTHON SOURCE LINES 57-58
 
 the episode terminated with positive reward
 
-.. GENERATED FROM PYTHON SOURCE LINES 57-60
+.. GENERATED FROM PYTHON SOURCE LINES 58-61
 
 .. code-block:: Python
 
@@ -237,13 +237,13 @@ the episode terminated with positive reward
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 61-64
+.. GENERATED FROM PYTHON SOURCE LINES 62-65
 
 It means we arrived at a contradiction (``$false``) which proves the lemma.
 Notice the ``birth_step`` number of a contradiction, it shows how many steps
 we did to find proof.
 
-.. GENERATED FROM PYTHON SOURCE LINES 64-66
+.. GENERATED FROM PYTHON SOURCE LINES 65-67
 
 .. code-block:: Python
 
@@ -267,14 +267,14 @@ we did to find proof.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 67-71
+.. GENERATED FROM PYTHON SOURCE LINES 68-72
 
 Age agent for iProver
 ----------------------
 
 We initialise iProver-based environment in the same way
 
-.. GENERATED FROM PYTHON SOURCE LINES 71-74
+.. GENERATED FROM PYTHON SOURCE LINES 72-76
 
 .. code-block:: Python
 
@@ -288,12 +288,33 @@ We initialise iProver-based environment in the same way
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 75-77
+
+.. GENERATED FROM PYTHON SOURCE LINES 77-78
+
+Special magic needed if running by Jupyter
+
+.. GENERATED FROM PYTHON SOURCE LINES 78-83
+
+.. code-block:: Python
+
+
+    import nest_asyncio
+
+    nest_asyncio.apply()
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 84-86
 
 Instead of a random agent, let's use Age agent which selects actions in the
 order they appear
 
-.. GENERATED FROM PYTHON SOURCE LINES 77-86
+.. GENERATED FROM PYTHON SOURCE LINES 86-95
 
 .. code-block:: Python
 
@@ -313,11 +334,11 @@ order they appear
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 87-88
+.. GENERATED FROM PYTHON SOURCE LINES 96-97
 
 We still arrive at contradiction but it takes a different number of steps
 
-.. GENERATED FROM PYTHON SOURCE LINES 88-91
+.. GENERATED FROM PYTHON SOURCE LINES 97-100
 
 .. code-block:: Python
 
@@ -346,7 +367,7 @@ We still arrive at contradiction but it takes a different number of steps
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.841 seconds)
+   **Total running time of the script:** (0 minutes 0.845 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_age_agent.py:

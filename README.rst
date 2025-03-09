@@ -76,7 +76,10 @@ One can also run it in a Docker container (pre-packed with
 .. code:: sh
 
    docker build -t gym-saturation https://github.com/inpefess/gym-saturation.git
-   docker run -it --rm -p 8888:8888 gym-saturation jupyter-lab --ip=0.0.0.0 --port=8888
+   docker run --rm -p 8888:8888 --name gym-saturation -d gym-saturation
+
+And then naviagate to http://localhost:8888/lab/tree/example.ipynb
+in your browser.
 
 How to use
 ==========

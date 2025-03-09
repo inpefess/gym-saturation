@@ -2,6 +2,7 @@
 Random and age agents for Vampire and iProver
 ==============================================
 """
+
 # %%
 # Random agent for Vampire
 # -------------------------
@@ -70,6 +71,14 @@ pprint(observation[-1])
 # We initialise iProver-based environment in the same way
 
 env = gym.make("iProver-v0")
+
+
+# %%
+# Special magic needed if running by Jupyter
+
+import nest_asyncio
+
+nest_asyncio.apply()
 
 # %%
 # Instead of a random agent, let's use Age agent which selects actions in the

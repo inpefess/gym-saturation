@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:00.841** total execution time for 1 file **from auto_examples**:
+**00:00.845** total execution time for 1 file **from auto_examples**:
 
 .. container::
 
@@ -33,5 +33,5 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_auto_examples_plot_age_agent.py` (``plot_age_agent.py``)
-     - 00:00.841
+     - 00:00.845
      - 0.0
