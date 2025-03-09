@@ -116,6 +116,7 @@ guidelines:
        cd doc
        make html
    
-#. The pull request should work for Python 3.9, 3.10, 3.11 and
-   3.12. Check https://github.com/inpefess/gym-saturation/pulls and
-   make sure that the CI checks pass for all supported Python versions.
+#. The pull request should work for Python 3.9, 3.10, 3.11, 3.12 and
+   3.13. Check https://github.com/inpefess/gym-saturation/pulls and
+   make sure that the CI checks pass for all supported Python
+   versions.
