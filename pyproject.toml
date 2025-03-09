@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "0.12.1"
+version = "0.12.2"
 description = "Gymnasium environments for saturation provers"
 authors = ["Boris Shminke <boris@shminke.com>"]
 license = "Apache-2.0"
@@ -153,7 +153,7 @@ commands =
 github_url = "https://github.com/inpfess/gym-saturation/"
 
 [tool.tbump.version]
-current = "0.12.1"
+current = "0.12.2"
 regex = """
   (?P<major>\\d+)
   \\.
