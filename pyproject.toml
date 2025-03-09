@@ -48,6 +48,7 @@ jedi = "*"
 bandit = {version = "*", extras = ["toml"]}
 pyupgrade = "*"
 pyroma = "*"
+nest-asyncio = "*"
 
 [tool.black]
 line-length=79
