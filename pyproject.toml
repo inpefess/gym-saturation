@@ -127,7 +127,7 @@ ignore_missing_imports = true
 legacy_tox_ini = """
 [tox]
 isolated_build = True
-envlist = py38,py39,py310,py311,py312,py13
+envlist = py39,py310,py311,py312,py13
 
 [testenv]
 deps =
