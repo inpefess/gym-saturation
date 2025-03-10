@@ -34,7 +34,6 @@ numpy = "*"
 black = "*"
 mypy = "*"
 pylint = "*"
-pytest-coverage = "*"
 pre-commit = "*"
 types-dataclasses = "*"
 sphinx-autodoc-typehints = "*"
@@ -51,6 +50,10 @@ pyupgrade = "*"
 pyroma = "*"
 nest-asyncio = "*"
 
+[tool.poetry.group.test.dependencies]
+coverage = "*"
+pytest = "*"
+
 [tool.black]
 line-length=79
 
@@ -64,7 +67,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--doctest-modules --cov gym_saturation --cov-report xml --cov-fail-under=100 --junit-xml test-results/gym-saturation.xml"
+addopts = "--doctest-modules --junit-xml test-results/gym-saturation.xml"
 testpaths = ["gym_saturation"]
 doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
 
@@ -131,7 +134,8 @@ envlist = py39,py310,py311,py312,py13
 
 [testenv]
 deps =
-    pytest-cov
+    coverage
+    pytest
     pydocstyle
     pylint
     mypy
@@ -145,7 +149,8 @@ commands =
     flake8 gym_saturation
     pylint gym_saturation
     mypy gym_saturation
-    pytest
+    coverage run -m pytest
+    coverage xml --fail-under=100
     pyroma .
     bandit -r gym_saturation
 """
