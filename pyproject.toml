@@ -138,33 +138,31 @@ module = ["pexpect", "enchant.*"]
 ignore_missing_imports = true
 
 [tool.tox]
-legacy_tox_ini = """
-[tox]
-isolated_build = True
-envlist = py39,py310,py311,py312,py13
+env_list = ["py39", "py310", "py311", "py312", "py13"]
 
-[testenv]
-deps =
-    coverage
-    pytest
-    pydocstyle
-    pylint
-    mypy
-    toml
-    pyenchant
-    flake8
-    pyroma
-    bandit
-commands =
-    pydocstyle gym_saturation
-    flake8 gym_saturation
-    pylint gym_saturation
-    mypy gym_saturation
-    coverage run -m pytest
-    coverage xml --fail-under=100
-    pyroma .
-    bandit -r gym_saturation
-"""
+[tool.tox.env_run_base]
+deps = [
+    "coverage",
+    "pytest",
+    "pydocstyle",
+    "pylint",
+    "mypy",
+    "toml",
+    "pyenchant",
+    "flake8",
+    "pyroma",
+    "bandit"
+]
+commands = [
+    ["pydocstyle", "gym_saturation"],
+    ["flake8", "gym_saturation"],
+    ["pylint", "gym_saturation"],
+    ["mypy", "gym_saturation"],
+    ["coverage", "run", "-m", "pytest"],
+    ["coverage", "xml", "--fail-under=100"],
+    ["pyroma", "."],
+    ["bandit", "-r", "gym_saturation"]
+]
 
 [tool.tbump]
 github_url = "https://github.com/inpfess/gym-saturation/"
