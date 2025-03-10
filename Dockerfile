@@ -1,4 +1,4 @@
-FROM inpefess/python_with_provers:3.12.0
+FROM inpefess/python_with_provers:2025.03.10
 COPY gym_saturation ./gym_saturation
 COPY pyproject.toml .
 COPY poetry.toml .

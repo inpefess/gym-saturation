@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "0.12.2"
+version = "0.12.3"
 description = "Gymnasium environments for saturation provers"
 authors = ["Boris Shminke <boris@shminke.com>"]
 license = "Apache-2.0"
@@ -11,6 +11,7 @@ classifiers=[
 	"Programming Language :: Python :: 3.10",
 	"Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
 	"License :: OSI Approved :: Apache Software License",
 	"Operating System :: OS Independent",
 	"Intended Audience :: Science/Research",
@@ -24,10 +25,10 @@ include = ["gym_saturation/py.typed"]
 keywords = ["saturation prover", "OpenAI Gym", "Gymnasium", "automated theorem prover"]
 
 [tool.poetry.dependencies]
-python = ">= 3.9.0, < 3.13"
+python = ">= 3.9.0, < 3.14"
 pexpect = "*"
-gymnasium = "<1.0.0"
-numpy = "<2.0.0"
+gymnasium = "*"
+numpy = "*"
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
@@ -126,7 +127,7 @@ ignore_missing_imports = true
 legacy_tox_ini = """
 [tox]
 isolated_build = True
-envlist = py38,py39,py310,py311,py312
+envlist = py38,py39,py310,py311,py312,py13
 
 [testenv]
 deps =
@@ -153,7 +154,7 @@ commands =
 github_url = "https://github.com/inpfess/gym-saturation/"
 
 [tool.tbump.version]
-current = "0.12.2"
+current = "0.12.3"
 regex = """
   (?P<major>\\d+)
   \\.
