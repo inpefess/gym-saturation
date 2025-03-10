@@ -30,29 +30,40 @@ pexpect = "*"
 gymnasium = "*"
 numpy = "*"
 
+[tool.poetry.group.dev]
+optional = true
+
 [tool.poetry.group.dev.dependencies]
 black = "*"
 mypy = "*"
 pylint = "*"
 pre-commit = "*"
-types-dataclasses = "*"
-sphinx-autodoc-typehints = "*"
 pydocstyle = "*"
 tbump = "*"
 pyenchant = "*"
 flake8 = "*"
 toml = "*"
-furo = "*"
-sphinx-gallery = "*"
 jedi = "*"
 bandit = {version = "*", extras = ["toml"]}
 pyupgrade = "*"
 pyroma = "*"
-nest-asyncio = "*"
+
+[tool.poetry.group.test]
+optional = true
 
 [tool.poetry.group.test.dependencies]
 coverage = "*"
 pytest = "*"
+
+[tool.poetry.group.doc]
+optional = true
+
+[tool.poetry.group.doc.dependencies]
+types-dataclasses = "*"
+sphinx-autodoc-typehints = "*"
+furo = "*"
+sphinx-gallery = "*"
+nest-asyncio = "*"
 
 [tool.black]
 line-length=79
