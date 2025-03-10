@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   build-and-test:
     docker:
-      - image: inpefess/python_with_provers:2025.03.09
+      - image: inpefess/python_with_provers:2025.03.10
     steps:
       - checkout
       - run:

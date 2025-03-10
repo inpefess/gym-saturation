@@ -367,7 +367,7 @@ We still arrive at contradiction but it takes a different number of steps
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.845 seconds)
+   **Total running time of the script:** (0 minutes 0.809 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_age_agent.py:
