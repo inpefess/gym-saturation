@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "0.12.3"
+version = "0.12.4"
 description = "Gymnasium environments for saturation provers"
 authors = ["Boris Shminke <boris@shminke.com>"]
 license = "Apache-2.0"
@@ -30,25 +30,39 @@ pexpect = "*"
 gymnasium = "*"
 numpy = "*"
 
+[tool.poetry.group.dev]
+optional = true
+
 [tool.poetry.group.dev.dependencies]
 black = "*"
 mypy = "*"
 pylint = "*"
-pytest-coverage = "*"
 pre-commit = "*"
-types-dataclasses = "*"
-sphinx-autodoc-typehints = "*"
 pydocstyle = "*"
 tbump = "*"
 pyenchant = "*"
 flake8 = "*"
 toml = "*"
-furo = "*"
-sphinx-gallery = "*"
 jedi = "*"
 bandit = {version = "*", extras = ["toml"]}
 pyupgrade = "*"
 pyroma = "*"
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+coverage = "*"
+pytest = "*"
+
+[tool.poetry.group.doc]
+optional = true
+
+[tool.poetry.group.doc.dependencies]
+types-dataclasses = "*"
+sphinx-autodoc-typehints = "*"
+furo = "*"
+sphinx-gallery = "*"
 nest-asyncio = "*"
 
 [tool.black]
@@ -64,7 +78,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--doctest-modules --cov gym_saturation --cov-report xml --cov-fail-under=100 --junit-xml test-results/gym-saturation.xml"
+addopts = "--doctest-modules --junit-xml test-results/gym-saturation.xml"
 testpaths = ["gym_saturation"]
 doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
 
@@ -124,37 +138,37 @@ module = ["pexpect", "enchant.*"]
 ignore_missing_imports = true
 
 [tool.tox]
-legacy_tox_ini = """
-[tox]
-isolated_build = True
-envlist = py38,py39,py310,py311,py312,py13
+env_list = ["py39", "py310", "py311", "py312", "py13"]
 
-[testenv]
-deps =
-    pytest-cov
-    pydocstyle
-    pylint
-    mypy
-    toml
-    pyenchant
-    flake8
-    pyroma
-    bandit
-commands =
-    pydocstyle gym_saturation
-    flake8 gym_saturation
-    pylint gym_saturation
-    mypy gym_saturation
-    pytest
-    pyroma .
-    bandit -r gym_saturation
-"""
+[tool.tox.env_run_base]
+deps = [
+    "coverage",
+    "pytest",
+    "pydocstyle",
+    "pylint",
+    "mypy",
+    "toml",
+    "pyenchant",
+    "flake8",
+    "pyroma",
+    "bandit"
+]
+commands = [
+    ["pydocstyle", "gym_saturation"],
+    ["flake8", "gym_saturation"],
+    ["pylint", "gym_saturation"],
+    ["mypy", "gym_saturation"],
+    ["coverage", "run", "-m", "pytest"],
+    ["coverage", "xml", "--fail-under=100"],
+    ["pyroma", "."],
+    ["bandit", "-r", "gym_saturation"]
+]
 
 [tool.tbump]
 github_url = "https://github.com/inpfess/gym-saturation/"
 
 [tool.tbump.version]
-current = "0.12.3"
+current = "0.12.4"
 regex = """
   (?P<major>\\d+)
   \\.

@@ -81,7 +81,8 @@ installed and ready to go.
 
    .. code:: bash
 
-      pytest --cov-report term-missing
+      coverage run -m pytest
+      coverage report -m
 
 #. If your contribution is a bug fix or new feature, you may want to
    add a test to the existing test suite. If possible, do it by
