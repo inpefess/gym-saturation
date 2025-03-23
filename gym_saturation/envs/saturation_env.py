@@ -59,18 +59,10 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
 
     def __init__(
         self,
-        max_clauses: int = MAX_CLAUSES,
     ):
-        """
-        Initialise spaces et al.
-
-        :param max_clauses: maximal number of clauses to store in proof state
-        """
+        """Initialise spaces et al."""
         super().__init__()
-        self.state = ProofState(
-            clauses={},
-            max_clauses=max_clauses,
-        )
+        self.state = ProofState(clauses={})
         self.observation_space = spaces.Sequence(
             spaces.Dict(
                 {
@@ -99,10 +91,7 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
         """
         super().reset(seed=seed)
         random.seed(seed)
-        self.state = ProofState(
-            clauses={},
-            max_clauses=self.state.max_clauses,
-        )
+        self.state = ProofState(clauses={})
         return tuple(self.state.clauses.values()), {}
 
     @abstractmethod
@@ -125,21 +114,19 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
         :returns: a tuple of four values:\n
             * observation: agent's observation of the current environment
             * reward: amount of reward returned after previous action
-            * terminated: Whether the proof was found
-            * truncated: Whether the maximal number of clauses in the proof
-              state were reached
+            * terminated: whether the proof was found
+            * truncated: whether the episode was finished for an external
+              reason (e.g. time limit)
             * info: contains auxiliary diagnostic information (helpful for
               debugging, and sometimes learning)
         """
-        if not (self.state.terminated or self.state.truncated):
+        if not self.state.terminated:
             self._do_deductions(action)
-        if self.state.truncated:
-            self.on_truncated()
         return (
             tuple(self.state.clauses.values()),
             1.0 if self.state.terminated else 0.0,
             self.state.terminated,
-            self.state.truncated,
+            False,
             {},
         )
 
@@ -162,6 +149,3 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
         :raises ValueError: is task is not set
         """
         return self._task
-
-    def on_truncated(self) -> None:
-        """Prover-specific episode truncation."""

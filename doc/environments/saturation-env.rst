@@ -108,8 +108,11 @@ Reward is ``1.0`` after a step iff the saturation algorithm terminated at this s
 Episode End
 ************
 
-* Termination means the saturation algorithm ended with refutation found or satisfiability established.
-* Truncation happens if the number of clauses in the state exceeds ``action_space.n``.
+* Termination means the saturation algorithm ended with refutation
+  found or satisfiability established.
+* There is no default truncation condition (one can add it using
+  wrappers, e.g. `TimeLimit
+  <https://gymnasium.farama.org/api/wrappers/misc_wrappers/#gymnasium.wrappers.TimeLimit>`__)
 
 Information
 ************
@@ -125,11 +128,8 @@ Arguments
     
    gymnasium.make(
        "Vampire-v0",  # or "iProver-v0"
-       max_clauses=1000,
        prover_binary_path="vampire",  # or "iproveropt"
    )
-
-``max_clauses=1000``: the size ``n`` of the action space.
 
 ``prover_binary_path="vampire"`` (or ``"iproveropt"``): the path to a prover binary (supposed to be on the ``$PATH`` by default)
 

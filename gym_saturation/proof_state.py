@@ -29,23 +29,14 @@ class ProofState:
     An object to store all relevant info about a saturation prover state.
 
     :param clauses: passive clauses
-    :param max_clauses: maximal possible number of clauses in the proof state
     """
 
     clauses: dict[str, dict[str, Any]]
-    max_clauses: int
 
     @property
     def terminated(self) -> bool:
         """Refutation found or satisfiability established."""
-        return (
-            max(
-                clause["literals"] == FALSEHOOD_SYMBOL
-                for clause in self.clauses.values()
-            )
-        ) and not self.truncated
-
-    @property
-    def truncated(self) -> bool:
-        """More clauses generated than expected."""
-        return len(self.clauses) > self.max_clauses
+        return max(
+            clause["literals"] == FALSEHOOD_SYMBOL
+            for clause in self.clauses.values()
+        )

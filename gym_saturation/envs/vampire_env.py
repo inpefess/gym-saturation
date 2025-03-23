@@ -43,18 +43,11 @@ class VampireEnv(SaturationEnv):
 
     repeating actions change nothing
 
-    >>> env = gym.make("Vampire-v0", max_clauses=5)
+    >>> env = gym.make("Vampire-v0")
     >>> _ = env.reset()
     >>> one = env.step(0)
     >>> two = env.step(0)
     >>> one == two
-    True
-
-    episode is truncated if we have more than ``max_clauses`` clauses
-
-    >>> _, _, _, truncated, _ = env.step(1)
-    >>> _, _, _, truncated, _ = env.step(2)
-    >>> truncated
     True
 
     sometimes Vampire can solve a problem during pre-processing
@@ -69,6 +62,7 @@ class VampireEnv(SaturationEnv):
     >>> _, _, terminated, _, _ = env.step(0)
     >>> terminated
     True
+    >>> env.close()
 
     a test of an unexpected reply from Vampire
 
@@ -83,19 +77,17 @@ class VampireEnv(SaturationEnv):
 
     def __init__(
         self,
-        max_clauses: int = MAX_CLAUSES,
         prover_binary_path: str = "vampire",
     ):
         """
         Initialise a :ref:`VampireWrapper <vampire-wrapper>`.
 
-        :param max_clauses: maximal number of clauses in proof state
         :param prover_binary_path: a path to Vampire binary;
             by default we expect it to be in the $PATH
         """
-        super().__init__(max_clauses)
+        super().__init__()
         self._vampire = VampireWrapper(prover_binary_path)
-        self.action_space = Discrete(self.state.max_clauses)
+        self.action_space = Discrete(MAX_CLAUSES)
 
     def _parse_vampire_response(
         self, vampire_response: tuple[tuple[str, str, str], ...]
@@ -163,10 +155,6 @@ class VampireEnv(SaturationEnv):
             "inference_rule": inference_rule,
             "inference_parents": inference_parents,
         }
-
-    def on_truncated(self) -> None:
-        """Terminate Vampire process."""
-        self._vampire.terminate()
 
     def close(self) -> None:
         """Terminate Vampire process."""

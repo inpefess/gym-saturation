@@ -87,7 +87,6 @@ class IProverEnv(SaturationEnv):
     >>> import gymnasium as gym
     >>> env = gym.make(
     ...     "iProver-v0",
-    ...     max_clauses=5
     ... ).unwrapped
     >>> env.relay_server
     Traceback (most recent call last):
@@ -95,28 +94,26 @@ class IProverEnv(SaturationEnv):
     ValueError: run ``reset`` first!
     >>> check_env(env)
 
-    when episode truncated, all threads are terminated
+    episode is never truncated by default
 
     >>> _ = env.reset()
     >>> _, _, _, truncated, _ = env.step(4)
     >>> truncated
-    True
+    False
     """
 
     def __init__(
         self,
-        max_clauses: int = MAX_CLAUSES,
         prover_binary_path: str = "iproveropt",
     ):
         """
         Initialise the environment.
 
-        :param max_clauses: maximal number of clauses in proof state
         :param prover_binary_path: a path to iProver binary;
             by default, we assume it to be ``iproveropt`` and in the $PATH
         """
-        super().__init__(max_clauses)
-        self.action_space = Discrete(self.state.max_clauses)
+        super().__init__()
+        self.action_space = Discrete(MAX_CLAUSES)
         self.prover_binary_path = prover_binary_path
         self._relay_server: Optional[RelayServer] = None
         self.relay_server_thread: Optional[Thread] = None
@@ -245,10 +242,6 @@ class IProverEnv(SaturationEnv):
         if self._relay_server:
             return self._relay_server
         raise ValueError("run ``reset`` first!")
-
-    def on_truncated(self) -> None:
-        """Terminate threads."""
-        self._terminate_threads()
 
     def _terminate_threads(self) -> None:
         if self._relay_server:
