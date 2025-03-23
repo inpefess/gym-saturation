@@ -162,7 +162,6 @@ class VampireEnv(SaturationEnv):
             "role": "lemma",
             "inference_rule": inference_rule,
             "inference_parents": inference_parents,
-            "birth_step": self.state.step_number,
         }
 
     def on_truncated(self) -> None:

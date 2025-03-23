@@ -29,12 +29,10 @@ class ProofState:
     An object to store all relevant info about a saturation prover state.
 
     :param clauses: passive clauses
-    :param step_number: current step number. ``-1`` before reset, ``0`` after
     :param max_clauses: maximal possible number of clauses in the proof state
     """
 
     clauses: dict[str, dict[str, Any]]
-    step_number: int
     max_clauses: int
 
     @property

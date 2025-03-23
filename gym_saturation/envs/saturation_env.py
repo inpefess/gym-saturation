@@ -69,7 +69,6 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
         super().__init__()
         self.state = ProofState(
             clauses={},
-            step_number=-1,
             max_clauses=max_clauses,
         )
         self.observation_space = spaces.Sequence(
@@ -80,7 +79,6 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
                     "literals": LONG_TEXT_SPACE,
                     "inference_rule": SHORT_TEXT_SPACE,
                     "inference_parents": spaces.Sequence(SHORT_TEXT_SPACE),
-                    "birth_step": spaces.Discrete(max_clauses),
                 }
             )
         )
@@ -103,7 +101,6 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
         random.seed(seed)
         self.state = ProofState(
             clauses={},
-            step_number=0,
             max_clauses=self.state.max_clauses,
         )
         return tuple(self.state.clauses.values()), {}
@@ -135,7 +132,6 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
               debugging, and sometimes learning)
         """
         if not (self.state.terminated or self.state.truncated):
-            self.state.step_number += 1
             self._do_deductions(action)
         if self.state.truncated:
             self.on_truncated()

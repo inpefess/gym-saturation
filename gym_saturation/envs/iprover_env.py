@@ -162,7 +162,6 @@ class IProverEnv(SaturationEnv):
                 "literals": literals,
                 "label": label,
                 "role": "lemma",
-                "birth_step": dict_clause["clause_features"]["born"] - 1,
                 "inference_rule": inference_rule,
                 "inference_parents": (
                     tuple(inference_parents.split(","))

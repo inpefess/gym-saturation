@@ -36,7 +36,6 @@ Here ``Clause(n)`` is an alias for
 .. code:: python
 
   Dict(
-      'birth_step': Discrete(n),
       'inference_parents': Sequence(
           Text(1, 256, characters=ALPHANUMERIC_WITH_UNDERSCORE),
 	  stack=False
