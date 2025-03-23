@@ -20,11 +20,8 @@ Saturation Environment with Vampire back-end
 import os
 from typing import Any, Optional
 
-import numpy as np
-from gymnasium.spaces import Discrete
-
 from gym_saturation.constants import FALSEHOOD_SYMBOL
-from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
+from gym_saturation.envs.saturation_env import SaturationEnv
 from gym_saturation.vampire_wrapper import VampireWrapper
 
 
@@ -45,8 +42,8 @@ class VampireEnv(SaturationEnv):
 
     >>> env = gym.make("Vampire-v0")
     >>> _ = env.reset()
-    >>> one = env.step(0)
-    >>> two = env.step(0)
+    >>> one = env.step("1")
+    >>> two = env.step("1")
     >>> one == two
     True
 
@@ -59,7 +56,7 @@ class VampireEnv(SaturationEnv):
     >>> _, _ = env.reset()
     >>> env.unwrapped.state.terminated
     True
-    >>> _, _, terminated, _, _ = env.step(0)
+    >>> _, _, terminated, _, _ = env.step("anything")
     >>> terminated
     True
     >>> env.close()
@@ -87,7 +84,6 @@ class VampireEnv(SaturationEnv):
         """
         super().__init__()
         self._vampire = VampireWrapper(prover_binary_path)
-        self.action_space = Discrete(MAX_CLAUSES)
 
     def _parse_vampire_response(
         self, vampire_response: tuple[tuple[str, str, str], ...]
@@ -130,13 +126,9 @@ class VampireEnv(SaturationEnv):
         self._parse_vampire_response(vampire_response)
         return tuple(self.state.clauses.values()), {}
 
-    def _do_deductions(self, action: np.int64) -> None:
-        if action < len(self.state.clauses):
-            self._parse_vampire_response(
-                self._vampire.pick_a_clause(
-                    list(self.state.clauses.keys())[action]
-                )
-            )
+    def _do_deductions(self, action: str) -> None:
+        if action in self.state.clauses:
+            self._parse_vampire_response(self._vampire.pick_a_clause(action))
 
     def _parse_vampire_clause(
         self, clause_label: str, clause_text: str

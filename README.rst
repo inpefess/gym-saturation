@@ -96,10 +96,11 @@ One can use ``gym-saturation`` environments as any other Gymnasium environment:
   env.set_task("a-TPTP-problem-filename")
   observation, info = env.reset()
   terminated, truncated = False, False
+  action_id = 0
   while not (terminated or truncated):
-      # apply policy (a random action here)
-      action = env.action_space.sample()
-      observation, reward, terminated, truncated, info = env.step(action)
+      # apply policy
+      action_id += 1
+      observation, reward, terminated, truncated, info = env.step(str(action))
   env.close()
 
 Or have a look at the basic `tutorial <https://gym-saturation.readthedocs.io/en/latest/auto_examples/plot_age_agent.html>`__.

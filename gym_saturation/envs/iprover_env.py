@@ -24,10 +24,7 @@ import re
 from threading import Thread
 from typing import Any, Optional
 
-import numpy as np
-from gymnasium.spaces import Discrete
-
-from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
+from gym_saturation.envs.saturation_env import SaturationEnv
 from gym_saturation.relay_server import (
     QUERY_END_MESSAGE,
     SESSION_END_MESSAGE,
@@ -97,7 +94,7 @@ class IProverEnv(SaturationEnv):
     episode is never truncated by default
 
     >>> _ = env.reset()
-    >>> _, _, _, truncated, _ = env.step(4)
+    >>> _, _, _, truncated, _ = env.step("c_49")
     >>> truncated
     False
     """
@@ -113,7 +110,6 @@ class IProverEnv(SaturationEnv):
             by default, we assume it to be ``iproveropt`` and in the $PATH
         """
         super().__init__()
-        self.action_space = Discrete(MAX_CLAUSES)
         self.prover_binary_path = prover_binary_path
         self._relay_server: Optional[RelayServer] = None
         self.relay_server_thread: Optional[Thread] = None
@@ -209,13 +205,12 @@ class IProverEnv(SaturationEnv):
             if "clauses" in iprover_request:
                 self._parse_batch_clauses(iprover_request["clauses"])
 
-    def _do_deductions(self, action: np.int64) -> None:
-        if action < len(self.state.clauses):
-            given_clause_label = list(self.state.clauses.keys())[action]
+    def _do_deductions(self, action: str) -> None:
+        if action in self.state.clauses:
             iprover_scores_message = {
                 "tag": "given_clause_res",
                 "passive_is_empty": False,
-                "given_clause": int(given_clause_label[2:]),
+                "given_clause": int(action[2:]),
             }
             relayed_scores_message = bytes(
                 json.dumps({"tag": "server_queries_end"})

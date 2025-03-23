@@ -26,7 +26,7 @@ SaturationEnv
   
 .. csv-table::
    
-   Action Space, ``Discrete(n)``
+   Action Space, ``Text(256)``
    Observation Space, "``Sequence(Clause(n), stack=False)``"
    import, ``import gym_saturation; gymnasium.make("Vampire-v0")``
    import, ``import gym_saturation; gymnasium.make("iProver-v0")``
@@ -77,7 +77,7 @@ If the ``EMPTY_CLAUSE`` (aka falsehood or contradiction) appears among the ``unp
 Action Space
 *************
 
-Action is an index of a given clause. It belongs to a discrete space of size ``n``. ``n`` is the maximal number of clauses in a proof state (``unprocessed_clauses`` and ``processed_clauses`` together).
+Action is a label of a given clause. Different provers use different labelling systems.
     
 Observation Space
 ******************

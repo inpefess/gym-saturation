@@ -21,14 +21,12 @@ import random
 from abc import abstractmethod
 from typing import Any, Optional
 
-import numpy as np
 from gymnasium import Env, spaces
 from gymnasium.spaces.text import alphanumeric
 
 from gym_saturation.constants import MOCK_TPTP_PROBLEM
 from gym_saturation.proof_state import ProofState
 
-MAX_CLAUSES = 1000
 ALPHANUMERIC_WITH_UNDERSCORE = "".join(alphanumeric) + "_"
 SHORT_TEXT_SPACE = spaces.Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE)
 LONG_TEXT_SPACE = spaces.Text(
@@ -37,7 +35,7 @@ LONG_TEXT_SPACE = spaces.Text(
 )
 
 
-class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
+class SaturationEnv(Env[tuple[dict[str, Any], ...], str]):
     """
     Saturation algorithm in a reinforcement learning friendly way.
 
@@ -54,7 +52,7 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
     """
 
     reward_range = (0, 1)
-    action_space: spaces.Space
+    action_space = spaces.Text(256)
     observation_space: spaces.Sequence
 
     def __init__(
