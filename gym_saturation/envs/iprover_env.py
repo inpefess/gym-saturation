@@ -94,9 +94,6 @@ class IProverEnv(SaturationEnv):
      ...
     ValueError: run ``reset`` first!
     >>> check_env(env)
-    cnf(c_53, ...).
-    ...
-    cnf(c_49, ...).
 
     when episode truncated, all threads are terminated
 
@@ -109,18 +106,16 @@ class IProverEnv(SaturationEnv):
     def __init__(
         self,
         max_clauses: int = MAX_CLAUSES,
-        render_mode: str = "human",
         prover_binary_path: str = "iproveropt",
     ):
         """
         Initialise the environment.
 
         :param max_clauses: maximal number of clauses in proof state
-        :param render_mode: a mode of running ``render`` method
         :param prover_binary_path: a path to iProver binary;
             by default, we assume it to be ``iproveropt`` and in the $PATH
         """
-        super().__init__(max_clauses, render_mode)
+        super().__init__(max_clauses)
         self.action_space = Discrete(self.state.max_clauses)
         self.prover_binary_path = prover_binary_path
         self._relay_server: Optional[RelayServer] = None

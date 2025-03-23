@@ -40,9 +40,6 @@ class VampireEnv(SaturationEnv):
     >>> import gymnasium as gym
     >>> env = gym.make("Vampire-v0").unwrapped
     >>> check_env(env)
-    cnf(1, ...).
-    ...
-    cnf(5, ...).
 
     repeating actions change nothing
 
@@ -87,18 +84,16 @@ class VampireEnv(SaturationEnv):
     def __init__(
         self,
         max_clauses: int = MAX_CLAUSES,
-        render_mode: str = "human",
         prover_binary_path: str = "vampire",
     ):
         """
         Initialise a :ref:`VampireWrapper <vampire-wrapper>`.
 
         :param max_clauses: maximal number of clauses in proof state
-        :param render_mode: a mode of running ``render`` method
         :param prover_binary_path: a path to Vampire binary;
             by default we expect it to be in the $PATH
         """
-        super().__init__(max_clauses, render_mode)
+        super().__init__(max_clauses)
         self._vampire = VampireWrapper(prover_binary_path)
         self.action_space = Discrete(self.state.max_clauses)
 

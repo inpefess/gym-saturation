@@ -27,7 +27,6 @@ from gymnasium.spaces.text import alphanumeric
 
 from gym_saturation.constants import MOCK_TPTP_PROBLEM
 from gym_saturation.proof_state import ProofState
-from gym_saturation.utils import pretty_print
 
 MAX_CLAUSES = 1000
 ALPHANUMERIC_WITH_UNDERSCORE = "".join(alphanumeric) + "_"
@@ -50,20 +49,10 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
     >>> class DummyProver(SaturationEnv):
     ...     def _do_deductions(action):
     ...         pass
-    >>> env = DummyProver(render_mode="rgb_array")
-    Traceback (most recent call last):
-     ...
-    ValueError: Expected a render mode among ['ansi', 'human'] but got rgb_a...
 
     >>> env = DummyProver()
-    >>> env.render_mode = "rgb_array"
-    >>> env.render()
-    Traceback (most recent call last):
-     ...
-    NotImplementedError
     """
 
-    metadata = {"render_modes": ["ansi", "human"], "render_fps": 1}
     reward_range = (0, 1)
     action_space: spaces.Space
     observation_space: spaces.Sequence
@@ -71,13 +60,11 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
     def __init__(
         self,
         max_clauses: int = MAX_CLAUSES,
-        render_mode: str = "human",
     ):
         """
         Initialise spaces et al.
 
         :param max_clauses: maximal number of clauses to store in proof state
-        :param render_mode: a mode of running ``render`` method
         """
         super().__init__()
         self.state = ProofState(
@@ -98,15 +85,6 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
             )
         )
         self._task = MOCK_TPTP_PROBLEM
-        self.render_mode = self._check_render_mode(render_mode)
-
-    def _check_render_mode(self, render_mode: str) -> str:
-        if render_mode in self.metadata["render_modes"]:
-            return render_mode
-        raise ValueError(
-            f"Expected a render mode among {self.metadata['render_modes']} "
-            f"but got {render_mode}"
-        )
 
     def reset(
         self,
@@ -169,26 +147,8 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
             {},
         )
 
-    # pylint: disable=inconsistent-return-statements
     def render(self) -> None:
-        """
-        Return or print the proof state.
-
-        :returns: proof state (TPTP formatted) or nothing
-            (depending on ``render_mode``)
-        """
-        tptp_string = "\n".join(
-            map(
-                pretty_print,
-                self.state.clauses.values(),
-            )
-        )
-        if self.render_mode == "ansi":
-            return tptp_string  # type: ignore
-        if self.render_mode == "human":
-            print(tptp_string)
-        else:
-            super().render()
+        """No render."""
 
     def set_task(self, task: str) -> None:
         """

@@ -127,13 +127,10 @@ Arguments
    gymnasium.make(
        "Vampire-v0",  # or "iProver-v0"
        max_clauses=1000,
-       render_mode="human",
        prover_binary_path="vampire",  # or "iproveropt"
    )
 
 ``max_clauses=1000``: the size ``n`` of the action space.
-
-``render_mode="human"``: either ``ansi`` (return the clauses from the current proof state in the TPTP format) or ``human`` (print the ``ansi`` rendering to the standard output)
 
 ``prover_binary_path="vampire"`` (or ``"iproveropt"``): the path to a prover binary (supposed to be on the ``$PATH`` by default)
 
