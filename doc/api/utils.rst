@@ -15,8 +15,6 @@
 
 Utils
 ******
-.. automodule:: gym_saturation.proof_state
-   :members:
 .. automodule:: gym_saturation.vampire_wrapper
    :members:
    :special-members: __init__

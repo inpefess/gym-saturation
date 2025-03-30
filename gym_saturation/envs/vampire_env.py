@@ -55,7 +55,7 @@ class VampireEnv(SaturationEnv):
     ...     "TST002-1.p")
     >>> env.unwrapped.set_task(trivial_problem)
     >>> _, _ = env.reset()
-    >>> env.unwrapped.state.terminated
+    >>> env.unwrapped._terminated
     True
     >>> _, _, terminated, _, _ = env.step("anything")
     >>> terminated
@@ -88,12 +88,15 @@ class VampireEnv(SaturationEnv):
 
     def _parse_vampire_response(
         self, vampire_response: tuple[tuple[str, str, str], ...]
-    ) -> None:
+    ) -> tuple[tuple[str, ...], set[str]]:
+        new_labels: set[str] = set()
+        new_clauses: tuple[str, ...] = ()
         for response_type, clause_label, clause_text in vampire_response:
             if response_type == "passive" or FALSEHOOD_SYMBOL in clause_text:
-                self.state.clauses[clause_label] = self._parse_vampire_clause(
-                    clause_label, clause_text
+                new_clauses += (
+                    self._parse_vampire_clause(clause_label, clause_text),
                 )
+                new_labels.add(clause_label)
             elif response_type not in {
                 "active",
                 "forward reduce",
@@ -105,6 +108,7 @@ class VampireEnv(SaturationEnv):
                 "fn def discovered",
             }:
                 raise ValueError("Unexpected response type: ", response_type)
+        return new_clauses, new_labels
 
     def reset(
         self,
@@ -124,12 +128,20 @@ class VampireEnv(SaturationEnv):
             os.path.dirname(self.get_task()), "..", ".."
         )
         vampire_response = self._vampire.start(self.get_task(), tptp_folder)
-        self._parse_vampire_response(vampire_response)
-        return tuple(map(str, self.state.clauses.values())), {}
+        new_clauses, new_labels = self._parse_vampire_response(
+            vampire_response
+        )
+        self._terminated = max(
+            (FALSEHOOD_SYMBOL in clause for clause in new_clauses),
+            default=False,
+        )
+        self._available_actions = new_labels
+        return new_clauses, {}
 
-    def _do_deductions(self, action: str) -> None:
-        if action in self.state.clauses:
-            self._parse_vampire_response(self._vampire.pick_a_clause(action))
+    def _do_deductions(self, action: str) -> tuple[tuple[str, ...], set[str]]:
+        return self._parse_vampire_response(
+            self._vampire.pick_a_clause(action)
+        )
 
     def _parse_vampire_clause(
         self, clause_label: str, clause_text: str

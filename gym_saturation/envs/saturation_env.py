@@ -24,8 +24,7 @@ from typing import Any, Optional
 from gymnasium import Env, spaces
 from gymnasium.spaces.text import alphanumeric
 
-from gym_saturation.constants import MOCK_TPTP_PROBLEM
-from gym_saturation.proof_state import ProofState
+from gym_saturation.constants import FALSEHOOD_SYMBOL, MOCK_TPTP_PROBLEM
 
 ALPHANUMERIC_WITH_UNDERSCORE = "".join(alphanumeric) + "_"
 EXTENDED_ALPHANUMERIC = ALPHANUMERIC_WITH_UNDERSCORE + "(), |~=!$" + ".'"
@@ -58,8 +57,9 @@ class SaturationEnv(Env[tuple[str, ...], str]):
     ):
         """Initialise spaces et al."""
         super().__init__()
-        self.state = ProofState(clauses={})
         self._task = MOCK_TPTP_PROBLEM
+        self._terminated = False
+        self._available_actions: set[str] = set()
 
     def reset(
         self,
@@ -76,11 +76,12 @@ class SaturationEnv(Env[tuple[str, ...], str]):
         """
         super().reset(seed=seed)
         random.seed(seed)
-        self.state = ProofState(clauses={})
-        return tuple(map(str, self.state.clauses.values())), {}
+        self._terminated = False
+        self._available_actions = set()
+        return (), {}
 
     @abstractmethod
-    def _do_deductions(self, action: Any) -> None:
+    def _do_deductions(self, action: Any) -> tuple[tuple[str, ...], set[str]]:
         raise NotImplementedError  # pragma: no cover
 
     def step(
@@ -105,12 +106,19 @@ class SaturationEnv(Env[tuple[str, ...], str]):
             * info: contains auxiliary diagnostic information (helpful for
               debugging, and sometimes learning)
         """
-        if not self.state.terminated:
-            self._do_deductions(action)
+        new_clauses: tuple[str, ...] = ()
+        if not self._terminated and action in self._available_actions:
+            new_clauses, new_actions = self._do_deductions(action)
+            self._terminated = max(
+                (FALSEHOOD_SYMBOL in clause for clause in new_clauses),
+                default=False,
+            )
+            self._available_actions.discard(action)
+            self._available_actions.update(new_actions)
         return (
-            tuple(map(str, self.state.clauses.values())),
-            1.0 if self.state.terminated else 0.0,
-            self.state.terminated,
+            new_clauses,
+            0.0,
+            self._terminated,
             False,
             {},
         )

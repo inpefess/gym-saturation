@@ -127,7 +127,9 @@ class IProverEnv(SaturationEnv):
 
     def _parse_batch_clauses(
         self, batch_clauses: list[dict[str, Any]]
-    ) -> None:
+    ) -> tuple[tuple[str, ...], set[str]]:
+        new_labels: set[str] = set()
+        new_clauses: tuple[str, ...] = ()
         for dict_clause in batch_clauses:
             raw_clause = (
                 dict_clause["clause"].replace("\n", "").replace(" ", "")
@@ -136,14 +138,16 @@ class IProverEnv(SaturationEnv):
                 pattern=r"cnf\((\w+),\w+,\((.*)\),(\w+\(.+\))\)\.",
                 string=raw_clause,
             )[0]
+            new_labels.add(label)
             if inference_record[:5] == "file(":
-                self.state.clauses[label] = (
-                    f"cnf({label},axiom,{literals},file('input.p'))."
+                new_clauses += (
+                    f"cnf({label},axiom,{literals},file('input.p')).",
                 )
             else:
-                self.state.clauses[label] = (
-                    f"cnf({label},plain,{literals},{inference_record})."
+                new_clauses += (
+                    f"cnf({label},plain,{literals},{inference_record}).",
                 )
+        return new_clauses, new_labels
 
     def reset(
         self,
@@ -166,8 +170,9 @@ class IProverEnv(SaturationEnv):
             self.prover_binary_path,
         )
         data = self._get_json_data()
-        self._parse_iprover_requests(data)
-        return tuple(map(str, self.state.clauses.values())), {}
+        new_clauses, new_labels = self._parse_iprover_requests(data)
+        self._available_actions = new_labels
+        return new_clauses, {}
 
     def _get_json_data(self) -> list[dict[str, Any]]:
         json_data = [{"tag": "None"}]
@@ -182,28 +187,34 @@ class IProverEnv(SaturationEnv):
 
     def _parse_iprover_requests(
         self, iprover_requests: list[dict[str, Any]]
-    ) -> None:
+    ) -> tuple[tuple[str, ...], set[str]]:
+        new_labels: set[str] = set()
+        new_clauses: tuple[str, ...] = ()
         for iprover_request in iprover_requests:
             if "clauses" in iprover_request:
-                self._parse_batch_clauses(iprover_request["clauses"])
+                more_new_clauses, more_new_labels = self._parse_batch_clauses(
+                    iprover_request["clauses"]
+                )
+                new_labels.update(more_new_labels)
+                new_clauses += more_new_clauses
+        return new_clauses, new_labels
 
-    def _do_deductions(self, action: str) -> None:
-        if action in self.state.clauses:
-            iprover_scores_message = {
-                "tag": "given_clause_res",
-                "passive_is_empty": False,
-                "given_clause": int(action[2:]),
-            }
-            relayed_scores_message = bytes(
-                json.dumps({"tag": "server_queries_end"})
-                + "\n\x00\n"
-                + json.dumps(iprover_scores_message)
-                + "\n\x00\n",
-                "utf8",
-            )
-            self.relay_server.output_queue.put(relayed_scores_message)
-            data = self._get_json_data()
-            self._parse_iprover_requests(data)
+    def _do_deductions(self, action: str) -> tuple[tuple[str, ...], set[str]]:
+        iprover_scores_message = {
+            "tag": "given_clause_res",
+            "passive_is_empty": False,
+            "given_clause": int(action[2:]),
+        }
+        relayed_scores_message = bytes(
+            json.dumps({"tag": "server_queries_end"})
+            + "\n\x00\n"
+            + json.dumps(iprover_scores_message)
+            + "\n\x00\n",
+            "utf8",
+        )
+        self.relay_server.output_queue.put(relayed_scores_message)
+        data = self._get_json_data()
+        return self._parse_iprover_requests(data)
 
     def close(self) -> None:
         """Stop relay server."""
