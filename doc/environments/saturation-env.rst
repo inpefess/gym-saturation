@@ -31,7 +31,7 @@ SaturationEnv
    import, ``import gym_saturation; gymnasium.make("Vampire-v0")``
    import, ``import gym_saturation; gymnasium.make("iProver-v0")``
 
-and ``EXTENDED_ALPHANUMERIC`` is ``ALPHANUMERIC_WITH_UNDERSCORE`` extended by nine special characters ``(), |~=!$``. Such a structure corresponds to clauses (logical statements) in the `TPTP <https://tptp.org>`__ language.
+and ``EXTENDED_ALPHANUMERIC`` is ``ALPHANUMERIC_WITH_UNDERSCORE`` extended by special characters ``(), |~=!$.'``. Such a structure corresponds to clauses (logical statements) in the `TPTP <https://tptp.org>`__ language.
 
 Description
 ************
@@ -88,7 +88,9 @@ One can set another task by specifying a filename of a respective TPTP problem:
 Rewards
 ********
 
-Reward is ``1.0`` after a step iff the saturation algorithm terminated at this step, and ``0.0`` otherwise.
+Reward is always ``0.0``. One has to use `reward wrappers
+<https://gymnasium.farama.org/api/wrappers/reward_wrappers/>`__
+according to their training strategy.
 
 Episode End
 ************

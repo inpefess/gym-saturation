@@ -145,7 +145,8 @@ class IProverEnv(SaturationEnv):
                 )
             else:
                 new_clauses += (
-                    f"cnf({label},plain,{literals},{inference_record}).",
+                    f"cnf({label},plain,{literals},"
+                    f"{inference_record.replace('status(thm)', '')}).",
                 )
         return new_clauses, new_labels
 

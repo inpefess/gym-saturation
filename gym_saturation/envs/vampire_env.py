@@ -43,8 +43,8 @@ class VampireEnv(SaturationEnv):
 
     >>> env = gym.make("Vampire-v0")
     >>> _ = env.reset()
-    >>> one = env.step("1")
-    >>> two = env.step("1")
+    >>> one = env.step("c_1")
+    >>> two = env.step("c_1")
     >>> one == two
     True
 
@@ -92,11 +92,12 @@ class VampireEnv(SaturationEnv):
         new_labels: set[str] = set()
         new_clauses: tuple[str, ...] = ()
         for response_type, clause_label, clause_text in vampire_response:
+            new_label = "c_" + clause_label
             if response_type == "passive" or FALSEHOOD_SYMBOL in clause_text:
                 new_clauses += (
-                    self._parse_vampire_clause(clause_label, clause_text),
+                    self._parse_vampire_clause(new_label, clause_text),
                 )
-                new_labels.add(clause_label)
+                new_labels.add(new_label)
             elif response_type not in {
                 "active",
                 "forward reduce",
@@ -140,22 +141,26 @@ class VampireEnv(SaturationEnv):
 
     def _do_deductions(self, action: str) -> tuple[tuple[str, ...], set[str]]:
         return self._parse_vampire_response(
-            self._vampire.pick_a_clause(action)
+            # the first two characters are `c_`
+            self._vampire.pick_a_clause(action[2:])
         )
 
     def _parse_vampire_clause(
         self, clause_label: str, clause_text: str
     ) -> str:
         literals, inference_rule, inference_parents = re.findall(
-            r"(.+) \[(.+)([\d,]*)\]", clause_text
+            r"(.+) \[([^\d,]+)([\d,]*)\]", clause_text
         )[0]
-        inference_parents = "f" + inference_parents.replace(",", ",f")
+        literals = literals.replace(" ", "")
+        inference_rule = inference_rule.strip().replace(" ", "_")
+        inference_parents = "c_" + inference_parents.replace(",", ",c_")
         if inference_rule != "input":
             return (
-                f"cnf(f{clause_label}, plain, {literals}, "
-                f"inference({inference_rule},[],[{inference_parents}]))."
+                f"cnf({clause_label},plain,{literals},"
+                f"inference({inference_rule},"
+                f"[],[{inference_parents}]))."
             )
-        return f"cnf(f{clause_label}, axiom, {literals}, file('input.p'))."
+        return f"cnf({clause_label},axiom,{literals},file('input.p'))."
 
     def close(self) -> None:
         """Terminate Vampire process."""

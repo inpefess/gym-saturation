@@ -96,16 +96,13 @@ One can use ``gym-saturation`` environments as any other Gymnasium environment:
   env.set_task("a-TPTP-problem-filename")
   observation, info = env.reset()
   terminated, truncated = False, False
-  action_id = 0
   while not (terminated or truncated):
       # apply policy
-      action_id += 1
+      action = ...
       observation, reward, terminated, truncated, info = env.step(str(action))
   env.close()
 
-Or have a look at the basic `tutorial <https://gym-saturation.readthedocs.io/en/latest/auto_examples/plot_age_agent.html>`__.
-  
-For a bit more comprehensive experiments, please see `this project <https://github.com/inpefess/ray-prover>`__.
+Have a look at the basic `tutorial <https://gym-saturation.readthedocs.io/en/latest/auto_examples/plot_age_agent.html>`__.  
 
 More Documentation
 ==================
