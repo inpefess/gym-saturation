@@ -132,36 +132,18 @@ class IProverEnv(SaturationEnv):
             raw_clause = (
                 dict_clause["clause"].replace("\n", "").replace(" ", "")
             )
-            try:
-                (
-                    label,
-                    literals,
-                    inference_rule,
-                    inference_parents,
-                ) = re.findall(
-                    r"cnf\((\w+),\w+,\((.*)\),"
-                    + r"inference\((.*),.*,\[(.*)\]\)\)\.",
-                    raw_clause,
-                )[
-                    0
-                ]
-            except IndexError:
-                label, literals = re.findall(
-                    r"cnf\((\w+),\w+,\((.*)\),file\(.*\)\)\.",
-                    raw_clause,
-                )[0]
-                inference_rule, inference_parents = "input", None
-            self.state.clauses[label] = {
-                "literals": literals,
-                "label": label,
-                "role": "lemma",
-                "inference_rule": inference_rule,
-                "inference_parents": (
-                    tuple(inference_parents.split(","))
-                    if inference_parents is not None
-                    else ()
-                ),
-            }
+            (label, literals, inference_record) = re.findall(
+                pattern=r"cnf\((\w+),\w+,\((.*)\),(\w+\(.+\))\)\.",
+                string=raw_clause,
+            )[0]
+            if inference_record[:5] == "file(":
+                self.state.clauses[label] = (
+                    f"cnf({label},axiom,{literals},file('input.p'))."
+                )
+            else:
+                self.state.clauses[label] = (
+                    f"cnf({label},plain,{literals},{inference_record})."
+                )
 
     def reset(
         self,

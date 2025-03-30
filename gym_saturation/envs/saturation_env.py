@@ -28,7 +28,7 @@ from gym_saturation.constants import MOCK_TPTP_PROBLEM
 from gym_saturation.proof_state import ProofState
 
 ALPHANUMERIC_WITH_UNDERSCORE = "".join(alphanumeric) + "_"
-EXTENDED_ALPHANUMERIC = ALPHANUMERIC_WITH_UNDERSCORE + "(), |~=!$" + ":'{}"
+EXTENDED_ALPHANUMERIC = ALPHANUMERIC_WITH_UNDERSCORE + "(), |~=!$" + ".'"
 
 
 class SaturationEnv(Env[tuple[str, ...], str]):

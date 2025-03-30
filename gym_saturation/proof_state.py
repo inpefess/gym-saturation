@@ -18,7 +18,6 @@ Proof State
 ============
 """
 from dataclasses import dataclass
-from typing import Any
 
 from gym_saturation.constants import FALSEHOOD_SYMBOL
 
@@ -31,12 +30,11 @@ class ProofState:
     :param clauses: passive clauses
     """
 
-    clauses: dict[str, dict[str, Any]]
+    clauses: dict[str, str]
 
     @property
     def terminated(self) -> bool:
         """Refutation found or satisfiability established."""
         return max(
-            clause["literals"] == FALSEHOOD_SYMBOL
-            for clause in self.clauses.values()
+            FALSEHOOD_SYMBOL in clause for clause in self.clauses.values()
         )

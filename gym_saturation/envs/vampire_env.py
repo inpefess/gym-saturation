@@ -18,6 +18,7 @@ Saturation Environment with Vampire back-end
 ============================================
 """
 import os
+import re
 from typing import Any, Optional
 
 from gym_saturation.constants import FALSEHOOD_SYMBOL
@@ -132,21 +133,17 @@ class VampireEnv(SaturationEnv):
 
     def _parse_vampire_clause(
         self, clause_label: str, clause_text: str
-    ) -> dict[str, Any]:
-        formula, inference_info = clause_text.split("[")
-        pre_inference = inference_info.split("]")[0].split(" ")
-        if len(pre_inference) > 1:
-            inference_parents = tuple(pre_inference[-1].split(","))
-            inference_rule = "_".join(pre_inference[:-1])
-        else:
-            inference_parents, inference_rule = (), pre_inference[0]
-        return {
-            "literals": formula.strip(),
-            "label": clause_label,
-            "role": "lemma",
-            "inference_rule": inference_rule,
-            "inference_parents": inference_parents,
-        }
+    ) -> str:
+        literals, inference_rule, inference_parents = re.findall(
+            r"(.+) \[(.+)([\d,]*)\]", clause_text
+        )[0]
+        inference_parents = "f" + inference_parents.replace(",", ",f")
+        if inference_rule != "input":
+            return (
+                f"cnf(f{clause_label}, plain, {literals}, "
+                f"inference({inference_rule},[],[{inference_parents}]))."
+            )
+        return f"cnf(f{clause_label}, axiom, {literals}, file('input.p'))."
 
     def close(self) -> None:
         """Terminate Vampire process."""
