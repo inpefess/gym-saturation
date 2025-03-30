@@ -26,25 +26,10 @@ SaturationEnv
   
 .. csv-table::
    
-   Action Space, ``Text(256)``
-   Observation Space, "``Sequence(Clause(n), stack=False)``"
+   Action Space, ``Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE)``
+   Observation Space, ``Sequence(Text(4000, charset=EXTENDED_ALPHANUMERIC))``
    import, ``import gym_saturation; gymnasium.make("Vampire-v0")``
    import, ``import gym_saturation; gymnasium.make("iProver-v0")``
-
-Here ``Clause(n)`` is an alias for
-
-.. code:: python
-
-  Dict(
-      'inference_parents': Sequence(
-          Text(1, 256, characters=ALPHANUMERIC_WITH_UNDERSCORE),
-	  stack=False
-      ),
-      'inference_rule': Text(1, 256, characters=ALPHANUMERIC_WITH_UNDERSCORE),
-      'label': Text(1, 256, characters=ALPHANUMERIC_WITH_UNDERSCORE),
-      'literals': Text(1, 4000, characters=EXTENDED_ALPHANUMERIC),
-      'role': Text(1, 256, characters=ALPHANUMERIC_WITH_UNDERSCORE)
-  )
 
 and ``EXTENDED_ALPHANUMERIC`` is ``ALPHANUMERIC_WITH_UNDERSCORE`` extended by nine special characters ``(), |~=!$``. Such a structure corresponds to clauses (logical statements) in the `TPTP <https://tptp.org>`__ language.
 

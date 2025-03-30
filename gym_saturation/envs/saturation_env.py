@@ -28,14 +28,10 @@ from gym_saturation.constants import MOCK_TPTP_PROBLEM
 from gym_saturation.proof_state import ProofState
 
 ALPHANUMERIC_WITH_UNDERSCORE = "".join(alphanumeric) + "_"
-SHORT_TEXT_SPACE = spaces.Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE)
-LONG_TEXT_SPACE = spaces.Text(
-    4000,
-    charset=ALPHANUMERIC_WITH_UNDERSCORE + "(), |~=!$",
-)
+EXTENDED_ALPHANUMERIC = ALPHANUMERIC_WITH_UNDERSCORE + "(), |~=!$" + ":'{}"
 
 
-class SaturationEnv(Env[tuple[dict[str, Any], ...], str]):
+class SaturationEnv(Env[tuple[str, ...], str]):
     """
     Saturation algorithm in a reinforcement learning friendly way.
 
@@ -52,8 +48,10 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], str]):
     """
 
     reward_range = (0, 1)
-    action_space = spaces.Text(256)
-    observation_space: spaces.Sequence
+    action_space = spaces.Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE)
+    observation_space = spaces.Sequence(
+        spaces.Text(4000, charset=EXTENDED_ALPHANUMERIC)
+    )
 
     def __init__(
         self,
@@ -61,17 +59,6 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], str]):
         """Initialise spaces et al."""
         super().__init__()
         self.state = ProofState(clauses={})
-        self.observation_space = spaces.Sequence(
-            spaces.Dict(
-                {
-                    "label": SHORT_TEXT_SPACE,
-                    "role": SHORT_TEXT_SPACE,
-                    "literals": LONG_TEXT_SPACE,
-                    "inference_rule": SHORT_TEXT_SPACE,
-                    "inference_parents": spaces.Sequence(SHORT_TEXT_SPACE),
-                }
-            )
-        )
         self._task = MOCK_TPTP_PROBLEM
 
     def reset(
@@ -79,7 +66,7 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], str]):
         *,
         seed: Optional[int] = None,
         options: Optional[dict[str, Any]] = None,
-    ) -> tuple[tuple[dict[str, Any], ...], dict[str, Any]]:
+    ) -> tuple[tuple[str, ...], dict[str, Any]]:
         """
         Reset the environment.
 
@@ -90,7 +77,7 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], str]):
         super().reset(seed=seed)
         random.seed(seed)
         self.state = ProofState(clauses={})
-        return tuple(self.state.clauses.values()), {}
+        return tuple(map(str, self.state.clauses.values())), {}
 
     @abstractmethod
     def _do_deductions(self, action: Any) -> None:
@@ -98,7 +85,7 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], str]):
 
     def step(
         self, action: Any
-    ) -> tuple[tuple[dict[str, Any], ...], float, bool, bool, dict[str, Any]]:
+    ) -> tuple[tuple[str, ...], float, bool, bool, dict[str, Any]]:
         # noqa: D301
         """
         Run one time-step of the environment's dynamics.
@@ -121,7 +108,7 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], str]):
         if not self.state.terminated:
             self._do_deductions(action)
         return (
-            tuple(self.state.clauses.values()),
+            tuple(map(str, self.state.clauses.values())),
             1.0 if self.state.terminated else 0.0,
             self.state.terminated,
             False,

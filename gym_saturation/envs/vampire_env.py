@@ -110,7 +110,7 @@ class VampireEnv(SaturationEnv):
         *,
         seed: Optional[int] = None,
         options: Optional[dict[str, Any]] = None,
-    ) -> tuple[tuple[dict[str, Any], ...], dict[str, Any]]:
+    ) -> tuple[tuple[str, ...], dict[str, Any]]:
         """
         Reset the environment.
 
@@ -124,7 +124,7 @@ class VampireEnv(SaturationEnv):
         )
         vampire_response = self._vampire.start(self.get_task(), tptp_folder)
         self._parse_vampire_response(vampire_response)
-        return tuple(self.state.clauses.values()), {}
+        return tuple(map(str, self.state.clauses.values())), {}
 
     def _do_deductions(self, action: str) -> None:
         if action in self.state.clauses:

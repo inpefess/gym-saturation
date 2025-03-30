@@ -168,7 +168,7 @@ class IProverEnv(SaturationEnv):
         *,
         seed: Optional[int] = None,
         options: Optional[dict[str, Any]] = None,
-    ) -> tuple[tuple[dict[str, Any], ...], dict[str, Any]]:
+    ) -> tuple[tuple[str, ...], dict[str, Any]]:
         """
         Reset the environment.
 
@@ -185,7 +185,7 @@ class IProverEnv(SaturationEnv):
         )
         data = self._get_json_data()
         self._parse_iprover_requests(data)
-        return tuple(self.state.clauses.values()), {}
+        return tuple(map(str, self.state.clauses.values())), {}
 
     def _get_json_data(self) -> list[dict[str, Any]]:
         json_data = [{"tag": "None"}]
