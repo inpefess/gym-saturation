@@ -17,8 +17,4 @@
 Gymnasium Wrappers for Provers
 ===============================
 """
-from gym_saturation.wrappers.ast2vec_wrapper import AST2VecWrapper
-from gym_saturation.wrappers.clause_embeddings_wrapper import (
-    ClauseEmbeddingsWrapper,
-)
-from gym_saturation.wrappers.llm_wrapper import LLMWrapper
+from gym_saturation.wrappers.labels_extractor import LabelsExtractor
