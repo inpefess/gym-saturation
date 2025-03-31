@@ -7,16 +7,14 @@ Random and age agents for Vampire and iProver
 # Random agent for Vampire
 # -------------------------
 #
-# To make a ``gym-saturation`` environment, we have to import the package
+# We can make a prover environment as any other Gymnasium one
+# We will always add a wrapper to extract formulae labels
 
 import gymnasium as gym
 
-import gym_saturation
+from gym_saturation.wrappers import LabelsExtractor
 
-# %%
-# then we can make a prover environment as any other Gymnasium one
-
-env = gym.make("Vampire-v0")
+env = LabelsExtractor(gym.make("Vampire-v0"))
 
 # %%
 # before using the environment, we should reset it
@@ -29,40 +27,46 @@ observation, info = env.reset()
 print(info)
 
 # %%
-# observation is a tuple of JSON representations of logic clauses
-
-from pprint import pprint
-
-pprint(observation)
-
-# %%
-# We can render the environment state in the TPTP format.
+# Observation is a tuple of CNF formulae.
 # By default, we are trying to prove a basic group theory lemma:
 # every idempotent element equals the identity
 
-env.render()
+print("Observation:")
+print("\n".join(observation["observation"]))
 
 # %%
-# here is an example of an episode during which we play random actions.
+# Wrappers extracts formulae labels for us:
+
+labels = list(observation["labels"])
+print(labels)
+
+# %%
+# Here is an example of an episode during which we play random actions.
 # We set the random seed for reproducibility.
 
-env.action_space.seed(0)
+import random
+
+random.seed(0)
+
 terminated, truncated = False, False
 while not (terminated or truncated):
-    action = env.action_space.sample()
+    action = random.choice(labels)
     observation, reward, terminated, truncated, info = env.step(action)
+    print("Action:", action, "Observation:")
+    print("\n".join(observation["observation"]))
+    labels.remove(action)
+    labels += list(observation["labels"])
+
 env.close()
 
 # %%
-# the episode terminated with positive reward
+# the episode is terminated
 
-print(terminated, truncated, reward)
+print(terminated, truncated)
 
 # %%
 # It means we arrived at a contradiction (``$false``) which proves the lemma.
-# Notice the ``birth_step`` number of a contradiction, it shows how many steps
-# we did to find proof.
-pprint(observation[-1])
+print(observation["observation"][-1])
 
 # %%
 # Age agent for iProver
@@ -70,8 +74,7 @@ pprint(observation[-1])
 #
 # We initialise iProver-based environment in the same way
 
-env = gym.make("iProver-v0")
-
+env = LabelsExtractor(gym.make("iProver-v0"))
 
 # %%
 # Special magic needed if running by Jupyter
@@ -85,15 +88,20 @@ nest_asyncio.apply()
 # order they appear
 
 observation, info = env.reset()
-terminated, truncated = False, False
-action = 0
-while not (terminated or truncated):
+print("Observation:")
+print("\n".join(observation["observation"]))
+labels = list(observation["labels"])
+terminated = False
+while not terminated:
+    action = labels.pop(0)
     observation, reward, terminated, truncated, info = env.step(action)
-    action += 1
+    print("Action:", action, "Observation:")
+    print("\n".join(observation["observation"]))
+    labels += list(observation["labels"])
 env.close()
 
 # %%
-# We still arrive at contradiction but it takes a different number of steps
+# We still arrive at a contradiction
 
-print(terminated, truncated, reward)
-pprint(observation[-1])
+print(terminated, truncated)
+print(observation["observation"][-1])
