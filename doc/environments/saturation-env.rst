@@ -26,12 +26,13 @@ SaturationEnv
   
 .. csv-table::
    
-   Action Space, ``Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE)``
-   Observation Space, ``Sequence(Text(4000, charset=EXTENDED_ALPHANUMERIC))``
+   Action Space, "``Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE)``"
+   Observation Space, "``Sequence(Text(4000, charset=EXTENDED_ALPHANUMERIC))``"
    import, ``import gym_saturation; gymnasium.make("Vampire-v0")``
    import, ``import gym_saturation; gymnasium.make("iProver-v0")``
 
-and ``EXTENDED_ALPHANUMERIC`` is ``ALPHANUMERIC_WITH_UNDERSCORE`` extended by special characters ``(), |~=!$.'``. Such a structure corresponds to clauses (logical statements) in the `TPTP <https://tptp.org>`__ language.
+``EXTENDED_ALPHANUMERIC`` should cover characters used by the `TPTP
+<https://tptp.org>`__ language.
 
 Description
 ************
