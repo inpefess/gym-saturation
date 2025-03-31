@@ -18,13 +18,11 @@ Saturation Environment with Vampire back-end
 ============================================
 """
 import os
+import re
 from typing import Any, Optional
 
-import numpy as np
-from gymnasium.spaces import Discrete
-
 from gym_saturation.constants import FALSEHOOD_SYMBOL
-from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
+from gym_saturation.envs.saturation_env import SaturationEnv
 from gym_saturation.vampire_wrapper import VampireWrapper
 
 
@@ -40,24 +38,14 @@ class VampireEnv(SaturationEnv):
     >>> import gymnasium as gym
     >>> env = gym.make("Vampire-v0").unwrapped
     >>> check_env(env)
-    cnf(1, ...).
-    ...
-    cnf(5, ...).
 
     repeating actions change nothing
 
-    >>> env = gym.make("Vampire-v0", max_clauses=5)
+    >>> env = gym.make("Vampire-v0")
     >>> _ = env.reset()
-    >>> one = env.step(0)
-    >>> two = env.step(0)
+    >>> one = env.step("c_1")
+    >>> two = env.step("c_1")
     >>> one == two
-    True
-
-    episode is truncated if we have more than ``max_clauses`` clauses
-
-    >>> _, _, _, truncated, _ = env.step(1)
-    >>> _, _, _, truncated, _ = env.step(2)
-    >>> truncated
     True
 
     sometimes Vampire can solve a problem during pre-processing
@@ -67,11 +55,12 @@ class VampireEnv(SaturationEnv):
     ...     "TST002-1.p")
     >>> env.unwrapped.set_task(trivial_problem)
     >>> _, _ = env.reset()
-    >>> env.unwrapped.state.terminated
+    >>> env.unwrapped._terminated
     True
-    >>> _, _, terminated, _, _ = env.step(0)
+    >>> _, _, terminated, _, _ = env.step("anything")
     >>> terminated
     True
+    >>> env.close()
 
     a test of an unexpected reply from Vampire
 
@@ -86,30 +75,29 @@ class VampireEnv(SaturationEnv):
 
     def __init__(
         self,
-        max_clauses: int = MAX_CLAUSES,
-        render_mode: str = "human",
         prover_binary_path: str = "vampire",
     ):
         """
         Initialise a :ref:`VampireWrapper <vampire-wrapper>`.
 
-        :param max_clauses: maximal number of clauses in proof state
-        :param render_mode: a mode of running ``render`` method
         :param prover_binary_path: a path to Vampire binary;
             by default we expect it to be in the $PATH
         """
-        super().__init__(max_clauses, render_mode)
+        super().__init__()
         self._vampire = VampireWrapper(prover_binary_path)
-        self.action_space = Discrete(self.state.max_clauses)
 
     def _parse_vampire_response(
         self, vampire_response: tuple[tuple[str, str, str], ...]
-    ) -> None:
+    ) -> tuple[tuple[str, ...], set[str]]:
+        new_labels: set[str] = set()
+        new_clauses: tuple[str, ...] = ()
         for response_type, clause_label, clause_text in vampire_response:
+            new_label = "c_" + clause_label
             if response_type == "passive" or FALSEHOOD_SYMBOL in clause_text:
-                self.state.clauses[clause_label] = self._parse_vampire_clause(
-                    clause_label, clause_text
+                new_clauses += (
+                    self._parse_vampire_clause(new_label, clause_text),
                 )
+                new_labels.add(new_label)
             elif response_type not in {
                 "active",
                 "forward reduce",
@@ -121,13 +109,14 @@ class VampireEnv(SaturationEnv):
                 "fn def discovered",
             }:
                 raise ValueError("Unexpected response type: ", response_type)
+        return new_clauses, new_labels
 
     def reset(
         self,
         *,
         seed: Optional[int] = None,
         options: Optional[dict[str, Any]] = None,
-    ) -> tuple[tuple[dict[str, Any], ...], dict[str, Any]]:
+    ) -> tuple[tuple[str, ...], dict[str, Any]]:
         """
         Reset the environment.
 
@@ -140,39 +129,38 @@ class VampireEnv(SaturationEnv):
             os.path.dirname(self.get_task()), "..", ".."
         )
         vampire_response = self._vampire.start(self.get_task(), tptp_folder)
-        self._parse_vampire_response(vampire_response)
-        return tuple(self.state.clauses.values()), {}
+        new_clauses, new_labels = self._parse_vampire_response(
+            vampire_response
+        )
+        self._terminated = max(
+            (FALSEHOOD_SYMBOL in clause for clause in new_clauses),
+            default=False,
+        )
+        self._available_actions = new_labels
+        return new_clauses, {}
 
-    def _do_deductions(self, action: np.int64) -> None:
-        if action < len(self.state.clauses):
-            self._parse_vampire_response(
-                self._vampire.pick_a_clause(
-                    list(self.state.clauses.keys())[action]
-                )
-            )
+    def _do_deductions(self, action: str) -> tuple[tuple[str, ...], set[str]]:
+        return self._parse_vampire_response(
+            # the first two characters are `c_`
+            self._vampire.pick_a_clause(action[2:])
+        )
 
     def _parse_vampire_clause(
         self, clause_label: str, clause_text: str
-    ) -> dict[str, Any]:
-        formula, inference_info = clause_text.split("[")
-        pre_inference = inference_info.split("]")[0].split(" ")
-        if len(pre_inference) > 1:
-            inference_parents = tuple(pre_inference[-1].split(","))
-            inference_rule = "_".join(pre_inference[:-1])
-        else:
-            inference_parents, inference_rule = (), pre_inference[0]
-        return {
-            "literals": formula.strip(),
-            "label": clause_label,
-            "role": "lemma",
-            "inference_rule": inference_rule,
-            "inference_parents": inference_parents,
-            "birth_step": self.state.step_number,
-        }
-
-    def on_truncated(self) -> None:
-        """Terminate Vampire process."""
-        self._vampire.terminate()
+    ) -> str:
+        literals, inference_rule, inference_parents = re.findall(
+            r"(.+) \[([^\d,]+)([\d,]*)\]", clause_text
+        )[0]
+        literals = literals.replace(" ", "")
+        inference_rule = inference_rule.strip().replace(" ", "_")
+        inference_parents = "c_" + inference_parents.replace(",", ",c_")
+        if inference_rule != "input":
+            return (
+                f"cnf({clause_label},plain,{literals},"
+                f"inference({inference_rule},"
+                f"[],[{inference_parents}]))."
+            )
+        return f"cnf({clause_label},axiom,{literals},file('input.p'))."
 
     def close(self) -> None:
         """Terminate Vampire process."""

@@ -21,21 +21,24 @@
 Random and age agents for Vampire and iProver
 ==============================================
 
-.. GENERATED FROM PYTHON SOURCE LINES 7-11
+.. GENERATED FROM PYTHON SOURCE LINES 7-12
 
 Random agent for Vampire
 -------------------------
 
-To make a ``gym-saturation`` environment, we have to import the package
+We can make a prover environment as any other Gymnasium one
+We will always add a wrapper to extract formulae labels
 
-.. GENERATED FROM PYTHON SOURCE LINES 11-16
+.. GENERATED FROM PYTHON SOURCE LINES 12-19
 
 .. code-block:: Python
 
 
     import gymnasium as gym
 
-    import gym_saturation
+    from gym_saturation.wrappers import LabelsExtractor
+
+    env = LabelsExtractor(gym.make("Vampire-v0"))
 
 
 
@@ -44,29 +47,11 @@ To make a ``gym-saturation`` environment, we have to import the package
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 17-18
-
-then we can make a prover environment as any other Gymnasium one
-
-.. GENERATED FROM PYTHON SOURCE LINES 18-21
-
-.. code-block:: Python
-
-
-    env = gym.make("Vampire-v0")
-
-
-
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 22-23
+.. GENERATED FROM PYTHON SOURCE LINES 20-21
 
 before using the environment, we should reset it
 
-.. GENERATED FROM PYTHON SOURCE LINES 23-26
+.. GENERATED FROM PYTHON SOURCE LINES 21-24
 
 .. code-block:: Python
 
@@ -80,11 +65,11 @@ before using the environment, we should reset it
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 27-28
+.. GENERATED FROM PYTHON SOURCE LINES 25-26
 
 ``gym-saturation`` environments don't return any ``info``
 
-.. GENERATED FROM PYTHON SOURCE LINES 28-31
+.. GENERATED FROM PYTHON SOURCE LINES 26-29
 
 .. code-block:: Python
 
@@ -104,73 +89,19 @@ before using the environment, we should reset it
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 32-33
+.. GENERATED FROM PYTHON SOURCE LINES 30-33
 
-observation is a tuple of JSON representations of logic clauses
-
-.. GENERATED FROM PYTHON SOURCE LINES 33-38
-
-.. code-block:: Python
-
-
-    from pprint import pprint
-
-    pprint(observation)
-
-
-
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    ({'birth_step': 0,
-      'inference_parents': (),
-      'inference_rule': 'input',
-      'label': '1',
-      'literals': 'mult(X0,mult(X1,X2)) = mult(mult(X0,X1),X2)',
-      'role': 'lemma'},
-     {'birth_step': 0,
-      'inference_parents': (),
-      'inference_rule': 'input',
-      'label': '2',
-      'literals': 'mult(e,X0) = X0',
-      'role': 'lemma'},
-     {'birth_step': 0,
-      'inference_parents': (),
-      'inference_rule': 'input',
-      'label': '3',
-      'literals': 'e = mult(inv(X0),X0)',
-      'role': 'lemma'},
-     {'birth_step': 0,
-      'inference_parents': (),
-      'inference_rule': 'input',
-      'label': '4',
-      'literals': 'a = mult(a,a)',
-      'role': 'lemma'},
-     {'birth_step': 0,
-      'inference_parents': (),
-      'inference_rule': 'input',
-      'label': '5',
-      'literals': 'e != a',
-      'role': 'lemma'})
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 39-42
-
-We can render the environment state in the TPTP format.
+Observation is a tuple of CNF formulae.
 By default, we are trying to prove a basic group theory lemma:
 every idempotent element equals the identity
 
-.. GENERATED FROM PYTHON SOURCE LINES 42-45
+.. GENERATED FROM PYTHON SOURCE LINES 33-37
 
 .. code-block:: Python
 
 
-    env.render()
+    print("Observation:")
+    print("\n".join(observation["observation"]))
 
 
 
@@ -180,49 +111,98 @@ every idempotent element equals the identity
 
  .. code-block:: none
 
-    cnf(1, lemma, mult(X0,mult(X1,X2)) = mult(mult(X0,X1),X2), inference(input, [], [])).
-    cnf(2, lemma, mult(e,X0) = X0, inference(input, [], [])).
-    cnf(3, lemma, e = mult(inv(X0),X0), inference(input, [], [])).
-    cnf(4, lemma, a = mult(a,a), inference(input, [], [])).
-    cnf(5, lemma, e != a, inference(input, [], [])).
+    Observation:
+    cnf(c_1,axiom,mult(X0,mult(X1,X2))=mult(mult(X0,X1),X2),file('input.p')).
+    cnf(c_2,axiom,mult(e,X0)=X0,file('input.p')).
+    cnf(c_3,axiom,e=mult(inv(X0),X0),file('input.p')).
+    cnf(c_4,axiom,a=mult(a,a),file('input.p')).
+    cnf(c_5,axiom,e!=a,file('input.p')).
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 46-48
+.. GENERATED FROM PYTHON SOURCE LINES 38-39
 
-here is an example of an episode during which we play random actions.
-We set the random seed for reproducibility.
+Wrappers extracts formulae labels for us:
 
-.. GENERATED FROM PYTHON SOURCE LINES 48-56
+.. GENERATED FROM PYTHON SOURCE LINES 39-43
 
 .. code-block:: Python
 
 
-    env.action_space.seed(0)
+    labels = list(observation["labels"])
+    print(labels)
+
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    ['c_1', 'c_2', 'c_3', 'c_4', 'c_5']
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 44-46
+
+Here is an example of an episode during which we play random actions.
+We set the random seed for reproducibility.
+
+.. GENERATED FROM PYTHON SOURCE LINES 46-62
+
+.. code-block:: Python
+
+
+    import random
+
+    random.seed(0)
+
     terminated, truncated = False, False
     while not (terminated or truncated):
-        action = env.action_space.sample()
+        action = random.choice(labels)
         observation, reward, terminated, truncated, info = env.step(action)
+        print("Action:", action, "Observation:")
+        print("\n".join(observation["observation"]))
+        labels.remove(action)
+        labels += list(observation["labels"])
+
     env.close()
 
 
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    Action: c_4 Observation:
+
+    Action: c_5 Observation:
+
+    Action: c_1 Observation:
+    cnf(c_6,plain,mult(a,X0)=mult(a,mult(a,X0)),inference(superposition,[],[c_1,c_4])).
+    Action: c_3 Observation:
+    cnf(c_11,plain,mult(inv(X0),mult(X0,X1))=X1,inference(forward_demodulation,[],[c_10,c_2])).
+    Action: c_11 Observation:
+    cnf(c_18,plain,$false,inference(subsumption_resolution,[],[c_17,c_5])).
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 57-58
 
-the episode terminated with positive reward
+.. GENERATED FROM PYTHON SOURCE LINES 63-64
 
-.. GENERATED FROM PYTHON SOURCE LINES 58-61
+the episode is terminated
+
+.. GENERATED FROM PYTHON SOURCE LINES 64-67
 
 .. code-block:: Python
 
 
-    print(terminated, truncated, reward)
+    print(terminated, truncated)
 
 
 
@@ -232,22 +212,20 @@ the episode terminated with positive reward
 
  .. code-block:: none
 
-    True False 1.0
+    True False
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 62-65
+.. GENERATED FROM PYTHON SOURCE LINES 68-69
 
 It means we arrived at a contradiction (``$false``) which proves the lemma.
-Notice the ``birth_step`` number of a contradiction, it shows how many steps
-we did to find proof.
 
-.. GENERATED FROM PYTHON SOURCE LINES 65-67
+.. GENERATED FROM PYTHON SOURCE LINES 69-71
 
 .. code-block:: Python
 
-    pprint(observation[-1])
+    print(observation["observation"][-1])
 
 
 
@@ -257,29 +235,24 @@ we did to find proof.
 
  .. code-block:: none
 
-    {'birth_step': 1077,
-     'inference_parents': ('17', '5'),
-     'inference_rule': 'subsumption_resolution',
-     'label': '18',
-     'literals': '$false',
-     'role': 'lemma'}
+    cnf(c_18,plain,$false,inference(subsumption_resolution,[],[c_17,c_5])).
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 68-72
+.. GENERATED FROM PYTHON SOURCE LINES 72-76
 
 Age agent for iProver
 ----------------------
 
 We initialise iProver-based environment in the same way
 
-.. GENERATED FROM PYTHON SOURCE LINES 72-76
+.. GENERATED FROM PYTHON SOURCE LINES 76-79
 
 .. code-block:: Python
 
 
-    env = gym.make("iProver-v0")
+    env = LabelsExtractor(gym.make("iProver-v0"))
 
 
 
@@ -288,12 +261,11 @@ We initialise iProver-based environment in the same way
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 77-78
+.. GENERATED FROM PYTHON SOURCE LINES 80-81
 
 Special magic needed if running by Jupyter
 
-.. GENERATED FROM PYTHON SOURCE LINES 78-83
+.. GENERATED FROM PYTHON SOURCE LINES 81-86
 
 .. code-block:: Python
 
@@ -309,42 +281,29 @@ Special magic needed if running by Jupyter
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 84-86
+.. GENERATED FROM PYTHON SOURCE LINES 87-89
 
 Instead of a random agent, let's use Age agent which selects actions in the
 order they appear
 
-.. GENERATED FROM PYTHON SOURCE LINES 86-95
+.. GENERATED FROM PYTHON SOURCE LINES 89-103
 
 .. code-block:: Python
 
 
     observation, info = env.reset()
-    terminated, truncated = False, False
-    action = 0
-    while not (terminated or truncated):
+    print("Observation:")
+    print("\n".join(observation["observation"]))
+    labels = list(observation["labels"])
+    terminated = False
+    while not terminated:
+        action = labels.pop(0)
         observation, reward, terminated, truncated, info = env.step(action)
-        action += 1
+        print("Action:", action, "Observation:")
+        print("\n".join(observation["observation"]))
+        labels += list(observation["labels"])
     env.close()
 
-
-
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 96-97
-
-We still arrive at contradiction but it takes a different number of steps
-
-.. GENERATED FROM PYTHON SOURCE LINES 97-100
-
-.. code-block:: Python
-
-
-    print(terminated, truncated, reward)
-    pprint(observation[-1])
 
 
 
@@ -353,13 +312,69 @@ We still arrive at contradiction but it takes a different number of steps
 
  .. code-block:: none
 
-    True False 1.0
-    {'birth_step': 1,
-     'inference_parents': ('c_85', 'c_53'),
-     'inference_rule': 'forward_subsumption_resolution',
-     'label': 'c_86',
-     'literals': '$false',
-     'role': 'lemma'}
+    Observation:
+    cnf(c_53,axiom,e!=a,file('input.p')).
+    cnf(c_52,axiom,mult(a,a)=a,file('input.p')).
+    cnf(c_50,axiom,mult(e,X0)=X0,file('input.p')).
+    cnf(c_51,axiom,mult(inv(X0),X0)=e,file('input.p')).
+    cnf(c_49,axiom,mult(mult(X0,X1),X2)=mult(X0,mult(X1,X2)),file('input.p')).
+    Action: c_53 Observation:
+
+    Action: c_52 Observation:
+
+    Action: c_50 Observation:
+
+    Action: c_51 Observation:
+
+    Action: c_49 Observation:
+    cnf(c_63,plain,mult(a,mult(a,X0))=mult(a,X0),inference(superposition,[],[c_52,c_49])).
+    cnf(c_62,plain,mult(inv(X0),mult(X0,X1))=mult(e,X1),inference(superposition,[],[c_51,c_49])).
+    cnf(c_64,plain,mult(mult(X0,mult(X1,X2)),X3)=mult(mult(X0,X1),mult(X2,X3)),inference(superposition,[],[c_49,c_49])).
+    Action: c_63 Observation:
+    cnf(c_68,plain,mult(a,mult(mult(a,X0),X1))=mult(mult(a,X0),X1),inference(superposition,[],[c_63,c_49])).
+    Action: c_62 Observation:
+    cnf(c_70,plain,mult(inv(X0),mult(X0,X1))=X1,inference(demodulation,[],[c_62,c_50])).
+    cnf(c_74,plain,mult(inv(a),a)=a,inference(superposition,[],[c_52,c_70])).
+    cnf(c_72,plain,mult(inv(e),X0)=X0,inference(superposition,[],[c_50,c_70])).
+    cnf(c_73,plain,mult(inv(inv(X0)),e)=X0,inference(superposition,[],[c_51,c_70])).
+    cnf(c_77,plain,mult(inv(inv(X0)),X1)=mult(X0,X1),inference(superposition,[],[c_70,c_70])).
+    cnf(c_76,plain,mult(inv(a),mult(a,X0))=mult(a,X0),inference(superposition,[],[c_63,c_70])).
+    cnf(c_78,plain,mult(inv(X0),mult(mult(X0,X1),X2))=mult(X1,X2),inference(superposition,[],[c_70,c_49])).
+    cnf(c_71,plain,mult(inv(mult(X0,X1)),mult(X0,mult(X1,X2)))=X2,inference(superposition,[],[c_49,c_70])).
+    Action: c_64 Observation:
+
+    Action: c_68 Observation:
+
+    Action: c_70 Observation:
+
+    Action: c_74 Observation:
+    cnf(c_85,plain,e=a,inference(demodulation,[],[c_74,c_51])).
+    cnf(c_86,plain,$false,inference(forward_subsumption_resolution,[],[c_85,c_53])).
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 104-105
+
+We still arrive at a contradiction
+
+.. GENERATED FROM PYTHON SOURCE LINES 105-108
+
+.. code-block:: Python
+
+
+    print(terminated, truncated)
+    print(observation["observation"][-1])
+
+
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    True False
+    cnf(c_86,plain,$false,inference(forward_subsumption_resolution,[],[c_85,c_53])).
 
 
 
@@ -367,7 +382,7 @@ We still arrive at contradiction but it takes a different number of steps
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.809 seconds)
+   **Total running time of the script:** (0 minutes 0.792 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_age_agent.py:

@@ -21,24 +21,16 @@ import random
 from abc import abstractmethod
 from typing import Any, Optional
 
-import numpy as np
 from gymnasium import Env, spaces
 from gymnasium.spaces.text import alphanumeric
 
-from gym_saturation.constants import MOCK_TPTP_PROBLEM
-from gym_saturation.proof_state import ProofState
-from gym_saturation.utils import pretty_print
+from gym_saturation.constants import FALSEHOOD_SYMBOL, MOCK_TPTP_PROBLEM
 
-MAX_CLAUSES = 1000
 ALPHANUMERIC_WITH_UNDERSCORE = "".join(alphanumeric) + "_"
-SHORT_TEXT_SPACE = spaces.Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE)
-LONG_TEXT_SPACE = spaces.Text(
-    4000,
-    charset=ALPHANUMERIC_WITH_UNDERSCORE + "(), |~=!$",
-)
+EXTENDED_ALPHANUMERIC = ALPHANUMERIC_WITH_UNDERSCORE + "(), |~=!$.'"
 
 
-class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
+class SaturationEnv(Env[tuple[str, ...], str]):
     """
     Saturation algorithm in a reinforcement learning friendly way.
 
@@ -50,70 +42,31 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
     >>> class DummyProver(SaturationEnv):
     ...     def _do_deductions(action):
     ...         pass
-    >>> env = DummyProver(render_mode="rgb_array")
-    Traceback (most recent call last):
-     ...
-    ValueError: Expected a render mode among ['ansi', 'human'] but got rgb_a...
 
     >>> env = DummyProver()
-    >>> env.render_mode = "rgb_array"
-    >>> env.render()
-    Traceback (most recent call last):
-     ...
-    NotImplementedError
     """
 
-    metadata = {"render_modes": ["ansi", "human"], "render_fps": 1}
     reward_range = (0, 1)
-    action_space: spaces.Space
-    observation_space: spaces.Sequence
+    action_space = spaces.Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE)
+    observation_space = spaces.Sequence(
+        spaces.Text(4000, charset=EXTENDED_ALPHANUMERIC)
+    )
 
     def __init__(
         self,
-        max_clauses: int = MAX_CLAUSES,
-        render_mode: str = "human",
     ):
-        """
-        Initialise spaces et al.
-
-        :param max_clauses: maximal number of clauses to store in proof state
-        :param render_mode: a mode of running ``render`` method
-        """
+        """Initialise spaces et al."""
         super().__init__()
-        self.state = ProofState(
-            clauses={},
-            step_number=-1,
-            max_clauses=max_clauses,
-        )
-        self.observation_space = spaces.Sequence(
-            spaces.Dict(
-                {
-                    "label": SHORT_TEXT_SPACE,
-                    "role": SHORT_TEXT_SPACE,
-                    "literals": LONG_TEXT_SPACE,
-                    "inference_rule": SHORT_TEXT_SPACE,
-                    "inference_parents": spaces.Sequence(SHORT_TEXT_SPACE),
-                    "birth_step": spaces.Discrete(max_clauses),
-                }
-            )
-        )
         self._task = MOCK_TPTP_PROBLEM
-        self.render_mode = self._check_render_mode(render_mode)
-
-    def _check_render_mode(self, render_mode: str) -> str:
-        if render_mode in self.metadata["render_modes"]:
-            return render_mode
-        raise ValueError(
-            f"Expected a render mode among {self.metadata['render_modes']} "
-            f"but got {render_mode}"
-        )
+        self._terminated = False
+        self._available_actions: set[str] = set()
 
     def reset(
         self,
         *,
         seed: Optional[int] = None,
         options: Optional[dict[str, Any]] = None,
-    ) -> tuple[tuple[dict[str, Any], ...], dict[str, Any]]:
+    ) -> tuple[tuple[str, ...], dict[str, Any]]:
         """
         Reset the environment.
 
@@ -123,20 +76,17 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
         """
         super().reset(seed=seed)
         random.seed(seed)
-        self.state = ProofState(
-            clauses={},
-            step_number=0,
-            max_clauses=self.state.max_clauses,
-        )
-        return tuple(self.state.clauses.values()), {}
+        self._terminated = False
+        self._available_actions = set()
+        return (), {}
 
     @abstractmethod
-    def _do_deductions(self, action: Any) -> None:
+    def _do_deductions(self, action: Any) -> tuple[tuple[str, ...], set[str]]:
         raise NotImplementedError  # pragma: no cover
 
     def step(
         self, action: Any
-    ) -> tuple[tuple[dict[str, Any], ...], float, bool, bool, dict[str, Any]]:
+    ) -> tuple[tuple[str, ...], float, bool, bool, dict[str, Any]]:
         # noqa: D301
         """
         Run one time-step of the environment's dynamics.
@@ -150,45 +100,31 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
         :returns: a tuple of four values:\n
             * observation: agent's observation of the current environment
             * reward: amount of reward returned after previous action
-            * terminated: Whether the proof was found
-            * truncated: Whether the maximal number of clauses in the proof
-              state were reached
+            * terminated: whether the proof was found
+            * truncated: whether the episode was finished for an external
+              reason (e.g. time limit)
             * info: contains auxiliary diagnostic information (helpful for
               debugging, and sometimes learning)
         """
-        if not (self.state.terminated or self.state.truncated):
-            self.state.step_number += 1
-            self._do_deductions(action)
-        if self.state.truncated:
-            self.on_truncated()
+        new_clauses: tuple[str, ...] = ()
+        if not self._terminated and action in self._available_actions:
+            new_clauses, new_actions = self._do_deductions(action)
+            self._terminated = max(
+                (FALSEHOOD_SYMBOL in clause for clause in new_clauses),
+                default=False,
+            )
+            self._available_actions.discard(action)
+            self._available_actions.update(new_actions)
         return (
-            tuple(self.state.clauses.values()),
-            1.0 if self.state.terminated else 0.0,
-            self.state.terminated,
-            self.state.truncated,
+            new_clauses,
+            0.0,
+            self._terminated,
+            False,
             {},
         )
 
-    # pylint: disable=inconsistent-return-statements
     def render(self) -> None:
-        """
-        Return or print the proof state.
-
-        :returns: proof state (TPTP formatted) or nothing
-            (depending on ``render_mode``)
-        """
-        tptp_string = "\n".join(
-            map(
-                pretty_print,
-                self.state.clauses.values(),
-            )
-        )
-        if self.render_mode == "ansi":
-            return tptp_string  # type: ignore
-        if self.render_mode == "human":
-            print(tptp_string)
-        else:
-            super().render()
+        """No render."""
 
     def set_task(self, task: str) -> None:
         """
@@ -206,6 +142,3 @@ class SaturationEnv(Env[tuple[dict[str, Any], ...], np.int64]):
         :raises ValueError: is task is not set
         """
         return self._task
-
-    def on_truncated(self) -> None:
-        """Prover-specific episode truncation."""

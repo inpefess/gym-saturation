@@ -24,10 +24,7 @@ import re
 from threading import Thread
 from typing import Any, Optional
 
-import numpy as np
-from gymnasium.spaces import Discrete
-
-from gym_saturation.envs.saturation_env import MAX_CLAUSES, SaturationEnv
+from gym_saturation.envs.saturation_env import SaturationEnv
 from gym_saturation.relay_server import (
     QUERY_END_MESSAGE,
     SESSION_END_MESSAGE,
@@ -87,41 +84,32 @@ class IProverEnv(SaturationEnv):
     >>> import gymnasium as gym
     >>> env = gym.make(
     ...     "iProver-v0",
-    ...     max_clauses=5
     ... ).unwrapped
     >>> env.relay_server
     Traceback (most recent call last):
      ...
     ValueError: run ``reset`` first!
     >>> check_env(env)
-    cnf(c_53, ...).
-    ...
-    cnf(c_49, ...).
 
-    when episode truncated, all threads are terminated
+    episode is never truncated by default
 
     >>> _ = env.reset()
-    >>> _, _, _, truncated, _ = env.step(4)
+    >>> _, _, _, truncated, _ = env.step("c_49")
     >>> truncated
-    True
+    False
     """
 
     def __init__(
         self,
-        max_clauses: int = MAX_CLAUSES,
-        render_mode: str = "human",
         prover_binary_path: str = "iproveropt",
     ):
         """
         Initialise the environment.
 
-        :param max_clauses: maximal number of clauses in proof state
-        :param render_mode: a mode of running ``render`` method
         :param prover_binary_path: a path to iProver binary;
             by default, we assume it to be ``iproveropt`` and in the $PATH
         """
-        super().__init__(max_clauses, render_mode)
-        self.action_space = Discrete(self.state.max_clauses)
+        super().__init__()
         self.prover_binary_path = prover_binary_path
         self._relay_server: Optional[RelayServer] = None
         self.relay_server_thread: Optional[Thread] = None
@@ -139,49 +127,35 @@ class IProverEnv(SaturationEnv):
 
     def _parse_batch_clauses(
         self, batch_clauses: list[dict[str, Any]]
-    ) -> None:
+    ) -> tuple[tuple[str, ...], set[str]]:
+        new_labels: set[str] = set()
+        new_clauses: tuple[str, ...] = ()
         for dict_clause in batch_clauses:
             raw_clause = (
                 dict_clause["clause"].replace("\n", "").replace(" ", "")
             )
-            try:
-                (
-                    label,
-                    literals,
-                    inference_rule,
-                    inference_parents,
-                ) = re.findall(
-                    r"cnf\((\w+),\w+,\((.*)\),"
-                    + r"inference\((.*),.*,\[(.*)\]\)\)\.",
-                    raw_clause,
-                )[
-                    0
-                ]
-            except IndexError:
-                label, literals = re.findall(
-                    r"cnf\((\w+),\w+,\((.*)\),file\(.*\)\)\.",
-                    raw_clause,
-                )[0]
-                inference_rule, inference_parents = "input", None
-            self.state.clauses[label] = {
-                "literals": literals,
-                "label": label,
-                "role": "lemma",
-                "birth_step": dict_clause["clause_features"]["born"] - 1,
-                "inference_rule": inference_rule,
-                "inference_parents": (
-                    tuple(inference_parents.split(","))
-                    if inference_parents is not None
-                    else ()
-                ),
-            }
+            (label, literals, inference_record) = re.findall(
+                pattern=r"cnf\((\w+),\w+,\((.*)\),(\w+\(.+\))\)\.",
+                string=raw_clause,
+            )[0]
+            new_labels.add(label)
+            if inference_record[:5] == "file(":
+                new_clauses += (
+                    f"cnf({label},axiom,{literals},file('input.p')).",
+                )
+            else:
+                new_clauses += (
+                    f"cnf({label},plain,{literals},"
+                    f"{inference_record.replace('status(thm)', '')}).",
+                )
+        return new_clauses, new_labels
 
     def reset(
         self,
         *,
         seed: Optional[int] = None,
         options: Optional[dict[str, Any]] = None,
-    ) -> tuple[tuple[dict[str, Any], ...], dict[str, Any]]:
+    ) -> tuple[tuple[str, ...], dict[str, Any]]:
         """
         Reset the environment.
 
@@ -197,8 +171,9 @@ class IProverEnv(SaturationEnv):
             self.prover_binary_path,
         )
         data = self._get_json_data()
-        self._parse_iprover_requests(data)
-        return tuple(self.state.clauses.values()), {}
+        new_clauses, new_labels = self._parse_iprover_requests(data)
+        self._available_actions = new_labels
+        return new_clauses, {}
 
     def _get_json_data(self) -> list[dict[str, Any]]:
         json_data = [{"tag": "None"}]
@@ -213,29 +188,34 @@ class IProverEnv(SaturationEnv):
 
     def _parse_iprover_requests(
         self, iprover_requests: list[dict[str, Any]]
-    ) -> None:
+    ) -> tuple[tuple[str, ...], set[str]]:
+        new_labels: set[str] = set()
+        new_clauses: tuple[str, ...] = ()
         for iprover_request in iprover_requests:
             if "clauses" in iprover_request:
-                self._parse_batch_clauses(iprover_request["clauses"])
+                more_new_clauses, more_new_labels = self._parse_batch_clauses(
+                    iprover_request["clauses"]
+                )
+                new_labels.update(more_new_labels)
+                new_clauses += more_new_clauses
+        return new_clauses, new_labels
 
-    def _do_deductions(self, action: np.int64) -> None:
-        if action < len(self.state.clauses):
-            given_clause_label = list(self.state.clauses.keys())[action]
-            iprover_scores_message = {
-                "tag": "given_clause_res",
-                "passive_is_empty": False,
-                "given_clause": int(given_clause_label[2:]),
-            }
-            relayed_scores_message = bytes(
-                json.dumps({"tag": "server_queries_end"})
-                + "\n\x00\n"
-                + json.dumps(iprover_scores_message)
-                + "\n\x00\n",
-                "utf8",
-            )
-            self.relay_server.output_queue.put(relayed_scores_message)
-            data = self._get_json_data()
-            self._parse_iprover_requests(data)
+    def _do_deductions(self, action: str) -> tuple[tuple[str, ...], set[str]]:
+        iprover_scores_message = {
+            "tag": "given_clause_res",
+            "passive_is_empty": False,
+            "given_clause": int(action[2:]),
+        }
+        relayed_scores_message = bytes(
+            json.dumps({"tag": "server_queries_end"})
+            + "\n\x00\n"
+            + json.dumps(iprover_scores_message)
+            + "\n\x00\n",
+            "utf8",
+        )
+        self.relay_server.output_queue.put(relayed_scores_message)
+        data = self._get_json_data()
+        return self._parse_iprover_requests(data)
 
     def close(self) -> None:
         """Stop relay server."""
@@ -251,10 +231,6 @@ class IProverEnv(SaturationEnv):
         if self._relay_server:
             return self._relay_server
         raise ValueError("run ``reset`` first!")
-
-    def on_truncated(self) -> None:
-        """Terminate threads."""
-        self._terminate_threads()
 
     def _terminate_threads(self) -> None:
         if self._relay_server:

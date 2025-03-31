@@ -97,14 +97,12 @@ One can use ``gym-saturation`` environments as any other Gymnasium environment:
   observation, info = env.reset()
   terminated, truncated = False, False
   while not (terminated or truncated):
-      # apply policy (a random action here)
-      action = env.action_space.sample()
-      observation, reward, terminated, truncated, info = env.step(action)
+      # apply policy
+      action = ...
+      observation, reward, terminated, truncated, info = env.step(str(action))
   env.close()
 
-Or have a look at the basic `tutorial <https://gym-saturation.readthedocs.io/en/latest/auto_examples/plot_age_agent.html>`__.
-  
-For a bit more comprehensive experiments, please see `this project <https://github.com/inpefess/ray-prover>`__.
+Have a look at the basic `tutorial <https://gym-saturation.readthedocs.io/en/latest/auto_examples/plot_age_agent.html>`__.  
 
 More Documentation
 ==================
@@ -114,11 +112,6 @@ More documentation can be found
 
 Related Projects
 =================
-
-``gym-saturation`` is compatible with RL-frameworks such as `Ray
-RLlib <https://docs.ray.io/en/latest/rllib/package_ref/index.html>`__
-and can leverage code embeddings such as `CodeBERT
-<https://github.com/microsoft/CodeBERT>`__.
 
 Other projects using RL-guidance for ATPs include:
 

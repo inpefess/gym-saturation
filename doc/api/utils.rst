@@ -15,17 +15,11 @@
 
 Utils
 ******
-.. automodule:: gym_saturation.proof_state
-   :members:
-.. automodule:: gym_saturation.utils
-   :members:		     
 .. automodule:: gym_saturation.vampire_wrapper
    :members:
    :special-members: __init__
 .. automodule:: gym_saturation.relay_server
    :members:
    :special-members: __init__
-.. automodule:: gym_saturation.dummy_http_handler
-   :members:
 .. automodule:: gym_saturation.constants
    :members:

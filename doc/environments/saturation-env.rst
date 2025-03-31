@@ -26,28 +26,13 @@ SaturationEnv
   
 .. csv-table::
    
-   Action Space, ``Discrete(n)``
-   Observation Space, "``Sequence(Clause(n), stack=False)``"
+   Action Space, "``Text(256, charset=ALPHANUMERIC_WITH_UNDERSCORE)``"
+   Observation Space, "``Sequence(Text(4000, charset=EXTENDED_ALPHANUMERIC))``"
    import, ``import gym_saturation; gymnasium.make("Vampire-v0")``
    import, ``import gym_saturation; gymnasium.make("iProver-v0")``
 
-Here ``Clause(n)`` is an alias for
-
-.. code:: python
-
-  Dict(
-      'birth_step': Discrete(n),
-      'inference_parents': Sequence(
-          Text(1, 256, characters=ALPHANUMERIC_WITH_UNDERSCORE),
-	  stack=False
-      ),
-      'inference_rule': Text(1, 256, characters=ALPHANUMERIC_WITH_UNDERSCORE),
-      'label': Text(1, 256, characters=ALPHANUMERIC_WITH_UNDERSCORE),
-      'literals': Text(1, 4000, characters=EXTENDED_ALPHANUMERIC),
-      'role': Text(1, 256, characters=ALPHANUMERIC_WITH_UNDERSCORE)
-  )
-
-and ``EXTENDED_ALPHANUMERIC`` is ``ALPHANUMERIC_WITH_UNDERSCORE`` extended by nine special characters ``(), |~=!$``. Such a structure corresponds to clauses (logical statements) in the `TPTP <https://tptp.org>`__ language.
+``EXTENDED_ALPHANUMERIC`` should cover characters used by the `TPTP
+<https://tptp.org>`__ language.
 
 Description
 ************
@@ -78,7 +63,7 @@ If the ``EMPTY_CLAUSE`` (aka falsehood or contradiction) appears among the ``unp
 Action Space
 *************
 
-Action is an index of a given clause. It belongs to a discrete space of size ``n``. ``n`` is the maximal number of clauses in a proof state (``unprocessed_clauses`` and ``processed_clauses`` together).
+Action is a label of a given clause. Different provers use different labelling systems.
     
 Observation Space
 ******************
@@ -104,13 +89,18 @@ One can set another task by specifying a filename of a respective TPTP problem:
 Rewards
 ********
 
-Reward is ``1.0`` after a step iff the saturation algorithm terminated at this step, and ``0.0`` otherwise.
+Reward is always ``0.0``. One has to use `reward wrappers
+<https://gymnasium.farama.org/api/wrappers/reward_wrappers/>`__
+according to their training strategy.
 
 Episode End
 ************
 
-* Termination means the saturation algorithm ended with refutation found or satisfiability established.
-* Truncation happens if the number of clauses in the state exceeds ``action_space.n``.
+* Termination means the saturation algorithm ended with refutation
+  found or satisfiability established.
+* There is no default truncation condition (one can add it using
+  wrappers, e.g. `TimeLimit
+  <https://gymnasium.farama.org/api/wrappers/misc_wrappers/#gymnasium.wrappers.TimeLimit>`__)
 
 Information
 ************
@@ -126,14 +116,8 @@ Arguments
     
    gymnasium.make(
        "Vampire-v0",  # or "iProver-v0"
-       max_clauses=1000,
-       render_mode="human",
        prover_binary_path="vampire",  # or "iproveropt"
    )
-
-``max_clauses=1000``: the size ``n`` of the action space.
-
-``render_mode="human"``: either ``ansi`` (return the clauses from the current proof state in the TPTP format) or ``human`` (print the ``ansi`` rendering to the standard output)
 
 ``prover_binary_path="vampire"`` (or ``"iproveropt"``): the path to a prover binary (supposed to be on the ``$PATH`` by default)
 
