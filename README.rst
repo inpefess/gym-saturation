@@ -115,11 +115,6 @@ More documentation can be found
 Related Projects
 =================
 
-``gym-saturation`` is compatible with RL-frameworks such as `Ray
-RLlib <https://docs.ray.io/en/latest/rllib/package_ref/index.html>`__
-and can leverage code embeddings such as `CodeBERT
-<https://github.com/microsoft/CodeBERT>`__.
-
 Other projects using RL-guidance for ATPs include:
 
 * `TRAIL <https://github.com/IBM/TRAIL>`__
