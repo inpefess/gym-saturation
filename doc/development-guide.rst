@@ -26,21 +26,6 @@ installed and ready to go.
 #. Install
    [poetry](https://python-poetry.org/docs/#installing-with-the-official-installer)
 
-#. It's highly recommended to use a virtual environment for your
-   local development (by the standard means of Python or using
-   Anaconda or anything else):
-
-   .. code:: bash
-
-      python -m venv gym-saturation-env
-      source gym-saturation-env/bin/activate
-
-   This should change the shell to look something like:
-
-   .. code:: bash
-
-      (gym-saturation-env) $
-
 #. Now you can install all the things you need for development:
 
    .. code:: bash
@@ -54,8 +39,13 @@ installed and ready to go.
       wget https://gitlab.com/api/v4/projects/39846772/jobs/artifacts/2023.04.10/download?job=build-job -O iprover.zip
       unzip iprover.zip
       # then use iproveropt
-      # recommended but not necessary
-      pre-commit install
+
+#. `poetry` will also create a virtual environment in a `.venv`
+   subfolder. To activate it:
+
+   .. code:: bash
+
+      poetry env activate       
 
 #. Create a branch for local development:
 
@@ -70,10 +60,17 @@ installed and ready to go.
 
    .. code:: bash
 
-      pydocstyle gym_saturation
-      flake8 gym_saturation
+      ruff format
+      ruff check
       pylint gym_saturation
       mypy gym_saturation
+
+#. You can also do these checks automatically on each commit. To
+   activate this option:
+
+   .. code:: bash
+
+      pre-commit install       
 
 #. The next step would be to run the test cases. `gym-saturation`
    uses pytest and all the existing tests are `doctest

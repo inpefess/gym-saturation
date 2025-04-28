@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# noqa: D205, D400
 """
 Saturation Environment with iProver back-end
 ============================================
-"""
+"""  # noqa: D205, D400
+
 import asyncio
 import json
 import os

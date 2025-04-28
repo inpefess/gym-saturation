@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# noqa: D205, D400
 """
 Relay Server between Two Sockets
 ================================
-"""
+"""  # noqa: D205, D400
+
 import json
 from queue import Queue
 from socketserver import BaseRequestHandler, ThreadingTCPServer

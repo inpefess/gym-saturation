@@ -17,6 +17,7 @@ There are two environments in this module.
 They are registered using a limit for the number of steps in an episode and the
 maximal possible reward is set to ``1.0`` (proof is found).
 """
+
 from gymnasium.envs.registration import register
 
 register(id="Vampire-v0", entry_point="gym_saturation.envs:VampireEnv")

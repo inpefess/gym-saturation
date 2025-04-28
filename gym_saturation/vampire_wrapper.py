@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# noqa: D205, D400
 """
 Vampire Wrapper
 ================
-"""
+"""  # noqa: D205, D400
+
 from typing import Optional
 
 import pexpect

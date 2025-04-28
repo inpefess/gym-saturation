@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# noqa: D205, D400
 """
 Saturation Environment
 =======================
-"""
+"""  # noqa: D205, D400
+
 import random
 from abc import abstractmethod
 from typing import Any, Optional
@@ -87,7 +87,6 @@ class SaturationEnv(Env[tuple[str, ...], str]):
     def step(
         self, action: Any
     ) -> tuple[tuple[str, ...], float, bool, bool, dict[str, Any]]:
-        # noqa: D301
         """
         Run one time-step of the environment's dynamics.
 
@@ -105,7 +104,7 @@ class SaturationEnv(Env[tuple[str, ...], str]):
               reason (e.g. time limit)
             * info: contains auxiliary diagnostic information (helpful for
               debugging, and sometimes learning)
-        """
+        """  # noqa: D301
         new_clauses: tuple[str, ...] = ()
         if not self._terminated and action in self._available_actions:
             new_clauses, new_actions = self._do_deductions(action)

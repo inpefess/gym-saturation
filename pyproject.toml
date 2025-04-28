@@ -34,18 +34,13 @@ numpy = "*"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-black = "*"
 mypy = "*"
 pylint = "*"
 pre-commit = "*"
-pydocstyle = "*"
 tbump = "*"
 pyenchant = "*"
-flake8 = "*"
 toml = "*"
 jedi = "*"
-bandit = {version = "*", extras = ["toml"]}
-pyupgrade = "*"
 pyroma = "*"
 
 [tool.poetry.group.test]
@@ -54,6 +49,7 @@ optional = true
 [tool.poetry.group.test.dependencies]
 coverage = "*"
 pytest = "*"
+ruff = "*"
 
 [tool.poetry.group.doc]
 optional = true
@@ -64,9 +60,6 @@ sphinx-autodoc-typehints = "*"
 furo = "*"
 sphinx-gallery = "*"
 nest-asyncio = "*"
-
-[tool.black]
-line-length=79
 
 [tool.isort]
 profile = "black"
@@ -144,24 +137,21 @@ env_list = ["py39", "py310", "py311", "py312", "py13"]
 deps = [
     "coverage",
     "pytest",
-    "pydocstyle",
     "pylint",
     "mypy",
     "toml",
     "pyenchant",
-    "flake8",
     "pyroma",
-    "bandit"
+    "ruff"
 ]
 commands = [
-    ["pydocstyle", "gym_saturation"],
-    ["flake8", "gym_saturation"],
+    ["ruff", "format"],
+    ["ruff", "check"],
     ["pylint", "gym_saturation"],
     ["mypy", "gym_saturation"],
     ["coverage", "run", "-m", "pytest"],
     ["coverage", "xml", "--fail-under=100"],
-    ["pyroma", "."],
-    ["bandit", "-r", "gym_saturation"]
+    ["pyroma", "."]
 ]
 
 [tool.tbump]
@@ -189,3 +179,13 @@ src = "pyproject.toml"
 
 [[tool.tbump.file]]
 src = "doc/conf.py"
+
+[tool.ruff]
+exclude = ["examples", "doc/auto_examples"]
+line-length = 79
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "D", "S", "UP"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
