@@ -1,13 +1,12 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "1.0.0"
+version = "1.0.1"
 description = "Gymnasium environments for saturation provers"
 authors = ["Boris Shminke <boris@shminke.com>"]
 license = "Apache-2.0"
 repository = "https://github.com/inpefess/gym-saturation"
 readme = "README.rst"
 classifiers=[
-	"Programming Language :: Python :: 3.9",
 	"Programming Language :: Python :: 3.10",
 	"Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
@@ -25,28 +24,21 @@ include = ["gym_saturation/py.typed"]
 keywords = ["saturation prover", "OpenAI Gym", "Gymnasium", "automated theorem prover"]
 
 [tool.poetry.dependencies]
-python = ">= 3.9.0, < 3.14"
+python = ">= 3.10.0, < 3.14"
 pexpect = "*"
 gymnasium = "*"
-numpy = "*"
 
 [tool.poetry.group.dev]
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-black = "*"
 mypy = "*"
-pylint = "*"
 pre-commit = "*"
-pydocstyle = "*"
 tbump = "*"
-pyenchant = "*"
-flake8 = "*"
 toml = "*"
 jedi = "*"
-bandit = {version = "*", extras = ["toml"]}
-pyupgrade = "*"
 pyroma = "*"
+pydoclint = "*"
 
 [tool.poetry.group.test]
 optional = true
@@ -54,6 +46,7 @@ optional = true
 [tool.poetry.group.test.dependencies]
 coverage = "*"
 pytest = "*"
+ruff = "*"
 
 [tool.poetry.group.doc]
 optional = true
@@ -65,15 +58,12 @@ furo = "*"
 sphinx-gallery = "*"
 nest-asyncio = "*"
 
-[tool.black]
-line-length=79
-
 [tool.isort]
 profile = "black"
 src_paths = ["gym_saturation"]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.0.1"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
@@ -82,51 +72,6 @@ addopts = "--doctest-modules --junit-xml test-results/gym-saturation.xml"
 testpaths = ["gym_saturation"]
 doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
 
-[tool.pylint.MASTER]
-load-plugins = [
-    "pylint.extensions.docparams",
-    "pylint.extensions.mccabe",
-    "pylint.extensions.set_membership",
-    "pylint.extensions.code_style",
-    "pylint.extensions.broad_try_clause",
-    "pylint.extensions.comparison_placement",
-    "pylint.extensions.dict_init_mutate",
-    "pylint.extensions.redefined_loop_name",
-    "pylint.extensions.dunder",
-    "pylint.extensions.eq_without_hash",
-    "pylint.extensions.redefined_variable_type",
-    "pylint.extensions.overlapping_exceptions",
-    "pylint.extensions.confusing_elif",
-]
-
-[tool.pylint.parameter_documentation]
-accept-no-param-doc = false
-accept-no-raise-doc = false
-accept-no-return-doc = false
-accept-no-yields-doc = false
-default-docstring-type = "sphinx"
-
-[tool.pylint.similarities]
-ignore-comments = true
-ignore-docstrings = true
-ignore-imports = true
-ignore-signatures = true
-min-similarity-lines = 4
-
-[tool.pylint.format]
-ignore-long-lines = "https://"
-max-line-length = 79
-
-[tool.pylint.design]
-max-statements = 10
-
-[tool.pylint.typecheck]
-generated-members = ["asyncio"]
-
-[tool.pylint.spelling]
-spelling-dict = "en_GB"
-spelling-private-dict-file = "spelling.dict"
-
 [tool.mypy]
 show_error_codes = true
 incremental = false
@@ -134,41 +79,37 @@ disable_error_code = "no-redef"
 check_untyped_defs = true
 
 [[tool.mypy.overrides]]
-module = ["pexpect", "enchant.*"]
+module = ["pexpect"]
 ignore_missing_imports = true
 
 [tool.tox]
-env_list = ["py39", "py310", "py311", "py312", "py13"]
+env_list = ["py310", "py311", "py312", "py13"]
 
 [tool.tox.env_run_base]
 deps = [
     "coverage",
     "pytest",
-    "pydocstyle",
-    "pylint",
     "mypy",
     "toml",
-    "pyenchant",
-    "flake8",
     "pyroma",
-    "bandit"
+    "ruff",
+    "pydoclint"
 ]
 commands = [
-    ["pydocstyle", "gym_saturation"],
-    ["flake8", "gym_saturation"],
-    ["pylint", "gym_saturation"],
+    ["ruff", "format"],
+    ["ruff", "check"],
     ["mypy", "gym_saturation"],
+    ["pydoclint", "gym_saturation"],
     ["coverage", "run", "-m", "pytest"],
     ["coverage", "xml", "--fail-under=100"],
-    ["pyroma", "."],
-    ["bandit", "-r", "gym_saturation"]
+    ["pyroma", "."]
 ]
 
 [tool.tbump]
 github_url = "https://github.com/inpfess/gym-saturation/"
 
 [tool.tbump.version]
-current = "1.0.0"
+current = "1.0.1"
 regex = """
   (?P<major>\\d+)
   \\.
@@ -189,3 +130,21 @@ src = "pyproject.toml"
 
 [[tool.tbump.file]]
 src = "doc/conf.py"
+
+[tool.ruff]
+exclude = ["examples", "doc/auto_examples"]
+line-length = 79
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "D", "S", "UP", "PL"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.pydoclint]
+style = "sphinx"
+arg-type-hints-in-docstring = false
+check-return-types = false
+
+[tool.ruff.lint.pylint]
+max-statements = 10

@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# noqa: D205, D400
 """
 Constants used throughout the package
 ======================================
-"""
+"""  # noqa: D205, D400
+
 import os
 from importlib.resources import files
 

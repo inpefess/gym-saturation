@@ -12,9 +12,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-# noqa: D205, D400
 """
 Gymnasium Wrappers for Provers
 ===============================
-"""
+"""  # noqa: D205, D400
+
 from gym_saturation.wrappers.labels_extractor import LabelsExtractor
+
+__all__ = ["LabelsExtractor"]

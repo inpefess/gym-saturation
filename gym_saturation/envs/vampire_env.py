@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# noqa: D205, D400
 """
 Saturation Environment with Vampire back-end
 ============================================
-"""
+"""  # noqa: D205, D400
+
 import os
 import re
 from typing import Any, Optional
@@ -29,6 +29,9 @@ from gym_saturation.vampire_wrapper import VampireWrapper
 class VampireEnv(SaturationEnv):
     """
     An RL environment wrapper around Vampire prover.
+
+    :param prover_binary_path: a path to Vampire binary;
+        by default we expect it to be in the $PATH
 
     Refer to :ref:`saturation_env` for more documentation.
 
@@ -73,16 +76,10 @@ class VampireEnv(SaturationEnv):
     ValueError: ('Unexpected response type: ', 'who could expect that?')
     """
 
-    def __init__(
+    def __init__(  # noqa: D107
         self,
         prover_binary_path: str = "vampire",
     ):
-        """
-        Initialise a :ref:`VampireWrapper <vampire-wrapper>`.
-
-        :param prover_binary_path: a path to Vampire binary;
-            by default we expect it to be in the $PATH
-        """
         super().__init__()
         self._vampire = VampireWrapper(prover_binary_path)
 

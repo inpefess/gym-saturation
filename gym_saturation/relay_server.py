@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# noqa: D205, D400
 """
 Relay Server between Two Sockets
 ================================
-"""
+"""  # noqa: D205, D400
+
 import json
 from queue import Queue
 from socketserver import BaseRequestHandler, ThreadingTCPServer
@@ -57,13 +57,12 @@ class RelayServer(ThreadingTCPServer):
     test
     """
 
-    def __init__(
+    def __init__(  # noqa: D107
         self,
         server_address: tuple[str, int],
         request_handler_class: type[BaseRequestHandler],
         bind_and_activate: bool = True,
     ):
-        """Initialise queues."""
         super().__init__(
             server_address, request_handler_class, bind_and_activate
         )
@@ -75,12 +74,23 @@ class RelayServer(ThreadingTCPServer):
 class RelayTCPHandler(BaseRequestHandler):
     """The request handler class for relay server."""
 
-    def _read_messages(
-        self, old_data: str
-    ) -> tuple[list[dict[str, Any]], str]:
-        raw_data = old_data + str(self.request.recv(4096), "utf8")
-        raw_jsons = raw_data.split("\n\x00\n")
-        return list(map(json.loads, raw_jsons[:-1])), raw_jsons[-1]
+    def read_messages(self) -> list[dict[str, Any]]:
+        """
+        Read messages from TCP request.
+
+        :returns: parsed messages
+        """
+        raw_data = ""
+        json_messages: list[dict[str, Any]] = []
+        while len(json_messages) == 0 or json_messages[-1]["tag"] not in {
+            QUERY_END_MESSAGE,
+            SESSION_END_MESSAGE,
+        }:
+            raw_data += str(self.request.recv(4096), "utf8")
+            raw_jsons = raw_data.split("\n\x00\n")
+            raw_data = raw_jsons[-1]
+            json_messages.extend(list(map(json.loads, raw_jsons[:-1])))
+        return json_messages
 
     def handle(self) -> None:
         """Read data from another TCP socket or send data to it."""
@@ -90,15 +100,7 @@ class RelayTCPHandler(BaseRequestHandler):
                 len(json_messages) == 0
                 or json_messages[-1]["tag"] != SESSION_END_MESSAGE
             ):
-                raw_data, json_messages = "", []
-                while len(json_messages) == 0 or json_messages[-1][
-                    "tag"
-                ] not in {
-                    QUERY_END_MESSAGE,
-                    SESSION_END_MESSAGE,
-                }:
-                    new_messages, raw_data = self._read_messages(raw_data)
-                    json_messages.extend(new_messages)
+                json_messages = self.read_messages()
                 for json_message in json_messages:
                     self.server.input_queue.put(json_message)
                 if json_messages[-1]["tag"] == QUERY_END_MESSAGE:

@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# noqa: D205, D400
 """
 Saturation Environment
 =======================
-"""
+"""  # noqa: D205, D400
+
 import random
 from abc import abstractmethod
 from typing import Any, Optional
@@ -52,10 +52,9 @@ class SaturationEnv(Env[tuple[str, ...], str]):
         spaces.Text(4000, charset=EXTENDED_ALPHANUMERIC)
     )
 
-    def __init__(
+    def __init__(  # noqa: D107
         self,
     ):
-        """Initialise spaces et al."""
         super().__init__()
         self._task = MOCK_TPTP_PROBLEM
         self._terminated = False
@@ -87,7 +86,6 @@ class SaturationEnv(Env[tuple[str, ...], str]):
     def step(
         self, action: Any
     ) -> tuple[tuple[str, ...], float, bool, bool, dict[str, Any]]:
-        # noqa: D301
         """
         Run one time-step of the environment's dynamics.
 
@@ -105,7 +103,7 @@ class SaturationEnv(Env[tuple[str, ...], str]):
               reason (e.g. time limit)
             * info: contains auxiliary diagnostic information (helpful for
               debugging, and sometimes learning)
-        """
+        """  # noqa: D301
         new_clauses: tuple[str, ...] = ()
         if not self._terminated and action in self._available_actions:
             new_clauses, new_actions = self._do_deductions(action)
@@ -139,6 +137,5 @@ class SaturationEnv(Env[tuple[str, ...], str]):
         Get the task that the agent is performing in the current environment.
 
         :returns: a TPTP problem filename
-        :raises ValueError: is task is not set
         """
         return self._task

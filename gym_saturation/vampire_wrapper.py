@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# noqa: D205, D400
 """
 Vampire Wrapper
 ================
-"""
+"""  # noqa: D205, D400
+
 from typing import Optional
 
 import pexpect
@@ -25,6 +25,9 @@ import pexpect
 class VampireWrapper:
     """
     A wrapper around Vampire binary running in a manual clause selection mode.
+
+    :param binary_path: an absolute path to Vampire binary
+    :param command_line_arguments: command line arguments in one string
 
     .. _vampire-wrapper :
 
@@ -38,14 +41,9 @@ class VampireWrapper:
     >>> result = vampire.start(MOCK_TPTP_PROBLEM, MOCK_TPTP_FOLDER)
     """
 
-    def __init__(
+    def __init__(  # noqa: D107
         self, binary_path: str, command_line_arguments: Optional[str] = None
     ):
-        """
-        Remember the path to Vampire, don't start the process yet.
-
-        :param binary_path: an absolute path to Vampire binary
-        """
         self.binary_path = binary_path
         self._proc = None
         self.problem_filename: Optional[str] = None
