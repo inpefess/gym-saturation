@@ -17,9 +17,7 @@ Utils
 ******
 .. automodule:: gym_saturation.vampire_wrapper
    :members:
-   :special-members: __init__
 .. automodule:: gym_saturation.relay_server
    :members:
-   :special-members: __init__
 .. automodule:: gym_saturation.constants
    :members:

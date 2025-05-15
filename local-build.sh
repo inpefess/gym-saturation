@@ -7,7 +7,8 @@ make clean html coverage
 cat _build/coverage/python.txt
 cd ..
 ruff check
-mypy ${PACKAGE_NAME} scripts
+mypy ${PACKAGE_NAME}
+pydoclint ${PACKAGE_NAME}
 coverage run -m pytest
 coverage report --show-missing --fail-under=100
 pyroma -n 10 .

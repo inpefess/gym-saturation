@@ -17,4 +17,3 @@ Wrappers
 *********
 .. automodule:: gym_saturation.wrappers.labels_extractor
    :members:
-   :special-members: __init__

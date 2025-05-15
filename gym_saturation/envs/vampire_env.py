@@ -30,6 +30,9 @@ class VampireEnv(SaturationEnv):
     """
     An RL environment wrapper around Vampire prover.
 
+    :param prover_binary_path: a path to Vampire binary;
+        by default we expect it to be in the $PATH
+
     Refer to :ref:`saturation_env` for more documentation.
 
     We can run a full Gymnasium environment check:
@@ -73,16 +76,10 @@ class VampireEnv(SaturationEnv):
     ValueError: ('Unexpected response type: ', 'who could expect that?')
     """
 
-    def __init__(
+    def __init__(  # noqa: D107
         self,
         prover_binary_path: str = "vampire",
     ):
-        """
-        Initialise a :ref:`VampireWrapper <vampire-wrapper>`.
-
-        :param prover_binary_path: a path to Vampire binary;
-            by default we expect it to be in the $PATH
-        """
         super().__init__()
         self._vampire = VampireWrapper(prover_binary_path)
 

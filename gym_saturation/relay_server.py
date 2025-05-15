@@ -57,13 +57,12 @@ class RelayServer(ThreadingTCPServer):
     test
     """
 
-    def __init__(
+    def __init__(  # noqa: D107
         self,
         server_address: tuple[str, int],
         request_handler_class: type[BaseRequestHandler],
         bind_and_activate: bool = True,
     ):
-        """Initialise queues."""
         super().__init__(
             server_address, request_handler_class, bind_and_activate
         )

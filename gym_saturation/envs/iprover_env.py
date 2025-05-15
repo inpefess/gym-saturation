@@ -78,6 +78,9 @@ class IProverEnv(SaturationEnv):
     """
     An RL environment around iProver.
 
+    :param prover_binary_path: a path to iProver binary;
+        by default, we assume it to be ``iproveropt`` and in the $PATH
+
     Refer to :ref:`saturation_env` for more documentation.
 
     >>> from gymnasium.utils.env_checker import check_env
@@ -99,16 +102,10 @@ class IProverEnv(SaturationEnv):
     False
     """
 
-    def __init__(
+    def __init__(  # noqa: D107
         self,
         prover_binary_path: str = "iproveropt",
     ):
-        """
-        Initialise the environment.
-
-        :param prover_binary_path: a path to iProver binary;
-            by default, we assume it to be ``iproveropt`` and in the $PATH
-        """
         super().__init__()
         self.prover_binary_path = prover_binary_path
         self._relay_server: Optional[RelayServer] = None

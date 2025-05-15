@@ -38,6 +38,7 @@ tbump = "*"
 toml = "*"
 jedi = "*"
 pyroma = "*"
+pydoclint = "*"
 
 [tool.poetry.group.test]
 optional = true
@@ -91,12 +92,14 @@ deps = [
     "mypy",
     "toml",
     "pyroma",
-    "ruff"
+    "ruff",
+    "pydoclint"
 ]
 commands = [
     ["ruff", "format"],
     ["ruff", "check"],
     ["mypy", "gym_saturation"],
+    ["pydoclint", "gym_saturation"],
     ["coverage", "run", "-m", "pytest"],
     ["coverage", "xml", "--fail-under=100"],
     ["pyroma", "."]
@@ -137,3 +140,8 @@ select = ["F", "E", "W", "D", "S", "UP", "PL"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"
+
+[tool.pydoclint]
+style = "sphinx"
+arg-type-hints-in-docstring = false
+check-return-types = false

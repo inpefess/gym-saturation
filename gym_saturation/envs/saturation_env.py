@@ -52,10 +52,9 @@ class SaturationEnv(Env[tuple[str, ...], str]):
         spaces.Text(4000, charset=EXTENDED_ALPHANUMERIC)
     )
 
-    def __init__(
+    def __init__(  # noqa: D107
         self,
     ):
-        """Initialise spaces et al."""
         super().__init__()
         self._task = MOCK_TPTP_PROBLEM
         self._terminated = False
@@ -138,6 +137,5 @@ class SaturationEnv(Env[tuple[str, ...], str]):
         Get the task that the agent is performing in the current environment.
 
         :returns: a TPTP problem filename
-        :raises ValueError: is task is not set
         """
         return self._task
