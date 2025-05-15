@@ -11,11 +11,6 @@ repos:
         entry: ruff check
         language: system
         types: [python]
-    -   id: pylint
-        name: pylint
-        entry: pylint
-        language: system
-        types: [python]
     -   id: mypy
         name: mypy
         entry: mypy

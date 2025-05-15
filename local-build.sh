@@ -7,7 +7,6 @@ make clean html coverage
 cat _build/coverage/python.txt
 cd ..
 ruff check
-pylint ${PACKAGE_NAME} scripts
 mypy ${PACKAGE_NAME} scripts
 coverage run -m pytest
 coverage report --show-missing --fail-under=100

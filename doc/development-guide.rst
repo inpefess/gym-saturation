@@ -62,7 +62,6 @@ installed and ready to go.
 
       ruff format
       ruff check
-      pylint gym_saturation
       mypy gym_saturation
 
 #. You can also do these checks automatically on each commit. To

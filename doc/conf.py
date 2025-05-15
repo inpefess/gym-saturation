@@ -15,7 +15,6 @@
 
 """Sphinx config."""
 
-# pylint: disable-all
 import os
 import sys
 

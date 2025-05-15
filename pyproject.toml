@@ -33,10 +33,8 @@ optional = true
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
-pylint = "*"
 pre-commit = "*"
 tbump = "*"
-pyenchant = "*"
 toml = "*"
 jedi = "*"
 pyroma = "*"
@@ -73,51 +71,6 @@ addopts = "--doctest-modules --junit-xml test-results/gym-saturation.xml"
 testpaths = ["gym_saturation"]
 doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
 
-[tool.pylint.MASTER]
-load-plugins = [
-    "pylint.extensions.docparams",
-    "pylint.extensions.mccabe",
-    "pylint.extensions.set_membership",
-    "pylint.extensions.code_style",
-    "pylint.extensions.broad_try_clause",
-    "pylint.extensions.comparison_placement",
-    "pylint.extensions.dict_init_mutate",
-    "pylint.extensions.redefined_loop_name",
-    "pylint.extensions.dunder",
-    "pylint.extensions.eq_without_hash",
-    "pylint.extensions.redefined_variable_type",
-    "pylint.extensions.overlapping_exceptions",
-    "pylint.extensions.confusing_elif",
-]
-
-[tool.pylint.parameter_documentation]
-accept-no-param-doc = false
-accept-no-raise-doc = false
-accept-no-return-doc = false
-accept-no-yields-doc = false
-default-docstring-type = "sphinx"
-
-[tool.pylint.similarities]
-ignore-comments = true
-ignore-docstrings = true
-ignore-imports = true
-ignore-signatures = true
-min-similarity-lines = 4
-
-[tool.pylint.format]
-ignore-long-lines = "https://"
-max-line-length = 79
-
-[tool.pylint.design]
-max-statements = 10
-
-[tool.pylint.typecheck]
-generated-members = ["asyncio"]
-
-[tool.pylint.spelling]
-spelling-dict = "en_GB"
-spelling-private-dict-file = "spelling.dict"
-
 [tool.mypy]
 show_error_codes = true
 incremental = false
@@ -125,7 +78,7 @@ disable_error_code = "no-redef"
 check_untyped_defs = true
 
 [[tool.mypy.overrides]]
-module = ["pexpect", "enchant.*"]
+module = ["pexpect"]
 ignore_missing_imports = true
 
 [tool.tox]
@@ -135,17 +88,14 @@ env_list = ["py310", "py311", "py312", "py13"]
 deps = [
     "coverage",
     "pytest",
-    "pylint",
     "mypy",
     "toml",
-    "pyenchant",
     "pyroma",
     "ruff"
 ]
 commands = [
     ["ruff", "format"],
     ["ruff", "check"],
-    ["pylint", "gym_saturation"],
     ["mypy", "gym_saturation"],
     ["coverage", "run", "-m", "pytest"],
     ["coverage", "xml", "--fail-under=100"],
@@ -183,7 +133,7 @@ exclude = ["examples", "doc/auto_examples"]
 line-length = 79
 
 [tool.ruff.lint]
-select = ["F", "E", "W", "D", "S", "UP"]
+select = ["F", "E", "W", "D", "S", "UP", "PL"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"
