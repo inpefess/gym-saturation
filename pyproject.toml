@@ -145,3 +145,6 @@ convention = "pep257"
 style = "sphinx"
 arg-type-hints-in-docstring = false
 check-return-types = false
+
+[tool.ruff.lint.pylint]
+max-statements = 10
