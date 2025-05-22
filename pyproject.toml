@@ -36,9 +36,12 @@ mypy = "*"
 pre-commit = "*"
 tbump = "*"
 toml = "*"
-jedi = "*"
 pyroma = "*"
 pydoclint = "*"
+python-lsp-server = "*"
+python-lsp-ruff = "*"
+pylsp-mypy = "*"
+pylsp-rope = "*"
 
 [tool.poetry.group.test]
 optional = true
