@@ -59,12 +59,13 @@ class VampireWrapper:
         self.proc.expect(
             ["Pick a clause:", "Pick a clause pair:", pexpect.EOF]
         )
-        lines = self.proc.before.decode("utf-8").split("\r\n")
-        for line in lines:
-            if line[:5] == "[SA] ":
-                result_type, result_body = line[5:].split(": ")
-                clause_label, clause = result_body.split(". ")
-                result += ((result_type, clause_label, clause),)
+        if self.proc.before is not None:
+            lines = self.proc.before.decode("utf-8").split("\r\n")
+            for line in lines:
+                if line[:5] == "[SA] ":
+                    result_type, result_body = line[5:].split(": ")
+                    clause_label, clause = result_body.split(". ")
+                    result += ((result_type, clause_label, clause),)
         return result
 
     def start(

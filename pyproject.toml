@@ -32,7 +32,6 @@ gymnasium = "*"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-mypy = "*"
 pre-commit = "*"
 tbump = "*"
 toml = "*"
@@ -40,8 +39,8 @@ pyroma = "*"
 pydoclint = "*"
 python-lsp-server = "*"
 python-lsp-ruff = "*"
-pylsp-mypy = "*"
 pylsp-rope = "*"
+pyright = "*"
 
 [tool.poetry.group.test]
 optional = true
@@ -75,16 +74,6 @@ addopts = "--doctest-modules --junit-xml test-results/gym-saturation.xml"
 testpaths = ["gym_saturation"]
 doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
 
-[tool.mypy]
-show_error_codes = true
-incremental = false
-disable_error_code = "no-redef"
-check_untyped_defs = true
-
-[[tool.mypy.overrides]]
-module = ["pexpect"]
-ignore_missing_imports = true
-
 [tool.tox]
 env_list = ["py310", "py311", "py312", "py13"]
 
@@ -92,7 +81,7 @@ env_list = ["py310", "py311", "py312", "py13"]
 deps = [
     "coverage",
     "pytest",
-    "mypy",
+    "pyright",
     "toml",
     "pyroma",
     "ruff",
@@ -101,7 +90,7 @@ deps = [
 commands = [
     ["ruff", "format"],
     ["ruff", "check"],
-    ["mypy", "gym_saturation"],
+    ["pyright"],
     ["pydoclint", "gym_saturation"],
     ["coverage", "run", "-m", "pytest"],
     ["coverage", "xml", "--fail-under=100"],

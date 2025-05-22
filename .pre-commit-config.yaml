@@ -16,8 +16,8 @@ repos:
         entry: pydoclint
         language: system
         types: [python]
-    -   id: mypy
-        name: mypy
-        entry: mypy
+    -   id: pyright
+        name: pyright
+        entry: pyright
         language: system
         types: [python]
