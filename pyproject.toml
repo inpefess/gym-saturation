@@ -41,6 +41,7 @@ python-lsp-server = "*"
 python-lsp-ruff = "*"
 pylsp-rope = "*"
 pyright = "*"
+debugpy = "*"
 
 [tool.poetry.group.test]
 optional = true
