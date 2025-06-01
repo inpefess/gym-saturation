@@ -6,6 +6,5 @@ COPY poetry.lock .
 COPY README.rst .
 RUN pip install -e .
 RUN pip install jupyterlab
-COPY doc/auto_examples/plot_age_agent.ipynb example.ipynb
 ENTRYPOINT ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", \
    "--ServerApp.token=''", "--no-browser"]

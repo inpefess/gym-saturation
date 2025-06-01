@@ -1,0 +1,190 @@
+* Random and age agents for Vampire and iProver
+** Random agent for Vampire
+We can make a prover environment as any other Gymnasium one.
+
+We will also add a wrapper to extract formulae labels.
+
+#+begin_src python
+  import gymnasium as gym
+
+  from gym_saturation.wrappers import LabelsExtractor
+
+  env = LabelsExtractor(gym.make("Vampire-v0"))
+#+end_src
+
+#+RESULTS:
+
+before using the environment, we should reset it
+
+#+begin_src python
+  observation, info = env.reset()
+#+end_src
+
+#+RESULTS:
+
+~gym-saturation~ environments don't return any ~info~
+
+#+begin_src python
+  print(info)
+#+end_src
+
+#+RESULTS:
+: {}
+
+Observation is a tuple of CNF formulae.
+
+By default, we are trying to prove a basic group theory lemma: every idempotent element equals the identity.
+
+#+begin_src python
+  print("Observation:")
+  print("\n".join(observation["observation"]))
+#+end_src
+
+#+RESULTS:
+: Observation:
+: cnf(c_1,axiom,mult(X0,mult(X1,X2))=mult(mult(X0,X1),X2),file('input.p')).
+: cnf(c_2,axiom,mult(e,X0)=X0,file('input.p')).
+: cnf(c_3,axiom,e=mult(inv(X0),X0),file('input.p')).
+: cnf(c_4,axiom,a=mult(a,a),file('input.p')).
+: cnf(c_5,axiom,e!=a,file('input.p')).
+
+Wrappers extracts formulae labels for us:
+
+#+begin_src python
+  labels = list(observation["labels"])
+  print(labels)
+#+end_src
+
+#+RESULTS:
+: ['c_1', 'c_2', 'c_3', 'c_4', 'c_5']
+
+Here is an example of an episode during which we play random actions.
+We set the random seed for reproducibility.
+
+#+begin_src python
+  import random
+
+  random.seed(0)
+
+  terminated, truncated = False, False
+  while not (terminated or truncated):
+      action = random.choice(labels)
+      observation, reward, terminated, truncated, info = env.step(action)
+      print("Action:", action, "Observation:")
+      print("\n".join(observation["observation"]))
+      labels.remove(action)
+      labels += list(observation["labels"])
+
+  env.close()
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Action: c_4 Observation:
+
+Action: c_5 Observation:
+
+Action: c_1 Observation:
+cnf(c_6,plain,mult(a,X0)=mult(a,mult(a,X0)),inference(superposition,[],[c_1,c_4])).
+Action: c_3 Observation:
+cnf(c_11,plain,mult(inv(X0),mult(X0,X1))=X1,inference(forward_demodulation,[],[c_10,c_2])).
+Action: c_11 Observation:
+cnf(c_18,plain,$false,inference(subsumption_resolution,[],[c_17,c_5])).
+#+end_example
+
+the episode is terminated
+
+#+begin_src python
+  print(terminated, truncated)
+#+end_src
+
+#+RESULTS:
+: True False
+
+It means we arrived at a contradiction (~$false~) which proves the lemma.
+
+#+begin_src python
+  print(observation["observation"][-1])
+#+end_src
+
+#+RESULTS:
+: cnf(c_18,plain,$false,inference(subsumption_resolution,[],[c_17,c_5])).
+
+** Age agent for iProver
+We initialise iProver-based environment in the same way as Vampire-based one:
+
+#+begin_src python
+  env = LabelsExtractor(gym.make("iProver-v0"))
+#+end_src
+
+#+RESULTS:
+
+Instead of a random agent, let's use Age agent which selects actions in the order they appear
+
+#+begin_src python
+  observation, info = env.reset()
+  print("Observation:")
+  print("\n".join(observation["observation"]))
+  labels = list(observation["labels"])
+  terminated = False
+  while not terminated:
+      action = labels.pop(0)
+      observation, reward, terminated, truncated, info = env.step(action)
+      print("Action:", action, "Observation:")
+      print("\n".join(observation["observation"]))
+      labels += list(observation["labels"])
+  env.close()
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Observation:
+cnf(c_53,axiom,e!=a,file('input.p')).
+cnf(c_52,axiom,mult(a,a)=a,file('input.p')).
+cnf(c_50,axiom,mult(e,X0)=X0,file('input.p')).
+cnf(c_51,axiom,mult(inv(X0),X0)=e,file('input.p')).
+cnf(c_49,axiom,mult(mult(X0,X1),X2)=mult(X0,mult(X1,X2)),file('input.p')).
+Action: c_53 Observation:
+
+Action: c_52 Observation:
+
+Action: c_50 Observation:
+
+Action: c_51 Observation:
+
+Action: c_49 Observation:
+cnf(c_63,plain,mult(a,mult(a,X0))=mult(a,X0),inference(superposition,[],[c_52,c_49])).
+cnf(c_62,plain,mult(inv(X0),mult(X0,X1))=mult(e,X1),inference(superposition,[],[c_51,c_49])).
+cnf(c_64,plain,mult(mult(X0,mult(X1,X2)),X3)=mult(mult(X0,X1),mult(X2,X3)),inference(superposition,[],[c_49,c_49])).
+Action: c_63 Observation:
+cnf(c_68,plain,mult(a,mult(mult(a,X0),X1))=mult(mult(a,X0),X1),inference(superposition,[],[c_63,c_49])).
+Action: c_62 Observation:
+cnf(c_70,plain,mult(inv(X0),mult(X0,X1))=X1,inference(demodulation,[],[c_62,c_50])).
+cnf(c_74,plain,mult(inv(a),a)=a,inference(superposition,[],[c_52,c_70])).
+cnf(c_72,plain,mult(inv(e),X0)=X0,inference(superposition,[],[c_50,c_70])).
+cnf(c_73,plain,mult(inv(inv(X0)),e)=X0,inference(superposition,[],[c_51,c_70])).
+cnf(c_77,plain,mult(inv(inv(X0)),X1)=mult(X0,X1),inference(superposition,[],[c_70,c_70])).
+cnf(c_76,plain,mult(inv(a),mult(a,X0))=mult(a,X0),inference(superposition,[],[c_63,c_70])).
+cnf(c_78,plain,mult(inv(X0),mult(mult(X0,X1),X2))=mult(X1,X2),inference(superposition,[],[c_70,c_49])).
+cnf(c_71,plain,mult(inv(mult(X0,X1)),mult(X0,mult(X1,X2)))=X2,inference(superposition,[],[c_49,c_70])).
+Action: c_64 Observation:
+
+Action: c_68 Observation:
+
+Action: c_70 Observation:
+
+Action: c_74 Observation:
+cnf(c_85,plain,e=a,inference(demodulation,[],[c_74,c_51])).
+cnf(c_86,plain,$false,inference(forward_subsumption_resolution,[],[c_85,c_53])).
+#+end_example
+
+We still arrive at a contradiction
+
+#+begin_src python
+    print(terminated, truncated)
+    print(observation["observation"][-1])
+#+end_src
+
+#+RESULTS:
+: True False
+: cnf(c_86,plain,$false,inference(forward_subsumption_resolution,[],[c_85,c_53])).

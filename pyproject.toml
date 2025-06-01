@@ -58,8 +58,6 @@ optional = true
 types-dataclasses = "*"
 sphinx-autodoc-typehints = "*"
 furo = "*"
-sphinx-gallery = "*"
-nest-asyncio = "*"
 
 [tool.isort]
 profile = "black"
@@ -125,7 +123,6 @@ src = "pyproject.toml"
 src = "doc/conf.py"
 
 [tool.ruff]
-exclude = ["examples", "doc/auto_examples"]
 line-length = 79
 
 [tool.ruff.lint]

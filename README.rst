@@ -78,9 +78,6 @@ One can also run it in a Docker container (pre-packed with
    docker build -t gym-saturation https://github.com/inpefess/gym-saturation.git
    docker run --rm -p 8888:8888 --name gym-saturation -d gym-saturation
 
-And then naviagate to http://localhost:8888/lab/tree/example.ipynb
-in your browser.
-
 How to use
 ==========
 
@@ -102,7 +99,7 @@ One can use ``gym-saturation`` environments as any other Gymnasium environment:
       observation, reward, terminated, truncated, info = env.step(str(action))
   env.close()
 
-Have a look at the basic `tutorial <https://gym-saturation.readthedocs.io/en/latest/auto_examples/plot_age_agent.html>`__.  
+Have a look at the basic `tutorial <https://gym-saturation.readthedocs.io/en/latest/example.html>`__.  
 
 More Documentation
 ==================
