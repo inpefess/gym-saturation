@@ -15,14 +15,14 @@
 
 """Sphinx config."""
 
-import os
-import sys
+import gym_saturation
+from importlib.metadata import distribution
 
-sys.path.insert(0, os.path.abspath(".."))
-project = "gym-saturation"
-version = "1.0.1"
-copyright = "2021-2025, Boris Shminke"
-author = "Boris Shminke"
+distribution_metadata = distribution(gym_saturation.__name__).metadata
+project = distribution_metadata["Name"]
+version = distribution_metadata["Version"]
+author = distribution_metadata["Author"]
+copyright = f"2021-2025, {author}"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",

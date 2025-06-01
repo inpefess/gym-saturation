@@ -114,13 +114,7 @@ message_template = "Bump to {new_version}"
 tag_template = "v{new_version}"
 
 [[tool.tbump.file]]
-src = "gym_saturation/__init__.py"
-
-[[tool.tbump.file]]
 src = "pyproject.toml"
-
-[[tool.tbump.file]]
-src = "doc/conf.py"
 
 [tool.ruff]
 line-length = 79
