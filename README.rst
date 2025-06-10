@@ -78,6 +78,9 @@ One can also run it in a Docker container (pre-packed with
    docker build -t gym-saturation https://github.com/inpefess/gym-saturation.git
    docker run --rm -p 8888:8888 --name gym-saturation -d gym-saturation
 
+and navigate to `<http://localhost:8888/lab/tree/example.py>`__ in
+your browser.
+
 How to use
 ==========
 
