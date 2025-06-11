@@ -37,11 +37,9 @@ tbump = "*"
 toml = "*"
 pyroma = "*"
 pydoclint = "*"
-python-lsp-server = "*"
-python-lsp-ruff = "*"
-pylsp-rope = "*"
 pyright = "*"
 debugpy = "*"
+jedi-language-server = "*"
 
 [tool.poetry.group.test]
 optional = true
