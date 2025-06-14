@@ -116,6 +116,7 @@ src = "pyproject.toml"
 
 [tool.ruff]
 line-length = 79
+exclude = ["doc/example.py"]
 
 [tool.ruff.lint]
 select = ["F", "E", "W", "D", "S", "UP", "PL"]
@@ -130,3 +131,6 @@ check-return-types = false
 
 [tool.ruff.lint.pylint]
 max-statements = 10
+
+[tool.pyright]
+exclude = ["doc/example.py"]
