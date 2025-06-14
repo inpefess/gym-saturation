@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "1.0.1"
+version = "1.0.2"
 description = "Gymnasium environments for saturation provers"
 authors = ["Boris Shminke <boris@shminke.com>"]
 license = "Apache-2.0"
@@ -62,7 +62,7 @@ profile = "black"
 src_paths = ["gym_saturation"]
 
 [build-system]
-requires = ["poetry-core>=1.0.1"]
+requires = ["poetry-core>=1.0.2"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
@@ -98,7 +98,7 @@ commands = [
 github_url = "https://github.com/inpfess/gym-saturation/"
 
 [tool.tbump.version]
-current = "1.0.1"
+current = "1.0.2"
 regex = """
   (?P<major>\\d+)
   \\.
