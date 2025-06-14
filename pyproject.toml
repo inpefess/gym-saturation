@@ -133,4 +133,4 @@ check-return-types = false
 max-statements = 10
 
 [tool.pyright]
-exclude = ["doc/example.py"]
+exclude = ["doc/example.py", ".*"]
