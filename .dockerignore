@@ -1,6 +1,6 @@
 venv
 doc
-!doc/auto_examples/plot_age_agent.ipynb
+!doc/example.py
 **/.*
 dist
 joss-paper

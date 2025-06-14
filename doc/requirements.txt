@@ -2,3 +2,4 @@ gymnasium
 pexpect
 sphinx-autodoc-typehints
 furo
+-e .

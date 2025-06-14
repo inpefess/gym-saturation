@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gym-saturation"
-version = "1.0.1"
+version = "1.0.2"
 description = "Gymnasium environments for saturation provers"
 authors = ["Boris Shminke <boris@shminke.com>"]
 license = "Apache-2.0"
@@ -32,13 +32,14 @@ gymnasium = "*"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-mypy = "*"
 pre-commit = "*"
 tbump = "*"
 toml = "*"
-jedi = "*"
 pyroma = "*"
 pydoclint = "*"
+pyright = "*"
+debugpy = "*"
+jedi-language-server = "*"
 
 [tool.poetry.group.test]
 optional = true
@@ -55,15 +56,13 @@ optional = true
 types-dataclasses = "*"
 sphinx-autodoc-typehints = "*"
 furo = "*"
-sphinx-gallery = "*"
-nest-asyncio = "*"
 
 [tool.isort]
 profile = "black"
 src_paths = ["gym_saturation"]
 
 [build-system]
-requires = ["poetry-core>=1.0.1"]
+requires = ["poetry-core>=1.0.2"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
@@ -72,16 +71,6 @@ addopts = "--doctest-modules --junit-xml test-results/gym-saturation.xml"
 testpaths = ["gym_saturation"]
 doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
 
-[tool.mypy]
-show_error_codes = true
-incremental = false
-disable_error_code = "no-redef"
-check_untyped_defs = true
-
-[[tool.mypy.overrides]]
-module = ["pexpect"]
-ignore_missing_imports = true
-
 [tool.tox]
 env_list = ["py310", "py311", "py312", "py13"]
 
@@ -89,7 +78,7 @@ env_list = ["py310", "py311", "py312", "py13"]
 deps = [
     "coverage",
     "pytest",
-    "mypy",
+    "pyright",
     "toml",
     "pyroma",
     "ruff",
@@ -98,7 +87,7 @@ deps = [
 commands = [
     ["ruff", "format"],
     ["ruff", "check"],
-    ["mypy", "gym_saturation"],
+    ["pyright"],
     ["pydoclint", "gym_saturation"],
     ["coverage", "run", "-m", "pytest"],
     ["coverage", "xml", "--fail-under=100"],
@@ -109,7 +98,7 @@ commands = [
 github_url = "https://github.com/inpfess/gym-saturation/"
 
 [tool.tbump.version]
-current = "1.0.1"
+current = "1.0.2"
 regex = """
   (?P<major>\\d+)
   \\.
@@ -123,17 +112,11 @@ message_template = "Bump to {new_version}"
 tag_template = "v{new_version}"
 
 [[tool.tbump.file]]
-src = "gym_saturation/__init__.py"
-
-[[tool.tbump.file]]
 src = "pyproject.toml"
 
-[[tool.tbump.file]]
-src = "doc/conf.py"
-
 [tool.ruff]
-exclude = ["examples", "doc/auto_examples"]
 line-length = 79
+exclude = ["doc/example.py"]
 
 [tool.ruff.lint]
 select = ["F", "E", "W", "D", "S", "UP", "PL"]
@@ -148,3 +131,6 @@ check-return-types = false
 
 [tool.ruff.lint.pylint]
 max-statements = 10
+
+[tool.pyright]
+exclude = ["doc/example.py", ".*"]

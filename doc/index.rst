@@ -31,7 +31,7 @@
    :hidden:
    :caption: Tutorials
 
-   auto_examples/index
+   example
 
 .. toctree::
    :hidden:
