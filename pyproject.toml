@@ -40,6 +40,7 @@ pydoclint = "*"
 pyright = "*"
 debugpy = "*"
 jedi-language-server = "*"
+isort = "*"
 
 [tool.poetry.group.test]
 optional = true
