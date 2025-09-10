@@ -22,7 +22,7 @@ import json
 import os
 import re
 from threading import Thread
-from typing import Any, Optional
+from typing import Any
 
 from gym_saturation.envs.saturation_env import SaturationEnv
 from gym_saturation.relay_server import (
@@ -108,9 +108,9 @@ class IProverEnv(SaturationEnv):
     ):
         super().__init__()
         self.prover_binary_path = prover_binary_path
-        self._relay_server: Optional[RelayServer] = None
-        self.relay_server_thread: Optional[Thread] = None
-        self.iprover_process: Optional[asyncio.subprocess.Process] = None
+        self._relay_server: RelayServer | None = None
+        self.relay_server_thread: Thread | None = None
+        self.iprover_process: asyncio.subprocess.Process | None = None
 
     def _restart_relay_server(self) -> None:
         if self._relay_server:
@@ -150,8 +150,8 @@ class IProverEnv(SaturationEnv):
     def reset(
         self,
         *,
-        seed: Optional[int] = None,
-        options: Optional[dict[str, Any]] = None,
+        seed: int | None = None,
+        options: dict[str, Any] | None = None,
     ) -> tuple[tuple[str, ...], dict[str, Any]]:
         """
         Reset the environment.
