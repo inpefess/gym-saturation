@@ -1138,26 +1138,24 @@ files = [
 ]
 
 [[package]]
-name = "pyright"
-version = "1.1.405"
-description = "Command line wrapper for pyright"
+name = "pyrefly"
+version = "0.32.0"
+description = "A fast Python type checker written in Rust"
 optional = true
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 groups = ["main"]
 markers = "extra == \"dev\""
 files = [
-    {file = "pyright-1.1.405-py3-none-any.whl", hash = "sha256:a2cb13700b5508ce8e5d4546034cb7ea4aedb60215c6c33f56cec7f53996035a"},
-    {file = "pyright-1.1.405.tar.gz", hash = "sha256:5c2a30e1037af27eb463a1cc0b9f6d65fec48478ccf092c1ac28385a15c55763"},
+    {file = "pyrefly-0.32.0-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:e6711bddd2d2bb548cb569eef2c35c1ce88de00c2b4008a84a49ad3f666e70ef"},
+    {file = "pyrefly-0.32.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:5bfdc3aa86a80c50d8496189d908a6b9faebebd1e9716e72fb3e165a8a1ce492"},
+    {file = "pyrefly-0.32.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1f88311fcd910b416f78af8138d38a9ff213a0abf7b2197d940607eff94870d1"},
+    {file = "pyrefly-0.32.0-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:426a36eb7e6f7ad3b7b7d51811223ca6eeee5248ccfa80295843faa93936eecf"},
+    {file = "pyrefly-0.32.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:35eb677342c562be63c087f4d3c729d4307c8fb0b098f9ef17eecdf7b2815a6e"},
+    {file = "pyrefly-0.32.0-py3-none-win32.whl", hash = "sha256:5ec5a91303532901b786f6bd3eed305b6bcf08f43991b8d278a0d0c7b777e676"},
+    {file = "pyrefly-0.32.0-py3-none-win_amd64.whl", hash = "sha256:dbfeefbec4dea98e39f582f36d27cae6e1838122a45231cc664a1d3603792da3"},
+    {file = "pyrefly-0.32.0-py3-none-win_arm64.whl", hash = "sha256:e053380a804412d4cf4312c93fda8ce0cbb789ffd8c250f96ca09598e44788a9"},
+    {file = "pyrefly-0.32.0.tar.gz", hash = "sha256:99cfca29ed2ffa0663827fc30a10f8ed5f67937dcc7d3b53533a1fa625cb92b5"},
 ]
-
-[package.dependencies]
-nodeenv = ">=1.6.0"
-typing-extensions = ">=4.1"
-
-[package.extras]
-all = ["nodejs-wheel-binaries", "twine (>=3.4.1)"]
-dev = ["twine (>=3.4.1)"]
-nodejs = ["nodejs-wheel-binaries"]
 
 [[package]]
 name = "pyroma"
@@ -1788,11 +1786,11 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more_it
 type = ["pytest-mypy"]
 
 [extras]
-dev = ["debugpy", "isort", "jedi-language-server", "pre-commit", "pydoclint", "pyright", "pyroma", "ruff", "tbump", "toml"]
+dev = ["debugpy", "isort", "jedi-language-server", "pre-commit", "pydoclint", "pyrefly", "pyrefly", "pyroma", "ruff", "tbump", "toml"]
 doc = ["furo", "sphinx-autodoc-typehints", "types-dataclasses"]
 test = ["coverage", "pytest"]
 
 [metadata]
 lock-version = "2.1"
 python-versions = ">= 3.10.0, < 3.14"
-content-hash = "19a38bf073a2a3e577c2d1418ef6a392ddcb05055869d99c42a591598b3f8382"
+content-hash = "ec8f06ca6eb459eeb411f59729a8814915b5a4f854090ba8ec25615f66a65b12"

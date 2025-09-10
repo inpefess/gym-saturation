@@ -43,7 +43,7 @@ class VampireWrapper:
         self, binary_path: str, command_line_arguments: str | None = None
     ):
         self.binary_path = binary_path
-        self._proc = None
+        self._proc: pexpect.spawn | None = None
         self.problem_filename: str | None = None
         self.command_line_arguments = (
             " --manual_cs on --show_passive on"

@@ -30,8 +30,8 @@ Issues = "https://github.com/inpefess/gym-saturation/issues"
 Repository = "https://github.com/inpefess/gym-saturation.git"
 
 [project.optional-dependencies]
-dev = ["pre-commit", "tbump", "toml", "pyroma", "pydoclint", "pyright", "debugpy",
-       "jedi-language-server", "isort", "ruff"]
+dev = ["pre-commit", "tbump", "toml", "pyroma", "pydoclint", "pyrefly", "debugpy",
+       "jedi-language-server", "isort", "ruff", "pyrefly"]
 test = ["coverage", "pytest"]
 doc = ["types-dataclasses", "sphinx-autodoc-typehints", "furo"]
 
@@ -56,7 +56,7 @@ env_list = ["py310", "py311", "py312", "py13"]
 deps = [
     "coverage",
     "pytest",
-    "pyright",
+    "pyrefly",
     "toml",
     "pyroma",
     "ruff",
@@ -65,7 +65,7 @@ deps = [
 commands = [
     ["ruff", "format"],
     ["ruff", "check"],
-    ["pyright"],
+    ["pyrefly"],
     ["pydoclint", "gym_saturation"],
     ["coverage", "run", "-m", "pytest"],
     ["coverage", "xml", "--fail-under=100"],
@@ -110,5 +110,5 @@ check-return-types = false
 [tool.ruff.lint.pylint]
 max-statements = 10
 
-[tool.pyright]
-exclude = ["doc/example.py", ".*"]
+[tool.pyrefly]
+project-excludes = ["doc/example.py", ".*"]

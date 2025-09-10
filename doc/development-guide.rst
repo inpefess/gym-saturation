@@ -63,7 +63,7 @@ installed and ready to go.
       ruff format
       ruff check
       pydoclint gym_saturation
-      pyright gym_saturation
+      pyrefly check
 
 #. You can also do these checks automatically on each commit. To
    activate this option:

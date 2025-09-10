@@ -121,7 +121,7 @@ class SaturationEnv(Env[tuple[str, ...], str]):
             {},
         )
 
-    def render(self) -> None:
+    def render(self) -> None:  # type: ignore
         """No render."""
 
     def set_task(self, task: str) -> None:
