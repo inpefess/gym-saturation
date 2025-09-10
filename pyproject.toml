@@ -1,10 +1,9 @@
-[tool.poetry]
+[project]
 name = "gym-saturation"
 version = "1.0.2"
 description = "Gymnasium environments for saturation provers"
-authors = ["Boris Shminke <boris@shminke.com>"]
+authors = [{name = "Boris Shminke", email = "<boris@shminke.com>"}]
 license = "Apache-2.0"
-repository = "https://github.com/inpefess/gym-saturation"
 readme = "README.rst"
 classifiers=[
 	"Programming Language :: Python :: 3.10",
@@ -22,41 +21,19 @@ classifiers=[
 ]
 include = ["gym_saturation/py.typed"]
 keywords = ["saturation prover", "OpenAI Gym", "Gymnasium", "automated theorem prover"]
+requires-python = ">= 3.10.0, < 3.14"
+dependencies = ["gymnasium", "pexpect"]
 
-[tool.poetry.dependencies]
-python = ">= 3.10.0, < 3.14"
-pexpect = "*"
-gymnasium = "*"
+[project.urls]
+Documentation = "https://gym-saturation.readthedocs.io"
+Issues = "https://github.com/inpefess/gym-saturation/issues"
+Repository = "https://github.com/inpefess/gym-saturation.git"
 
-[tool.poetry.group.dev]
-optional = true
-
-[tool.poetry.group.dev.dependencies]
-pre-commit = "*"
-tbump = "*"
-toml = "*"
-pyroma = "*"
-pydoclint = "*"
-pyright = "*"
-debugpy = "*"
-jedi-language-server = "*"
-isort = "*"
-
-[tool.poetry.group.test]
-optional = true
-
-[tool.poetry.group.test.dependencies]
-coverage = "*"
-pytest = "*"
-ruff = "*"
-
-[tool.poetry.group.doc]
-optional = true
-
-[tool.poetry.group.doc.dependencies]
-types-dataclasses = "*"
-sphinx-autodoc-typehints = "*"
-furo = "*"
+[project.optional-dependencies]
+dev = ["pre-commit", "tbump", "toml", "pyroma", "pydoclint", "pyright", "debugpy",
+       "jedi-language-server", "isort", "ruff"]
+test = ["coverage", "pytest"]
+doc = ["types-dataclasses", "sphinx-autodoc-typehints", "furo"]
 
 [tool.isort]
 profile = "black"
