@@ -64,7 +64,7 @@ deps = [
 commands = [
     ["ruff", "format"],
     ["ruff", "check"],
-    ["pyrefly"],
+    ["pyrefly", "check"],
     ["pydoclint", "gym_saturation"],
     ["coverage", "run", "-m", "pytest"],
     ["coverage", "xml", "--fail-under=100"],
