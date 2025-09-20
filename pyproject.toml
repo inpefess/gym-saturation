@@ -1,10 +1,8 @@
-[tool.poetry]
+[project]
 name = "gym-saturation"
-version = "1.0.2"
+version = "1.0.3"
 description = "Gymnasium environments for saturation provers"
-authors = ["Boris Shminke <boris@shminke.com>"]
-license = "Apache-2.0"
-repository = "https://github.com/inpefess/gym-saturation"
+authors = [{name = "Boris Shminke", email = "<boris@shminke.com>"}]
 readme = "README.rst"
 classifiers=[
 	"Programming Language :: Python :: 3.10",
@@ -22,47 +20,26 @@ classifiers=[
 ]
 include = ["gym_saturation/py.typed"]
 keywords = ["saturation prover", "OpenAI Gym", "Gymnasium", "automated theorem prover"]
+requires-python = ">= 3.10.0, < 3.14"
+dependencies = ["gymnasium", "pexpect"]
 
-[tool.poetry.dependencies]
-python = ">= 3.10.0, < 3.14"
-pexpect = "*"
-gymnasium = "*"
+[project.urls]
+Documentation = "https://gym-saturation.readthedocs.io"
+Issues = "https://github.com/inpefess/gym-saturation/issues"
+Repository = "https://github.com/inpefess/gym-saturation.git"
 
-[tool.poetry.group.dev]
-optional = true
-
-[tool.poetry.group.dev.dependencies]
-pre-commit = "*"
-tbump = "*"
-toml = "*"
-pyroma = "*"
-pydoclint = "*"
-pyright = "*"
-debugpy = "*"
-jedi-language-server = "*"
-
-[tool.poetry.group.test]
-optional = true
-
-[tool.poetry.group.test.dependencies]
-coverage = "*"
-pytest = "*"
-ruff = "*"
-
-[tool.poetry.group.doc]
-optional = true
-
-[tool.poetry.group.doc.dependencies]
-types-dataclasses = "*"
-sphinx-autodoc-typehints = "*"
-furo = "*"
+[project.optional-dependencies]
+dev = ["pre-commit", "tbump", "toml", "pyroma", "pydoclint", "pyrefly", "debugpy",
+       "jedi-language-server", "isort", "ruff", "pyrefly"]
+test = ["coverage", "pytest"]
+doc = ["types-dataclasses", "sphinx-autodoc-typehints", "furo"]
 
 [tool.isort]
 profile = "black"
 src_paths = ["gym_saturation"]
 
 [build-system]
-requires = ["poetry-core>=1.0.2"]
+requires = ["poetry-core>=1.0.3"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
@@ -78,7 +55,7 @@ env_list = ["py310", "py311", "py312", "py13"]
 deps = [
     "coverage",
     "pytest",
-    "pyright",
+    "pyrefly",
     "toml",
     "pyroma",
     "ruff",
@@ -87,7 +64,7 @@ deps = [
 commands = [
     ["ruff", "format"],
     ["ruff", "check"],
-    ["pyright"],
+    ["pyrefly", "check"],
     ["pydoclint", "gym_saturation"],
     ["coverage", "run", "-m", "pytest"],
     ["coverage", "xml", "--fail-under=100"],
@@ -98,7 +75,7 @@ commands = [
 github_url = "https://github.com/inpfess/gym-saturation/"
 
 [tool.tbump.version]
-current = "1.0.2"
+current = "1.0.3"
 regex = """
   (?P<major>\\d+)
   \\.
@@ -132,5 +109,5 @@ check-return-types = false
 [tool.ruff.lint.pylint]
 max-statements = 10
 
-[tool.pyright]
-exclude = ["doc/example.py", ".*"]
+[tool.pyrefly]
+project-excludes = ["doc/example.py", ".*"]

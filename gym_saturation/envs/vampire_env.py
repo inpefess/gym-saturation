@@ -19,7 +19,7 @@ Saturation Environment with Vampire back-end
 
 import os
 import re
-from typing import Any, Optional
+from typing import Any
 
 from gym_saturation.constants import FALSEHOOD_SYMBOL
 from gym_saturation.envs.saturation_env import SaturationEnv
@@ -111,8 +111,8 @@ class VampireEnv(SaturationEnv):
     def reset(
         self,
         *,
-        seed: Optional[int] = None,
-        options: Optional[dict[str, Any]] = None,
+        seed: int | None = None,
+        options: dict[str, Any] | None = None,
     ) -> tuple[tuple[str, ...], dict[str, Any]]:
         """
         Reset the environment.

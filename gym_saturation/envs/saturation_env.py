@@ -19,7 +19,7 @@ Saturation Environment
 
 import random
 from abc import abstractmethod
-from typing import Any, Optional
+from typing import Any
 
 from gymnasium import Env, spaces
 from gymnasium.spaces.text import alphanumeric
@@ -63,8 +63,8 @@ class SaturationEnv(Env[tuple[str, ...], str]):
     def reset(
         self,
         *,
-        seed: Optional[int] = None,
-        options: Optional[dict[str, Any]] = None,
+        seed: int | None = None,
+        options: dict[str, Any] | None = None,
     ) -> tuple[tuple[str, ...], dict[str, Any]]:
         """
         Reset the environment.
@@ -121,7 +121,7 @@ class SaturationEnv(Env[tuple[str, ...], str]):
             {},
         )
 
-    def render(self) -> None:
+    def render(self) -> None:  # type: ignore
         """No render."""
 
     def set_task(self, task: str) -> None:

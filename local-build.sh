@@ -7,7 +7,7 @@ make clean html coverage
 cat _build/coverage/python.txt
 cd ..
 ruff check
-pyright
+pyrefly check
 pydoclint ${PACKAGE_NAME}
 coverage run -m pytest
 coverage report --show-missing --fail-under=100

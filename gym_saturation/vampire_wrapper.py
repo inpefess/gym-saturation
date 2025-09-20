@@ -17,8 +17,6 @@ Vampire Wrapper
 ================
 """  # noqa: D205, D400
 
-from typing import Optional
-
 import pexpect
 
 
@@ -42,11 +40,11 @@ class VampireWrapper:
     """
 
     def __init__(  # noqa: D107
-        self, binary_path: str, command_line_arguments: Optional[str] = None
+        self, binary_path: str, command_line_arguments: str | None = None
     ):
         self.binary_path = binary_path
-        self._proc = None
-        self.problem_filename: Optional[str] = None
+        self._proc: pexpect.spawn | None = None
+        self.problem_filename: str | None = None
         self.command_line_arguments = (
             " --manual_cs on --show_passive on"
             " --show_new on --time_limit 0 --avatar off "
