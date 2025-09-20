@@ -3,7 +3,6 @@ name = "gym-saturation"
 version = "1.0.2"
 description = "Gymnasium environments for saturation provers"
 authors = [{name = "Boris Shminke", email = "<boris@shminke.com>"}]
-license = "Apache-2.0"
 readme = "README.rst"
 classifiers=[
 	"Programming Language :: Python :: 3.10",
