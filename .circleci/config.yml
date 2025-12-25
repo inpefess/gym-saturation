@@ -2,14 +2,14 @@ version: 2.1
 jobs:
   build-and-test:
     docker:
-      - image: inpefess/python_with_provers:2025.03.10
+      - image: inpefess/python_with_provers:2025.12.25
     steps:
       - checkout
       - run:
           name: use tox
           command: |
             pip install tox
-            pyenv local 3.10.16 3.11.11 3.12.9 3.13.2
+            pyenv local 3.10.18 3.11.13 3.12.11 3.13.8 3.14.0
             tox
       - run:
           name: upload data to codecov

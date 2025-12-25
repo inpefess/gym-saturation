@@ -1,4 +1,4 @@
-FROM inpefess/python_with_provers:2025.03.10
+FROM inpefess/python_with_provers:2025.12.25
 COPY gym_saturation ./gym_saturation
 COPY pyproject.toml poetry.toml poetry.lock README.rst ./doc/example.py .
 RUN pip install -e .

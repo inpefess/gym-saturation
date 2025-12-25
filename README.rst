@@ -50,13 +50,12 @@ How to Install
 ==============
 
 .. attention:: If you want to use ``VampireEnv`` you should have a
-   Vampire binary on your machine. For example, download the
-   latest `release
-   <https://github.com/vprover/vampire/releases/tag/v4.8casc2023>`__.
-
-   To use ``IProverEnv``, please download a stable iProver 
+   Vampire binary on your machine. For example, download the latest
    `release
-   <https://gitlab.com/inpefess/iprover/-/releases/2023.07.13>`__ or build it from `this commit <https://gitlab.com/korovin/iprover/-/commit/11831c13057ff984e62c8acb7226288e7092797a>`__.
+   <https://github.com/vprover/vampire/releases/tag/v5.0.0>`__.
+
+   To use ``IProverEnv``, please download the official iProver `build
+   <https://gitlab.com/korovin/iprover/-/jobs/artifacts/master/download?job=build>`__.
 
 The best way to install this package is to use ``pip``:
 
