@@ -15,6 +15,8 @@
 
 |PyPI version|\ |Anaconda|\ |CircleCI|\ |Documentation Status|\ |codecov|\ |DOI|
 
+.. attention:: The project is not maintained anymore.
+
 gym-saturation
 ==============
 
