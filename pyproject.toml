@@ -12,7 +12,7 @@ classifiers=[
 	"License :: OSI Approved :: Apache Software License",
 	"Operating System :: OS Independent",
 	"Intended Audience :: Science/Research",
-	"Development Status :: 3 - Alpha",
+	"Development Status :: 7 - Inactive",
 	"Environment :: Console",
 	"Natural Language :: English",
 	"Topic :: Scientific/Engineering :: Artificial Intelligence",
